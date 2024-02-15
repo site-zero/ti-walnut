@@ -2,9 +2,9 @@ import { I18nLang, Vars } from '@site0/tijs';
 
 export type AjaxResult = {
   ok: boolean;
-  errCode: string;
-  msg: string;
-  data: any;
+  errCode?: string;
+  msg?: string;
+  data?: any;
 };
 
 export interface ServerConfig {

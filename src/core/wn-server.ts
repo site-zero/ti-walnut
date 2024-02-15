@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import { AjaxResult, ServerConfig, SignInForm } from '../lib';
 
+const TICKET_KEY = 'Walnut-Ticket';
+
 export class WalnutServer {
   /**
    * 记录远端服务器属性
@@ -21,7 +23,7 @@ export class WalnutServer {
       port: 8080,
       site: undefined,
     };
-    this._ticket = TiStore.local.getString('Walnut-Ticket', undefined);
+    this._ticket = TiStore.local.getString(TICKET_KEY, undefined);
   }
 
   init(conf: ServerConfig) {
@@ -46,7 +48,23 @@ export class WalnutServer {
     return { headers };
   }
 
-  async signInToDomain(info: SignInForm) {
+  async fetchMySession(): Promise<AjaxResult> {
+    if (this._ticket) {
+      let re = await Walnut.fetchAjax('/a/me');
+      if (!re.ok) {
+        this._ticket = undefined;
+        TiStore.local.remove(TICKET_KEY);
+      }
+      return re;
+    }
+    return new Promise((resolve) => {
+      resolve({
+        ok: false,
+      });
+    });
+  }
+
+  async signInToDomain(info: SignInForm): Promise<AjaxResult> {
     let re = await this.postFormToGetAjax('/a/auth_login_by_domain_passwd', {
       site: this._conf.site,
       name: info.username,
@@ -55,7 +73,7 @@ export class WalnutServer {
     });
     if (re && re.ok && re.data) {
       this._ticket = re.data.ticket;
-      TiStore.local.set('Walnut-Ticket', this._ticket);
+      TiStore.local.set(TICKET_KEY, this._ticket);
     }
     return re;
   }

@@ -44,7 +44,7 @@ export const useSessionStore = defineStore('session', {
       const status = userGlobalStatusStore();
       try {
         status.loading = true;
-        let re = await Walnut.fetchAjax('/a/me');
+        let re = await Walnut.fetchMySession();
         if (re.ok) {
           let session = translateSessionResult(re.data);
           session.errCode = undefined;
@@ -55,7 +55,7 @@ export const useSessionStore = defineStore('session', {
           this.$patch({
             ticket: undefined,
             me: undefined,
-            errCode: undefined,
+            errCode: re.errCode,
           });
         }
       } finally {

@@ -1,31 +1,31 @@
 <script lang="ts" setup>
-import { BUS_KEY, TiLoading, createAppBus, watchAppResize } from '@site0/tijs';
-import { onBeforeMount, onUnmounted, provide } from 'vue';
-import { WnSignIn, useSessionStore, userGlobalStatusStore } from '../../';
+  import {
+    TiMainFrame,
+    BUS_KEY,
+    TiLoading,
+    createAppBus,
+    watchAppResize,
+  } from '@site0/tijs';
+  import { onBeforeMount, onUnmounted, provide } from 'vue';
+  import { WnSignIn, useSessionStore, userGlobalStatusStore } from '../../';
 
-/*-------------------------------------------------------
-
-                   Global Bus
-
--------------------------------------------------------*/
-let bus = createAppBus(onUnmounted);
-provide(BUS_KEY, bus);
-watchAppResize(bus)
-/*-------------------------------------------------------
-
-                     Stores
-
--------------------------------------------------------*/
-const status = userGlobalStatusStore();
-const session = useSessionStore();
-/*-------------------------------------------------------
-
-                   Methods
-
--------------------------------------------------------*/
-onBeforeMount(async () => {
-  await session.reload();
-})
+  //
+  // Global Bus
+  //
+  let bus = createAppBus(onUnmounted);
+  provide(BUS_KEY, bus);
+  watchAppResize(bus);
+  //
+  // Stores
+  //
+  const status = userGlobalStatusStore();
+  const session = useSessionStore();
+  //
+  // Methods
+  //
+  onBeforeMount(async () => {
+    await session.reload();
+  });
 </script>
 <template>
   <!--显示加载界面-->
@@ -34,13 +34,15 @@ onBeforeMount(async () => {
   </template>
   <!--显示登录面板-->
   <template v-else-if="!session.ticket">
-    <WnSignIn username="demo" :errCode="session.errCode"
+    <WnSignIn
+      username="demo"
+      :errCode="session.errCode"
       @submit="session.signIn($event)" />
   </template>
   <!--显示主界面-->
   <template v-else>
-    {{ session.ticket }}
-    <hr>
-    {{ session.me }}
+    <TiMainFrame mode="T">
+      <template v-slot:sky>I am sky</template>
+    </TiMainFrame>
   </template>
 </template>
