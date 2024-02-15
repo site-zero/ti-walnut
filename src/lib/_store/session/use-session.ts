@@ -40,6 +40,12 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
+    async signOut(){
+      console.log("sign out")
+      let re = await Walnut.signOut()
+      console.log(re)
+    },
+
     async reload() {
       const status = userGlobalStatusStore();
       try {

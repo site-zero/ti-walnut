@@ -1,8 +1,8 @@
 <script lang="ts" setup>
   import {
-    TiMainFrame,
     BUS_KEY,
     TiLoading,
+    TiMainFrame,
     createAppBus,
     watchAppResize,
   } from '@site0/tijs';

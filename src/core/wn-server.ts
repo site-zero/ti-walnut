@@ -78,6 +78,27 @@ export class WalnutServer {
     return re;
   }
 
+  async signOut(): Promise<AjaxResult> {
+    let re = await this.fetchAjax('/a/sys_ajax_logout');
+    if (re.ok) {
+      // Quiet parent Sesssion
+      if (re.data && re.data.parent) {
+        this._ticket = re.data.parent.ticket;
+        TiStore.local.set(TICKET_KEY, this._ticket);
+      }
+      // Cancel session
+      else {
+        this._ticket = undefined;
+      }
+    }
+    // Handler error
+    else {
+      console.error('Session SignOut Fail!!', re);
+      alert(JSON.stringify(re));
+    }
+    return re;
+  }
+
   async postFormToGetJson(
     path: string,
     form: Record<string, any>
