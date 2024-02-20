@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
-import { SignInForm, UserSession, userGlobalStatusStore } from '../../';
+import { SignInForm, UserSessionState, userGlobalStatusStore } from '../..';
 import { Walnut } from '../../../core';
 import { translateSessionResult } from './session-result';
 
 export const useSessionStore = defineStore('session', {
-  state: (): UserSession => ({
+  state: (): UserSessionState => ({
     env: {},
     ticket: 'xxx',
     me: {
@@ -18,6 +18,11 @@ export const useSessionStore = defineStore('session', {
     lang: 'xxx',
     errCode: undefined,
   }),
+  getters: {
+    hasTicket(state): boolean {
+      return state.ticket ? true : false;
+    },
+  },
   actions: {
     async signIn(info: SignInForm) {
       const status = userGlobalStatusStore();
@@ -40,10 +45,35 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    async signOut(){
-      console.log("sign out")
-      let re = await Walnut.signOut()
-      console.log(re)
+    async signOut() {
+      console.log('sign out');
+      let re = await Walnut.signOut();
+      console.log(re);
+      if (re.ok) {
+        if (re.data && re.data.parent) {
+          let session = translateSessionResult(re.data.parent);
+          session.errCode = undefined;
+          this.$patch(session);
+        }
+        // Cancel Session
+        else {
+          this.resetSession();
+        }
+      }
+    },
+
+    resetSession(): void {
+      this.$patch({
+        env: {},
+        ticket: undefined,
+        me: undefined,
+        loginAt: undefined,
+        expireAt: undefined,
+        homePath: undefined,
+        theme: undefined,
+        lang: undefined,
+        errCode: undefined,
+      });
     },
 
     async reload() {

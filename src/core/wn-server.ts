@@ -1,7 +1,9 @@
 import { installTiCoreI18n, TiStore } from '@site0/tijs';
 import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
-import { AjaxResult, ServerConfig, SignInForm } from '../lib';
+import JSON5 from 'json5';
+import { AjaxResult, ServerConfig, SignInForm, WnExecOptions } from '../lib';
+import { wnRunCommand } from './wn-run-command';
 
 const TICKET_KEY = 'Walnut-Ticket';
 
@@ -33,14 +35,14 @@ export class WalnutServer {
     installWalnutI18n(lang);
   }
 
-  private getUrl(path: string) {
+  getUrl(path: string) {
     let sep = path.startsWith('/') ? '' : '/';
     let { protocal, host, port } = this._conf;
     let ports = port == 80 ? '' : ':' + port;
     return `${protocal}://${host}${ports}${sep}${path}`;
   }
 
-  private getRequestInit(): RequestInit {
+  getRequestInit(): RequestInit {
     let headers: HeadersInit = {};
     if (this._ticket) {
       headers['X-Walnut-Ticket'] = this._ticket;
@@ -89,6 +91,7 @@ export class WalnutServer {
       // Cancel session
       else {
         this._ticket = undefined;
+        TiStore.local.remove(TICKET_KEY);
       }
     }
     // Handler error
@@ -137,6 +140,13 @@ export class WalnutServer {
   async fetchAjax(path: string): Promise<AjaxResult> {
     let reo = await this.fetchJson(path);
     return reo as AjaxResult;
+  }
+
+  async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
+    let url = this.getUrl('/a/run/wn.manager');
+    let init = this.getRequestInit();
+    let reo = await wnRunCommand(url, init, cmdText, options);
+    return reo;
   }
 }
 

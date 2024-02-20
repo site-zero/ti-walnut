@@ -1,4 +1,4 @@
-import { I18nLang, Vars } from '@site0/tijs';
+import { I18nLang, IconInput, Vars } from '@site0/tijs';
 
 export type AjaxResult = {
   ok: boolean;
@@ -20,7 +20,7 @@ export interface SignInForm {
   password?: string;
 }
 
-export type UserSession = {
+export type UserSessionState = {
   ticket?: string;
   me?: UserInfo;
   env: Vars;
@@ -31,6 +31,10 @@ export type UserSession = {
   lang: string;
   errCode?: string;
 };
+
+export type UserSessionApi =  UserSessionState & {
+  hasTicket:boolean
+}
 
 export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
 
@@ -52,4 +56,25 @@ export type GlobalStatus = {
   removing: boolean | string;
   processing: boolean | string;
   changed: boolean;
+};
+
+export type WnExecOptions = {
+  input?: string;
+  as?: 'json' | 'text';
+};
+
+export type SideBarItem = {
+  key?: string;
+  path?: string;
+  icon?: IconInput;
+  title?: string;
+  items?: SideBarItem[];
+};
+
+export type SideBarItemType = 'group' | 'item';
+
+export type SideBarDisplayItem = Omit<SideBarItem, 'key' | 'items'> & {
+  uniqKey: string;
+  type: SideBarItemType;
+  items?: SideBarDisplayItem[];
 };

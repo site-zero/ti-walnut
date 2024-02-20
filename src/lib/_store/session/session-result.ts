@@ -1,5 +1,5 @@
 import { Str } from '@site0/tijs';
-import { UserSession } from '../../';
+import { UserSessionState } from '../../';
 
 /*
 Read data from response:
@@ -50,7 +50,7 @@ Read data from response:
   }
 }
 */
-export function translateSessionResult(data: any): UserSession {
+export function translateSessionResult(data: any): UserSessionState {
   let env = data.envs || {};
   return {
     env,
