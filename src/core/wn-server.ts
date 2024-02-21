@@ -2,8 +2,15 @@ import { installTiCoreI18n, TiStore } from '@site0/tijs';
 import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import JSON5 from 'json5';
-import { AjaxResult, ServerConfig, SignInForm, WnExecOptions } from '../lib';
+import {
+  AjaxResult,
+  ServerConfig,
+  SignInForm,
+  UserSidebar,
+  WnExecOptions,
+} from '../lib';
 import { wnRunCommand } from './wn-run-command';
+import { resolve } from 'path';
 
 const TICKET_KEY = 'Walnut-Ticket';
 
@@ -24,6 +31,7 @@ export class WalnutServer {
       host: 'localhost',
       port: 8080,
       site: undefined,
+      sidebar: false,
     };
     this._ticket = TiStore.local.getString(TICKET_KEY, undefined);
   }
@@ -140,6 +148,22 @@ export class WalnutServer {
   async fetchAjax(path: string): Promise<AjaxResult> {
     let reo = await this.fetchJson(path);
     return reo as AjaxResult;
+  }
+
+  async fetchSidebar(): Promise<UserSidebar> {
+    let sidebar = this._conf.sidebar;
+    if (sidebar) {
+      let cmdText = `ti sidebar`;
+      if (_.isString(sidebar)) {
+        cmdText += ' ' + sidebar;
+      }
+      return new Promise<UserSidebar>((resolve, reject) => {
+        this.exec(cmdText, { as: 'json' }).then(resolve).catch(reject);
+      });
+    }
+    return new Promise<UserSidebar>((resolve) => {
+      resolve({ sidebar: [] });
+    });
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {

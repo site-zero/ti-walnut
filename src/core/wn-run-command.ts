@@ -19,7 +19,7 @@ export async function wnRunCommand(
   try {
     let resp = await fetch(url, init);
     let str = await resp.text();
-    if ('json' == str) {
+    if ('json' == options.as) {
       try {
         return JSON5.parse(str);
       } catch (errParse) {

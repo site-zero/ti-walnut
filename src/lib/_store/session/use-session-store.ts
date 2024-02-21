@@ -6,17 +6,15 @@ import { translateSessionResult } from './session-result';
 export const useSessionStore = defineStore('session', {
   state: (): UserSessionState => ({
     env: {},
-    ticket: 'xxx',
-    me: {
-      loginName: 'xxx',
-      mainGroup: 'xxx',
-    },
-    loginAt: new Date(),
-    expireAt: new Date(),
-    homePath: 'xxx',
-    theme: 'xxx',
-    lang: 'xxx',
+    ticket: undefined,
+    me: undefined,
+    loginAt: undefined,
+    expireAt: undefined,
+    homePath: undefined,
+    theme: undefined,
+    lang: undefined,
     errCode: undefined,
+    sidebar: undefined,
   }),
   getters: {
     hasTicket(state): boolean {
@@ -33,6 +31,8 @@ export const useSessionStore = defineStore('session', {
         if (re.ok) {
           let session = translateSessionResult(re.data);
           session.errCode = undefined;
+          console.log('有会话，读侧边栏');
+          session.sidebar = await Walnut.fetchSidebar();
           this.$patch(session);
         }
         // Sign-in Failed
@@ -53,6 +53,8 @@ export const useSessionStore = defineStore('session', {
         if (re.data && re.data.parent) {
           let session = translateSessionResult(re.data.parent);
           session.errCode = undefined;
+          console.log('有会话，读侧边栏');
+          session.sidebar = await Walnut.fetchSidebar();
           this.$patch(session);
         }
         // Cancel Session
@@ -73,6 +75,7 @@ export const useSessionStore = defineStore('session', {
         theme: undefined,
         lang: undefined,
         errCode: undefined,
+        sidebar: undefined,
       });
     },
 
@@ -84,15 +87,13 @@ export const useSessionStore = defineStore('session', {
         if (re.ok) {
           let session = translateSessionResult(re.data);
           session.errCode = undefined;
+          console.log('有会话，读侧边栏');
+          session.sidebar = await Walnut.fetchSidebar();
           this.$patch(session);
         }
         // Outpu error
         else {
-          this.$patch({
-            ticket: undefined,
-            me: undefined,
-            errCode: re.errCode,
-          });
+          this.resetSession()
         }
       } finally {
         status.loading = false;

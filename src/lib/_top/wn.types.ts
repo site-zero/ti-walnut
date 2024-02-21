@@ -13,6 +13,7 @@ export interface ServerConfig {
   port: number;
   site?: string;
   lang?: I18nLang;
+  sidebar?: boolean | string;
 }
 
 export interface SignInForm {
@@ -24,17 +25,18 @@ export type UserSessionState = {
   ticket?: string;
   me?: UserInfo;
   env: Vars;
-  loginAt: Date;
-  expireAt: Date;
-  homePath: string;
-  theme: string;
-  lang: string;
+  loginAt?: Date;
+  expireAt?: Date;
+  homePath?: string;
+  theme?: string;
+  lang?: string;
   errCode?: string;
+  sidebar?: UserSidebar;
 };
 
-export type UserSessionApi =  UserSessionState & {
-  hasTicket:boolean
-}
+export type UserSessionApi = UserSessionState & {
+  hasTicket: boolean;
+};
 
 export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
 
@@ -63,18 +65,17 @@ export type WnExecOptions = {
   as?: 'json' | 'text';
 };
 
+export type UserSidebar = {
+  statusStoreKey?: string;
+  sidebar: SideBarItem[];
+};
+
 export type SideBarItem = {
-  key?: string;
+  key: string;
+  depth: number;
+  id: string;
   path?: string;
   icon?: IconInput;
   title?: string;
   items?: SideBarItem[];
-};
-
-export type SideBarItemType = 'group' | 'item';
-
-export type SideBarDisplayItem = Omit<SideBarItem, 'key' | 'items'> & {
-  uniqKey: string;
-  type: SideBarItemType;
-  items?: SideBarDisplayItem[];
 };
