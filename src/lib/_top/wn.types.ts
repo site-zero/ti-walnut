@@ -1,4 +1,4 @@
-import { I18nLang, IconInput, Vars } from '@site0/tijs';
+import { I18nLang, IconInput, SideBarItem, Vars } from '@site0/tijs';
 
 export type AjaxResult = {
   ok: boolean;
@@ -68,14 +68,4 @@ export type WnExecOptions = {
 export type UserSidebar = {
   statusStoreKey?: string;
   sidebar: SideBarItem[];
-};
-
-export type SideBarItem = {
-  key: string;
-  depth: number;
-  id: string;
-  path?: string;
-  icon?: IconInput;
-  title?: string;
-  items?: SideBarItem[];
 };
