@@ -153,17 +153,24 @@ export class WalnutServer {
   async fetchSidebar(): Promise<UserSidebar> {
     let sidebar = this._conf.sidebar;
     if (sidebar) {
-      let cmdText = `ti sidebar`;
-      if (_.isString(sidebar)) {
-        cmdText += ' ' + sidebar;
+      //  Load the  Static sidebar.
+      if (_.isString(sidebar) && sidebar.startsWith('load://')) {
+        let url = `/${sidebar.substring(7)}`;
+        let resp = await fetch(url);
+        let json = await resp.json();
+        return json;
       }
-      return new Promise<UserSidebar>((resolve, reject) => {
-        this.exec(cmdText, { as: 'json' }).then(resolve).catch(reject);
-      });
+      //  load the side bar of Walnut
+      else {
+        let cmdText = `ti sidebar`;
+        if (_.isString(sidebar)) {
+          cmdText += ' ' + sidebar;
+        }
+        let json = await this.exec(cmdText, { as: 'json' });
+        return json;
+      }
     }
-    return new Promise<UserSidebar>((resolve) => {
-      resolve({ sidebar: [] });
-    });
+    return { sidebar: [] };
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
