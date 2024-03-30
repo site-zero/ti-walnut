@@ -7,12 +7,13 @@ let emit = defineEmits<(event: "submit", info: SignInForm) => void>()
 
 const props = defineProps<{
   username?: string,
+  password?: string,
   errCode?: string
 }>()
 
 const info = reactive<SignInForm>({
   username: props.username,
-  password: undefined
+  password: props.password
 })
 
 function onClickSubmit() {

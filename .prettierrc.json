@@ -7,6 +7,6 @@
   "proseWrap": "always",
   "quoteProps": "consistent",
   "bracketSameLine": true,
-  "vueIndentScriptAndStyle": true,
+  "vueIndentScriptAndStyle": false,
   "jsxSingleQuote": true
 }

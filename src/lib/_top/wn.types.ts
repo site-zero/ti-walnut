@@ -1,10 +1,17 @@
 import { I18nLang, IconInput, SideBarItem, Vars } from '@site0/tijs';
 
-export type AjaxResult = {
+export type AjaxResult<T = any> = {
   ok: boolean;
   errCode?: string;
   msg?: string;
-  data?: any;
+  data?: T;
+};
+
+export type WnObj = Record<string, any>;
+
+export type WnObjInfo = {
+  id?: string;
+  ph?: string;
 };
 
 export interface ServerConfig {

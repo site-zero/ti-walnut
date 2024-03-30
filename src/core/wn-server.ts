@@ -1,16 +1,15 @@
 import { installTiCoreI18n, TiStore } from '@site0/tijs';
 import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
-import JSON5 from 'json5';
 import {
   AjaxResult,
   ServerConfig,
   SignInForm,
   UserSidebar,
   WnExecOptions,
+  WnObj,
 } from '../lib';
 import { wnRunCommand } from './wn-run-command';
-import { resolve } from 'path';
 
 const TICKET_KEY = 'Walnut-Ticket';
 
@@ -134,19 +133,28 @@ export class WalnutServer {
     return reo as AjaxResult;
   }
 
-  async fetchJson(path: string): Promise<any> {
+  async fetchObj(objPath: string): Promise<WnObj> {
+    let urlPath = `/o/fetch?str=${encodeURIComponent(objPath)}`;
+    let re: AjaxResult<WnObj> = await this.fetchAjax(urlPath);
+    if (re.ok && re.data) {
+      return re.data;
+    }
+    throw new Error(JSON.stringify(re));
+  }
+
+  async fetchJson(urlPath: string): Promise<any> {
     let headers: HeadersInit = {};
     if (this._ticket) {
       headers['X-Walnut-Ticket'] = this._ticket;
     }
-    let url = this.getUrl(path);
+    let url = this.getUrl(urlPath);
     let init = this.getRequestInit();
     let resp = await fetch(url, init);
     return await resp.json();
   }
 
-  async fetchAjax(path: string): Promise<AjaxResult> {
-    let reo = await this.fetchJson(path);
+  async fetchAjax(urlPath: string): Promise<AjaxResult> {
+    let reo = await this.fetchJson(urlPath);
     return reo as AjaxResult;
   }
 
