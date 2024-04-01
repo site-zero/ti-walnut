@@ -133,8 +133,17 @@ export class WalnutServer {
     return reo as AjaxResult;
   }
 
-  async fetchObj(objPath: string): Promise<WnObj> {
+  async fetchObj(
+    objPath: string,
+    { loadAxis = false, loadPath = true } = {}
+  ): Promise<WnObj> {
     let urlPath = `/o/fetch?str=${encodeURIComponent(objPath)}`;
+    if (loadPath) {
+      urlPath += '&path=true';
+    }
+    if (loadAxis) {
+      urlPath += '&axis=true';
+    }
     let re: AjaxResult<WnObj> = await this.fetchAjax(urlPath);
     if (re.ok && re.data) {
       return re.data;

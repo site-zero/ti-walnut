@@ -1,4 +1,5 @@
-import { I18nLang, IconInput, SideBarItem, Vars } from '@site0/tijs';
+import { FuncA1, I18nLang, SideBarItem, TiMatch, Vars } from '@site0/tijs';
+import _ from 'lodash';
 
 export type AjaxResult<T = any> = {
   ok: boolean;
