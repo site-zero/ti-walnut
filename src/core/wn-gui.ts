@@ -1,9 +1,8 @@
 import { ActionBarItem, FuncA1, TiMatch, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import JSON5 from 'json5';
-import { _add_all_dft_views } from './wn.view.defaults';
 
-export interface AppView {
+export interface AppGUI {
   // 当前视图的动作项
   actions?: ActionBarItem[];
   // 当前视图的显示控件
@@ -11,25 +10,25 @@ export interface AppView {
   comConf: Vars;
 }
 
-export function isAppView(obj: any): obj is AppView {
+export function isAppGUI(obj: any): obj is AppGUI {
   return obj && _.isString(obj.comType) && _.isPlainObject(obj.comConf);
 }
 
-export type AppViewRule = {
+export type AppGUIRule = {
   name: string;
   test?: TiMatch;
-  view: AppView;
+  view: AppGUI;
 };
 
-export type ViewDispatcher = FuncA1<Record<string, any> | string, AppView>;
+export type GUIDispatcher = FuncA1<Record<string, any> | string, AppGUI>;
 
-export function findWalnutView(input: Record<string, any> | string): AppView {
-  return findViewInRules(input, VIEW_RULES);
+export function findGUI(input: Record<string, any> | string): AppGUI {
+  return findGUIofRules(input, VIEW_RULES);
 }
 
-const VIEW_RULES = [] as AppViewRule[];
+const VIEW_RULES = [] as AppGUIRule[];
 
-export function addViewRule(name: string, view: AppView, test?: any) {
+export function addGUIRule(name: string, view: AppGUI, test?: any) {
   if (name && view) {
     VIEW_RULES.push({
       name,
@@ -39,13 +38,10 @@ export function addViewRule(name: string, view: AppView, test?: any) {
   }
 }
 
-// 添加所有的内置默认视图
-_add_all_dft_views();
-
-export function findViewInRules(
+export function findGUIofRules(
   input: Record<string, any> | string,
-  rules: AppViewRule[]
-): AppView {
+  rules: AppGUIRule[]
+): AppGUI {
   let viewName = _.isString(input) ? input : '';
 
   // find by viewName
@@ -66,4 +62,13 @@ export function findViewInRules(
   }
 
   throw `Fail to found view by '${JSON5.stringify(input)}'`;
+}
+
+export function installAllDefaultGUIs() {
+  addGUIRule('view-any', {
+    comType: 'TiLabel',
+    comConf: {
+      value: "=.."
+    },
+  });
 }
