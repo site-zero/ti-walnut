@@ -7,6 +7,7 @@
   "proseWrap": "always",
   "quoteProps": "consistent",
   "bracketSameLine": true,
-  "vueIndentScriptAndStyle": false,
+  "vueIndentScriptAndStyle": true,
+  "scriptIndent": "1",
   "jsxSingleQuote": true
 }

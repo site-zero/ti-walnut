@@ -1,2 +1,2 @@
-export * from './session/use-session.store';
-export * from './global-status/use-global-status.store';
+export * from './use-session.store';
+export * from './use-global-status.store';

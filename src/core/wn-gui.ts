@@ -66,7 +66,7 @@ export function findGUIofRules(
 
 export function installAllDefaultGUIs() {
   addGUIRule('view-any', {
-    comType: 'TiLabel',
+    comType: 'WnObjViewer',
     comConf: {
       value: "=.."
     },

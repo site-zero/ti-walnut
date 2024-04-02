@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { GlobalStatus } from '../..';
+import { GlobalStatus } from '..';
 
 export const userGlobalStatusStore = defineStore('status', {
   state: (): GlobalStatus => ({

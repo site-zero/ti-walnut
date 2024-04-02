@@ -1,4 +1,4 @@
-import { installTiCoreI18n, TiStore } from '@site0/tijs';
+import { installTiCoreI18n, TiStore, updateInstalledComponentsLangs } from '@site0/tijs';
 import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import {
@@ -40,6 +40,7 @@ export class WalnutServer {
     let lang = conf.lang ?? 'zh-cn';
     installTiCoreI18n(lang);
     installWalnutI18n(lang);
+    updateInstalledComponentsLangs(lang)
   }
 
   getUrl(path: string) {
