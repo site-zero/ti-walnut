@@ -68,6 +68,10 @@ export type GlobalStatus = {
   changed: boolean;
 };
 
+export type GlobalSettings = {
+  exposeHidden: boolean
+};
+
 export type WnExecOptions = {
   input?: string;
   as?: 'json' | 'text';

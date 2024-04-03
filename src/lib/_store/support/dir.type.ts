@@ -49,3 +49,11 @@ export type CurrentDirState = {
   schema?: any;
   objMethods?: Vars;
 };
+
+export type CurrentDirGetters = {
+  isPagerEnabled: () => boolean;
+};
+
+export interface CurrentDirActions {
+  queryList: () => WnObj[];
+}
