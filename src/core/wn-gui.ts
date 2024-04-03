@@ -1,6 +1,7 @@
-import { ActionBarItem, FuncA1, TiMatch, Vars } from '@site0/tijs';
+import { ActionBarItem, FuncA1, Match, TiMatch, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import JSON5 from 'json5';
+import { WnObj } from 'src/lib';
 
 export interface AppGUI {
   // 当前视图的动作项
@@ -33,13 +34,13 @@ export function addGUIRule(name: string, view: AppGUI, test?: any) {
     VIEW_RULES.push({
       name,
       view,
-      test,
+      test: Match.parse(test, true),
     });
   }
 }
 
 export function findGUIofRules(
-  input: Record<string, any> | string,
+  input: WnObj | string,
   rules: AppGUIRule[]
 ): AppGUI {
   let viewName = _.isString(input) ? input : '';
@@ -65,10 +66,25 @@ export function findGUIofRules(
 }
 
 export function installAllDefaultGUIs() {
+  // ----------------- DIR ---------------------
+  addGUIRule(
+    'view-dir',
+    {
+      comType: 'WnDirBrowser',
+      comConf: {
+        value: '=..',
+      },
+    },
+    {
+      race: 'DIR',
+    }
+  );
+  // ----------------- any ---------------------
   addGUIRule('view-any', {
     comType: 'WnObjViewer',
     comConf: {
-      value: "=.."
+      value: '=..',
     },
   });
+  // ----------------- END -----------------
 }

@@ -26,7 +26,7 @@ export type QueryJoinOne = {
   toKey?: string;
 };
 
-export type QueryAgg = {
+export type AggQuery = {
   /**
    * 从传入的 filter 里过滤掉指定的条件
    */
@@ -35,10 +35,15 @@ export type QueryAgg = {
   /**
    * 指定更多的查询条件
    */
-  match?: QueryFilter
+  match?: QueryFilter;
 
-  by: ""
+  /**
+   * 聚集方法
+   */
+  by: string;
 };
+
+export type AggResult = Record<string, Record<string, any>[]>;
 
 export type ModulePriviledge = {
   remove?: null | string;
