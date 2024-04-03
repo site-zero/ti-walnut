@@ -1,24 +1,27 @@
-import { Pager } from '@site0/tijs';
-import _ from 'lodash';
-import { Ref, computed, ref } from 'vue';
+import { Pager, ShortNamePager, Vars } from '@site0/tijs';
+import { Ref, computed, reactive, ref } from 'vue';
 import { userGlobalSettingsStore, userGlobalStatusStore } from '..';
 import { WnObj } from '../../';
+import _ from 'lodash';
+import { QueryAgg, QueryFilter, QueryJoinOne, QuerySorter } from './dir.type';
 import { Walnut } from '../../../core';
-import { QueryFilter, QueryJoinOne, QuerySorter } from './dir.type';
 
-export function userDirQuery(oDir: Ref<WnObj>) {
+export function userDirAgg(oDir: Ref<WnObj>) {
   // Prepare settings
   let settings = userGlobalSettingsStore();
   let status = userGlobalStatusStore();
 
   // Prepare data
   let fixedMatch = ref<QueryFilter>({});
-  let filter = ref<QueryFilter>({});
+  let aggQuery = ref<QueryFilter>({});
+  let aggName = ref<string>();
+  let aggSet = ref<Record<string, QueryAgg>>({});
+
   let sorter = ref<QuerySorter>({});
   let objKeys = ref<string>('');
-  let joinOne = ref<QueryJoinOne>();
+  let joinOne = ref<QueryJoinOne | null>(null);
   let list = ref<WnObj[]>([]);
-  let pager = ref<Pager>();
+  let pager = ref<Pager | null>(null);
 
   // Getters
   let queryPageNumber = computed(() => {
