@@ -1,11 +1,20 @@
-import { Pager } from '@site0/tijs';
+import { Pager, getLogger } from '@site0/tijs';
 import _ from 'lodash';
-import { Ref, computed, ref } from 'vue';
+import { ComputedRef, Ref, computed, ref } from 'vue';
 import { WnObj } from '../../';
 import { Walnut } from '../../../core';
 import { QueryFilter, QueryJoinOne, QuerySorter } from './dir.type';
 
-export function userDirQuery(oHome: Ref<WnObj | undefined>) {
+const log = getLogger('wn.store.dir.query');
+
+export type DirQueryOptions = {
+  homeIndexId: ComputedRef<string>;
+  isHomeExists: ComputedRef<boolean>;
+};
+
+export function userDirQuery(options: DirQueryOptions) {
+  log.debug('userDirQuery');
+  let { homeIndexId, isHomeExists } = options;
   // Prepare data
   let fixedMatch = ref<QueryFilter>({});
   let filter = ref<QueryFilter>({});
@@ -47,8 +56,6 @@ export function userDirQuery(oHome: Ref<WnObj | undefined>) {
   let isPagerEnabled = computed(
     () => pager.value && (isLongPager.value || isShortPager.value)
   );
-  let homeId = computed(() => _.get(oHome.value, 'id'));
-  let isHomeExists = computed(() => (homeId.value ? true : false));
 
   // -----------------------------------------------
   // Actions
@@ -58,7 +65,7 @@ export function userDirQuery(oHome: Ref<WnObj | undefined>) {
     if (!isHomeExists.value) {
       throw 'Query:Parent DIR without defined!';
     }
-    let cmds = [`o 'id:${homeId.value}' @query`];
+    let cmds = [`o 'id:${homeIndexId.value}' @query`];
 
     // Eval Pager
     if (isPagerEnabled.value) {
@@ -108,13 +115,19 @@ export function userDirQuery(oHome: Ref<WnObj | undefined>) {
     let cmdText = makeQueryCommand();
     let q = _.assign({}, filter.value, fixedMatch.value, flt);
     let input = JSON.stringify(q);
+    log.info('queryList=>', cmdText);
+    log.info('<< input <<', q);
 
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
 
     if (_.isArray(reo)) {
       list.value = reo as unknown as WnObj[];
+      log.info('>> list:', list.value);
     } else if (reo.list && reo.pager) {
+      list.value = reo.list;
       pager.value = reo.pager;
+      log.info('>> list:', list.value);
+      log.info('>> page:', pager.value);
     }
   }
 
@@ -133,8 +146,6 @@ export function userDirQuery(oHome: Ref<WnObj | undefined>) {
     isLongPager,
     isShortPager,
     isPagerEnabled,
-    homeId,
-    isHomeExists,
     // Actions
     queryList,
   };

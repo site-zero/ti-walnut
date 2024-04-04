@@ -22,6 +22,8 @@ export interface ServerConfig {
   site?: string;
   lang?: I18nLang;
   sidebar?: boolean | string;
+  logLevel?: string;
+  logger?: Record<string, string>;
 }
 
 export interface SignInForm {
@@ -69,7 +71,7 @@ export type GlobalStatus = {
 };
 
 export type GlobalSettings = {
-  exposeHidden: boolean
+  exposeHidden: boolean;
 };
 
 export type WnExecOptions = {

@@ -1,4 +1,11 @@
-import { ActionBarItem, FuncA1, Match, TiMatch, Vars } from '@site0/tijs';
+import {
+  ActionBarItem,
+  FuncA1,
+  Match,
+  TiMatch,
+  Vars,
+  getLogger,
+} from '@site0/tijs';
 import _ from 'lodash';
 import JSON5 from 'json5';
 import { WnObj } from 'src/lib';
@@ -29,8 +36,11 @@ export function findGUI(input: Record<string, any> | string): AppGUI {
 
 const VIEW_RULES = [] as AppGUIRule[];
 
+const log = getLogger('wn.core.gui');
+
 export function addGUIRule(name: string, view: AppGUI, test?: any) {
   if (name && view) {
+    log.debug('addGUIRule', name, view, test);
     VIEW_RULES.push({
       name,
       view,

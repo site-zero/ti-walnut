@@ -1,30 +1,36 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { WnObj } from '..';
-import { userDirAgg } from './support/use-dir-agg';
-import { userDirQuery } from './support/use-dir-query';
+import { userDirAgg } from './dir/use-dir-agg';
+import { userDirQuery } from './dir/use-dir-query';
+import { useDirSetup } from './dir/use-dir-setup';
+import { getLogger } from '@site0/tijs';
+
+const log = getLogger('wn.store.dir');
 
 export function defineDirStore(name?: string) {
+  log.debug(`defineDirStore(${name || ''})`);
   return defineStore(name || 'CurrentDir', () => {
-    let oHome = ref<WnObj>();
-    let _query = userDirQuery(oHome);
-    let _agg = userDirAgg(_query);
+    log.info(`defineStore(${name || 'CurrentDir'})`);
+    let _setup = useDirSetup();
+    let _query = userDirQuery(_setup);
+    let _agg = userDirAgg({
+      fixedMatch: _query.fixedMatch,
+      filter: _query.filter,
+      homeIndexId: _setup.homeIndexId,
+      isHomeExists: _setup.isHomeExists,
+    });
 
-    async function reloadData() {
+    async function reload(o_dir?: WnObj) {
+      await _setup.loadGUISettings(o_dir);
       await _query.queryList();
     }
 
-    async function reload(o_dir?: WnObj) {
-      oHome.value = o_dir;
-      await reloadData()
-    }
-
     return {
-      oHome,
+      ..._setup,
       ..._query,
       ..._agg,
       reload,
-      reloadData,
     };
   });
 }

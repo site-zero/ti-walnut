@@ -1,4 +1,13 @@
-import { installTiCoreI18n, TiStore, updateInstalledComponentsLangs } from '@site0/tijs';
+import {
+  addLogger,
+  getLogger,
+  getLogLevel,
+  installTiCoreI18n,
+  setDefaultLogLevel,
+  tidyLogger,
+  TiStore,
+  updateInstalledComponentsLangs,
+} from '@site0/tijs';
 import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import {
@@ -12,6 +21,7 @@ import {
 import { wnRunCommand } from './wn-run-command';
 
 const TICKET_KEY = 'Walnut-Ticket';
+const log = getLogger('wn.core.server');
 
 export class WalnutServer {
   /**
@@ -36,11 +46,22 @@ export class WalnutServer {
   }
 
   init(conf: ServerConfig) {
+    log.info('init server', conf);
     this._conf = conf;
     let lang = conf.lang ?? 'zh-cn';
     installTiCoreI18n(lang);
     installWalnutI18n(lang);
-    updateInstalledComponentsLangs(lang)
+    updateInstalledComponentsLangs(lang);
+    if (conf.logLevel) {
+      setDefaultLogLevel(getLogLevel(conf.logLevel));
+    }
+    if (conf.logger) {
+      _.forEach(conf.logger, (v, k) => {
+        let lv = getLogLevel(v);
+        addLogger(k, lv);
+      });
+      tidyLogger();
+    }
   }
 
   getUrl(path: string) {
