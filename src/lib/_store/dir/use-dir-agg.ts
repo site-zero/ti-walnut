@@ -1,4 +1,4 @@
-import { Match, getLogger } from '@site0/tijs';
+import { Callback1, Match, getLogger } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
 import { ComputedRef, Ref, ref } from 'vue';
@@ -14,8 +14,18 @@ export type AggOptions = {
   isHomeExists: ComputedRef<boolean>;
 };
 
+export type DirAggFeature = {
+  // State
+  aggQuery: Ref<string | undefined>;
+  aggSet: Ref<Record<string, AggQuery>>;
+  aggResult: Ref<AggResult>;
+  // Getter
+  // Actions
+  loadAggResult: Callback1<QueryFilter>;
+};
+
 export function userDirAgg(options: AggOptions) {
-  log.debug('userDirAgg')
+  log.debug('userDirAgg');
   // Prepare data
   let hasDir = options.isHomeExists;
   let dirId = options.homeIndexId;
@@ -27,7 +37,7 @@ export function userDirAgg(options: AggOptions) {
   // Actions
   // -----------------------------------------------
 
-  async function loadAggResult(flt: QueryFilter) {
+  async function loadAggResult(flt: QueryFilter = {}) {
     if (!hasDir.value) {
       throw 'Agg:Parent DIR without defined!';
     }
@@ -45,8 +55,6 @@ export function userDirAgg(options: AggOptions) {
         '   '
       )}`;
     }
-
-    let cmds = [`o 'id:${dirId.value}' @query`];
 
     // Ignore the specil keys in filter to agg more data
     let ignore = Match.parse(agg.ignore);
@@ -74,5 +82,5 @@ export function userDirAgg(options: AggOptions) {
     // Getter
     // Actions
     loadAggResult,
-  };
+  } as DirAggFeature;
 }

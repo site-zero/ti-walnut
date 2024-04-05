@@ -45,6 +45,19 @@ export type AggQuery = {
 
 export type AggResult = Record<string, Record<string, any>[]>;
 
+export type DirGUIView = {
+  // 从哪里加载列表
+  indexPath: string;
+  // 动作菜单的加载文件
+  actionsPath: string;
+  // 布局文件
+  layoutPath: string;
+  // Schema 文件
+  schemaPath: string;
+  // 扩展的自定义函数集合
+  methodPaths: string;
+};
+
 export type ModulePriviledge = {
   remove?: null | string;
   create?: null | string;

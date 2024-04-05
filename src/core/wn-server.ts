@@ -19,6 +19,7 @@ import {
   WnObj,
 } from '../lib';
 import { wnRunCommand } from './wn-run-command';
+import JSON5 from 'json5';
 
 const TICKET_KEY = 'Walnut-Ticket';
 const log = getLogger('wn.core.server');
@@ -155,6 +156,20 @@ export class WalnutServer {
     return reo as AjaxResult;
   }
 
+  async loadContent(objPath: string): Promise<string> {
+    let urlPath = `/o/content?str=${encodeURIComponent(objPath)}`;
+    return await this.fetchText(urlPath);
+  }
+
+  async loadJson(objPath: string): Promise<any> {
+    let re = await this.loadContent(objPath);
+    try {
+      return JSON5.parse(re);
+    } catch (err) {
+      log.error(`loadJson(${objPath}) fail to parse JSON:`, re, err);
+    }
+  }
+
   async fetchObj(
     objPath: string,
     { loadAxis = false, loadPath = true } = {}
@@ -171,6 +186,17 @@ export class WalnutServer {
       return re.data;
     }
     throw new Error(JSON.stringify(re));
+  }
+
+  async fetchText(urlPath: string): Promise<any> {
+    let headers: HeadersInit = {};
+    if (this._ticket) {
+      headers['X-Walnut-Ticket'] = this._ticket;
+    }
+    let url = this.getUrl(urlPath);
+    let init = this.getRequestInit();
+    let resp = await fetch(url, init);
+    return await resp.text();
   }
 
   async fetchJson(urlPath: string): Promise<any> {

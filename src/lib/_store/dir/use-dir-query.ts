@@ -1,4 +1,4 @@
-import { Pager, getLogger } from '@site0/tijs';
+import { Pager, Vars, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { ComputedRef, Ref, computed, ref } from 'vue';
 import { WnObj } from '../../';
@@ -10,6 +10,24 @@ const log = getLogger('wn.store.dir.query');
 export type DirQueryOptions = {
   homeIndexId: ComputedRef<string>;
   isHomeExists: ComputedRef<boolean>;
+};
+
+export type DirQueryFeature = {
+  // State
+  list: Ref<WnObj[]>;
+  pager: Ref<Pager | undefined>;
+  fixedMatch: Ref<Vars>;
+  filter: Ref<Vars>;
+  sorter: Ref<QuerySorter>;
+  objKeys: Ref<string>;
+  // Getter
+  queryPageNumber: ComputedRef<number>;
+  queryPageSize: ComputedRef<number>;
+  isLongPager: ComputedRef<boolean>;
+  isShortPager: ComputedRef<boolean>;
+  isPagerEnabled: ComputedRef<boolean>;
+  // Actions
+  queryList: (flt?: QueryFilter) => Promise<void>;
 };
 
 export function userDirQuery(options: DirQueryOptions) {
@@ -148,5 +166,5 @@ export function userDirQuery(options: DirQueryOptions) {
     isPagerEnabled,
     // Actions
     queryList,
-  };
+  } as DirQueryFeature;
 }
