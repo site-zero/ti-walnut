@@ -3,52 +3,44 @@ import { computed, ref } from 'vue';
 import _ from 'lodash';
 import { getLogger } from '@site0/tijs';
 import { Walnut } from 'src/core/wn-server';
-import { DirGUIView } from './dir.type';
+import { DirGUIViewInfo, DirBaseSettings, DirBaseFeatures } from './dir.type';
 
 const log = getLogger('wn.store.dir.setup');
 
-export function useDirSetup() {
+export function useDirSetup(): DirBaseFeatures {
   log.debug('useDirSetup');
-  let oHome = ref<WnObj>();
-  let oHomeIndex = ref<WnObj>();
-  let homeId = computed(() => _.get(oHome.value, 'id'));
-  let homeIndexId = computed(() => _.get(oHomeIndex.value, 'id'));
-  let isHomeExists = computed(() => (homeId.value ? true : false));
+  let S: DirBaseSettings = {
+    moduleName: ref(''),
+    oHome: ref<WnObj>(),
+    oHomeIndex: ref<WnObj | undefined>(),
+    actionsPath: ref<string>(),
+    layoutPath: ref<string>(),
+    schemaPath: ref<string>(),
+    methodPaths: ref<string>(),
+  };
 
-  // GUI 的加载路径
-  let actionsPath = ref<string>();
-  let layoutPath = ref<string>();
-  let schemaPath = ref<string>();
-  let methodPaths = ref<string>();
-
-  async function __update_by_view(view: Partial<DirGUIView>) {
+  async function __update_by_view(view: Partial<DirGUIViewInfo>) {
     if (view.indexPath) {
-      oHomeIndex.value = await Walnut.fetchObj(view.indexPath);
+      S.oHomeIndex.value = await Walnut.fetchObj(view.indexPath);
+    } else {
+      S.oHomeIndex.value = undefined;
     }
-    actionsPath.value = view.actionsPath;
-    layoutPath.value = view.layoutPath;
-    schemaPath.value = view.schemaPath;
-    methodPaths.value = view.methodPaths;
+    S.actionsPath.value = view.actionsPath;
+    S.layoutPath.value = view.layoutPath;
+    S.schemaPath.value = view.schemaPath;
+    S.methodPaths.value = view.methodPaths;
   }
 
-  function resetGUISettings() {}
-
-  async function loadGUISettings(obj?: WnObj) {
-    oHome.value = obj;
-
-    // Guard: oHome is Nil
-    if (_.isNil(oHome.value)) {
-      oHomeIndex.value = undefined;
-      resetGUISettings();
-      return;
-    }
+  async function _init_dir(obj: WnObj) {
     // oHome is GUI View
-    if ('FILE' == oHome.value['race']) {
+    if ('FILE' == obj.race) {
       // File as View
-      if ('gui-view' == oHome.value['tp']) {
-        let json = await Walnut.loadJson(`id:${oHome.value.id}`);
-        let view = json as Partial<DirGUIView>;
+      if ('gui-view' == obj.tp) {
+        let objId = obj.id;
+        let json = await Walnut.loadJson(`id:${objId}`);
+        let view = json as Partial<DirGUIViewInfo>;
         await __update_by_view(view);
+        S.oHome.value = S.oHomeIndex.value;
       }
       // oHome is FILE
       else {
@@ -57,31 +49,54 @@ export function useDirSetup() {
     }
     // oHome is Thing Set
     // oHome is DIR
-    if ('DIR' == oHome.value.race) {
-      oHomeIndex.value = oHome.value;
+    if ('DIR' == obj.race) {
+      S.oHome.value = obj;
       // 指定了视图
-      let viewPath = oHome.value['gui-view'];
+      let viewPath = obj['gui-view'];
       if (viewPath && _.isString(viewPath)) {
         let json = await Walnut.loadJson(viewPath);
-        let view = json as Partial<DirGUIView>;
+        let view = json as Partial<DirGUIViewInfo>;
         await __update_by_view(view);
+        S.oHomeIndex.value = S.oHomeIndex.value || obj;
       }
       // 自己的元数据就是视图内容
       else {
-        actionsPath.value = oHome.value['actionsPath'];
-        layoutPath.value = oHome.value['layoutPath'];
-        schemaPath.value = oHome.value['schemaPath'];
-        methodPaths.value = oHome.value['methodPaths'];
+        S.oHomeIndex.value = obj;
+        S.actionsPath.value = obj['actions-path'];
+        S.layoutPath.value = obj['layout-path'];
+        S.schemaPath.value = obj['schema-path'];
+        S.methodPaths.value = obj['method-paths'];
       }
     }
   }
 
+  function _reset_dir_settings() {
+    S.moduleName.value = '';
+    S.oHome.value = undefined;
+    S.oHomeIndex.value = undefined;
+    S.actionsPath.value = undefined;
+    S.layoutPath.value = undefined;
+    S.schemaPath.value = undefined;
+    S.methodPaths.value = undefined;
+  }
+
+  async function loadDirSettings(obj?: WnObj) {
+    // Guard: oHome is Nil
+    if (_.isNil(obj)) {
+      _reset_dir_settings();
+      return;
+    }
+    // Init dir Setting
+    _init_dir(obj);
+  }
+
   return {
-    oHome,
-    oHomeIndex,
-    homeId,
-    homeIndexId,
-    isHomeExists,
-    loadGUISettings,
+    ...S,
+    homeId: computed(() => _.get(S.oHome.value, 'id')),
+    homeIndexId: computed(() => _.get(S.oHomeIndex.value, 'id')),
+    isHomeExists: computed(() =>
+      S.oHome.value && S.oHome.value.id ? true : false
+    ),
+    loadDirSettings,
   };
 }

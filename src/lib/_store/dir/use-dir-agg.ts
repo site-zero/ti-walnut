@@ -1,28 +1,21 @@
-import { Callback1, Match, getLogger } from '@site0/tijs';
+import { Match, getLogger } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
-import { ComputedRef, Ref, ref } from 'vue';
+import { ref } from 'vue';
 import { Walnut } from '../../../core';
-import { AggQuery, AggResult, QueryFilter } from './dir.type';
+import {
+  AggQuery,
+  AggResult,
+  DirAggFeature,
+  DirBaseFeatures,
+  DirQuerySettings,
+  QueryFilter,
+} from './dir.type';
 
 const log = getLogger('wn.store.dir.agg');
 
-export type AggOptions = {
-  fixedMatch: Ref<QueryFilter>;
-  filter: Ref<QueryFilter>;
-  homeIndexId: ComputedRef<string>;
-  isHomeExists: ComputedRef<boolean>;
-};
-
-export type DirAggFeature = {
-  // State
-  aggQuery: Ref<string | undefined>;
-  aggSet: Ref<Record<string, AggQuery>>;
-  aggResult: Ref<AggResult>;
-  // Getter
-  // Actions
-  loadAggResult: Callback1<QueryFilter>;
-};
+export type AggOptions = Pick<DirBaseFeatures, 'homeIndexId' | 'isHomeExists'> &
+  Pick<DirQuerySettings, 'fixedMatch' | 'filter'>;
 
 export function userDirAgg(options: AggOptions) {
   log.debug('userDirAgg');

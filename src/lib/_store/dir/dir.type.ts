@@ -1,5 +1,15 @@
-import { ShortNamePager, Vars } from '@site0/tijs';
+import {
+  ActionBarItem,
+  AsyncFuncA0,
+  FieldStatus,
+  LayoutProps,
+  Pager,
+  ShortNamePager,
+  Vars,
+  WnObjStatus,
+} from '@site0/tijs';
 import { WnObj } from '../../';
+import { ComputedRef, Ref } from 'vue';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -45,7 +55,14 @@ export type AggQuery = {
 
 export type AggResult = Record<string, Record<string, any>[]>;
 
-export type DirGUIView = {
+export type ModulePriviledge = {
+  remove?: string;
+  create?: string;
+  update?: string;
+  save?: string;
+};
+
+export type DirGUIViewInfo = {
   // 从哪里加载列表
   indexPath: string;
   // 动作菜单的加载文件
@@ -58,14 +75,139 @@ export type DirGUIView = {
   methodPaths: string;
 };
 
-export type ModulePriviledge = {
-  remove?: null | string;
-  create?: null | string;
-  update?: null | string;
-  save?: null | string;
+/*
+----------------------------------------
+                  Base
+----------------------------------------
+*/
+export type DirBaseSettings = {
+  moduleName: Ref<string>;
+  oHome: Ref<WnObj | undefined>;
+  oHomeIndex: Ref<WnObj | undefined>;
+  //............ GUI Loading Path
+  actionsPath: Ref<string | undefined>;
+  layoutPath: Ref<string | undefined>;
+  schemaPath: Ref<string | undefined>;
+  methodPaths: Ref<string | undefined>;
 };
 
-export type CurrentDirState = {
+export type DirViewSettings = {
+  pvg: Ref<ModulePriviledge>;
+  guiShown: Ref<Vars | undefined>;
+  actions: Ref<ActionBarItem[] | undefined>;
+  layout: Ref<Omit<LayoutProps, 'schema'> | undefined>;
+  schema: Ref<Pick<LayoutProps, 'schema'> | undefined>;
+  methods: Ref<Record<string, Function>>;
+};
+
+export type DirBaseGetters = {
+  homeId: ComputedRef<string | undefined>;
+  homeIndexId: ComputedRef<string | undefined>;
+  isHomeExists: ComputedRef<boolean>;
+};
+
+export type DirBaseActions = {
+  loadDirSettings: (obj?: WnObj) => Promise<void>;
+};
+
+export type DirBaseFeatures = DirBaseSettings & DirBaseGetters & DirBaseActions;
+
+/*
+----------------------------------------
+               Local Storage
+----------------------------------------
+*/
+export type DirLocalSettings = {
+  localBehaviorKeepAt: Ref<string | undefined>;
+  localBehaviorIgnore: Ref<string | undefined>;
+};
+
+/*
+----------------------------------------
+               Query
+----------------------------------------
+*/
+export type DirQuerySettings = {
+  fixedMatch: Ref<Vars | undefined>;
+  filter: Ref<Vars | undefined>;
+  sorter: Ref<Vars | undefined>;
+  objKeys: Ref<string | undefined>;
+  pager: Ref<Pager | undefined>;
+};
+
+export type DirQueryGetters = {
+  queryPageNumber: ComputedRef<number>;
+  queryPageSize: ComputedRef<number>;
+  isLongPager: ComputedRef<boolean>;
+  isShortPager: ComputedRef<boolean>;
+  isPagerEnabled: ComputedRef<boolean>;
+};
+
+export type DirSelection = {
+  currentId: Ref<string | undefined>;
+  checkedIds: Ref<Record<string, boolean> | undefined>;
+  list: Ref<WnObj[]>;
+  itemStatus: Ref<Record<string, WnObjStatus>>;
+};
+
+export type DirQueryActions = {
+  queryList: (flt?: QueryFilter) => Promise<void>;
+};
+
+export type DirQueryFeature = DirQuerySettings &
+  DirQueryGetters &
+  DirSelection &
+  DirQueryActions;
+
+/*
+----------------------------------------
+              Agg
+----------------------------------------
+*/
+
+export type DirAggSettings = {
+  aggQuery: Ref<string | undefined>;
+  aggSet: Ref<Record<string, AggQuery>>;
+  aggAutoReload: Ref<boolean>;
+};
+
+export type DirAggActions = {
+  loadAggResult: (flt?: QueryFilter) => Promise<void>;
+};
+export type DirAggFeature = DirAggSettings &
+  DirAggActions & {
+    aggResult: Ref<AggResult>;
+  };
+
+/*
+----------------------------------------
+         Current Editing
+----------------------------------------
+*/
+export type DirEditCurrentFeatures<T extends any = any> = {
+  meta: Ref<WnObj | undefined>;
+  content: Ref<string | undefined>;
+  savedContent: Ref<string | undefined>;
+  contentPath: Ref<string | undefined>;
+  contentType: Ref<string | undefined>;
+  contentData: Ref<T>;
+  fieldStatus: Ref<Record<string, FieldStatus>>;
+};
+
+/*
+----------------------------------------
+        Whole DirStore
+----------------------------------------
+*/
+export type DirFeatures = DirBaseFeatures &
+  DirQueryFeature &
+  DirAggFeature &
+  {
+    reload: (obj?:WnObj)=>Promise<void>
+  }
+  //DirEditCurrentFeatures;
+
+export type ___old_state = {
   moduleName: string;
   pvg?: ModulePriviledge;
   view?: Vars;
@@ -106,11 +248,3 @@ export type CurrentDirState = {
   schema?: any;
   objMethods?: Vars;
 };
-
-export type CurrentDirGetters = {
-  isPagerEnabled: () => boolean;
-};
-
-export interface CurrentDirActions {
-  queryList: () => WnObj[];
-}
