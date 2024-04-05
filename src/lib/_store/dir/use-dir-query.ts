@@ -3,11 +3,11 @@ import _ from 'lodash';
 import { ComputedRef, Ref, computed, ref } from 'vue';
 import { WnObj } from '../../';
 import { Walnut } from '../../../core';
-import { DirBaseGetters, DirQueryFeature, QueryFilter, QueryJoinOne, QuerySorter } from './dir.type';
+import { DirInitGetters, DirQueryFeature, QueryFilter, QueryJoinOne, QuerySorter } from './dir.type';
 
 const log = getLogger('wn.store.dir.query');
 
-export function userDirQuery(options: DirBaseGetters) {
+export function userDirQuery(options: DirInitGetters) {
   log.debug('userDirQuery');
   let { homeIndexId, isHomeExists } = options;
   // Prepare data

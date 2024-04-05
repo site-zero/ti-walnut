@@ -77,10 +77,10 @@ export type DirGUIViewInfo = {
 
 /*
 ----------------------------------------
-                  Base
+                  Init
 ----------------------------------------
 */
-export type DirBaseSettings = {
+export type DirInitSettings = {
   moduleName: Ref<string>;
   oHome: Ref<WnObj | undefined>;
   oHomeIndex: Ref<WnObj | undefined>;
@@ -91,6 +91,24 @@ export type DirBaseSettings = {
   methodPaths: Ref<string | undefined>;
 };
 
+export type DirInitGetters = {
+  homeId: ComputedRef<string | undefined>;
+  homeIndexId: ComputedRef<string | undefined>;
+  isHomeExists: ComputedRef<boolean>;
+};
+
+export type DirInitActions = {
+  initDirSettings: (obj?: WnObj) => Promise<void>;
+};
+
+export type DirInitFeatures = DirInitSettings & DirInitGetters & DirInitActions;
+
+/*
+----------------------------------------
+               GUI View 
+----------------------------------------
+*/
+
 export type DirViewSettings = {
   pvg: Ref<ModulePriviledge>;
   guiShown: Ref<Vars | undefined>;
@@ -100,17 +118,19 @@ export type DirViewSettings = {
   methods: Ref<Record<string, Function>>;
 };
 
-export type DirBaseGetters = {
-  homeId: ComputedRef<string | undefined>;
-  homeIndexId: ComputedRef<string | undefined>;
-  isHomeExists: ComputedRef<boolean>;
+export type DirViewGetters = {};
+
+export type DirViewActions = {
+  can_I_remove: () => boolean;
+  can_I_create: () => boolean;
+  can_I_update: () => boolean;
+  can_I_save: () => boolean;
+  updateShown: (shown: Vars) => void;
+  mergeShown: (shown: Vars) => void;
+  invoke: (methodName: string, ...args: any[]) => Promise<void>;
 };
 
-export type DirBaseActions = {
-  loadDirSettings: (obj?: WnObj) => Promise<void>;
-};
-
-export type DirBaseFeatures = DirBaseSettings & DirBaseGetters & DirBaseActions;
+export type DirViewFeatures = DirViewSettings & DirViewGetters & DirViewActions;
 
 /*
 ----------------------------------------
@@ -121,6 +141,15 @@ export type DirLocalSettings = {
   localBehaviorKeepAt: Ref<string | undefined>;
   localBehaviorIgnore: Ref<string | undefined>;
 };
+
+export type DirLocalStorablInfo = Omit<DirViewSettings, 'pvg'> &
+  Pick<DirQuerySettings, 'filter' | 'sorter'>;
+export type DirLocalActions = {
+  saveToLocal: (info: DirLocalStorablInfo) => void;
+  restoreFromLocal: (info: DirLocalStorablInfo) => void;
+};
+
+export type DirLocalFeatures = DirLocalSettings & DirLocalActions;
 
 /*
 ----------------------------------------
@@ -199,13 +228,12 @@ export type DirEditCurrentFeatures<T extends any = any> = {
         Whole DirStore
 ----------------------------------------
 */
-export type DirFeatures = DirBaseFeatures &
+export type DirFeatures = DirInitFeatures &
   DirQueryFeature &
-  DirAggFeature &
-  {
-    reload: (obj?:WnObj)=>Promise<void>
-  }
-  //DirEditCurrentFeatures;
+  DirAggFeature & {
+    reload: (obj?: WnObj) => Promise<void>;
+  };
+//DirEditCurrentFeatures;
 
 export type ___old_state = {
   moduleName: string;
