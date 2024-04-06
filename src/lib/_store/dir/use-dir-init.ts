@@ -1,25 +1,40 @@
-import { WnObj } from '../..';
-import { computed, ref } from 'vue';
-import _ from 'lodash';
 import { getLogger } from '@site0/tijs';
-import { Walnut } from 'src/core/wn-server';
-import { DirGUIViewInfo, DirInitSettings, DirInitFeatures } from './dir.type';
+import _ from 'lodash';
+import { computed, ref } from 'vue';
+import { WnObj } from '../..';
+import { Walnut } from '../../../core';
+import {
+  DirGUIViewBehaviors,
+  DirGUIViewInfo,
+  DirInitFeatures,
+  DirInitGetters,
+  DirInitSettings,
+} from './dir.type';
 
-const log = getLogger('wn.store.dir.init');
+const log = getLogger('wn.pinia.dir.init');
 
 export function useDirInit(): DirInitFeatures {
   log.debug('useDirSetup');
   let _init: DirInitSettings = {
-    moduleName: ref(''),
+    moduleName: ref<string>(''),
     oHome: ref<WnObj>(),
     oHomeIndex: ref<WnObj | undefined>(),
     actionsPath: ref<string>(),
     layoutPath: ref<string>(),
     schemaPath: ref<string>(),
-    methodPaths: ref<string>(),
+    methodPaths: ref<string[]>([]),
+    behaviors: ref<DirGUIViewBehaviors>({}),
   };
 
-  async function __update_by_view(view: Partial<DirGUIViewInfo>) {
+  let _getters: DirInitGetters = {
+    homeId: computed(() => _.get(_init.oHome.value, 'id')),
+    homeIndexId: computed(() => _.get(_init.oHomeIndex.value, 'id')),
+    isHomeExists: computed(() =>
+      _init.oHome.value && _init.oHome.value.id ? true : false
+    ),
+  };
+
+  async function __update_by_view(view: DirGUIViewInfo) {
     if (view.indexPath) {
       _init.oHomeIndex.value = await Walnut.fetchObj(view.indexPath);
     } else {
@@ -28,7 +43,12 @@ export function useDirInit(): DirInitFeatures {
     _init.actionsPath.value = view.actionsPath;
     _init.layoutPath.value = view.layoutPath;
     _init.schemaPath.value = view.schemaPath;
-    _init.methodPaths.value = view.methodPaths;
+    if (view.methodPaths && !_.isEmpty(view.methodPaths)) {
+      _init.methodPaths.value = _.concat(view.methodPaths);
+    } else {
+      _init.methodPaths.value = undefined;
+    }
+    _init.behaviors.value = view.behaviors || {};
   }
 
   async function _init_dir(obj: WnObj) {
@@ -38,7 +58,7 @@ export function useDirInit(): DirInitFeatures {
       if ('gui-view' == obj.tp) {
         let objId = obj.id;
         let json = await Walnut.loadJson(`id:${objId}`);
-        let view = json as Partial<DirGUIViewInfo>;
+        let view = json as DirGUIViewInfo;
         await __update_by_view(view);
         _init.oHome.value = _init.oHomeIndex.value;
       }
@@ -54,18 +74,25 @@ export function useDirInit(): DirInitFeatures {
       // 指定了视图
       let viewPath = obj['gui-view'];
       if (viewPath && _.isString(viewPath)) {
+        log.debug('viewPath=', viewPath);
         let json = await Walnut.loadJson(viewPath);
-        let view = json as Partial<DirGUIViewInfo>;
+        let view = json as DirGUIViewInfo;
         await __update_by_view(view);
-        _init.oHomeIndex.value = _init.oHomeIndex.value || obj;
+        if (!_init.oHomeIndex.value) {
+          _init.oHomeIndex.value = obj;
+        }
       }
       // 自己的元数据就是视图内容
       else {
-        _init.oHomeIndex.value = obj;
-        _init.actionsPath.value = obj['actions-path'];
-        _init.layoutPath.value = obj['layout-path'];
-        _init.schemaPath.value = obj['schema-path'];
-        _init.methodPaths.value = obj['method-paths'];
+        let view = {} as DirGUIViewInfo;
+        view.actionsPath = obj['actions-path'];
+        view.layoutPath = obj['layout-path'];
+        view.schemaPath = obj['schema-path'];
+        view.methodPaths = obj['method-paths'];
+        await __update_by_view(view);
+        if (!_init.oHomeIndex.value) {
+          _init.oHomeIndex.value = obj;
+        }
       }
     }
   }
@@ -82,11 +109,7 @@ export function useDirInit(): DirInitFeatures {
 
   return {
     ..._init,
-    homeId: computed(() => _.get(_init.oHome.value, 'id')),
-    homeIndexId: computed(() => _.get(_init.oHomeIndex.value, 'id')),
-    isHomeExists: computed(() =>
-      _init.oHome.value && _init.oHome.value.id ? true : false
-    ),
+    ..._getters,
     initDirSettings: async (obj?: WnObj) => {
       // Guard: oHome is Nil
       if (_.isNil(obj)) {
@@ -94,7 +117,7 @@ export function useDirInit(): DirInitFeatures {
         return;
       }
       // Init dir Setting
-      _init_dir(obj);
+      await _init_dir(obj);
     },
   };
 }

@@ -12,7 +12,7 @@ import {
   QueryFilter,
 } from './dir.type';
 
-const log = getLogger('wn.store.dir.agg');
+const log = getLogger('wn.pinia.dir.agg');
 
 export type AggOptions = Pick<DirInitFeatures, 'homeIndexId' | 'isHomeExists'> &
   Pick<DirQuerySettings, 'fixedMatch' | 'filter'>;
@@ -24,11 +24,20 @@ export function userDirAgg(options: AggOptions) {
   let dirId = options.homeIndexId;
   let aggQuery = ref<string>();
   let aggSet = ref<Record<string, AggQuery>>({});
+  let aggAutoReload = ref<boolean>(false);
   let aggResult = ref<AggResult>();
 
   // -----------------------------------------------
   // Actions
   // -----------------------------------------------
+
+  function resetAgg() {
+    log.debug('resetAgg');
+    aggQuery.value = undefined;
+    aggSet.value = {};
+    aggResult.value = undefined;
+    aggAutoReload.value = false;
+  }
 
   async function loadAggResult(flt: QueryFilter = {}) {
     if (!hasDir.value) {
@@ -71,9 +80,11 @@ export function userDirAgg(options: AggOptions) {
     // State
     aggQuery,
     aggSet,
+    aggAutoReload,
     aggResult,
     // Getter
     // Actions
+    resetAgg,
     loadAggResult,
   } as DirAggFeature;
 }

@@ -6,9 +6,9 @@ import {
   Vars,
   getLogger,
 } from '@site0/tijs';
-import _ from 'lodash';
 import JSON5 from 'json5';
-import { WnObj } from 'src/lib';
+import _ from 'lodash';
+import { WnObj } from '../lib';
 
 export interface AppGUI {
   // 当前视图的动作项

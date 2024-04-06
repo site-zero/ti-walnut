@@ -1,15 +1,14 @@
 import {
   ActionBarItem,
-  AsyncFuncA0,
   FieldStatus,
+  KeepMode,
   LayoutProps,
   Pager,
-  ShortNamePager,
   Vars,
   WnObjStatus,
 } from '@site0/tijs';
-import { WnObj } from '../../';
 import { ComputedRef, Ref } from 'vue';
+import { WnObj } from '../../';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -62,17 +61,32 @@ export type ModulePriviledge = {
   save?: string;
 };
 
+export type DirGUIViewBehaviors = {
+  keepAt?: string;
+  filterIgnore?: string;
+  fixedMatch?: QueryFilter;
+  filter?: QueryFilter;
+  sorter?: QuerySorter;
+  joinOne?: QueryJoinOne;
+  pager?: Pager;
+  aggQuery?: string;
+  aggSet?: Record<string, AggQuery>;
+  aggAutoReload?: boolean;
+};
+
 export type DirGUIViewInfo = {
   // 从哪里加载列表
-  indexPath: string;
+  indexPath?: string;
   // 动作菜单的加载文件
-  actionsPath: string;
+  actionsPath?: string;
   // 布局文件
-  layoutPath: string;
+  layoutPath?: string;
   // Schema 文件
-  schemaPath: string;
+  schemaPath?: string;
   // 扩展的自定义函数集合
-  methodPaths: string;
+  methodPaths?: string[];
+  // 指定视图的行为
+  behaviors?: DirGUIViewBehaviors;
 };
 
 /*
@@ -88,7 +102,9 @@ export type DirInitSettings = {
   actionsPath: Ref<string | undefined>;
   layoutPath: Ref<string | undefined>;
   schemaPath: Ref<string | undefined>;
-  methodPaths: Ref<string | undefined>;
+  methodPaths: Ref<string[] | undefined>;
+  //............ behaviors
+  behaviors: Ref<DirGUIViewBehaviors>;
 };
 
 export type DirInitGetters = {
@@ -121,13 +137,19 @@ export type DirViewSettings = {
 export type DirViewGetters = {};
 
 export type DirViewActions = {
+  resetView: () => void;
+  loadView: () => Promise<void>;
+  applyView: (
+    be: DirGUIViewBehaviors,
+    settings: DirQuerySettings & DirAggSettings
+  ) => void;
   can_I_remove: () => boolean;
   can_I_create: () => boolean;
   can_I_update: () => boolean;
   can_I_save: () => boolean;
   updateShown: (shown: Vars) => void;
   mergeShown: (shown: Vars) => void;
-  invoke: (methodName: string, ...args: any[]) => Promise<void>;
+  invoke: (methodName: string, ...args: any[]) => Promise<any>;
 };
 
 export type DirViewFeatures = DirViewSettings & DirViewGetters & DirViewActions;
@@ -137,19 +159,22 @@ export type DirViewFeatures = DirViewSettings & DirViewGetters & DirViewActions;
                Local Storage
 ----------------------------------------
 */
-export type DirLocalSettings = {
-  localBehaviorKeepAt: Ref<string | undefined>;
-  localBehaviorIgnore: Ref<string | undefined>;
+
+export type DirKeepSetting = {
+  keepAt: Ref<string | undefined>;
+  keepMode: Ref<KeepMode | undefined>;
+  filterIgnore: Ref<string | undefined>;
 };
 
-export type DirLocalStorablInfo = Omit<DirViewSettings, 'pvg'> &
+export type DirKeeplInfo = Pick<DirViewSettings, 'guiShown'> &
   Pick<DirQuerySettings, 'filter' | 'sorter'>;
-export type DirLocalActions = {
-  saveToLocal: (info: DirLocalStorablInfo) => void;
-  restoreFromLocal: (info: DirLocalStorablInfo) => void;
+
+export type DirKeepActions = {
+  saveToLocal: (info: DirKeeplInfo) => void;
+  restoreFromLocal: (info: DirKeeplInfo) => void;
 };
 
-export type DirLocalFeatures = DirLocalSettings & DirLocalActions;
+export type DirKeepFeatures = DirKeepSetting & DirKeepActions;
 
 /*
 ----------------------------------------
@@ -161,6 +186,7 @@ export type DirQuerySettings = {
   filter: Ref<Vars | undefined>;
   sorter: Ref<Vars | undefined>;
   objKeys: Ref<string | undefined>;
+  joinOne: Ref<QueryJoinOne | undefined>;
   pager: Ref<Pager | undefined>;
 };
 
@@ -180,6 +206,7 @@ export type DirSelection = {
 };
 
 export type DirQueryActions = {
+  resetQuery: () => void;
   queryList: (flt?: QueryFilter) => Promise<void>;
 };
 
@@ -201,6 +228,7 @@ export type DirAggSettings = {
 };
 
 export type DirAggActions = {
+  resetAgg: () => void;
   loadAggResult: (flt?: QueryFilter) => Promise<void>;
 };
 export type DirAggFeature = DirAggSettings &
@@ -232,6 +260,7 @@ export type DirFeatures = DirInitFeatures &
   DirQueryFeature &
   DirAggFeature & {
     reload: (obj?: WnObj) => Promise<void>;
+    keepState: () => void;
   };
 //DirEditCurrentFeatures;
 
@@ -256,7 +285,7 @@ export type ___old_state = {
   list: WnObj[];
   currentId?: string;
   checkedIds?: Record<string, boolean>;
-  pager: ShortNamePager;
+  pager: Pager;
   meta?: WnObj;
   content: string | null;
   __saved_content: string | null;

@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import { SignInForm, UserSessionState, userGlobalStatusStore } from '..';
 import { Walnut } from '../../core';
-import { Str } from '@site0/tijs';
+import { Str, getLogger } from '@site0/tijs';
+
+const log = getLogger('wn.pinia.session');
 
 /*
 Read data from response:
@@ -118,14 +120,13 @@ export const useSessionStore = defineStore('session', {
     },
 
     async signOut() {
-      console.log('sign out');
+      log.info('sign out');
       let re = await Walnut.signOut();
-      console.log(re);
+      log.info(re);
       if (re.ok) {
         if (re.data && re.data.parent) {
           let session = _translate_session_result(re.data.parent);
           session.errCode = undefined;
-          console.log('有会话，读侧边栏');
           session.sidebar = await Walnut.fetchSidebar();
           this.$patch(session);
         }
@@ -159,7 +160,6 @@ export const useSessionStore = defineStore('session', {
         if (re.ok) {
           let session = _translate_session_result(re.data);
           session.errCode = undefined;
-          console.log('有会话，读侧边栏');
           session.sidebar = await Walnut.fetchSidebar();
           this.$patch(session);
         }

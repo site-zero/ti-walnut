@@ -1,11 +1,17 @@
-import { Pager, Vars, getLogger } from '@site0/tijs';
+import { Pager, getLogger } from '@site0/tijs';
 import _ from 'lodash';
-import { ComputedRef, Ref, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { WnObj } from '../../';
 import { Walnut } from '../../../core';
-import { DirInitGetters, DirQueryFeature, QueryFilter, QueryJoinOne, QuerySorter } from './dir.type';
+import {
+  DirInitGetters,
+  DirQueryFeature,
+  QueryFilter,
+  QueryJoinOne,
+  QuerySorter,
+} from './dir.type';
 
-const log = getLogger('wn.store.dir.query');
+const log = getLogger('wn.pinia.dir.query');
 
 export function userDirQuery(options: DirInitGetters) {
   log.debug('userDirQuery');
@@ -39,14 +45,14 @@ export function userDirQuery(options: DirInitGetters) {
     if (!pg) {
       return false;
     }
-    return pg.pageSize > 0 && pg.pageNumber > 0;
+    return (pg.pageSize ?? 0) > 0 && (pg.pageNumber ?? 0) > 0;
   });
   let isShortPager = computed(() => {
     let pg = pager.value;
     if (!pg) {
       return false;
     }
-    return pg.pgsz > 0 && pg.pn > 0;
+    return (pg.pgsz ?? 0) > 0 && (pg.pn ?? 0) > 0;
   });
   let isPagerEnabled = computed(
     () => pager.value && (isLongPager.value || isShortPager.value)
@@ -55,6 +61,15 @@ export function userDirQuery(options: DirInitGetters) {
   // -----------------------------------------------
   // Actions
   // -----------------------------------------------
+  function resetQuery() {
+    log.debug('resetQuery');
+    fixedMatch.value = {};
+    filter.value = {};
+    sorter.value = {};
+    objKeys.value = '';
+    list.value = [];
+    pager.value = undefined;
+  }
 
   function makeQueryCommand() {
     if (!isHomeExists.value) {
@@ -110,8 +125,7 @@ export function userDirQuery(options: DirInitGetters) {
     let cmdText = makeQueryCommand();
     let q = _.assign({}, filter.value, fixedMatch.value, flt);
     let input = JSON.stringify(q);
-    log.info('queryList=>', cmdText);
-    log.info('<< input <<', q);
+    log.info('queryList=>', cmdText, ' << ', q);
 
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
 
@@ -134,6 +148,7 @@ export function userDirQuery(options: DirInitGetters) {
     fixedMatch,
     filter,
     sorter,
+    joinOne,
     objKeys,
     // Getter
     queryPageNumber,
@@ -142,6 +157,7 @@ export function userDirQuery(options: DirInitGetters) {
     isShortPager,
     isPagerEnabled,
     // Actions
+    resetQuery,
     queryList,
   } as DirQueryFeature;
 }

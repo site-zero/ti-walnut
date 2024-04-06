@@ -217,12 +217,17 @@ export class WalnutServer {
 
   async fetchSidebar(): Promise<UserSidebar> {
     let sidebar = this._conf.sidebar;
+    log.info('fetchSidebar:', sidebar);
     if (sidebar) {
       //  Load the  Static sidebar.
       if (_.isString(sidebar) && sidebar.startsWith('load://')) {
         let url = `/${sidebar.substring(7)}`;
+        log.info('fetchSidebar:url=>', url);
         let resp = await fetch(url);
         let json = await resp.json();
+        if (log.isDebugEnabled()) {
+          log.debug('sidebar is:', json);
+        }
         return json;
       }
       //  load the side bar of Walnut
@@ -231,7 +236,11 @@ export class WalnutServer {
         if (_.isString(sidebar)) {
           cmdText += ' ' + sidebar;
         }
+        log.info('fetchSidebar:cmd=>', cmdText);
         let json = await this.exec(cmdText, { as: 'json' });
+        if (log.isDebugEnabled()) {
+          log.debug('sidebar is:', json);
+        }
         return json;
       }
     }
@@ -239,9 +248,13 @@ export class WalnutServer {
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
+    log.info('exec>:', cmdText, options);
     let url = this.getUrl('/a/run/wn.manager');
     let init = this.getRequestInit();
     let reo = await wnRunCommand(url, init, cmdText, options);
+    if (log.isDebugEnabled()) {
+      log.debug('exec>:', reo);
+    }
     return reo;
   }
 }
