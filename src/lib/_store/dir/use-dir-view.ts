@@ -1,6 +1,6 @@
-import { Net, Vars, getLogger } from '@site0/tijs';
+import { Vars, getLogger } from '@site0/tijs';
 import _ from 'lodash';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Walnut } from '../../../core';
 import {
   DirAggSettings,
@@ -23,6 +23,21 @@ export function useDirView(options: DirInitFeatures): DirViewFeatures {
     schema: ref(),
     methods: ref({}),
   };
+
+  /*-------------------------------------
+
+                Computed
+
+  --------------------------------------*/
+  let GuiLayout = computed(() => {
+    return;
+  });
+
+  /*-------------------------------------
+
+                Methods
+
+  --------------------------------------*/
 
   async function loadActions() {
     if (actionsPath.value) {
@@ -56,7 +71,9 @@ export function useDirView(options: DirInitFeatures): DirViewFeatures {
       let loadedMethods = [] as any[];
       let loadings = [] as Promise<void>[];
       async function _load_(path: string) {
-        let re = await Net.loadESModule(path);
+        let jsPath = Walnut.cookPath(path);
+        console.log(jsPath);
+        let re = await Walnut.loadJsModule(jsPath);
         loadedMethods.push(re);
       }
       for (let path of methodPaths.value) {
@@ -109,7 +126,11 @@ export function useDirView(options: DirInitFeatures): DirViewFeatures {
   }
 
   return {
+    /*-----------<State>---------------*/
     ...VIEW,
+    /*-----------<Getters>---------------*/
+
+    /*-----------<Actions>---------------*/
     resetView: () => {
       log.debug('resetView');
       VIEW.pvg.value = {};

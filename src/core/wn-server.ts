@@ -3,6 +3,7 @@ import {
   getLogger,
   getLogLevel,
   installTiCoreI18n,
+  Net,
   setDefaultLogLevel,
   tidyLogger,
   TiStore,
@@ -157,8 +158,21 @@ export class WalnutServer {
   }
 
   async loadContent(objPath: string): Promise<string> {
-    let urlPath = `/o/content?str=${encodeURIComponent(objPath)}`;
+    if (objPath.startsWith('load://')) {
+      let loadPath = `/${objPath.substring(7)}`;
+      let resp = await fetch(loadPath);
+      return await resp.text();
+    }
+    let urlPath = this.cookPath(objPath);
     return await this.fetchText(urlPath);
+  }
+
+  /**
+   * @param objPath 存放在 Walnut 系统的对象路径
+   * @returns  可以加载的 Walnut 系统的对象路径
+   */
+  cookPath(objPath: string): string {
+    return `/o/content?str=${encodeURIComponent(objPath)}`;
   }
 
   async loadJson(objPath: string): Promise<any> {
@@ -168,6 +182,17 @@ export class WalnutServer {
     } catch (err) {
       log.error(`loadJson(${objPath}) fail to parse JSON:`, re, err);
     }
+  }
+
+  async loadJsModule(jsPath: string) {
+    //let jsUrl = this.getUrl(jsPath);
+    //document.cookie = `SEID=${this._ticket}; path=/`;
+    let text = await this.fetchText(jsPath);
+    let installModule = eval(text);
+    if (_.isFunction(installModule)) {
+      return installModule();
+    }
+    log.error(`Fail to loadJsModule: ${jsPath}`);
   }
 
   async fetchObj(

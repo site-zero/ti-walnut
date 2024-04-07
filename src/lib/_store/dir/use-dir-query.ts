@@ -1,4 +1,4 @@
-import { Pager, getLogger } from '@site0/tijs';
+import { Pager, WnObjStatus, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { WnObj } from '../../';
@@ -22,8 +22,12 @@ export function userDirQuery(options: DirInitGetters) {
   let sorter = ref<QuerySorter>({});
   let objKeys = ref<string>('');
   let joinOne = ref<QueryJoinOne>();
-  let list = ref<WnObj[]>([]);
   let pager = ref<Pager>();
+
+  let currentId = ref<string>();
+  let checkedIds = ref<Record<string, boolean>>({});
+  let list = ref<WnObj[]>([]);
+  let itemStatus = ref<Record<string, WnObjStatus>>({});
 
   // Getters
   let queryPageNumber = computed(() => {
@@ -143,13 +147,17 @@ export function userDirQuery(options: DirInitGetters) {
   //....................................................
   return {
     // State
-    list,
     pager,
     fixedMatch,
     filter,
     sorter,
     joinOne,
     objKeys,
+    // Selections
+    currentId,
+    checkedIds,
+    list,
+    itemStatus,
     // Getter
     queryPageNumber,
     queryPageSize,

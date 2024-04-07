@@ -9,6 +9,7 @@ import {
 } from '@site0/tijs';
 import { ComputedRef, Ref } from 'vue';
 import { WnObj } from '../../';
+import { ObjEditFeatures } from '../edit/obj.edit.type';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -134,8 +135,6 @@ export type DirViewSettings = {
   methods: Ref<Record<string, Function>>;
 };
 
-export type DirViewGetters = {};
-
 export type DirViewActions = {
   resetView: () => void;
   loadView: () => Promise<void>;
@@ -152,7 +151,7 @@ export type DirViewActions = {
   invoke: (methodName: string, ...args: any[]) => Promise<any>;
 };
 
-export type DirViewFeatures = DirViewSettings & DirViewGetters & DirViewActions;
+export type DirViewFeatures = DirViewSettings & DirViewActions;
 
 /*
 ----------------------------------------
@@ -182,9 +181,9 @@ export type DirKeepFeatures = DirKeepSetting & DirKeepActions;
 ----------------------------------------
 */
 export type DirQuerySettings = {
-  fixedMatch: Ref<Vars | undefined>;
-  filter: Ref<Vars | undefined>;
-  sorter: Ref<Vars | undefined>;
+  fixedMatch: Ref<QueryFilter | undefined>;
+  filter: Ref<QueryFilter | undefined>;
+  sorter: Ref<QuerySorter | undefined>;
   objKeys: Ref<string | undefined>;
   joinOne: Ref<QueryJoinOne | undefined>;
   pager: Ref<Pager | undefined>;
@@ -200,7 +199,7 @@ export type DirQueryGetters = {
 
 export type DirSelection = {
   currentId: Ref<string | undefined>;
-  checkedIds: Ref<Record<string, boolean> | undefined>;
+  checkedIds: Ref<Record<string, boolean>>;
   list: Ref<WnObj[]>;
   itemStatus: Ref<Record<string, WnObjStatus>>;
 };
@@ -238,70 +237,61 @@ export type DirAggFeature = DirAggSettings &
 
 /*
 ----------------------------------------
-         Current Editing
-----------------------------------------
-*/
-export type DirEditCurrentFeatures<T extends any = any> = {
-  meta: Ref<WnObj | undefined>;
-  content: Ref<string | undefined>;
-  savedContent: Ref<string | undefined>;
-  contentPath: Ref<string | undefined>;
-  contentType: Ref<string | undefined>;
-  contentData: Ref<T>;
-  fieldStatus: Ref<Record<string, FieldStatus>>;
-};
-
-/*
-----------------------------------------
         Whole DirStore
 ----------------------------------------
 */
 export type DirFeatures = DirInitFeatures &
+  DirViewFeatures &
   DirQueryFeature &
-  DirAggFeature & {
+  DirAggFeature &
+  ObjEditFeatures & {
     reload: (obj?: WnObj) => Promise<void>;
     keepState: () => void;
+    GUIContext: ComputedRef<DirGUIContext>;
   };
-//DirEditCurrentFeatures;
 
-export type ___old_state = {
+export type DirGUIContext = {
   moduleName: string;
-  pvg?: ModulePriviledge;
-  view?: Vars;
-  localBehaviorKeepAt?: string;
-  localBehaviorIgnore?: string;
-  exportSettings: Vars;
-  importSettings: Vars;
-  lbkAt?: string;
-  lbkIgnore?: string;
-  lbkOff: boolean;
-  dirId?: string;
-  oDir?: WnObj;
-  mappingDirPath?: string;
-  fixedMatch?: Vars;
-  filter: Vars;
-  sorter: Vars;
-  objKeys?: string;
-  list: WnObj[];
-  currentId?: string;
-  checkedIds?: Record<string, boolean>;
-  pager: Pager;
-  meta?: WnObj;
-  content: string | null;
-  __saved_content: string | null;
-  contentPath: string;
-  contentType: string;
-  contentData?: any;
-  contentQuietParse: boolean;
-  fieldStatus: Vars;
-  itemStatus: Vars;
+  oHome?: WnObj;
+  oHomeIndex?: WnObj;
+  //............ GUI Loading Path
   actionsPath?: string;
   layoutPath?: string;
   schemaPath?: string;
-  methodPaths?: string;
-  guiShown: Vars;
-  objActions?: any[];
-  layout?: any;
-  schema?: any;
-  objMethods?: Vars;
+  methodPaths?: string[];
+  //........... DirInitGetters
+  homeId?: string;
+  homeIndexId?: string;
+  isHomeExists?: boolean;
+  //........... DirQuerySettings
+  fixedMatch?: QueryFilter;
+  filter?: QueryFilter;
+  sorter?: QuerySorter;
+  objKeys?: string;
+  joinOne?: QueryJoinOne;
+  pager?: Pager;
+  //........... DirQueryGetters
+  queryPageNumber: number;
+  queryPageSize: number;
+  isLongPager: boolean;
+  isShortPager: boolean;
+  isPagerEnabled: boolean;
+  //........... DirSelection
+  currentId?: string;
+  checkedIds?: Record<string, boolean>;
+  list: WnObj[];
+  itemStatus: Record<string, WnObjStatus>;
+  //........... DirAggFeature
+  aggQuery?: string;
+  aggSet: Record<string, AggQuery>;
+  aggAutoReload: boolean;
+  aggResult: AggResult;
+  //........... ObjEditState
+  meta?: WnObj;
+  content?: string;
+  savedContent?: string;
+  contentPath?: string;
+  contentType?: string;
+  contentData?: any;
+  fieldStatus: Record<string, FieldStatus>;
 };
