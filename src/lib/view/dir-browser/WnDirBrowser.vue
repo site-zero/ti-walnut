@@ -2,7 +2,7 @@
   import { TiLayoutGrid, Util } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, onMounted, watch } from 'vue';
-  import { WnObj, defineDirStore } from '../../';
+  import { WnObj, useDirStore } from '../../';
 
   const props = defineProps<{
     value?: WnObj;
@@ -13,14 +13,13 @@
   const hasObj = computed(() => (Obj.value.id ? true : false));
   const Meta = computed(() => _.omit(props.value, 'ancestors'));
 
-  const useDirStore = defineDirStore(props.moduleName);
-  const DIR = useDirStore();
+  const DIR = useDirStore(props.moduleName);
 
   const GUILayout = computed(() => {
-    return Util.explainObj(DIR.GUIContext, DIR.layout);
+    return DIR.explainLayout();
   });
   const GUISchema = computed(() => {
-    return Util.explainObj(DIR.GUIContext, DIR.schema);
+    return DIR.explainSchema();
   });
 
   watch(

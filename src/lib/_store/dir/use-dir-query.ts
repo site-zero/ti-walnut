@@ -11,7 +11,7 @@ import {
   QuerySorter,
 } from './dir.type';
 
-const log = getLogger('wn.pinia.dir.query');
+const log = getLogger('wn.store.dir.query');
 
 export function userDirQuery(options: DirInitGetters) {
   log.debug('userDirQuery');

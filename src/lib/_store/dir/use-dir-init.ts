@@ -11,7 +11,7 @@ import {
   DirInitSettings,
 } from './dir.type';
 
-const log = getLogger('wn.pinia.dir.init');
+const log = getLogger('wn.store.dir.init');
 
 export function useDirInit(): DirInitFeatures {
   log.debug('useDirSetup');

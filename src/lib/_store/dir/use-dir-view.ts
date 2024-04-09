@@ -11,7 +11,7 @@ import {
   DirViewSettings,
 } from './dir.type';
 
-const log = getLogger('wn.pinia.dir.view');
+const log = getLogger('wn.store.dir.view');
 
 export function useDirView(options: DirInitFeatures): DirViewFeatures {
   let { actionsPath, layoutPath, schemaPath, methodPaths } = options;
@@ -72,7 +72,6 @@ export function useDirView(options: DirInitFeatures): DirViewFeatures {
       let loadings = [] as Promise<void>[];
       async function _load_(path: string) {
         let jsPath = Walnut.cookPath(path);
-        console.log(jsPath);
         let re = await Walnut.loadJsModule(jsPath);
         loadedMethods.push(re);
       }

@@ -248,6 +248,8 @@ export type DirFeatures = DirInitFeatures &
     reload: (obj?: WnObj) => Promise<void>;
     keepState: () => void;
     GUIContext: ComputedRef<DirGUIContext>;
+    explainLayout: () => Omit<LayoutProps, 'schema'>;
+    explainSchema: () => Pick<LayoutProps, 'schema'>;
   };
 
 export type DirGUIContext = {

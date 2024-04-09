@@ -12,7 +12,7 @@ import {
   QueryFilter,
 } from './dir.type';
 
-const log = getLogger('wn.pinia.dir.agg');
+const log = getLogger('wn.store.dir.agg');
 
 export type AggOptions = Pick<DirInitFeatures, 'homeIndexId' | 'isHomeExists'> &
   Pick<DirQuerySettings, 'fixedMatch' | 'filter'>;

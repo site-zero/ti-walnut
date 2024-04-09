@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia';
-import { SignInForm, UserSessionState, userGlobalStatusStore } from '..';
+import { Str, Vars, getLogger } from '@site0/tijs';
+import { ComputedRef, Ref, computed, ref } from 'vue';
+import { SignInForm, UserSidebar, userGlobalStatusStore } from '..';
 import { Walnut } from '../../core';
-import { Str, getLogger } from '@site0/tijs';
 
-const log = getLogger('wn.pinia.session');
+const log = getLogger('wn.store.session');
 
 /*
 Read data from response:
@@ -54,122 +54,159 @@ Read data from response:
   }
 }
 */
-function _translate_session_result(data: any): UserSessionState {
+export type UserSession = {
+  ticket: Ref<string | undefined>;
+  me: Ref<UserInfo | undefined>;
+  env: Ref<Vars>;
+  loginAt: Ref<Date | undefined>;
+  expireAt: Ref<Date | undefined>;
+  homePath: Ref<string | undefined>;
+  theme: Ref<string | undefined>;
+  lang: Ref<string | undefined>;
+  errCode: Ref<string | undefined>;
+  sidebar: Ref<UserSidebar | undefined>;
+};
+
+export type UserSessionFeature = UserSession & {
+  hasTicket: ComputedRef<boolean>;
+  signIn: (info: SignInForm) => Promise<void>;
+  signOut: () => Promise<void>;
+  resetSession: () => void;
+  reload: () => Promise<void>;
+};
+
+export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
+
+export type UserInfo = {
+  loginName: string;
+  mainGroup: string;
+  role?: string[];
+  nickname?: string;
+  jobs?: string[];
+  depts?: string[];
+  roleInOp?: WnRole;
+  roleInDomain?: WnRole;
+  avatar?: string;
+};
+
+const SE = {
+  ticket: ref(),
+  me: ref(),
+  env: ref({}),
+  loginAt: ref(),
+  expireAt: ref(),
+  homePath: ref(),
+  theme: ref(),
+  lang: ref(),
+  errCode: ref(),
+  sidebar: ref(),
+} as UserSession;
+
+function _translate_session_result(data: any) {
   let env = data.envs || {};
-  return {
-    env,
-    ticket: data.ticket,
-    loginAt: new Date(data.me.login || 0),
-    expireAt: new Date(data.expi || 0),
-    homePath: env['HOME'],
-    theme: env['THEME'],
-    lang: env['LANG'],
-    me: {
-      loginName: data.unm,
-      mainGroup: data.grp,
-      role: Str.splitIgnoreBlank(data.me.role),
-      nickname: data.me.nickname,
-      jobs: data.me.jobs,
-      depts: data.me.depts,
-      roleInOp: data.me.roleInOp,
-      roleInDomain: data.me.roleInDomain,
-    },
+  SE.ticket.value = data.ticket;
+  SE.me.value = {
+    loginName: data.unm,
+    mainGroup: data.grp,
+    role: Str.splitIgnoreBlank(data.me.role),
+    nickname: data.me.nickname,
+    jobs: data.me.jobs,
+    depts: data.me.depts,
+    roleInOp: data.me.roleInOp,
+    roleInDomain: data.me.roleInDomain,
   };
+  SE.env.value = env;
+  SE.loginAt.value = new Date(data.me.login || 0);
+  SE.expireAt.value = new Date(data.expi || 0);
+  SE.homePath.value = env['HOME'];
+  SE.theme.value = env['THEME'];
+  SE.lang.value = env['LANG'];
 }
 
-export const useSessionStore = defineStore('session', {
-  state: (): UserSessionState => ({
-    env: {},
-    ticket: undefined,
-    me: undefined,
-    loginAt: undefined,
-    expireAt: undefined,
-    homePath: undefined,
-    theme: undefined,
-    lang: undefined,
-    errCode: undefined,
-    sidebar: undefined,
-  }),
-  getters: {
-    hasTicket(state): boolean {
-      return state.ticket ? true : false;
-    },
-  },
-  actions: {
-    async signIn(info: SignInForm) {
-      const status = userGlobalStatusStore();
-      try {
-        status.processing = '正在执行登录';
-        let re = await Walnut.signInToDomain(info);
-        // Sign-in successfully
-        if (re.ok) {
-          let session = _translate_session_result(re.data);
-          session.errCode = undefined;
-          console.log('有会话，读侧边栏');
-          session.sidebar = await Walnut.fetchSidebar();
-          this.$patch(session);
-        }
-        // Sign-in Failed
-        else {
-          this.errCode = re.errCode;
-        }
-        console.log('signIn', re);
-      } finally {
-        status.processing = false;
-      }
-    },
-
-    async signOut() {
-      log.info('sign out');
-      let re = await Walnut.signOut();
-      log.info(re);
+export function useSessionStore(): UserSessionFeature {
+  async function signIn(info: SignInForm) {
+    const status = userGlobalStatusStore();
+    try {
+      status.set('processing', '正在执行登录');
+      let re = await Walnut.signInToDomain(info);
+      // Sign-in successfully
       if (re.ok) {
-        if (re.data && re.data.parent) {
-          let session = _translate_session_result(re.data.parent);
-          session.errCode = undefined;
-          session.sidebar = await Walnut.fetchSidebar();
-          this.$patch(session);
-        }
-        // Cancel Session
-        else {
-          this.resetSession();
-        }
+        _translate_session_result(re.data);
+        SE.errCode.value = undefined;
+        SE.sidebar.value = undefined;
+        log.info('signIn OK, so fetchSidebar')
+        SE.sidebar.value = await Walnut.fetchSidebar();
       }
-    },
-
-    resetSession(): void {
-      this.$patch({
-        env: {},
-        ticket: undefined,
-        me: undefined,
-        loginAt: undefined,
-        expireAt: undefined,
-        homePath: undefined,
-        theme: undefined,
-        lang: undefined,
-        errCode: undefined,
-        sidebar: undefined,
-      });
-    },
-
-    async reload() {
-      const status = userGlobalStatusStore();
-      try {
-        status.loading = true;
-        let re = await Walnut.fetchMySession();
-        if (re.ok) {
-          let session = _translate_session_result(re.data);
-          session.errCode = undefined;
-          session.sidebar = await Walnut.fetchSidebar();
-          this.$patch(session);
-        }
-        // Outpu error
-        else {
-          this.resetSession();
-        }
-      } finally {
-        status.loading = false;
+      // Sign-in Failed
+      else {
+        SE.errCode.value = re.errCode;
       }
-    },
-  },
-});
+      console.log('signIn', re);
+    } finally {
+      status.reset('processing');
+    }
+  }
+
+  function resetSession() {
+    SE.ticket.value = undefined;
+    SE.me.value = undefined;
+    SE.env.value = {};
+    SE.loginAt.value = undefined;
+    SE.expireAt.value = undefined;
+    SE.homePath.value = undefined;
+    SE.theme.value = undefined;
+    SE.lang.value = undefined;
+  }
+
+  async function signOut() {
+    log.info('sign out');
+    let re = await Walnut.signOut();
+    log.info(re);
+    if (re.ok) {
+      if (re.data && re.data.parent) {
+        _translate_session_result(re.data.parent);
+        SE.errCode.value = undefined;
+        SE.sidebar.value = undefined;
+        log.info('signOut with parent session, so fetchSidebar')
+        SE.sidebar.value = await Walnut.fetchSidebar();
+      }
+      // Cancel Session
+      else {
+        log.info('signOut, resetSession')
+        resetSession();
+      }
+    }
+  }
+
+  async function reload() {
+    const status = userGlobalStatusStore();
+    try {
+      status.set('loading', true);
+      let re = await Walnut.fetchMySession();
+      if (re.ok) {
+        _translate_session_result(re.data);
+        SE.errCode.value = undefined;
+        SE.sidebar.value = undefined;
+        log.info('reload with session, so fetchSidebar')
+        SE.sidebar.value = await Walnut.fetchSidebar();
+      }
+      // Outpu error
+      else {
+        resetSession();
+      }
+    } finally {
+      status.reset('loading');
+    }
+  }
+
+  return {
+    ...SE,
+    // ........................ Getters
+    hasTicket: computed(() => (SE.ticket.value ? true : false)),
+    // ........................ Actions
+    signIn,
+    signOut,
+    resetSession,
+    reload,
+  };
+}

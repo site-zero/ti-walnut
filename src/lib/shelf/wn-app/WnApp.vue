@@ -6,7 +6,7 @@
     createAppBus,
     watchAppResize,
   } from '@site0/tijs';
-  import { onBeforeMount, onUnmounted, provide } from 'vue';
+  import { computed, onBeforeMount, onUnmounted, provide } from 'vue';
   import { WnSignIn, useSessionStore, userGlobalStatusStore } from '../../';
 
   //
@@ -29,14 +29,14 @@
 </script>
 <template>
   <!--显示加载界面-->
-  <template v-if="status.loading">
+  <template v-if="status.is('loading')">
     <TiLoading text="应用加载中..." />
   </template>
   <!--显示登录面板-->
   <template v-else-if="!session.ticket">
     <WnSignIn
       username="demo"
-      :errCode="session.errCode"
+      :errCode="session.errCode.value"
       @submit="session.signIn($event)" />
   </template>
   <!--显示主界面-->
