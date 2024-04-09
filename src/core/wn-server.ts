@@ -66,6 +66,11 @@ export class WalnutServer {
     }
   }
 
+  getConfig<T>(key: string, dft?: T): T {
+    let re = _.get(this._conf, key);
+    return re ?? dft;
+  }
+
   getUrl(path: string) {
     let sep = path.startsWith('/') ? '' : '/';
     let { protocal, host, port } = this._conf;
