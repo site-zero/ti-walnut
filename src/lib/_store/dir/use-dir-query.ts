@@ -83,7 +83,7 @@ export function userDirQuery(options: DirInitGetters) {
 
     // Eval Pager
     if (isPagerEnabled.value) {
-      let limit = queryPageNumber.value;
+      let limit = queryPageSize.value;
       let skip = Math.max(0, queryPageSize.value * (queryPageNumber.value - 1));
       cmds.push(`-pager -limit ${limit} -skip ${skip}`);
     }
@@ -126,6 +126,24 @@ export function userDirQuery(options: DirInitGetters) {
   }
 
   async function queryList(flt?: QueryFilter) {
+    console.log('--------------queryList');
+    if (log.isDebugEnabled()) {
+      log.debug('queryList', {
+        fixedMatch: fixedMatch.value,
+        filter: filter.value,
+        sorter: sorter.value,
+        objKeys: objKeys.value,
+        joinOne: joinOne.value,
+        pager: pager.value,
+        currentId: currentId.value,
+        checkedIds: checkedIds.value,
+        queryPageNumber: queryPageNumber.value,
+        queryPageSize: queryPageSize.value,
+        isLongPager: isLongPager.value,
+        isShortPager: isShortPager.value,
+        isPagerEnabled: isPagerEnabled.value,
+      });
+    }
     let cmdText = makeQueryCommand();
     let q = _.assign({}, filter.value, fixedMatch.value, flt);
     let input = JSON.stringify(q);

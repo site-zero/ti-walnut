@@ -1,18 +1,28 @@
 <script lang="ts" setup>
-  import JSON5 from 'json5';
+  import { TableProps, TiTable } from '@site0/tijs';
   import _ from 'lodash';
   import { computed } from 'vue';
-  import { WnObj } from '../../';
+  import { useObjColumns } from '../../../lib';
 
-  const props = defineProps<{
-    value: WnObj[];
-  }>();
+  const COL = useObjColumns();
 
+  type ObjListPros = Omit<TableProps, 'columns'> & {
+    columns?: string[];
+  };
+
+  const props = defineProps<ObjListPros>();
+
+  const TableConfig = computed(() => {
+    return _.omit(props, 'columns');
+  });
+
+  const TableColumns = computed(() => {
+    let colNames = props.columns || ['nm-icon', 'tp', 'ct'];
+    return COL.getColumns(colNames);
+  });
 </script>
 <template>
-  <div class="wn-obj-list">
-    对象列表
-  </div>
+  <TiTable class="fit-parent" v-bind="TableConfig" :columns="TableColumns" />
 </template>
 <style lang="scss" scoped>
   @use '@site0/tijs/scss' as *;
