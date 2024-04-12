@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-  import { TiLayoutGrid, Util } from '@site0/tijs';
+  import { TiLayoutGrid, TiLoading } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, onMounted, watch } from 'vue';
-  import { WnObj, useDirStore } from '../../';
+  import { WnObj, useDirStore, userGlobalStatusStore } from '../../';
 
   const props = defineProps<{
     value?: WnObj;
@@ -14,6 +14,7 @@
   const Meta = computed(() => _.omit(props.value, 'ancestors'));
 
   const DIR = useDirStore(props.moduleName);
+  const _GS = userGlobalStatusStore();
 
   const GUILayout = computed(() => {
     return DIR.explainLayout();
@@ -30,12 +31,15 @@
   );
 
   onMounted(() => {
+    _GS.set('loading', true);
     DIR.reload(props.value);
+    _GS.reset('loading');
   });
 </script>
 <template>
-  <div class="wn-dir-browser fit-parent">
+  <div class="wn-dir-browser fit-parent pos-relative">
     <TiLayoutGrid v-bind="GUILayout" :schema="GUISchema" />
+    <TiLoading mode="cover" v-if="_GS.is('loading')" />
   </div>
 </template>
 <style lang="scss" scoped>

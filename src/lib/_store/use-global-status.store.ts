@@ -1,6 +1,7 @@
 import { Ref, reactive, ref } from 'vue';
 
 export type GlobalStatus = {
+  appLoading: Ref<boolean | string>;
   loading: Ref<boolean | string>;
   saving: Ref<boolean | string>;
   removing: Ref<boolean | string>;
@@ -17,6 +18,7 @@ export type GlobalStatueFeature = {
 };
 
 const STATUS = {
+  appLoading: ref(false),
   loading: ref(false),
   saving: ref(false),
   removing: ref(false),

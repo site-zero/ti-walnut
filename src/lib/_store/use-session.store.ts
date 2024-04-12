@@ -181,7 +181,7 @@ export function useSessionStore(): UserSessionFeature {
   async function reload() {
     const status = userGlobalStatusStore();
     try {
-      status.set('loading', true);
+      status.set('appLoading', true);
       let re = await Walnut.fetchMySession();
       if (re.ok) {
         _translate_session_result(re.data);
@@ -195,7 +195,7 @@ export function useSessionStore(): UserSessionFeature {
         resetSession();
       }
     } finally {
-      status.reset('loading');
+      status.reset('appLoading');
     }
   }
 
