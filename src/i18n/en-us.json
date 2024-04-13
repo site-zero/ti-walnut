@@ -1,4 +1,15 @@
 {
+  "wn-obj-nm": "Obj Name",
+  "wn-obj-title": "Title",
+  "wn-obj-tp": "Type",
+  "wn-obj-race": "Race",
+  "wn-obj-mime": "MIME",
+  "wn-obj-c": "Creator",
+  "wn-obj-m": "Mender",
+  "wn-obj-g": "Group",
+  "wn-obj-md": "Pvg Mode",
+  "wn-obj-ct": "Created",
+  "wn-obj-lm": "Modified",
   "e-auth-account-noexists": "User Not Exists",
   "e-auth-login-invalid-passwd": "User Auth Error"
 }

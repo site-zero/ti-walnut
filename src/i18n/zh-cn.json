@@ -1,4 +1,15 @@
 {
+  "wn-obj-nm": "对象名",
+  "wn-obj-title": "标题",
+  "wn-obj-tp": "类型",
+  "wn-obj-race": "族类",
+  "wn-obj-mime": "MIME",
+  "wn-obj-c": "创建者",
+  "wn-obj-m": "修改者",
+  "wn-obj-g": "所属组",
+  "wn-obj-md": "权限模式",
+  "wn-obj-ct": "创建时间",
+  "wn-obj-lm": "最后修改",
   "e-auth-account-noexists": "账户不存在",
   "e-auth-login-invalid-passwd": "账户密码错误"
 }

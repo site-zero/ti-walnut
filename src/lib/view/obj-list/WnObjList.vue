@@ -10,7 +10,10 @@
     columns?: string[];
   };
 
-  const props = defineProps<ObjListPros>();
+  const props = withDefaults(defineProps<ObjListPros>(), {
+    showRowIndex: true,
+    showHeader: true,
+  });
 
   const TableConfig = computed(() => {
     return _.omit(props, 'columns');
