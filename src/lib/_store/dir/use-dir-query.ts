@@ -126,7 +126,6 @@ export function userDirQuery(options: DirInitGetters) {
   }
 
   async function queryList(flt?: QueryFilter) {
-    console.log('--------------queryList');
     if (log.isDebugEnabled()) {
       log.debug('queryList', {
         fixedMatch: fixedMatch.value,

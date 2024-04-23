@@ -20,7 +20,7 @@ export function useObjColumns() {
   }
 
   function getColumns(keys: string[]): TableCell[] {
-    console.log(keys);
+    log.debug('getColumns', keys);
     let cells = [] as TableCell[];
     for (let key of keys) {
       let col = getColumn(key);

@@ -25,16 +25,15 @@
 
   watch(
     () => props.value,
-    (oDir) => {
+    (oDir, oldDir) => {
+      console.log("oDir", oDir, "oldDir", oldDir)
+      //_GS.set('loading', true);
       DIR.reload(oDir);
+      //_GS.reset('loading');
+    }, {
+      immediate:true
     }
   );
-
-  onMounted(() => {
-    _GS.set('loading', true);
-    DIR.reload(props.value);
-    _GS.reset('loading');
-  });
 </script>
 <template>
   <div class="wn-dir-browser fit-parent pos-relative">

@@ -27,6 +27,7 @@ export type MetaGUIFeature = {
 export function useMetaGUIStore(): MetaGUIFeature {
   let hasMeta = computed(() => (_meta.value && _meta.value.id ? true : false));
   let GUIView = computed(() => {
+    //console.warn('Rebuild GUIView', _.get(_meta.value, 'id'));
     if (!hasMeta.value) {
       return _.cloneDeep(_defaultGUI);
     }
