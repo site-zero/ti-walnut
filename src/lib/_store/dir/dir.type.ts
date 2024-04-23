@@ -118,7 +118,7 @@ export type DirInitActions = {
   initDirSettings: (obj?: WnObj) => Promise<void>;
 };
 
-export type DirInitFeatures = DirInitSettings & DirInitGetters & DirInitActions;
+export type DirInitFeature = DirInitSettings & DirInitGetters & DirInitActions;
 
 /*
 ----------------------------------------
@@ -240,7 +240,7 @@ export type DirAggFeature = DirAggSettings &
         Whole DirStore
 ----------------------------------------
 */
-export type DirFeatures = DirInitFeatures &
+export type DirFeature = DirInitFeature &
   DirViewFeatures &
   DirQueryFeature &
   DirAggFeature &

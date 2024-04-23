@@ -6,14 +6,14 @@ import { Walnut } from '../../../core';
 import {
   DirGUIViewBehaviors,
   DirGUIViewInfo,
-  DirInitFeatures,
+  DirInitFeature,
   DirInitGetters,
   DirInitSettings,
 } from './dir.type';
 
 const log = getLogger('wn.store.dir.init');
 
-export function useDirInit(): DirInitFeatures {
+export function useDirInit(): DirInitFeature {
   log.debug('useDirSetup');
   let _init: DirInitSettings = {
     moduleName: ref<string>(''),

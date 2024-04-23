@@ -5,7 +5,7 @@ import { Walnut } from '../../../core';
 import {
   DirAggSettings,
   DirGUIViewBehaviors,
-  DirInitFeatures,
+  DirInitFeature,
   DirQuerySettings,
   DirViewFeatures,
   DirViewSettings,
@@ -13,7 +13,7 @@ import {
 
 const log = getLogger('wn.store.dir.view');
 
-export function useDirView(options: DirInitFeatures): DirViewFeatures {
+export function useDirView(options: DirInitFeature): DirViewFeatures {
   let { actionsPath, layoutPath, schemaPath, methodPaths } = options;
   let VIEW: DirViewSettings = {
     pvg: ref({}),

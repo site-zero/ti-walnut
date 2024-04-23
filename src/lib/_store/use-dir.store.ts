@@ -1,20 +1,22 @@
 import { Util, getLogger } from '@site0/tijs';
+import _ from 'lodash';
 import { computed } from 'vue';
 import { WnObj } from '..';
-import { DirFeatures, DirGUIContext } from './dir/dir.type';
+import { DirFeature, DirGUIContext } from './dir/dir.type';
 import { userDirAgg } from './dir/use-dir-agg';
 import { useDirInit } from './dir/use-dir-init';
 import { useDirKeep } from './dir/use-dir-keep';
 import { userDirQuery } from './dir/use-dir-query';
 import { useDirView } from './dir/use-dir-view';
 import { userObjEdit } from './edit/use-obj-edit';
-import _ from 'lodash';
+
+export * from './dir/dir.type';
 
 const log = getLogger('wn.store.dir');
 
-const _DIRS = new Map<string, DirFeatures>();
+const _DIRS = new Map<string, DirFeature>();
 
-export function useDirStore(name?: string): DirFeatures {
+export function useDirStore(name?: string): DirFeature {
   name = name || 'CurrentDir';
   log.debug(`defineDirStore(${name || ''})`);
 
@@ -141,7 +143,7 @@ export function useDirStore(name?: string): DirFeatures {
         await _agg.loadAggResult();
       }
     },
-  } as DirFeatures;
+  } as DirFeature;
 
   // Save to cache
   _DIRS.set(name, re);

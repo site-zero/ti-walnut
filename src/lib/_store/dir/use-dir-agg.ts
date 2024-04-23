@@ -7,14 +7,14 @@ import {
   AggQuery,
   AggResult,
   DirAggFeature,
-  DirInitFeatures,
+  DirInitFeature,
   DirQuerySettings,
   QueryFilter,
 } from './dir.type';
 
 const log = getLogger('wn.store.dir.agg');
 
-export type AggOptions = Pick<DirInitFeatures, 'homeIndexId' | 'isHomeExists'> &
+export type AggOptions = Pick<DirInitFeature, 'homeIndexId' | 'isHomeExists'> &
   Pick<DirQuerySettings, 'fixedMatch' | 'filter'>;
 
 export function userDirAgg(options: AggOptions) {
