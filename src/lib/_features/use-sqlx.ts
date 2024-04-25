@@ -4,13 +4,19 @@ import { Walnut } from '../../core';
 
 const log = getLogger('wn.use-sqlx');
 
-export function createDefaultSqlNames(): SqlNames {
+export function createDefaultSqlNames(prefix?: string): SqlNames {
+  const _gen = function (key: string) {
+    if (prefix) {
+      return `${prefix}.${key}`;
+    }
+    return key;
+  };
   return {
-    select: 'select',
-    update: 'update',
-    insert: 'insert',
-    delete: 'delete',
-    count: 'count',
+    select: _gen('select'),
+    update: _gen('update'),
+    insert: _gen('insert'),
+    delete: _gen('delete'),
+    count: _gen('count'),
   };
 }
 
@@ -35,7 +41,7 @@ export function useSqlx(daoName?: string) {
       log.info(cmdText);
     }
     let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
-    return list as SqlResult[]
+    return list as SqlResult[];
   }
 
   return { select };

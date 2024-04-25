@@ -278,6 +278,7 @@ export class WalnutServer {
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
+    // 执行命令
     log.info('exec>:', cmdText, options);
     let url = this.getUrl('/a/run/wn.manager');
     let init = this.getRequestInit();
