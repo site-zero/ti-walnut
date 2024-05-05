@@ -1,6 +1,7 @@
 import { getLogger } from '@site0/tijs';
 import { SqlNames, SqlQuery, SqlResult } from '..';
 import { Walnut } from '../../core';
+import _ from 'lodash';
 
 const log = getLogger('wn.use-sqlx');
 
@@ -44,5 +45,33 @@ export function useSqlx(daoName?: string) {
     return list as SqlResult[];
   }
 
-  return { select };
+  /**
+   * 封装 SQL 的查询
+   *
+   * @param sql SQL 模板名称
+   * @param query 查询条件
+   */
+  async function fetch(
+    sql: string,
+    query: SqlQuery
+  ): Promise<SqlResult | undefined> {
+    // 准备查询上下文
+    let qstr = JSON.stringify(query);
+    let cmds = [`sqlx`];
+    if (daoName) {
+      cmds.push(daoName);
+    }
+    cmds.push('-cqn @vars');
+    cmds.push(`@query ${sql} -p`);
+    let cmdText = cmds.join(' ');
+    if (log.isInfoEnabled()) {
+      log.info(cmdText);
+    }
+    let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+    if (_.isArray(list) && list.length > 0) {
+      return list[0] as SqlResult;
+    }
+  }
+
+  return { select, fetch };
 }

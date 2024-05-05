@@ -11,8 +11,8 @@ export type SqlNames = {
 export type SqlPager = {
   pageNumber: number;
   pageSize: number;
-  pageCount: number;
-  totalCount: number;
+  pageCount?: number;
+  totalCount?: number;
 };
 
 export type SqlResult = Record<string, any>;
