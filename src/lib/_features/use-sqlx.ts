@@ -1,25 +1,9 @@
-import { getLogger } from '@site0/tijs';
-import { SqlNames, SqlQuery, SqlResult } from '..';
+import { Vars, getLogger } from '@site0/tijs';
+import { QueryFilter, SqlLimit, SqlPager, SqlQuery, SqlResult } from '..';
 import { Walnut } from '../../core';
 import _ from 'lodash';
 
 const log = getLogger('wn.use-sqlx');
-
-export function createDefaultSqlNames(prefix?: string): SqlNames {
-  const _gen = function (key: string) {
-    if (prefix) {
-      return `${prefix}.${key}`;
-    }
-    return key;
-  };
-  return {
-    select: _gen('select'),
-    update: _gen('update'),
-    insert: _gen('insert'),
-    delete: _gen('delete'),
-    count: _gen('count'),
-  };
-}
 
 export function useSqlx(daoName?: string) {
   /**
@@ -30,7 +14,15 @@ export function useSqlx(daoName?: string) {
    */
   async function select(sql: string, query: SqlQuery): Promise<SqlResult[]> {
     // 准备查询上下文
-    let qstr = JSON.stringify(query);
+    let q = {
+      filter: query.filter,
+      sorter: query.sorter,
+      ...pagerToLimit(query.pager),
+    } as Vars;
+
+    let qstr = JSON.stringify(q);
+
+    // 准备命令
     let cmds = [`sqlx`];
     if (daoName) {
       cmds.push(daoName);
@@ -38,10 +30,14 @@ export function useSqlx(daoName?: string) {
     cmds.push('-cqn @vars');
     cmds.push(`@query ${sql} -p`);
     let cmdText = cmds.join(' ');
+
+    // 执行查询
     if (log.isInfoEnabled()) {
       log.info(cmdText);
     }
     let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+
+    // 处理结果
     return list as SqlResult[];
   }
 
@@ -53,25 +49,33 @@ export function useSqlx(daoName?: string) {
    */
   async function fetch(
     sql: string,
-    query: SqlQuery
+    filter: QueryFilter
   ): Promise<SqlResult | undefined> {
-    // 准备查询上下文
-    let qstr = JSON.stringify(query);
-    let cmds = [`sqlx`];
-    if (daoName) {
-      cmds.push(daoName);
-    }
-    cmds.push('-cqn @vars');
-    cmds.push(`@query ${sql} -p`);
-    let cmdText = cmds.join(' ');
-    if (log.isInfoEnabled()) {
-      log.info(cmdText);
-    }
-    let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+    // 确保查询结果不要超过2个
+    let query = {
+      filter: filter,
+      sorter: {},
+      pager: {
+        pageNumber: 1,
+        pageSize: 2,
+      },
+    } as SqlQuery;
+
+    // 执行查询
+    let list = await select(sql, query);
+
+    // 处理结果
     if (_.isArray(list) && list.length > 0) {
       return list[0] as SqlResult;
     }
   }
 
   return { select, fetch };
+}
+
+function pagerToLimit(pager: SqlPager): SqlLimit {
+  return {
+    limit: pager.pageSize,
+    skip: Math.max(0, pager.pageSize * (pager.pageNumber - 1)),
+  };
 }
