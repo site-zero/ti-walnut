@@ -1,6 +1,6 @@
 import { Str, Vars, getLogger } from '@site0/tijs';
 import { ComputedRef, Ref, computed, ref } from 'vue';
-import { SignInForm, UserSidebar, userGlobalStatusStore } from '..';
+import { SignInForm, UserSidebar, useGlobalStatus } from '..';
 import { Walnut } from '../../core';
 
 const log = getLogger('wn.store.session');
@@ -125,16 +125,16 @@ function _translate_session_result(data: any) {
 
 export function useSessionStore(): UserSessionFeature {
   async function signIn(info: SignInForm) {
-    const status = userGlobalStatusStore();
+    const status = useGlobalStatus();
     try {
-      status.set('processing', '正在执行登录');
+      status.processing = '正在执行登录';
       let re = await Walnut.signInToDomain(info);
       // Sign-in successfully
       if (re.ok) {
         _translate_session_result(re.data);
         SE.errCode.value = undefined;
         SE.sidebar.value = undefined;
-        log.info('signIn OK, so fetchSidebar')
+        log.info('signIn OK, so fetchSidebar');
         SE.sidebar.value = await Walnut.fetchSidebar();
       }
       // Sign-in Failed
@@ -143,7 +143,7 @@ export function useSessionStore(): UserSessionFeature {
       }
       console.log('signIn', re);
     } finally {
-      status.reset('processing');
+      status.processing = false;
     }
   }
 
@@ -167,27 +167,27 @@ export function useSessionStore(): UserSessionFeature {
         _translate_session_result(re.data.parent);
         SE.errCode.value = undefined;
         SE.sidebar.value = undefined;
-        log.info('signOut with parent session, so fetchSidebar')
+        log.info('signOut with parent session, so fetchSidebar');
         SE.sidebar.value = await Walnut.fetchSidebar();
       }
       // Cancel Session
       else {
-        log.info('signOut, resetSession')
+        log.info('signOut, resetSession');
         resetSession();
       }
     }
   }
 
   async function reload() {
-    const status = userGlobalStatusStore();
+    const status = useGlobalStatus();
     try {
-      status.set('appLoading', true);
+      status.appLoading = true;
       let re = await Walnut.fetchMySession();
       if (re.ok) {
         _translate_session_result(re.data);
         SE.errCode.value = undefined;
         SE.sidebar.value = undefined;
-        log.info('reload with session, so fetchSidebar')
+        log.info('reload with session, so fetchSidebar');
         SE.sidebar.value = await Walnut.fetchSidebar();
       }
       // Outpu error
@@ -195,7 +195,7 @@ export function useSessionStore(): UserSessionFeature {
         resetSession();
       }
     } finally {
-      status.reset('appLoading');
+      status.appLoading = false;
     }
   }
 

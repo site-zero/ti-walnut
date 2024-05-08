@@ -6,8 +6,8 @@
     createAppBus,
     watchAppResize,
   } from '@site0/tijs';
-  import { computed, onBeforeMount, onUnmounted, provide } from 'vue';
-  import { WnSignIn, useSessionStore, userGlobalStatusStore } from '../../';
+  import { onBeforeMount, onUnmounted, provide } from 'vue';
+  import { WnSignIn, useGlobalStatus, useSessionStore } from '../../';
 
   //
   // Global Bus
@@ -18,7 +18,7 @@
   //
   // Stores
   //
-  const status = userGlobalStatusStore();
+  const status = useGlobalStatus();
   const session = useSessionStore();
   //
   // Methods
@@ -29,7 +29,7 @@
 </script>
 <template>
   <!--显示加载界面-->
-  <template v-if="status.is('loading')">
+  <template v-if="status.appLoading">
     <TiLoading text="应用加载中..." />
   </template>
   <!--显示登录面板-->

@@ -1,5 +1,4 @@
-import { FuncA1, I18nLang, SideBarItem, TiMatch, Vars } from '@site0/tijs';
-import _ from 'lodash';
+import { I18nLang, SideBarItem } from '@site0/tijs';
 
 export type AjaxResult<T = any> = {
   ok: boolean;
@@ -31,7 +30,6 @@ export interface SignInForm {
   password?: string;
 }
 
-
 export type WnExecOptions = {
   input?: string;
   as?: 'json' | 'text';
@@ -40,4 +38,12 @@ export type WnExecOptions = {
 export type UserSidebar = {
   statusStoreKey?: string;
   sidebar: SideBarItem[];
+};
+
+export type StoreStatus = {
+  loading: boolean;
+  saving: boolean;
+  removing: boolean;
+  processing: boolean;
+  changed: boolean;
 };
