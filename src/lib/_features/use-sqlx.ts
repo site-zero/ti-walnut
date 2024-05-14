@@ -30,6 +30,7 @@ export function useSqlx(daoName?: string) {
     cmds.push('-cqn @vars');
     cmds.push(`@query ${sql} -p`);
     let cmdText = cmds.join(' ');
+    log.debug(cmdText, q);
 
     // 执行查询
     if (log.isInfoEnabled()) {
