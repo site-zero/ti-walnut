@@ -9,7 +9,7 @@ import {
 } from '@site0/tijs';
 import { ComputedRef, Ref } from 'vue';
 import { WnObj } from '../../';
-import { ObjEditFeatures } from '../edit/obj.edit.type';
+import { ObjEditFeatures } from '../edit/use-obj-edit-types';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;

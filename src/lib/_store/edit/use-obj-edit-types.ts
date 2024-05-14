@@ -1,6 +1,6 @@
 import { FieldStatus } from '@site0/tijs';
 import { Ref } from 'vue';
-import { WnObj } from '../../';
+import { WnObj } from '../..';
 
 /*
 ----------------------------------------

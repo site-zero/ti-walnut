@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { ObjEditFeatures, ObjEditState } from './obj.edit.type';
+import { ObjEditFeatures, ObjEditState } from './use-obj-edit-types';
 
 export function userObjEdit(): ObjEditFeatures {
   let re: ObjEditState = {
