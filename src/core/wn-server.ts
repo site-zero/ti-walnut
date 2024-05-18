@@ -193,11 +193,16 @@ export class WalnutServer {
     //let jsUrl = this.getUrl(jsPath);
     //document.cookie = `SEID=${this._ticket}; path=/`;
     let text = await this.fetchText(jsPath);
-    let installModule = eval(text);
-    if (_.isFunction(installModule)) {
-      return installModule();
+    // 假设， text 的代码类似
+    // (function(ex){/* you can export your module */})(exports)
+    let exports = {};
+    try {
+      let installModule = new Function('exports', text);
+      installModule(exports);
+      return exports;
+    } catch (error) {
+      log.error(`Fail to loadJsModule: ${jsPath} :: ${error}`);
     }
-    log.error(`Fail to loadJsModule: ${jsPath}`);
   }
 
   async fetchObj(
