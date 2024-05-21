@@ -33,6 +33,13 @@ export interface SignInForm {
 export type WnExecOptions = {
   input?: string;
   as?: 'json' | 'text';
+  signal?: AbortSignal;
+};
+
+export type FetchObjOptions = {
+  loadAxis?: boolean;
+  loadPath?: boolean;
+  signal?: AbortSignal;
 };
 
 export type UserSidebar = {

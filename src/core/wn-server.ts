@@ -3,16 +3,18 @@ import {
   getLogger,
   getLogLevel,
   installTiCoreI18n,
-  Net,
   setDefaultLogLevel,
+  Str,
   tidyLogger,
   TiStore,
   updateInstalledComponentsLangs,
 } from '@site0/tijs';
+import JSON5 from 'json5';
 import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import {
   AjaxResult,
+  FetchObjOptions,
   ServerConfig,
   SignInForm,
   UserSidebar,
@@ -20,7 +22,6 @@ import {
   WnObj,
 } from '../lib';
 import { wnRunCommand } from './wn-run-command';
-import JSON5 from 'json5';
 
 const TICKET_KEY = 'Walnut-Ticket';
 const log = getLogger('wn.core.server');
@@ -78,12 +79,12 @@ export class WalnutServer {
     return `${protocal}://${host}${ports}${sep}${path}`;
   }
 
-  getRequestInit(): RequestInit {
+  getRequestInit(signal?: AbortSignal): RequestInit {
     let headers: HeadersInit = {};
     if (this._ticket) {
       headers['X-Walnut-Ticket'] = this._ticket;
     }
-    return { headers };
+    return { headers, signal };
   }
 
   async fetchMySession(): Promise<AjaxResult> {
@@ -140,7 +141,8 @@ export class WalnutServer {
 
   async postFormToGetJson(
     path: string,
-    form: Record<string, any>
+    form: Record<string, any>,
+    signal?: AbortSignal
   ): Promise<any> {
     let url = this.getUrl(path);
     const body = new URLSearchParams();
@@ -150,26 +152,30 @@ export class WalnutServer {
     let resp = await fetch(url, {
       method: 'POST',
       body,
+      signal,
     });
     return await resp.json();
   }
 
   async postFormToGetAjax(
     path: string,
-    form: Record<string, any>
+    form: Record<string, any>,
+    signal?: AbortSignal
   ): Promise<AjaxResult> {
-    let reo = await this.postFormToGetJson(path, form);
+    let reo = await this.postFormToGetJson(path, form, signal);
     return reo as AjaxResult;
   }
 
-  async loadContent(objPath: string): Promise<string> {
+  async loadContent(objPath: string, signal?: AbortSignal): Promise<string> {
+    // 静态路径
     if (objPath.startsWith('load://')) {
       let loadPath = `/${objPath.substring(7)}`;
-      let resp = await fetch(loadPath);
+      let resp = await fetch(loadPath, { signal });
       return await resp.text();
     }
+    // Walnut 的动态路径
     let urlPath = this.cookPath(objPath);
-    return await this.fetchText(urlPath);
+    return await this.fetchText(urlPath, signal);
   }
 
   /**
@@ -180,8 +186,8 @@ export class WalnutServer {
     return `/o/content?str=${encodeURIComponent(objPath)}`;
   }
 
-  async loadJson(objPath: string): Promise<any> {
-    let re = await this.loadContent(objPath);
+  async loadJson(objPath: string, signal?: AbortSignal): Promise<any> {
+    let re = await this.loadContent(objPath, signal);
     try {
       return JSON5.parse(re);
     } catch (err) {
@@ -189,10 +195,13 @@ export class WalnutServer {
     }
   }
 
-  async loadJsModule(jsPath: string) {
+  async loadJsModule(jsPath: string, signal?: AbortSignal) {
     //let jsUrl = this.getUrl(jsPath);
     //document.cookie = `SEID=${this._ticket}; path=/`;
-    let text = await this.fetchText(jsPath);
+    let text = await this.fetchText(jsPath, signal);
+    if (Str.isBlank(text)) {
+      return {};
+    }
     // 假设， text 的代码类似
     // (function(ex){/* you can export your module */})(exports)
     let exports = {};
@@ -207,8 +216,9 @@ export class WalnutServer {
 
   async fetchObj(
     objPath: string,
-    { loadAxis = false, loadPath = true } = {}
+    options: FetchObjOptions = {}
   ): Promise<WnObj> {
+    let { loadAxis, loadPath, signal } = options;
     let urlPath = `/o/fetch?str=${encodeURIComponent(objPath)}`;
     if (loadPath) {
       urlPath += '&path=true';
@@ -216,37 +226,29 @@ export class WalnutServer {
     if (loadAxis) {
       urlPath += '&axis=true';
     }
-    let re: AjaxResult<WnObj> = await this.fetchAjax(urlPath);
+    let re: AjaxResult<WnObj> = await this.fetchAjax(urlPath, signal);
     if (re.ok && re.data) {
       return re.data;
     }
     throw new Error(JSON.stringify(re));
   }
 
-  async fetchText(urlPath: string): Promise<any> {
-    let headers: HeadersInit = {};
-    if (this._ticket) {
-      headers['X-Walnut-Ticket'] = this._ticket;
-    }
+  async fetchText(urlPath: string, signal?: AbortSignal): Promise<any> {
     let url = this.getUrl(urlPath);
-    let init = this.getRequestInit();
+    let init = this.getRequestInit(signal);
     let resp = await fetch(url, init);
     return await resp.text();
   }
 
-  async fetchJson(urlPath: string): Promise<any> {
-    let headers: HeadersInit = {};
-    if (this._ticket) {
-      headers['X-Walnut-Ticket'] = this._ticket;
-    }
+  async fetchJson(urlPath: string, signal?: AbortSignal): Promise<any> {
     let url = this.getUrl(urlPath);
-    let init = this.getRequestInit();
+    let init = this.getRequestInit(signal);
     let resp = await fetch(url, init);
     return await resp.json();
   }
 
-  async fetchAjax(urlPath: string): Promise<AjaxResult> {
-    let reo = await this.fetchJson(urlPath);
+  async fetchAjax(urlPath: string, signal?: AbortSignal): Promise<AjaxResult> {
+    let reo = await this.fetchJson(urlPath, signal);
     return reo as AjaxResult;
   }
 
@@ -286,7 +288,7 @@ export class WalnutServer {
     // 执行命令
     log.info('exec>:', cmdText, options);
     let url = this.getUrl('/a/run/wn.manager');
-    let init = this.getRequestInit();
+    let init = this.getRequestInit(options.signal);
     let reo = await wnRunCommand(url, init, cmdText, options);
     if (log.isDebugEnabled()) {
       log.debug('exec>:', reo);
