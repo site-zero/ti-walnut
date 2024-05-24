@@ -1,6 +1,6 @@
-import { DateTime, TableCell } from '@site0/tijs';
+import { DateTime, TableInputColumn } from '@site0/tijs';
 
-export const READONLY_FIELDS = new Map<string, TableCell>();
+export const READONLY_FIELDS = new Map<string, TableInputColumn>();
 // ----------------------------- 基本信息
 READONLY_FIELDS.set('id', { name: 'id', title: 'ID' });
 READONLY_FIELDS.set('pid', { name: 'pid', title: 'PID' });

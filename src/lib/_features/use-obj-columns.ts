@@ -1,13 +1,13 @@
-import { TableCell, getFieldUniqKey, getLogger } from '@site0/tijs';
+import { TableInputColumn, getFieldUniqKey, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { READONLY_FIELDS } from './define-obj-columns';
 
 const log = getLogger('wn.feature.obj-columns');
 
 export type ObjColumnsFeature = {
-  getColumn: (key: string) => TableCell;
-  getColumns: (key: string[]) => TableCell[];
-  addColumn: (col: TableCell, override: boolean) => void;
+  getColumn: (key: string) => TableInputColumn;
+  getColumns: (key: string[]) => TableInputColumn[];
+  addColumn: (col: TableInputColumn, override: boolean) => void;
 };
 
 export function useObjColumns() {
@@ -19,9 +19,9 @@ export function useObjColumns() {
     log.warn(`field [${key}] not Exists!`);
   }
 
-  function getColumns(keys: string[]): TableCell[] {
+  function getColumns(keys: string[]): TableInputColumn[] {
     log.debug('getColumns', keys);
-    let cells = [] as TableCell[];
+    let cells = [] as TableInputColumn[];
     for (let key of keys) {
       let col = getColumn(key);
       if (col) {
@@ -31,7 +31,7 @@ export function useObjColumns() {
     return cells;
   }
 
-  function addColumn(col: TableCell, override = false) {
+  function addColumn(col: TableInputColumn, override = false) {
     let key = getFieldUniqKey(col.name);
     if (READONLY_FIELDS.has(key) && !override) {
       throw `Field [${key}] Exists`;

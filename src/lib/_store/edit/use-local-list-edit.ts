@@ -1,7 +1,7 @@
 import { SqlResult } from '@site0/ti-walnut';
-import { Ref, ref } from 'vue';
+import { TableCellChanged } from '@site0/tijs';
 import _ from 'lodash';
-import { CellChanged } from '@site0/tijs';
+import { Ref, ref } from 'vue';
 
 export function useLocalListEdit(remoteList: Ref<SqlResult[]>) {
   /*---------------------------------------------
@@ -17,14 +17,18 @@ export function useLocalListEdit(remoteList: Ref<SqlResult[]>) {
   
   ---------------------------------------------*/
   function isChanged() {
-    return localList.value ? true : false;
+    if (localList.value) {
+      return !_.isEqual(remoteList.value, localList.value);
+    }
+    return false;
   }
+
   /**
    * 更新一条记录的某个字段
    *
    * @param payload Shipment 单元格改动
    */
-  function updateListField(payload: CellChanged) {
+  function updateListField(payload: TableCellChanged) {
     // 自动生成 localList
     if (!localList.value) {
       localList.value = _.cloneDeep(remoteList.value);
