@@ -42,7 +42,7 @@ export function useLocalMetaEdit(remoteMeta: Ref<SqlResult>) {
   
   ---------------------------------------------*/
   return {
-    localMeta: localMeta,
+    localMeta,
     isChanged,
     updateMeta,
   };

@@ -18,9 +18,11 @@ import {
   ServerConfig,
   SignInForm,
   UserSidebar,
+  WnDictSetup,
   WnExecOptions,
   WnObj,
 } from '../lib';
+import { installWalnutDicts } from './wn-dict';
 import { wnRunCommand } from './wn-run-command';
 
 const TICKET_KEY = 'Walnut-Ticket';
@@ -48,7 +50,7 @@ export class WalnutServer {
     this._ticket = TiStore.local.getString(TICKET_KEY, undefined);
   }
 
-  init(conf: ServerConfig) {
+  async init(conf: ServerConfig) {
     log.info('init server', conf);
     this._conf = conf;
     let lang = conf.lang ?? 'zh-cn';
@@ -64,6 +66,15 @@ export class WalnutServer {
         addLogger(k, lv);
       });
       tidyLogger();
+    }
+    if (conf.dicts) {
+      let dicts: Record<string, WnDictSetup> | undefined;
+      if (_.isString(conf.dicts)) {
+        dicts = await this.loadJson(conf.dicts);
+      } else {
+        dicts = conf.dicts;
+      }
+      installWalnutDicts(dicts);
     }
   }
 
@@ -244,7 +255,8 @@ export class WalnutServer {
     let url = this.getUrl(urlPath);
     let init = this.getRequestInit(signal);
     let resp = await fetch(url, init);
-    return await resp.json();
+    let text = await resp.text();
+    return JSON5.parse(text);
   }
 
   async fetchAjax(urlPath: string, signal?: AbortSignal): Promise<AjaxResult> {
@@ -261,7 +273,8 @@ export class WalnutServer {
         let url = `/${sidebar.substring(7)}`;
         log.info('fetchSidebar:url=>', url);
         let resp = await fetch(url);
-        let json = await resp.json();
+        let text = await resp.text();
+        let json = JSON5.parse(text);
         if (log.isDebugEnabled()) {
           log.debug('sidebar is:', json);
         }

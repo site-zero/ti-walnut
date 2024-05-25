@@ -1,4 +1,4 @@
-import { I18nLang, SideBarItem } from '@site0/tijs';
+import { I18nLang, SideBarItem, Vars } from '@site0/tijs';
 
 export type AjaxResult<T = any> = {
   ok: boolean;
@@ -23,7 +23,19 @@ export interface ServerConfig {
   sidebar?: boolean | string;
   logLevel?: string;
   logger?: Record<string, string>;
+  dicts?: string|Record<string, WnDictSetup>;
 }
+
+export type WnDictSetup = {
+  value?: string;
+  text?: string;
+  icon?: string;
+  tip?: string;
+
+  data?: string|Vars[];
+  query?: string;
+  item?: string;
+};
 
 export interface SignInForm {
   username?: string;
