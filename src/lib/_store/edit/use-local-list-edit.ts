@@ -1,5 +1,10 @@
 import { SqlResult } from '@site0/ti-walnut';
-import { TableCellChanged } from '@site0/tijs';
+import {
+  FieldChange,
+  TableRowChanagePayload,
+  Vars,
+  mergeFieldChanges,
+} from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, ref } from 'vue';
 
@@ -28,27 +33,28 @@ export function useLocalListEdit(remoteList: Ref<SqlResult[]>) {
    *
    * @param payload Shipment 单元格改动
    */
-  function updateListField(payload: TableCellChanged) {
+  function updateListField(payload: TableRowChanagePayload) {
     // 自动生成 localList
     if (!localList.value) {
       localList.value = _.cloneDeep(remoteList.value);
     }
 
     // 确定要修改的行和字段
-    let { rowIndex, name, value } = payload;
+    let { rowIndex, changed } = payload;
     let row = localList.value[rowIndex];
 
-    // 字段名为 Array 要修改多个键
-    if (_.isArray(name)) {
-      for (let key of name) {
-        let val = _.get(value, key);
-        row[key] = val;
-      }
+    // 内容为修改详情列表
+    let diff: Vars;
+    if (_.isArray<FieldChange>(changed)) {
+      diff = mergeFieldChanges(changed);
     }
-    // 简单字段名
+    // 已经合并过了
     else {
-      row[name] = value;
+      diff = changed;
     }
+
+    // 合并
+    _.assign(row, changed);
   }
   /*---------------------------------------------
                     
