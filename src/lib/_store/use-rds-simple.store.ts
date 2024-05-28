@@ -1,8 +1,10 @@
+import { Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, reactive, ref } from 'vue';
 import {
   QueryFilter,
   QuerySorter,
+  SqlExecOptions,
   SqlPager,
   SqlQuery,
   SqlResult,
@@ -16,6 +18,11 @@ export type RdsStoreFeature = {
   query: SqlQuery;
   remoteList: Ref<SqlResult[]>;
   queryRemoteList: (sqlName: string) => Promise<void>;
+  createRemote: (
+    sqlName: string,
+    vars: Vars,
+    options?: SqlExecOptions
+  ) => Promise<any>;
 };
 
 export type RdsStoreDefination = {
@@ -56,12 +63,22 @@ export function defineRdsSimpleStore(
     status.loading = false;
   }
 
+  async function createRemote(
+    sqlName: string,
+    vars: Vars,
+    options: SqlExecOptions = {}
+  ) {
+    return await sqlx.exec(sqlName, vars, options);
+  }
+
+  //-------------< Output Feature >------------------
   return {
     storeName: options.storeName,
     status,
     query,
     remoteList,
     queryRemoteList,
+    createRemote,
   };
 }
 
