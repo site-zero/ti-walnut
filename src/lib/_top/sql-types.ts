@@ -14,6 +14,12 @@ export type SqlLimit = {
 };
 
 export type SqlResult = Record<string, any>;
+export type SqlExecResult = {
+  updateCount: number;
+  batchResult: number[];
+  batchTotal: number;
+  list?: SqlResult[];
+};
 
 export type SqlQuery = {
   filter: QueryFilter;
@@ -21,10 +27,16 @@ export type SqlQuery = {
   pager: SqlPager;
 };
 
-/**
- * 创建记录时的配置
- */
 export type SqlExecOptions = {
+  sql: string;
+  // ------------------- sqlx @vars
+  vars: SqlResult | SqlResult[];
+  reset?: boolean;
+  explain?: boolean;
+  omit?: string;
+  pick?: string;
+  // ------------------- sqlx @set
+  sets?: SqlExecSetVar[];
   /**
    * 执行完创建语句，还需要把这个最新的插入记录读取回来
    * 读取的方式由这个属性来指明。 这个选项的值是一个元组：
@@ -55,5 +67,11 @@ export type SqlExecOptions = {
    * 这个例子表示，执行完插入语句，紧接着会从服务器的上下文里，直接获取 'id' 的值，
    * 再查询回来
    */
-  fetchBack?: [string, Vars];
+  fetchBack?: [string, Vars?];
+};
+
+export type SqlExecSetVar = {
+  name: string;
+  value: string;
+  to?: 'list' | 'map' | 'all';
 };

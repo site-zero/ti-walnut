@@ -1,9 +1,28 @@
-import { SqlResult } from '@site0/ti-walnut';
-import { Vars } from '@site0/tijs';
+import { SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
+import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { Ref, ref } from 'vue';
+import { Ref, computed, ref } from 'vue';
 
-export function useLocalMetaEdit(remoteMeta: Ref<SqlResult>) {
+export type LocalMetaEditOptions = {
+  isNew?: (meta: SqlResult) => boolean;
+};
+
+export type LocalMetaMakeChangeOptions = {
+  defaultMeta?: Vars;
+  updateSql: string;
+  insertSql: string;
+  insertMeta?: Vars;
+  insertSet?: SqlExecSetVar[];
+  updateMeta?: Vars;
+  fetchBack?:  [string, (Vars | undefined)?];
+};
+
+export function useLocalMetaEdit(
+  remoteMeta: Ref<SqlResult>,
+  options: LocalMetaEditOptions = {}
+) {
+  let { isNew = (meta: SqlResult) => 'new' == meta.id || _.isNil(meta.id) } =
+    options;
   /*---------------------------------------------
                     
                  数据模型
@@ -16,7 +35,17 @@ export function useLocalMetaEdit(remoteMeta: Ref<SqlResult>) {
                    方法
   
   ---------------------------------------------*/
+  function isNewMeta() {
+    if (localMeta.value) {
+      return isNew(localMeta.value);
+    }
+    return isNew(remoteMeta.value);
+  }
+
   function isChanged() {
+    if (isNewMeta()) {
+      return true;
+    }
     if (localMeta.value) {
       return !_.isEqual(remoteMeta.value, localMeta.value);
     }
@@ -30,11 +59,59 @@ export function useLocalMetaEdit(remoteMeta: Ref<SqlResult>) {
   function updateMeta(change: Vars) {
     // 自动生成 localMeta
     if (!localMeta.value) {
-      localMeta.value = _.cloneDeep(remoteMeta.value);
+      localMeta.value = _.cloneDeep(remoteMeta.value || {});
     }
 
     // 更新一下
     _.assign(localMeta.value, change);
+  }
+
+  function getDiffMeta(): Vars {
+    if (isNewMeta()) {
+      if (localMeta.value) {
+        return _.cloneDeep(localMeta.value);
+      }
+      return _.cloneDeep(remoteMeta.value || {});
+    }
+    if (localMeta.value) {
+      return Util.getDiff(remoteMeta.value, localMeta.value, {
+        checkRemoveFromOrgin: true,
+      });
+    }
+    return {};
+  }
+
+  function makeChange(options: LocalMetaMakeChangeOptions) {
+    // 检查 Console
+    let vars = getDiffMeta();
+    if(_.isEmpty(vars)){
+      return []
+    }
+
+    _.defaults(vars, options.defaultMeta);
+    let sets = [] as SqlExecSetVar[];
+    let sql = options.updateSql;
+    // 新创建的 consol 需要设置更多字段
+    if (isNewMeta()) {
+      sql = options.insertSql;
+      // 创建时间， 对于 st/st_rsn 数据库里有默认值
+      _.assign(vars, options.insertMeta);
+      // 自动生成 ID
+      if (options.insertSet) {
+        sets.push(...options.insertSet);
+      }
+    }
+    // 已经存在的，那么要把 ID 设置一下
+    else {
+      _.assign(vars, options.updateMeta);
+    }
+    return [{
+      sql,
+      vars,
+      explain: true,
+      sets,
+      fetchBack: options.fetchBack,
+    }];
   }
   /*---------------------------------------------
                     
@@ -42,8 +119,11 @@ export function useLocalMetaEdit(remoteMeta: Ref<SqlResult>) {
   
   ---------------------------------------------*/
   return {
+    isNewMeta,
     localMeta,
     isChanged,
     updateMeta,
+    getDiffMeta,
+    makeChange,
   };
 }

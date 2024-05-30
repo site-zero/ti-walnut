@@ -1,8 +1,10 @@
 import { Vars, getLogger } from '@site0/tijs';
+import JSON5 from 'json5';
 import _ from 'lodash';
 import {
   QueryFilter,
   SqlExecOptions,
+  SqlExecResult,
   SqlLimit,
   SqlPager,
   SqlQuery,
@@ -75,26 +77,70 @@ export function useSqlx(daoName?: string) {
   }
 
   async function exec(
-    sql: string,
-    vars: Vars,
-    _optons: SqlExecOptions
-  ): Promise<SqlResult> {
+    options: SqlExecOptions | SqlExecOptions[]
+  ): Promise<SqlExecResult> {
+    let inputs = {} as Vars;
+    let opts = _.concat(options);
     // 准备命令
     let cmds = [`sqlx`];
     if (daoName) {
       cmds.push(daoName);
     }
-    cmds.push('-cqn @vars');
-    cmds.push(`@exec ${sql}`);
+    cmds.push('-cqn');
+    for (let i = 0; i < opts.length; i++) {
+      let opt = opts[i];
+      // 准备输入
+      inputs[`I${i}`] = opt.vars;
+
+      //............. @vars
+      cmds.push(`@vars '=I${i}'`);
+      if (opt.reset) {
+        cmds.push('-reset');
+      }
+      if (opt.explain) {
+        cmds.push('-explain');
+      }
+      if (_.isArray(opt.vars)) {
+        cmds.push('-as list');
+      } else {
+        cmds.push('-as map');
+      }
+      if (opt.omit) {
+        cmds.push(`-omit '${opt.omit}'`);
+      }
+      if (opt.pick) {
+        cmds.push(`-pick '${opt.pick}'`);
+      }
+      //............. @set
+      if (opt.sets) {
+        for (let se of opt.sets) {
+          cmds.push(`@set ${se.name} '${se.value}'`);
+          if (se.to) {
+            cmds.push(`-to ${se.to}`);
+          }
+        }
+      }
+      //............. @exec
+      cmds.push(`@exec ${opt.sql}`);
+      if (opt.fetchBack) {
+        let [by, vars] = opt.fetchBack;
+        cmds.push(`-fetch_by ${by}`);
+        if (vars && !_.isEmpty(vars)) {
+          cmds.push(`-fetch_vars '${JSON5.stringify(vars)}'`);
+        }
+      }
+    }
+
+    // 准备发送命令
     let cmdText = cmds.join(' ');
     log.debug(cmdText);
 
     // 执行查询
-    let input = JSON.stringify(vars);
+    let input = JSON.stringify(inputs);
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
 
     // 处理结果
-    return reo as SqlResult;
+    return reo as SqlExecResult;
   }
 
   //-------------< Output Feature >------------------
