@@ -89,6 +89,17 @@ export function useLocalListEdit(
     localList.value.push(newItem);
   }
 
+  function batchUpdate(meta: Vars) {
+    // 自动生成 localList
+    if (!localList.value) {
+      localList.value = _.cloneDeep(remoteList.value);
+    }
+
+    for (let local of localList.value) {
+      _.assign(local, meta);
+    }
+  }
+
   function makeChanges(options: LocalListMakeChangeOptions) {
     let changes = [] as SqlExecOptions[];
     // 对远程列表编制索引
@@ -170,6 +181,7 @@ export function useLocalListEdit(
     updateListField,
     appendToList,
     makeChanges,
+    batchUpdate
   };
 }
 
