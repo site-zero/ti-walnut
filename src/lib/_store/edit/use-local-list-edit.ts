@@ -1,4 +1,8 @@
-import { SqlExecOptions, SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
+import {
+  LocalMetaMakeChangeOptions,
+  SqlExecOptions,
+  SqlResult,
+} from '@site0/ti-walnut';
 import {
   FieldChange,
   TableRowChanagePayload,
@@ -20,7 +24,7 @@ export function useLocalListEdit(
   options: LocalListEditOptions = {}
 ) {
   let {
-    isNew = (meta: SqlResult) => 'new' == meta.id || _.isNil(meta.id),
+    //isNew = (meta: SqlResult) => 'new' == meta.id || _.isNil(meta.id),
     idKey = 'id',
     getId,
   } = options;
@@ -103,7 +107,7 @@ export function useLocalListEdit(
       for (let local of localList.value) {
         let id = getMetaId(local);
         let remote = remoteMap.get(id);
-        // 已经存在
+        // 已经存在，必然是要更新记录
         if (remote) {
           let diff = Util.getDiff(remote, local, {
             checkRemoveFromOrgin: true,
@@ -120,7 +124,7 @@ export function useLocalListEdit(
           // 记入列表
           updateList.push(diff);
         }
-        // 必然是新记录
+        // 必然是新记录，需要插入
         else {
           let newMeta = _.cloneDeep(local);
           _.assign(newMeta, options.defaultMeta);
@@ -136,6 +140,8 @@ export function useLocalListEdit(
         sql: options.insertSql,
         vars,
         explain: true,
+        reset: true,
+        noresult: options.noresult,
         sets: options.insertSet,
       });
     }
@@ -146,6 +152,8 @@ export function useLocalListEdit(
         sql: options.updateSql,
         vars,
         explain: true,
+        reset: true,
+        noresult: options.noresult,
       });
     }
 
@@ -165,12 +173,4 @@ export function useLocalListEdit(
   };
 }
 
-export type LocalListMakeChangeOptions = {
-  defaultMeta?: Vars;
-  updateSql: string;
-  insertSql: string;
-  insertMeta?: Vars;
-  insertSet?: SqlExecSetVar[];
-  updateMeta?: Vars;
-  //fetchBack?: [string, (Vars | undefined)?];
-};
+export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions;

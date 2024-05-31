@@ -78,7 +78,7 @@ export function useSqlx(daoName?: string) {
 
   async function exec(
     options: SqlExecOptions | SqlExecOptions[]
-  ): Promise<SqlExecResult> {
+  ): Promise<SqlExecResult | undefined> {
     let inputs = {} as Vars;
     let opts = _.concat(options);
     // 准备命令
@@ -122,7 +122,11 @@ export function useSqlx(daoName?: string) {
       }
       //............. @exec
       cmds.push(`@exec ${opt.sql}`);
-      if (opt.fetchBack) {
+      if (opt.noresult) {
+        cmds.push('-noresult');
+      }
+      // 如果需要输出结果，则看看是否需要回查
+      else if (opt.fetchBack) {
         let [by, vars] = opt.fetchBack;
         cmds.push(`-fetch_by ${by}`);
         if (vars && !_.isEmpty(vars)) {
@@ -140,7 +144,10 @@ export function useSqlx(daoName?: string) {
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
 
     // 处理结果
-    return reo as SqlExecResult;
+    if (reo) {
+      return reo as SqlExecResult;
+    }
+    return;
   }
 
   //-------------< Output Feature >------------------

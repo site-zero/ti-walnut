@@ -1,4 +1,4 @@
-import { SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
+import { SqlExecOptions, SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
 import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, computed, ref } from 'vue';
@@ -14,7 +14,8 @@ export type LocalMetaMakeChangeOptions = {
   insertMeta?: Vars;
   insertSet?: SqlExecSetVar[];
   updateMeta?: Vars;
-  fetchBack?:  [string, (Vars | undefined)?];
+  fetchBack?: [string, (Vars | undefined)?];
+  noresult?: boolean;
 };
 
 export function useLocalMetaEdit(
@@ -81,11 +82,11 @@ export function useLocalMetaEdit(
     return {};
   }
 
-  function makeChange(options: LocalMetaMakeChangeOptions) {
+  function makeChange(options: LocalMetaMakeChangeOptions): SqlExecOptions[] {
     // 检查 Console
     let vars = getDiffMeta();
-    if(_.isEmpty(vars)){
-      return []
+    if (_.isEmpty(vars)) {
+      return [];
     }
 
     _.defaults(vars, options.defaultMeta);
@@ -105,13 +106,17 @@ export function useLocalMetaEdit(
     else {
       _.assign(vars, options.updateMeta);
     }
-    return [{
-      sql,
-      vars,
-      explain: true,
-      sets,
-      fetchBack: options.fetchBack,
-    }];
+    return [
+      {
+        sql,
+        vars,
+        explain: true,
+        reset: true,
+        noresult: options.noresult,
+        sets,
+        fetchBack: options.fetchBack,
+      },
+    ];
   }
   /*---------------------------------------------
                     

@@ -33,6 +33,7 @@ export type SqlExecOptions = {
   vars: SqlResult | SqlResult[];
   reset?: boolean;
   explain?: boolean;
+  noresult?: boolean;
   omit?: string;
   pick?: string;
   // ------------------- sqlx @set
