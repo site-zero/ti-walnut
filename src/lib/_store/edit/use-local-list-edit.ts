@@ -113,14 +113,36 @@ export function useLocalListEdit(
     }
     // 一批记录
     else if (_.isArray(forIds)) {
-      let ids = Util.arrayToMap(forIds);
-      for (let local of localList.value) {
-        let id = getMetaId(local);
-        if (ids.get(id)) {
-          _.assign(local, meta);
+      if (forIds.length > 0) {
+        let ids = Util.arrayToMap(forIds);
+        for (let local of localList.value) {
+          let id = getMetaId(local);
+          if (ids.get(id)) {
+            _.assign(local, meta);
+          }
         }
       }
     }
+  }
+
+  function removeLocalItems(forIds?: string[]) {
+    // Guard
+    if (!forIds || _.isEmpty(forIds)) {
+      return;
+    }
+
+    // Remove Local list
+    let ids = Util.arrayToMap(forIds);
+    let list = [] as SqlResult[];
+    if (localList.value) {
+      for (let local of localList.value) {
+        let id = getMetaId(local);
+        if (!ids.get(id)) {
+          list.push(local);
+        }
+      }
+    }
+    localList.value = list;
   }
 
   function makeChanges(options: LocalListMakeChangeOptions) {
@@ -205,6 +227,7 @@ export function useLocalListEdit(
     appendToList,
     makeChanges,
     batchUpdate,
+    removeLocalItems,
   };
 }
 
