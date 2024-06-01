@@ -89,14 +89,37 @@ export function useLocalListEdit(
     localList.value.push(newItem);
   }
 
-  function batchUpdate(meta: Vars) {
+  function batchUpdate(meta: Vars, forIds?: string | string[]) {
     // 自动生成 localList
     if (!localList.value) {
       localList.value = _.cloneDeep(remoteList.value);
     }
+    console.log('batchUpdate', forIds, meta);
 
-    for (let local of localList.value) {
-      _.assign(local, meta);
+    // 全部记录
+    if (_.isNil(forIds)) {
+      for (let local of localList.value) {
+        _.assign(local, meta);
+      }
+    }
+    // 某条指定记录
+    else if (_.isString(forIds)) {
+      for (let local of localList.value) {
+        let id = getMetaId(local);
+        if (forIds == id) {
+          _.assign(local, meta);
+        }
+      }
+    }
+    // 一批记录
+    else if (_.isArray(forIds)) {
+      let ids = Util.arrayToMap(forIds);
+      for (let local of localList.value) {
+        let id = getMetaId(local);
+        if (ids.get(id)) {
+          _.assign(local, meta);
+        }
+      }
     }
   }
 
@@ -181,7 +204,7 @@ export function useLocalListEdit(
     updateListField,
     appendToList,
     makeChanges,
-    batchUpdate
+    batchUpdate,
   };
 }
 
