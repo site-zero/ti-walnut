@@ -20,7 +20,7 @@ export type LocalListEditOptions = {
 };
 
 export function useLocalListEdit(
-  remoteList: Ref<SqlResult[]>,
+  remoteList: Ref<SqlResult[] | undefined>,
   options: LocalListEditOptions = {}
 ) {
   let {
@@ -59,7 +59,7 @@ export function useLocalListEdit(
   function updateListField(payload: TableRowChanagePayload) {
     // 自动生成 localList
     if (!localList.value) {
-      localList.value = _.cloneDeep(remoteList.value);
+      localList.value = _.cloneDeep(remoteList.value || []);
     }
 
     // 确定要修改的行和字段
@@ -83,7 +83,7 @@ export function useLocalListEdit(
   function appendToList(newItem: SqlResult) {
     // 自动生成 localList
     if (!localList.value) {
-      localList.value = _.cloneDeep(remoteList.value);
+      localList.value = _.cloneDeep(remoteList.value || []);
     }
 
     localList.value.push(newItem);
@@ -92,7 +92,7 @@ export function useLocalListEdit(
   function batchUpdate(meta: Vars, forIds?: string | string[]) {
     // 自动生成 localList
     if (!localList.value) {
-      localList.value = _.cloneDeep(remoteList.value);
+      localList.value = _.cloneDeep(remoteList.value || []);
     }
     console.log('batchUpdate', forIds, meta);
 
@@ -149,9 +149,11 @@ export function useLocalListEdit(
     let changes = [] as SqlExecOptions[];
     // 对远程列表编制索引
     let remoteMap = new Map<string, SqlResult>();
-    for (let remote of remoteList.value) {
-      let id = getMetaId(remote);
-      remoteMap.set(id, remote);
+    if (remoteList.value) {
+      for (let remote of remoteList.value) {
+        let id = getMetaId(remote);
+        remoteMap.set(id, remote);
+      }
     }
 
     // 准备两个列表
