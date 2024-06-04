@@ -22,7 +22,7 @@ export type SqlExecResult = {
 };
 
 export type SqlQuery = {
-  filter: QueryFilter;
+  filter: QueryFilter | QueryFilter[];
   sorter: QuerySorter;
   pager: SqlPager;
 };
