@@ -51,6 +51,10 @@ export function useLocalListEdit(
     return false;
   }
 
+  function hasLocalList() {
+    return localList.value ? true : false;
+  }
+
   /**
    * 更新一条记录的某个字段
    *
@@ -225,6 +229,7 @@ export function useLocalListEdit(
   return {
     localList,
     isChanged,
+    hasLocalList,
     updateListField,
     appendToList,
     makeChanges,
