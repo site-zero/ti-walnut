@@ -37,13 +37,21 @@ export function useLocalListEdit(
                  数据模型
   
   ---------------------------------------------*/
-  let localList = ref<SqlResult[]>();
+  let localList = ref<SqlResult[] | undefined>();
 
   /*---------------------------------------------
                     
                    方法
   
   ---------------------------------------------*/
+  function initLocalList() {
+    if (!localList.value) {
+      localList.value = _.cloneDeep(remoteList.value || []);
+      return true;
+    }
+    return false;
+  }
+
   function isChanged() {
     if (localList.value) {
       return !_.isEqual(remoteList.value, localList.value);
@@ -133,6 +141,11 @@ export function useLocalListEdit(
     // Guard
     if (!forIds || _.isEmpty(forIds)) {
       return;
+    }
+
+    // 自动生成 localList
+    if (!localList.value) {
+      localList.value = _.cloneDeep(remoteList.value || []);
     }
 
     // Remove Local list
@@ -228,6 +241,7 @@ export function useLocalListEdit(
   ---------------------------------------------*/
   return {
     localList,
+    initLocalList,
     isChanged,
     hasLocalList,
     updateListField,

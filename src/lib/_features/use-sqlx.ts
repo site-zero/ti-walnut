@@ -57,23 +57,28 @@ export function useSqlx(daoName?: string) {
       ...pagerToLimit(query.pager),
     } as Vars;
 
-    let qstr = JSON.stringify(q);
+    try {
+      let qstr = JSON.stringify(q);
 
-    // 准备命令
-    let cmds = [`sqlx`];
-    if (daoName) {
-      cmds.push(daoName);
+      // 准备命令
+      let cmds = [`sqlx`];
+      if (daoName) {
+        cmds.push(daoName);
+      }
+      cmds.push('-cqn @vars');
+      cmds.push(`@query ${sql} -p`);
+      let cmdText = cmds.join(' ');
+      log.debug(cmdText, q);
+
+      // 执行查询
+      let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+
+      // 处理结果
+      return list as SqlResult[];
+    } catch (err) {
+      console.warn(`Invalid [${sql}]`, query);
+      throw err;
     }
-    cmds.push('-cqn @vars');
-    cmds.push(`@query ${sql} -p`);
-    let cmdText = cmds.join(' ');
-    log.debug(cmdText, q);
-
-    // 执行查询
-    let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
-
-    // 处理结果
-    return list as SqlResult[];
   }
 
   async function exec(
