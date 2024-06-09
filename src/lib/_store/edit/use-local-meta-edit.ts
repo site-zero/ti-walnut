@@ -45,7 +45,7 @@ export function useLocalMetaEdit(
 
   function isChanged() {
     if (isNewMeta()) {
-      return true;
+      return !_.isEmpty(localMeta.value);
     }
     if (localMeta.value) {
       return !_.isEqual(remoteMeta.value, localMeta.value);
