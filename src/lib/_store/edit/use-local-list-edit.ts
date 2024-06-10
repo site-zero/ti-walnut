@@ -177,10 +177,12 @@ export function useLocalListEdit(
     let insertList = [] as Vars[];
     let updateList = [] as Vars[];
 
-    // 循环本地列表
+    // 循环本地列表，顺便编制一个本地列表的ID 索引
+    let localMap = new Map<string, SqlResult>();
     if (localList.value) {
       for (let local of localList.value) {
         let id = getMetaId(local);
+        localMap.set(id, local);
         let remote = remoteMap.get(id);
         // 已经存在，必然是要更新记录
         if (remote) {
@@ -232,6 +234,23 @@ export function useLocalListEdit(
       });
     }
 
+    // 可以支持删除
+    if (options.deleteSql && remoteList.value) {
+      for (let remote of remoteList.value) {
+        let id = getMetaId(remote);
+        let local = localMap.get(id);
+        if (!local) {
+          changes.push({
+            sql: options.deleteSql,
+            vars: remote,
+            explain: false,
+            reset: true,
+            noresult: true,
+          });
+        }
+      }
+    }
+
     return changes;
   }
   /*---------------------------------------------
@@ -252,4 +271,6 @@ export function useLocalListEdit(
   };
 }
 
-export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions;
+export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions & {
+  deleteSql?: string;
+};
