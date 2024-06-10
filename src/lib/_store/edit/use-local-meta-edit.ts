@@ -75,7 +75,7 @@ export function useLocalMetaEdit(
       return _.cloneDeep(remoteMeta.value || {});
     }
     if (localMeta.value) {
-      return Util.getDiff(remoteMeta.value, localMeta.value, {
+      return Util.getRecordDiff(remoteMeta.value, localMeta.value, {
         checkRemoveFromOrgin: true,
       });
     }

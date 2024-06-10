@@ -4,11 +4,10 @@ import {
   SqlResult,
 } from '@site0/ti-walnut';
 import {
-  FieldChange,
   TableRowChanagePayload,
   Util,
   Vars,
-  mergeFieldChanges,
+  useFieldChangeDiff,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, ref } from 'vue';
@@ -78,18 +77,8 @@ export function useLocalListEdit(
     let { rowIndex, changed } = payload;
     let row = localList.value[rowIndex];
 
-    // 内容为修改详情列表
-    let diff: Vars;
-    if (_.isArray<FieldChange>(changed)) {
-      diff = mergeFieldChanges(changed);
-    }
-    // 已经合并过了
-    else {
-      diff = changed;
-    }
-
-    // 合并
-    _.assign(row, changed);
+    // 应用修改修改详情列表
+    useFieldChangeDiff(changed, row);
   }
 
   function appendToList(newItem: SqlResult) {
@@ -186,7 +175,7 @@ export function useLocalListEdit(
         let remote = remoteMap.get(id);
         // 已经存在，必然是要更新记录
         if (remote) {
-          let diff = Util.getDiff(remote, local, {
+          let diff = Util.getRecordDiff(remote, local, {
             checkRemoveFromOrgin: true,
           });
           if (_.isEmpty(diff)) {
