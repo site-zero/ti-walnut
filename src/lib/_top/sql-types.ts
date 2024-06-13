@@ -1,4 +1,4 @@
-import { NameAnyValue, Vars } from '@site0/tijs';
+import { Vars } from '@site0/tijs';
 import { QueryFilter, QuerySorter } from '..';
 
 export type SqlPager = {
