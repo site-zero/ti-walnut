@@ -9,8 +9,8 @@ import {
   Vars,
 } from '@site0/tijs';
 import _ from 'lodash';
-import { Walnut, WnDictSetup } from '../..';
-import { makeDictOptions } from '../../../tijs/src/core/dict/ti-dict';
+import { WnDictSetup } from '../lib';
+import { Walnut } from './wn-server';
 
 function makeWalnutDictGetData(data?: string | Vars[]): LoadData<any> {
   if (data) {
@@ -109,10 +109,10 @@ export function installWalnutDicts(dicts?: Record<string, WnDictSetup>) {
   if (!dicts) {
     return;
   }
-  console.log('installWalnutDicts', dicts)
+  console.log('installWalnutDicts', dicts);
   for (let dictName of _.keys(dicts)) {
     let setup = makeWalnutDictOptions(dicts[dictName]);
-    let options = makeDictOptions(setup);
+    let options = Dicts.makeDictOptions(setup);
     Dicts.getOrCreate(options, dictName);
   }
 }
