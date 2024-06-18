@@ -73,6 +73,11 @@ export function useSqlx(daoName?: string) {
       // 执行查询
       let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
 
+      // 错误
+      if (!_.isArray(list)) {
+        return [];
+      }
+
       // 处理结果
       return list as SqlResult[];
     } catch (err) {
@@ -147,6 +152,11 @@ export function useSqlx(daoName?: string) {
     // 执行查询
     let input = JSON.stringify(inputs);
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
+
+    // 错误
+    if (!_.isPlainObject(reo) && !_.isArray(reo)) {
+      return;
+    }
 
     // 处理结果
     if (reo) {
