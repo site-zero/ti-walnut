@@ -14,16 +14,18 @@ import _ from 'lodash';
 import { Ref, ref } from 'vue';
 
 export type LocalListEditOptions = {
-  /**
-   *  判断一个对象是否为新对象
-   */
-  isNew?: (meta: SqlResult) => boolean;
-  /**
-   * 在 makeChange 的时候，会用到，如果指定 null 则不自动添加 update id
-   */
-  idKey?: string;
+  // /**
+  //  *  判断一个对象是否为新对象
+  //  */
+  // isNew?: (meta: SqlResult) => boolean;
+  // /**
+  //  * 在 makeChange 的时候，会用到，如果指定 null 则不自动添加 update id
+  //  */
+  // idKey?: string;
 
-  //patchUpdateMeta?:
+  patchMetaUpdate?:
+    | null
+    | ((diff: Vars, id: TableRowID, remote: SqlResult) => void);
   /**
    * 从指定的对象获取 ID
    *
@@ -31,7 +33,7 @@ export type LocalListEditOptions = {
    *              或者可以被 `anyConvertor` 转换的值
    * - `Function` : 一个获取 ID 的函数
    */
-  getId?: string | ((it: SqlResult, index: number) => TableRowID | undefined);
+  getId?: string | ((it: SqlResult, index: number) => TableRowID);
 };
 
 export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions & {
@@ -42,7 +44,7 @@ export function useLocalListEdit(
   remoteList: Ref<SqlResult[] | undefined>,
   options: LocalListEditOptions = {}
 ) {
-  let { idKey = 'id', getId = 'id' } = options;
+  let { getId = 'id' } = options;
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
@@ -53,12 +55,29 @@ export function useLocalListEdit(
   /**
    * 获取数据的 ID
    */
-  function getMetaId(it: SqlResult, index: number): TableRowID {
+  function getRowId(it: SqlResult, index: number): TableRowID {
     if (_.isString(getId)) {
       return _.get(it, getId) ?? `row-${index}`;
     }
     return getId(it, index) ?? `row-${index}`;
   }
+  /**
+   * 补充数据（仅当更新时）
+   */
+  let patchMetaUpdate:
+    | null
+    | ((diff: Vars, id: TableRowID, remote: SqlResult) => void) = null;
+  // 默认行为
+  if (_.isUndefined(options.patchMetaUpdate)) {
+    patchMetaUpdate = (diff: Vars, id: TableRowID, _remote: SqlResult) => {
+      diff['id'] = id;
+    };
+  }
+  // 用户已指定
+  else if (options.patchMetaUpdate) {
+    patchMetaUpdate = options.patchMetaUpdate;
+  }
+
   /*---------------------------------------------
                     
                   输出特性
@@ -66,6 +85,8 @@ export function useLocalListEdit(
   ---------------------------------------------*/
   return {
     localList: _local_list,
+    //.............................................
+    getRowId,
     //.............................................
     reset() {
       _local_list.value = undefined;
@@ -131,7 +152,7 @@ export function useLocalListEdit(
       else if (_.isString(forIds)) {
         for (let i = 0; i < _local_list.value.length; i++) {
           let local = _local_list.value[i];
-          let id = getMetaId(local, i);
+          let id = getRowId(local, i);
           if (forIds == id) {
             _.assign(local, meta);
           }
@@ -143,7 +164,7 @@ export function useLocalListEdit(
           let ids = Util.arrayToMap(forIds);
           for (let i = 0; i < _local_list.value.length; i++) {
             let local = _local_list.value[i];
-            let id = getMetaId(local, i);
+            let id = getRowId(local, i);
             if (ids.get(id)) {
               _.assign(local, meta);
             }
@@ -169,7 +190,7 @@ export function useLocalListEdit(
       if (_local_list.value) {
         for (let i = 0; i < _local_list.value.length; i++) {
           let local = _local_list.value[i];
-          let id = getMetaId(local, i);
+          let id = getRowId(local, i);
           if (!ids.get(id)) {
             list.push(local);
           }
@@ -185,7 +206,7 @@ export function useLocalListEdit(
       if (remoteList.value) {
         for (let i = 0; i < remoteList.value.length; i++) {
           let remote = remoteList.value[i];
-          let id = getMetaId(remote, i);
+          let id = getRowId(remote, i);
           remoteMap.set(id, remote);
         }
       }
@@ -199,7 +220,7 @@ export function useLocalListEdit(
       if (_local_list.value) {
         for (let i = 0; i < _local_list.value.length; i++) {
           let local = _local_list.value[i];
-          let id = getMetaId(local, i);
+          let id = getRowId(local, i);
           localMap.set(id, local);
           let remote = remoteMap.get(id);
           // 已经存在，必然是要更新记录
@@ -211,7 +232,9 @@ export function useLocalListEdit(
               continue;
             }
             // 补上 ID
-            diff[idKey] = id;
+            if (patchMetaUpdate) {
+              patchMetaUpdate(diff, id, remote);
+            }
             // 补上固定 Meta
             _.assign(diff, options.defaultMeta);
             _.assign(diff, options.updateMeta);
@@ -256,7 +279,7 @@ export function useLocalListEdit(
       if (options.deleteSql && remoteList.value) {
         for (let i = 0; i < remoteList.value.length; i++) {
           let remote = remoteList.value[i];
-          let id = getMetaId(remote, i);
+          let id = getRowId(remote, i);
           let local = localMap.get(id);
           if (!local) {
             changes.push({

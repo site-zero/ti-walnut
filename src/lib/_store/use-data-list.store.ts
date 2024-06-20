@@ -7,6 +7,7 @@ import {
 import _ from 'lodash';
 import { ComputedRef, Ref, computed, reactive, ref } from 'vue';
 import {
+  LocalListEditOptions,
   LocalListMakeChangeOptions,
   SqlExecOptions,
   SqlQuery,
@@ -21,8 +22,8 @@ export type DataListStoreFeature = {
   //---------------------------------------------
   // 数据模型
   _local: any;
-  _current_id: Ref<TableRowID | undefined>;
-  _checked_ids: Ref<TableRowID[]>;
+  currentId: Ref<TableRowID | undefined>;
+  checkedIds: Ref<TableRowID[]>;
   query: SqlQuery;
   status: Ref<DataListStoreStatus | undefined>;
   remoteList: Ref<SqlResult[] | undefined>;
@@ -31,11 +32,10 @@ export type DataListStoreFeature = {
   listData: ComputedRef<SqlResult[]>;
   hasCurrent: ComputedRef<boolean>;
   hasChecked: ComputedRef<boolean>;
-  currentItem: ComputedRef<SqlResult | undefined>;
   //---------------------------------------------
   // Getter
   isChanged: () => boolean;
-  getItemId: (it: SqlResult, index: number) => TableRowID | undefined;
+  getItemId: (it: SqlResult, index: number) => TableRowID;
   getItemById: (id: TableRowID) => SqlResult | undefined;
   getFilterField: (key: string, dft?: any) => any;
   //---------------------------------------------
@@ -56,18 +56,10 @@ export type DataListStoreFeature = {
   //---------------------------------------------
 };
 
-export type DataStoreOptions = {
+export type DataStoreOptions = LocalListEditOptions & {
   query: SqlQuery;
   sqlQuery: string;
   makeChange: LocalListMakeChangeOptions;
-  /**
-   * 从指定的对象获取 ID
-   *
-   * - `string` : 表示一个数据键，将通过 `_.get` 获取值，这个值必须是 `T`
-   *              或者可以被 `anyConvertor` 转换的值
-   * - `Function` : 一个获取 ID 的函数
-   */
-  getId?: string | ((it: SqlResult, index: number) => TableRowID | undefined);
 };
 
 function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
@@ -98,7 +90,7 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalListEdit(remoteList));
+  const _local = computed(() => useLocalListEdit(remoteList, options));
 
   //---------------------------------------------
   //                 被内部重用的方法
@@ -115,11 +107,7 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
    * 获取数据的 ID
    */
   function getItemId(it: SqlResult, index: number): TableRowID {
-    let getId = options.getId ?? 'id';
-    if (_.isString(getId)) {
-      return _.get(it, getId) ?? `row-${index}`;
-    }
-    return getId(it, index) ?? `row-${index}`;
+    return _local.value.getRowId(it, index);
   }
 
   function getItemById(id?: TableRowID) {
@@ -143,8 +131,8 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
   return {
     // 数据模型
     _local,
-    _current_id,
-    _checked_ids,
+    currentId: _current_id,
+    checkedIds: _checked_ids,
     query,
     status,
     remoteList,
@@ -155,7 +143,6 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
     listData,
     hasCurrent,
     hasChecked,
-    currentItem: computed(() => getItemById(_current_id.value)),
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
