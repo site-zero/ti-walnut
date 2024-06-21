@@ -37,6 +37,7 @@ export type DataListStoreFeature = {
   isChanged: () => boolean;
   getItemId: (it: SqlResult, index: number) => TableRowID;
   getItemById: (id: TableRowID) => SqlResult | undefined;
+  getCurrentItem: () => SqlResult | undefined;
   getFilterField: (key: string, dft?: any) => any;
   //---------------------------------------------
   // 本地方法
@@ -45,6 +46,7 @@ export type DataListStoreFeature = {
   addLocalItem: (meta: SqlResult) => void;
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
+  updateSelection: (currentId: TableRowID, checkedIds?: TableRowID[]) => void;
   //---------------------------------------------
   // 与控件绑定
   onSelect: (payload: TableSelectEmitInfo) => void;
@@ -56,14 +58,17 @@ export type DataListStoreFeature = {
   //---------------------------------------------
 };
 
-export type DataStoreOptions = LocalListEditOptions & {
+export type DataListStoreOptions = LocalListEditOptions & {
   query: SqlQuery;
   sqlQuery: string;
   makeChange: LocalListMakeChangeOptions;
   refreshWhenSave?: boolean;
+  patchRemote?: (remote: SqlResult, index: number) => SqlResult;
 };
 
-function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
+function defineDataListStore(
+  options: DataListStoreOptions
+): DataListStoreFeature {
   // 准备数据访问模型
   let sqlx = useSqlx();
   //---------------------------------------------
@@ -119,9 +124,25 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
     return _.find(listData.value, (li, index) => getItemId(li, index) == id);
   }
 
+  function getCurrentItem(): SqlResult | undefined {
+    return getItemById(_current_id.value);
+  }
+
   async function queryRemoteList(): Promise<void> {
     status.value = 'loading';
-    remoteList.value = await sqlx.select(options.sqlQuery, query);
+    let list = await sqlx.select(options.sqlQuery, query);
+    if (options.patchRemote) {
+      let list2 = [] as SqlResult[];
+      for (let i = 0; i < list.length; i++) {
+        let li = _.cloneDeep(list[i]);
+        let li2 = options.patchRemote(li, i);
+        if (li2) {
+          list2.push(li2);
+        }
+      }
+      list = list2;
+    }
+    remoteList.value = list;
     status.value = undefined;
   }
   /*---------------------------------------------
@@ -150,6 +171,7 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
     isChanged: () => _local.value.isChanged(),
     getItemId,
     getItemById,
+    getCurrentItem,
     getFilterField: (key: string, dft?: any) => {
       return _.get(query.filter, key) ?? dft;
     },
@@ -178,6 +200,12 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
       if (hasChecked.value) {
         _local.value.removeLocalItems(_checked_ids.value);
       }
+    },
+
+    updateSelection(currentId: TableRowID, checkedIds?: TableRowID[]) {
+      checkedIds = checkedIds ?? [currentId];
+      _current_id.value = currentId;
+      _checked_ids.value = checkedIds;
     },
 
     //---------------------------------------------
@@ -225,7 +253,7 @@ const _stores = new Map<string, DataListStoreFeature>();
 
 export function useDataListStore(
   name: string,
-  options: DataStoreOptions
+  options: DataListStoreOptions
 ): DataListStoreFeature {
   let re = _stores.get(name);
   if (!re) {

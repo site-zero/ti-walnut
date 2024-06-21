@@ -251,6 +251,26 @@ export function useLocalListEdit(
           }
         }
       }
+      // 可以支持删除，删除放在前面以便尽量避免更新时的主键冲突
+      //  A,B,C
+      // rm B + C update to B 是可以的
+      // C update to B + rm B 会抛错，因为 B 已经存在
+      if (options.deleteSql && remoteList.value) {
+        for (let i = 0; i < remoteList.value.length; i++) {
+          let remote = remoteList.value[i];
+          let id = getRowId(remote, i);
+          let local = localMap.get(id);
+          if (!local) {
+            changes.push({
+              sql: options.deleteSql,
+              vars: remote,
+              explain: false,
+              reset: true,
+              noresult: true,
+            });
+          }
+        }
+      }
 
       // 对插入，生成配置
       for (let vars of insertList) {
@@ -275,23 +295,7 @@ export function useLocalListEdit(
         });
       }
 
-      // 可以支持删除
-      if (options.deleteSql && remoteList.value) {
-        for (let i = 0; i < remoteList.value.length; i++) {
-          let remote = remoteList.value[i];
-          let id = getRowId(remote, i);
-          let local = localMap.get(id);
-          if (!local) {
-            changes.push({
-              sql: options.deleteSql,
-              vars: remote,
-              explain: false,
-              reset: true,
-              noresult: true,
-            });
-          }
-        }
-      }
+      
 
       return changes;
     },
