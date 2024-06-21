@@ -60,6 +60,7 @@ export type DataStoreOptions = LocalListEditOptions & {
   query: SqlQuery;
   sqlQuery: string;
   makeChange: LocalListMakeChangeOptions;
+  refreshWhenSave?: boolean;
 };
 
 function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
@@ -197,7 +198,16 @@ function defineDataListStore(options: DataStoreOptions): DataListStoreFeature {
       changes.push(..._local.value.makeChanges(options.makeChange));
       console.log('changes', changes);
       // 最后执行更新
-      await sqlx.exec(changes);
+      let re = await sqlx.exec(changes);
+      console.log(re);
+
+      // 更新远程结果
+      if (options.refreshWhenSave) {
+        queryRemoteList().then(() => {
+          //强制取消本地改动
+          _local.value.reset();
+        });
+      }
     },
 
     reload: async (): Promise<void> => {
