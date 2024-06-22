@@ -1,9 +1,12 @@
 import { Vars } from '@site0/tijs';
 import { QueryFilter, QuerySorter } from '..';
 
-export type SqlPager = {
+export type SqlPagerInput = {
   pageNumber: number;
   pageSize: number;
+};
+
+export type SqlPager = SqlPagerInput & {
   pageCount?: number;
   totalCount?: number;
 };

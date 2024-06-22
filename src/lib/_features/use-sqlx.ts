@@ -43,11 +43,13 @@ export function useSqlx(daoName?: string) {
       return list[0] as SqlResult;
     }
   }
+
   /**
    * 封装 SQL 的查询
    *
    * @param sql SQL 模板名称
    * @param query 查询条件
+   * @returns 查询结果
    */
   async function select(sql: string, query: SqlQuery): Promise<SqlResult[]> {
     // 准备查询上下文
@@ -86,6 +88,57 @@ export function useSqlx(daoName?: string) {
     }
   }
 
+  /**
+   * 获取符合查询条件的记录数量
+   *
+   * @param sql SQL 模板名称
+   * @param query 查询条件
+   * @param countKey 查询结果中哪个键是用来获取统计结果的，默认`total`
+   * @returns 符合查询条件的记录数量
+   */
+  async function count(
+    sql: string,
+    filter: QueryFilter,
+    countKey: string = 'total'
+  ): Promise<number> {
+    try {
+      let qstr = JSON.stringify(filter);
+
+      // 准备命令
+      let cmds = [`sqlx`];
+      if (daoName) {
+        cmds.push(daoName);
+      }
+      cmds.push('-cqn @vars');
+      cmds.push(`@query ${sql} -p`);
+      let cmdText = cmds.join(' ');
+      log.debug(cmdText, filter);
+
+      // 执行查询
+      let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+
+      // 错误
+      if (!_.isArray(list)) {
+        return -1;
+      }
+
+      // 处理结果
+      if (list.length == 0) {
+        return 0;
+      }
+
+      return list[0][countKey] ?? 0;
+    } catch (err) {
+      console.warn(`Invalid [${sql}]`, filter);
+      throw err;
+    }
+  }
+
+  /**
+   * 封装 SQL 的执行
+   * @param options  执行的具体细节
+   * @returns 执行结果
+   */
   async function exec(
     options: SqlExecOptions | SqlExecOptions[]
   ): Promise<SqlExecResult | undefined> {
@@ -166,7 +219,7 @@ export function useSqlx(daoName?: string) {
   }
 
   //-------------< Output Feature >------------------
-  return { select, fetch, exec };
+  return { select, fetch, count, exec };
 }
 
 function pagerToLimit(pager: SqlPager): SqlLimit {
@@ -174,4 +227,9 @@ function pagerToLimit(pager: SqlPager): SqlLimit {
     limit: pager.pageSize,
     skip: Math.max(0, pager.pageSize * (pager.pageNumber - 1)),
   };
+}
+
+export function updatePagerTotal(pager: SqlPager, total: number) {
+  pager.totalCount = total;
+  pager.pageCount = Math.ceil(total / pager.pageSize);
 }

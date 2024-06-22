@@ -1,17 +1,24 @@
 import {
   ComboFilterValue,
+  KeepInfo,
   TableRowID,
   TableSelectEmitInfo,
   Util,
+  useKeep,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { ComputedRef, Ref, computed, reactive, ref } from 'vue';
 import {
   LocalListEditOptions,
   LocalListMakeChangeOptions,
+  QueryFilter,
+  QuerySorter,
   SqlExecOptions,
+  SqlPager,
+  SqlPagerInput,
   SqlQuery,
   SqlResult,
+  updatePagerTotal,
   useLocalListEdit,
   useSqlx,
 } from '../../lib';
@@ -43,6 +50,9 @@ export type DataListStoreFeature = {
   // 本地方法
   resetLocal: () => void;
   updateQuery: (query: ComboFilterValue) => void;
+  updateFilter: (filter: QueryFilter) => void;
+  updateSorter: (sorter: QuerySorter) => void;
+  updatePager: (page: Partial<SqlPagerInput>) => void;
   addLocalItem: (meta: SqlResult) => void;
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
@@ -52,6 +62,7 @@ export type DataListStoreFeature = {
   onSelect: (payload: TableSelectEmitInfo) => void;
   //---------------------------------------------
   //  远程方法
+  countRemoteList: () => Promise<void>;
   queryRemoteList: () => Promise<void>;
   saveChange: () => Promise<void>;
   reload: () => Promise<void>;
@@ -59,8 +70,10 @@ export type DataListStoreFeature = {
 };
 
 export type DataListStoreOptions = LocalListEditOptions & {
+  keepQuery: KeepInfo;
   query: SqlQuery;
   sqlQuery: string;
+  sqlCount: string;
   makeChange: LocalListMakeChangeOptions;
   refreshWhenSave?: boolean;
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
@@ -69,35 +82,52 @@ export type DataListStoreOptions = LocalListEditOptions & {
 function defineDataListStore(
   options: DataListStoreOptions
 ): DataListStoreFeature {
+  //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx();
   //---------------------------------------------
+  // 本地保存
+  let Keep = useKeep(options.keepQuery);
+  //---------------------------------------------
   //              默认查询条件
   //---------------------------------------------
-  let _query = _.defaults(options.query, {
+  let _dft_query = _.defaults(options.query, {
     filter: {},
     sorter: {
       ct: 1,
     },
-    pager: {
-      pageNumber: 1,
-      pageSize: 50,
-    },
+  });
+  let _query = Keep.loadObj(_dft_query) as SqlQuery;
+  _query.pager = options.query.pager || {};
+  _.defaults(_query.pager, {
+    pageNumber: 1,
+    pageSize: 50,
   });
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
   const remoteList = ref<SqlResult[]>();
   const status = ref<DataListStoreStatus>();
-  const query = reactive(_query);
+  const query = reactive(_query as SqlQuery);
   const _current_id = ref<TableRowID>();
   const _checked_ids = ref<TableRowID[]>([]);
 
+  function __save_local_query() {
+    Keep.save({
+      filter: query.filter,
+      sorter: query.sorter,
+    });
+  }
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
   const _local = computed(() => useLocalListEdit(remoteList, options));
 
+  function resetLocal() {
+    _local.value.reset();
+    _current_id.value = undefined;
+    _checked_ids.value = [];
+  }
   //---------------------------------------------
   //                 被内部重用的方法
   //---------------------------------------------
@@ -117,7 +147,7 @@ function defineDataListStore(
   }
 
   function getItemById(id?: TableRowID) {
-    console.log('getItemById', id);
+    // console.log('getItemById', id);
     if (_.isNil(id)) {
       return;
     }
@@ -143,6 +173,13 @@ function defineDataListStore(
       list = list2;
     }
     remoteList.value = list;
+    status.value = undefined;
+  }
+
+  async function countRemoteList() {
+    status.value = 'loading';
+    let total = await sqlx.count(options.sqlCount, query.filter);
+    updatePagerTotal(query.pager, total);
     status.value = undefined;
   }
   /*---------------------------------------------
@@ -178,12 +215,31 @@ function defineDataListStore(
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
-    resetLocal() {
-      _local.value.reset();
-    },
+    resetLocal,
 
     updateQuery(q: ComboFilterValue) {
       _.assign(query, q);
+      __save_local_query();
+    },
+
+    updateFilter(filter: QueryFilter) {
+      query.filter = _.cloneDeep(filter);
+      __save_local_query();
+    },
+
+    updateSorter(sorter: QuerySorter) {
+      query.sorter = _.cloneDeep(sorter);
+      __save_local_query();
+    },
+
+    updatePager(page: Partial<SqlPagerInput>) {
+      let { pageNumber, pageSize } = page;
+      if (_.isNumber(pageNumber) && pageNumber > 0) {
+        query.pager.pageNumber = pageNumber;
+      }
+      if (_.isNumber(pageSize) && pageSize > 0) {
+        query.pager.pageSize = pageSize;
+      }
     },
 
     addLocalItem(meta: SqlResult) {
@@ -219,15 +275,15 @@ function defineDataListStore(
     //---------------------------------------------
     //                  远程方法
     //---------------------------------------------
+    countRemoteList,
     queryRemoteList,
 
     saveChange: async (): Promise<void> => {
       let changes = [] as SqlExecOptions[];
       changes.push(..._local.value.makeChanges(options.makeChange));
-      console.log('changes', changes);
+      //console.log('changes', changes);
       // 最后执行更新
-      let re = await sqlx.exec(changes);
-      console.log(re);
+      await sqlx.exec(changes);
 
       // 更新远程结果
       if (options.refreshWhenSave) {
@@ -239,9 +295,9 @@ function defineDataListStore(
     },
 
     reload: async (): Promise<void> => {
-      _local.value.reset();
+      resetLocal();
       remoteList.value = undefined;
-      await queryRemoteList();
+      await Promise.all([queryRemoteList(), countRemoteList()]);
     },
   };
 }
