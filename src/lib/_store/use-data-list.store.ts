@@ -98,10 +98,10 @@ function defineDataListStore(
     },
   });
   let _query = Keep.loadObj(_dft_query) as SqlQuery;
-  _query.pager = options.query.pager || {};
+  _query.pager = _.pick(_query.pager, 'pageSize') as SqlPager;
   _.defaults(_query.pager, {
     pageNumber: 1,
-    pageSize: 50,
+    pageSize: options.query.pager?.pageSize ?? 50,
   });
   //---------------------------------------------
   //                 建立数据模型
@@ -116,6 +116,9 @@ function defineDataListStore(
     Keep.save({
       filter: query.filter,
       sorter: query.sorter,
+      pager: {
+        pageSize: query.pager.pageSize,
+      },
     });
   }
   //---------------------------------------------
@@ -172,7 +175,7 @@ function defineDataListStore(
       }
       list = list2;
     }
-    remoteList.value = list;
+    remoteList.value = list ?? [];
     status.value = undefined;
   }
 
@@ -239,6 +242,7 @@ function defineDataListStore(
       }
       if (_.isNumber(pageSize) && pageSize > 0) {
         query.pager.pageSize = pageSize;
+        __save_local_query();
       }
     },
 
@@ -296,7 +300,7 @@ function defineDataListStore(
 
     reload: async (): Promise<void> => {
       resetLocal();
-      remoteList.value = undefined;
+      //remoteList.value = undefined;
       await Promise.all([queryRemoteList(), countRemoteList()]);
     },
   };
