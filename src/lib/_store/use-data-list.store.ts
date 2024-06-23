@@ -135,6 +135,7 @@ function defineDataListStore(
   //                 被内部重用的方法
   //---------------------------------------------
   const listData = computed(() => {
+    console.log('computed listData', _local.value.localList.value, remoteList.value)
     return _local.value.localList.value || remoteList.value || [];
   });
   const hasCurrent = computed(() => !_.isNil(_current_id.value));
