@@ -135,7 +135,11 @@ function defineDataListStore(
   //                 被内部重用的方法
   //---------------------------------------------
   const listData = computed(() => {
-    console.log('computed listData', _local.value.localList.value, remoteList.value)
+    console.log(
+      'computed listData',
+      _local.value.localList.value,
+      remoteList.value
+    );
     return _local.value.localList.value || remoteList.value || [];
   });
   const hasCurrent = computed(() => !_.isNil(_current_id.value));
@@ -313,13 +317,14 @@ function defineDataListStore(
 const _stores = new Map<string, DataListStoreFeature>();
 
 export function useDataListStore(
-  name: string,
+  _name: string,
   options: DataListStoreOptions
 ): DataListStoreFeature {
-  let re = _stores.get(name);
-  if (!re) {
-    re = defineDataListStore(options);
-    _stores.set(name, re);
-  }
-  return re;
+  // let re = _stores.get(name);
+  // if (!re) {
+  //   re = defineDataListStore(options);
+  //   _stores.set(name, re);
+  // }
+  // return re;
+  return defineDataListStore(options);
 }
