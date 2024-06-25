@@ -1,6 +1,7 @@
 import {
   ComboFilterValue,
   KeepInfo,
+  Str,
   TableRowID,
   TableSelectEmitInfo,
   Util,
@@ -48,7 +49,7 @@ export type DataListStoreFeature = {
   getFilterField: (key: string, dft?: any) => any;
   //---------------------------------------------
   // 本地方法
-  resetLocal: () => void;
+  resetLocalChange: () => void;
   updateQuery: (query: ComboFilterValue) => void;
   updateFilter: (filter: QueryFilter) => void;
   updateSorter: (sorter: QuerySorter) => void;
@@ -57,6 +58,10 @@ export type DataListStoreFeature = {
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
   updateSelection: (currentId: TableRowID, checkedIds?: TableRowID[]) => void;
+  //---------------------------------------------
+  // 本地化存储状态
+  saveLocalQuery: () => void;
+  resetLocalQuery: () => void;
   //---------------------------------------------
   // 与控件绑定
   onSelect: (payload: TableSelectEmitInfo) => void;
@@ -74,7 +79,7 @@ export type DataListStoreOptions = LocalListEditOptions & {
   query: SqlQuery;
   sqlQuery: string;
   sqlCount: string;
-  makeChange: LocalListMakeChangeOptions;
+  makeChange?: LocalListMakeChangeOptions;
   refreshWhenSave?: boolean;
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
 };
@@ -121,12 +126,16 @@ function defineDataListStore(
       },
     });
   }
+
+  function __reset_local_query() {
+    Keep.reset();
+  }
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
   const _local = computed(() => useLocalListEdit(remoteList, options));
 
-  function resetLocal() {
+  function resetLocalChange() {
     _local.value.reset();
     _current_id.value = undefined;
     _checked_ids.value = [];
@@ -223,7 +232,7 @@ function defineDataListStore(
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
-    resetLocal,
+    resetLocalChange,
 
     updateQuery(q: ComboFilterValue) {
       _.assign(query, q);
@@ -274,6 +283,12 @@ function defineDataListStore(
     },
 
     //---------------------------------------------
+    // 本地化存储状态
+    //---------------------------------------------
+    saveLocalQuery: __save_local_query,
+    resetLocalQuery: __reset_local_query,
+
+    //---------------------------------------------
     //                  与控件绑定
     //---------------------------------------------
     onSelect(payload: TableSelectEmitInfo) {
@@ -288,6 +303,11 @@ function defineDataListStore(
     queryRemoteList,
 
     saveChange: async (): Promise<void> => {
+      // 保护一下
+      if (!options.makeChange) {
+        return;
+      }
+      // 获取改动信息
       let changes = [] as SqlExecOptions[];
       changes.push(..._local.value.makeChanges(options.makeChange));
       //console.log('changes', changes);
@@ -304,7 +324,7 @@ function defineDataListStore(
     },
 
     reload: async (): Promise<void> => {
-      resetLocal();
+      resetLocalChange();
       //remoteList.value = undefined;
       await Promise.all([queryRemoteList(), countRemoteList()]);
     },
@@ -317,14 +337,19 @@ function defineDataListStore(
 const _stores = new Map<string, DataListStoreFeature>();
 
 export function useDataListStore(
-  _name: string,
+  name: string,
   options: DataListStoreOptions
 ): DataListStoreFeature {
-  // let re = _stores.get(name);
-  // if (!re) {
-  //   re = defineDataListStore(options);
-  //   _stores.set(name, re);
-  // }
-  // return re;
-  return defineDataListStore(options);
+  // 强制创建新的
+  if ('NEW' == name || Str.isBlank(name)) {
+    return defineDataListStore(options);
+  }
+  // 持久化的实例
+  let re = _stores.get(name);
+  if (!re) {
+    re = defineDataListStore(options);
+    _stores.set(name, re);
+  }
+  return re;
+  //return defineDataListStore(options);
 }
