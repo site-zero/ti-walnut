@@ -1,7 +1,7 @@
 import { SqlExecOptions, SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
 import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { Ref, computed, ref } from 'vue';
+import { Ref, ref } from 'vue';
 
 export type LocalMetaEditOptions = {
   isNew?: (meta: SqlResult) => boolean;
@@ -52,12 +52,19 @@ export function useLocalMetaEdit(
     }
     return false;
   }
+
+  function reset() {
+    if (localMeta.value) {
+      localMeta.value = undefined;
+    }
+  }
+
   /**
    * 更新一条记录的某个字段
    *
    * @param payload Shipment 单元格改动
    */
-  function updateMeta(change: Vars) {
+  function updateMeta(change: SqlResult) {
     // 自动生成 localMeta
     if (!localMeta.value) {
       localMeta.value = _.cloneDeep(remoteMeta.value || {});
@@ -65,6 +72,10 @@ export function useLocalMetaEdit(
 
     // 更新一下
     _.assign(localMeta.value, change);
+  }
+
+  function setMeta(meta: SqlResult) {
+    localMeta.value = meta;
   }
 
   function getDiffMeta(): Vars {
@@ -124,10 +135,12 @@ export function useLocalMetaEdit(
   
   ---------------------------------------------*/
   return {
-    isNewMeta,
     localMeta,
+    isNewMeta,
     isChanged,
+    reset,
     updateMeta,
+    setMeta,
     getDiffMeta,
     makeChange,
   };

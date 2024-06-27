@@ -5,6 +5,7 @@ import {
   TableRowID,
   TableSelectEmitInfo,
   Util,
+  getLogger,
   useKeep,
 } from '@site0/tijs';
 import _ from 'lodash';
@@ -23,6 +24,8 @@ import {
   useLocalListEdit,
   useSqlx,
 } from '../../lib';
+
+const log = getLogger('wn.use-data-list-store');
 
 export type DataListStoreStatus = 'loading' | 'saving';
 
@@ -75,7 +78,7 @@ export type DataListStoreFeature = {
 };
 
 export type DataListStoreOptions = LocalListEditOptions & {
-  keepQuery: KeepInfo;
+  keepQuery?: KeepInfo;
   query: SqlQuery;
   sqlQuery: string;
   sqlCount: string;
@@ -144,11 +147,6 @@ function defineDataListStore(
   //                 被内部重用的方法
   //---------------------------------------------
   const listData = computed(() => {
-    console.log(
-      'computed listData',
-      _local.value.localList.value,
-      remoteList.value
-    );
     return _local.value.localList.value || remoteList.value || [];
   });
   const hasCurrent = computed(() => !_.isNil(_current_id.value));
@@ -312,6 +310,7 @@ function defineDataListStore(
       changes.push(..._local.value.makeChanges(options.makeChange));
       //console.log('changes', changes);
       // 最后执行更新
+      log.debug('saveChange', changes);
       await sqlx.exec(changes);
 
       // 更新远程结果
@@ -334,22 +333,22 @@ function defineDataListStore(
 /**
  * 维持全局单例
  */
-const _stores = new Map<string, DataListStoreFeature>();
+//const _stores = new Map<string, DataListStoreFeature>();
 
 export function useDataListStore(
-  name: string,
-  options: DataListStoreOptions
+  options: DataListStoreOptions,
+  _name?: string
 ): DataListStoreFeature {
   // 强制创建新的
-  if ('NEW' == name || Str.isBlank(name)) {
-    return defineDataListStore(options);
-  }
-  // 持久化的实例
-  let re = _stores.get(name);
-  if (!re) {
-    re = defineDataListStore(options);
-    _stores.set(name, re);
-  }
-  return re;
-  //return defineDataListStore(options);
+  // if ('NEW' == name || Str.isBlank(name)) {
+  //   return defineDataListStore(options);
+  // }
+  // // 持久化的实例
+  // let re = _stores.get(name);
+  // if (!re) {
+  //   re = defineDataListStore(options);
+  //   _stores.set(name, re);
+  // }
+  // return re;
+  return defineDataListStore(options);
 }
