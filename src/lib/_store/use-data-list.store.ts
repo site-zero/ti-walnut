@@ -45,6 +45,9 @@ export type DataListStoreFeature = {
   hasChecked: ComputedRef<boolean>;
   //---------------------------------------------
   // Getter
+  isEmpty: () => boolean;
+  isRemoteEmpty: () => boolean;
+  isLocalEmpty: () => boolean;
   isChanged: () => boolean;
   getItemId: (it: SqlResult, index: number) => TableRowID;
   getItemById: (id: TableRowID) => SqlResult | undefined;
@@ -61,6 +64,7 @@ export type DataListStoreFeature = {
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
   updateSelection: (currentId: TableRowID, checkedIds?: TableRowID[]) => void;
+  makeChanges: () => SqlExecOptions[];
   //---------------------------------------------
   // 本地化存储状态
   saveLocalQuery: () => void;
@@ -78,6 +82,7 @@ export type DataListStoreFeature = {
 };
 
 export type DataListStoreOptions = LocalListEditOptions & {
+  daoName?: string;
   keepQuery?: KeepInfo;
   query: SqlQuery;
   sqlQuery: string;
@@ -92,7 +97,7 @@ function defineDataListStore(
 ): DataListStoreFeature {
   //---------------------------------------------
   // 准备数据访问模型
-  let sqlx = useSqlx();
+  let sqlx = useSqlx(options.daoName);
   //---------------------------------------------
   // 本地保存
   let Keep = useKeep(options.keepQuery);
@@ -142,6 +147,14 @@ function defineDataListStore(
     _local.value.reset();
     _current_id.value = undefined;
     _checked_ids.value = [];
+  }
+
+  function makeChanges() {
+    // 保护一下
+    if (!options.makeChange) {
+      return [];
+    }
+    return _local.value.makeChanges(options.makeChange);
   }
   //---------------------------------------------
   //                 被内部重用的方法
@@ -220,6 +233,9 @@ function defineDataListStore(
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
+    isEmpty: () => _.isEmpty(listData.value),
+    isRemoteEmpty: () => _.isEmpty(remoteList.value),
+    isLocalEmpty: () => _.isEmpty(_local.value?.localList?.value),
     isChanged: () => _local.value.isChanged(),
     getItemId,
     getItemById,
@@ -299,18 +315,17 @@ function defineDataListStore(
     //---------------------------------------------
     countRemoteList,
     queryRemoteList,
-
+    makeChanges,
     saveChange: async (): Promise<void> => {
+      // 获取改动信息
+      let changes = makeChanges();
+      log.debug('saveChange', changes);
       // 保护一下
-      if (!options.makeChange) {
+      if (changes.length == 0) {
         return;
       }
-      // 获取改动信息
-      let changes = [] as SqlExecOptions[];
-      changes.push(..._local.value.makeChanges(options.makeChange));
       //console.log('changes', changes);
-      // 最后执行更新
-      log.debug('saveChange', changes);
+      // 执行更新
       await sqlx.exec(changes);
 
       // 更新远程结果

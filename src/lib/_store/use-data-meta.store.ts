@@ -50,6 +50,7 @@ export type DataMetaStoreFeature = {
 };
 
 export type DataMetaStoreOptions = LocalMetaEditOptions & {
+  daoName?: string;
   filter: QueryFilter;
   sqlFetch: string;
   makeChange?: LocalMetaMakeChangeOptions;
@@ -68,7 +69,7 @@ function defineDataMetaStore(
 ): DataMetaStoreFeature {
   //---------------------------------------------
   // 准备数据访问模型
-  let sqlx = useSqlx();
+  let sqlx = useSqlx(options.daoName);
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
