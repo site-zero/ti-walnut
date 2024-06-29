@@ -25,40 +25,19 @@ export function useSqlx(daoName?: string) {
     sql: string,
     filter: QueryFilter
   ): Promise<SqlResult | undefined> {
-    // 确保查询结果不要超过2个
-    let query = {
-      filter: filter,
-      sorter: {},
-      pager: {
-        pageNumber: 1,
-        pageSize: 2,
-      },
-    } as SqlQuery;
-
     // 执行查询
-    let list = await select(sql, query);
+    let list = await __query(sql, filter);
 
     // 处理结果
-    if (_.isArray(list) && list.length > 0) {
-      return list[0] as SqlResult;
+    if (_.isArray(list)) {
+      if (list.length == 1) {
+        return list[0] as SqlResult;
+      } else if (list.length > 1) {
+        log.error(`Multiple result when fetch`, { sql, filter, list });
+      }
     }
   }
-
-  /**
-   * 封装 SQL 的查询
-   *
-   * @param sql SQL 模板名称
-   * @param query 查询条件
-   * @returns 查询结果
-   */
-  async function select(sql: string, query: SqlQuery): Promise<SqlResult[]> {
-    // 准备查询上下文
-    let q = {
-      filter: query.filter,
-      sorter: query.sorter,
-      ...pagerToLimit(query.pager),
-    } as Vars;
-
+  async function __query(sql: string, q: Vars): Promise<SqlResult[]> {
     try {
       let qstr = JSON.stringify(q);
 
@@ -83,9 +62,28 @@ export function useSqlx(daoName?: string) {
       // 处理结果
       return list as SqlResult[];
     } catch (err) {
-      console.warn(`Invalid [${sql}]`, query);
+      console.error(`Invalid [${sql}]`, q);
+      console.error(err);
       throw err;
     }
+  }
+
+  /**
+   * 封装 SQL 的查询
+   *
+   * @param sql SQL 模板名称
+   * @param query 查询条件
+   * @returns 查询结果
+   */
+  async function select(sql: string, query: SqlQuery): Promise<SqlResult[]> {
+    // 准备查询上下文
+    let q = {
+      filter: query.filter,
+      sorter: query.sorter,
+      ...pagerToLimit(query.pager),
+    } as Vars;
+
+    return await __query(sql, q);
   }
 
   /**

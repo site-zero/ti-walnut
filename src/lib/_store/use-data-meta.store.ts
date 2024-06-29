@@ -1,3 +1,4 @@
+import { getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { ComputedRef, Ref, computed, ref } from 'vue';
 import {
@@ -9,7 +10,6 @@ import {
   useLocalMetaEdit,
   useSqlx,
 } from '../../lib';
-import { getLogger } from '@site0/tijs';
 
 const log = getLogger('wn.use-data-meta-store');
 
@@ -70,12 +70,13 @@ function defineDataMetaStore(
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
+  console.log('defineDataMetaStore', options)
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
   const remoteMeta = ref<SqlResult>({});
   const _status = ref<DataMetaStoreStatus>();
-  const _filter = ref(options.filter);
+  const _filter = ref<QueryFilter>(options.filter);
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
@@ -99,6 +100,7 @@ function defineDataMetaStore(
   }
 
   async function fetchRemoteMeta(): Promise<void> {
+    console.log('I am fetch remote', _filter.value)
     _status.value = 'loading';
     let re = await sqlx.fetch(options.sqlFetch, _filter.value);
     if (re && options.patchRemote) {
