@@ -109,7 +109,7 @@ export function installWalnutDicts(dicts?: Record<string, WnDictSetup>) {
   if (!dicts) {
     return;
   }
-  console.log('installWalnutDicts', dicts);
+  //console.log('installWalnutDicts', dicts);
   for (let dictName of _.keys(dicts)) {
     let setup = makeWalnutDictOptions(dicts[dictName]);
     let options = Dicts.makeDictOptions(setup);
