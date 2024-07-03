@@ -1,4 +1,4 @@
-import { Vars, getLogger } from '@site0/tijs';
+import { Util, Vars, getLogger } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
 import {
@@ -39,7 +39,9 @@ export function useSqlx(daoName?: string) {
   }
   async function __query(sql: string, q: Vars): Promise<SqlResult[]> {
     try {
-      let qstr = JSON.stringify(q);
+      let qobj = Util.filterRecordNilValue(q);
+      let qstr = JSON.stringify(qobj);
+      //console.log('query', qstr);
 
       // 准备命令
       let cmds = [`sqlx`];
@@ -100,7 +102,8 @@ export function useSqlx(daoName?: string) {
     countKey: string = 'total'
   ): Promise<number> {
     try {
-      let qstr = JSON.stringify(filter);
+      let qobj = Util.filterRecordNilValue(filter);
+      let qstr = JSON.stringify(qobj);
 
       // 准备命令
       let cmds = [`sqlx`];
