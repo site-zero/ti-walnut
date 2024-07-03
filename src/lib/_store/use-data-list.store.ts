@@ -1,7 +1,6 @@
 import {
   ComboFilterValue,
   KeepInfo,
-  Str,
   TableRowID,
   TableSelectEmitInfo,
   Util,
@@ -43,12 +42,12 @@ export type DataListStoreFeature = {
   listData: ComputedRef<SqlResult[]>;
   hasCurrent: ComputedRef<boolean>;
   hasChecked: ComputedRef<boolean>;
+  changed: ComputedRef<boolean>;
+  isEmpty: ComputedRef<boolean>;
+  isRemoteEmpty: ComputedRef<boolean>;
+  isLocalEmpty: ComputedRef<boolean>;
   //---------------------------------------------
-  // Getter
-  isEmpty: () => boolean;
-  isRemoteEmpty: () => boolean;
-  isLocalEmpty: () => boolean;
-  isChanged: () => boolean;
+  //isChanged: () => boolean;
   getItemId: (it: SqlResult, index: number) => TableRowID;
   getItemById: (id: TableRowID) => SqlResult | undefined;
   getCurrentItem: () => SqlResult | undefined;
@@ -230,13 +229,14 @@ function defineDataListStore(
     listData,
     hasCurrent,
     hasChecked,
+    changed: computed(() => _local.value.isChanged()),
+    isEmpty: computed(() => _.isEmpty(listData.value)),
+    isRemoteEmpty: computed(() => _.isEmpty(remoteList.value)),
+    isLocalEmpty: computed(() => _.isEmpty(_local.value?.localList?.value)),
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
-    isEmpty: () => _.isEmpty(listData.value),
-    isRemoteEmpty: () => _.isEmpty(remoteList.value),
-    isLocalEmpty: () => _.isEmpty(_local.value?.localList?.value),
-    isChanged: () => _local.value.isChanged(),
+    //isChanged: () => _local.value.isChanged(),
     getItemId,
     getItemById,
     getCurrentItem,
