@@ -19,7 +19,7 @@ export type LocalMetaMakeChangeOptions = {
 };
 
 export function useLocalMetaEdit(
-  remoteMeta: Ref<SqlResult>,
+  remoteMeta: Ref<SqlResult | undefined>,
   options: LocalMetaEditOptions = {}
 ) {
   let { isNew = (meta: SqlResult) => 'new' == meta.id || _.isNil(meta.id) } =
@@ -37,6 +37,9 @@ export function useLocalMetaEdit(
   
   ---------------------------------------------*/
   function isNewMeta() {
+    if (!remoteMeta.value) {
+      return true;
+    }
     if (localMeta.value) {
       return isNew(localMeta.value);
     }
@@ -86,7 +89,7 @@ export function useLocalMetaEdit(
       return _.cloneDeep(remoteMeta.value || {});
     }
     if (localMeta.value) {
-      return Util.getRecordDiff(remoteMeta.value, localMeta.value, {
+      return Util.getRecordDiff(remoteMeta.value ?? {}, localMeta.value, {
         checkRemoveFromOrgin: true,
       });
     }

@@ -25,6 +25,9 @@ export type DataMetaStoreFeature = {
   //---------------------------------------------
   // 计算属性
   metaData: ComputedRef<SqlResult>;
+  changed: ComputedRef<boolean>;
+  newMeta: ComputedRef<boolean>;
+  hasRemoteMeta: ComputedRef<boolean>;
   //---------------------------------------------
   // Getter
   isNew: () => boolean;
@@ -39,6 +42,9 @@ export type DataMetaStoreFeature = {
 
   updateMeta: (meta: SqlResult) => void;
   setMeta: (meta: SqlResult) => void;
+
+  setRemoteMeta: (meta: SqlResult) => void;
+  clearRemoteMeta: () => void;
 
   makeChanges: () => SqlExecOptions[];
   //---------------------------------------------
@@ -70,13 +76,19 @@ function defineDataMetaStore(
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
-  console.log('defineDataMetaStore', options)
+  console.log('defineDataMetaStore', options);
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
-  const remoteMeta = ref<SqlResult>({});
+  const remoteMeta = ref<SqlResult>();
   const _status = ref<DataMetaStoreStatus>();
   const _filter = ref<QueryFilter>(options.filter);
+  const hasRemoteMeta = computed(() => {
+    if (!remoteMeta.value || _.isEmpty(remoteMeta.value)) {
+      return false;
+    }
+    return true;
+  });
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
@@ -100,13 +112,13 @@ function defineDataMetaStore(
   }
 
   async function fetchRemoteMeta(): Promise<void> {
-    console.log('I am fetch remote', _filter.value)
+    console.log('I am fetch remote', _filter.value);
     _status.value = 'loading';
     let re = await sqlx.fetch(options.sqlFetch, _filter.value);
     if (re && options.patchRemote) {
       re = options.patchRemote(re);
     }
-    remoteMeta.value = re ?? {};
+    remoteMeta.value = re;
     _status.value = undefined;
   }
 
@@ -139,6 +151,9 @@ function defineDataMetaStore(
     //                  计算属性
     //---------------------------------------------
     metaData,
+    changed: computed(() => _local.value.isChanged()),
+    newMeta: computed(() => isNewMeta()),
+    hasRemoteMeta,
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
@@ -166,6 +181,14 @@ function defineDataMetaStore(
 
     setMeta(meta: SqlResult) {
       _local.value.setMeta(meta);
+    },
+
+    setRemoteMeta(meta: SqlResult) {
+      remoteMeta.value = _.cloneDeep(meta);
+    },
+
+    clearRemoteMeta() {
+      remoteMeta.value = undefined;
     },
 
     makeChanges,

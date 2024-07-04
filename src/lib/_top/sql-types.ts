@@ -22,6 +22,7 @@ export type SqlExecResult = {
   batchResult: number[];
   batchTotal: number;
   list?: SqlResult[];
+  message?: string;
 };
 
 export type SqlQuery = {

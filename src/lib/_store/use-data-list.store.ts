@@ -63,6 +63,7 @@ export type DataListStoreFeature = {
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
   updateSelection: (currentId: TableRowID, checkedIds?: TableRowID[]) => void;
+  cancelSelection: () => void;
   makeChanges: () => SqlExecOptions[];
   //---------------------------------------------
   // 本地化存储状态
@@ -294,6 +295,11 @@ function defineDataListStore(
       checkedIds = checkedIds ?? [currentId];
       _current_id.value = currentId;
       _checked_ids.value = checkedIds;
+    },
+
+    cancelSelection() {
+      _current_id.value = undefined;
+      _checked_ids.value = [];
     },
 
     //---------------------------------------------
