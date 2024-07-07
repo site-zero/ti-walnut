@@ -8,13 +8,16 @@ export type LocalMetaEditOptions = {
 };
 
 export type LocalMetaMakeChangeOptions = {
-  defaultMeta?: Vars;
   updateSql: string;
   insertSql: string;
-  insertMeta?: Vars;
+  defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
+  insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
+  updateMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
   insertSet?: SqlExecSetVar[];
-  updateMeta?: Vars;
-  fetchBack?: [string, (Vars | undefined)?];
+  fetchBack?: (
+    local: SqlResult,
+    remote?: SqlResult
+  ) => [string, (Vars | undefined)?];
   noresult?: boolean;
 };
 
@@ -103,22 +106,39 @@ export function useLocalMetaEdit(
       return [];
     }
 
-    _.defaults(vars, options.defaultMeta);
+    // 语法上防一下空
+    if (!localMeta.value) {
+      return [];
+    }
+    let local = localMeta.value;
+    let remote = remoteMeta.value;
+
+    if (options.defaultMeta) {
+      _.defaults(vars, options.defaultMeta(local, remote));
+    }
+
     let sets = [] as SqlExecSetVar[];
     let sql = options.updateSql;
     // 新创建的 consol 需要设置更多字段
     if (isNewMeta()) {
       sql = options.insertSql;
       // 创建时间， 对于 st/st_rsn 数据库里有默认值
-      _.assign(vars, options.insertMeta);
+      if (options.insertMeta) {
+        _.assign(vars, options.insertMeta(local, remote));
+      }
       // 自动生成 ID
       if (options.insertSet) {
         sets.push(...options.insertSet);
       }
     }
     // 已经存在的，那么要把 ID 设置一下
-    else {
-      _.assign(vars, options.updateMeta);
+    else if (options.updateMeta) {
+      _.assign(vars, options.updateMeta(local, remote));
+    }
+
+    let fb: [string, (Vars | undefined)?] | undefined = undefined;
+    if (options.fetchBack) {
+      fb = options.fetchBack(local, remote);
     }
     return [
       {
@@ -128,7 +148,7 @@ export function useLocalMetaEdit(
         reset: true,
         noresult: options.noresult,
         sets,
-        fetchBack: options.fetchBack,
+        fetchBack: fb,
       },
     ];
   }

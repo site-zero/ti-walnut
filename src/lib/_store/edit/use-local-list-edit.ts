@@ -231,13 +231,19 @@ export function useLocalListEdit(
             if (_.isEmpty(diff)) {
               continue;
             }
+
+            // 补上固定 Meta
+            if (options.defaultMeta) {
+              _.defaults(diff, options.defaultMeta(local, remote));
+            }
+            if (options.updateMeta) {
+              _.assign(diff, options.updateMeta(local, remote));
+            }
+
             // 补上 ID
             if (patchMetaUpdate) {
               patchMetaUpdate(diff, id, remote);
             }
-            // 补上固定 Meta
-            _.assign(diff, options.defaultMeta);
-            _.assign(diff, options.updateMeta);
 
             // 记入列表
             updateList.push(diff);
@@ -245,8 +251,12 @@ export function useLocalListEdit(
           // 必然是新记录，需要插入
           else {
             let newMeta = _.cloneDeep(local);
-            _.assign(newMeta, options.defaultMeta);
-            _.assign(newMeta, options.insertMeta);
+            if (options.defaultMeta) {
+              _.defaults(newMeta, options.defaultMeta(local, remote));
+            }
+            if (options.insertMeta) {
+              _.assign(newMeta, options.insertMeta(local, remote));
+            }
             insertList.push(newMeta);
           }
         }
@@ -294,8 +304,6 @@ export function useLocalListEdit(
           noresult: options.noresult,
         });
       }
-
-      
 
       return changes;
     },

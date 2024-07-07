@@ -55,10 +55,11 @@ export type DataListStoreFeature = {
   //---------------------------------------------
   // 本地方法
   resetLocalChange: () => void;
-  updateQuery: (query: ComboFilterValue) => void;
-  updateFilter: (filter: QueryFilter) => void;
-  updateSorter: (sorter: QuerySorter) => void;
-  updatePager: (page: Partial<SqlPagerInput>) => void;
+  clearRemoteList: () => void;
+  setQuery: (query: ComboFilterValue) => void;
+  setFilter: (filter: QueryFilter) => void;
+  setSorter: (sorter: QuerySorter) => void;
+  setPager: (page: Partial<SqlPagerInput>) => void;
   addLocalItem: (meta: SqlResult) => void;
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
@@ -87,7 +88,7 @@ export type DataListStoreFeature = {
 export type DataListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
-  query: SqlQuery;
+  query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount: string;
   makeChange?: LocalListMakeChangeOptions;
@@ -107,7 +108,13 @@ function defineDataListStore(
   //---------------------------------------------
   //              默认查询条件
   //---------------------------------------------
-  let _dft_query = _.defaults(options.query, {
+  let _dft_query: SqlQuery;
+  if (_.isFunction(options.query)) {
+    _dft_query = options.query();
+  } else {
+    _dft_query = _.cloneDeep(options.query);
+  }
+  _.defaults(_dft_query, {
     filter: {},
     sorter: {
       ct: 1,
@@ -117,7 +124,7 @@ function defineDataListStore(
   _query.pager = _.pick(_query.pager, 'pageSize') as SqlPager;
   _.defaults(_query.pager, {
     pageNumber: 1,
-    pageSize: options.query.pager?.pageSize ?? 50,
+    pageSize: _dft_query.pager?.pageSize ?? 50,
   });
   //---------------------------------------------
   //                 建立数据模型
@@ -150,6 +157,10 @@ function defineDataListStore(
     _local.value.reset();
     _current_id.value = undefined;
     _checked_ids.value = [];
+  }
+
+  function clearRemoteList() {
+    remoteList.value = undefined;
   }
 
   function makeChanges() {
@@ -251,23 +262,24 @@ function defineDataListStore(
     //                  本地方法
     //---------------------------------------------
     resetLocalChange,
+    clearRemoteList,
 
-    updateQuery(q: ComboFilterValue) {
+    setQuery(q: ComboFilterValue) {
       _.assign(query, q);
       __save_local_query();
     },
 
-    updateFilter(filter: QueryFilter) {
+    setFilter(filter: QueryFilter) {
       query.filter = _.cloneDeep(filter);
       __save_local_query();
     },
 
-    updateSorter(sorter: QuerySorter) {
+    setSorter(sorter: QuerySorter) {
       query.sorter = _.cloneDeep(sorter);
       __save_local_query();
     },
 
-    updatePager(page: Partial<SqlPagerInput>) {
+    setPager(page: Partial<SqlPagerInput>) {
       let { pageNumber, pageSize } = page;
       if (_.isNumber(pageNumber) && pageNumber > 0) {
         query.pager.pageNumber = pageNumber;
