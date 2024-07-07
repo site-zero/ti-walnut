@@ -62,7 +62,10 @@ export type DataListStoreFeature = {
   addLocalItem: (meta: SqlResult) => void;
   updateCurrent: (meta: SqlResult) => void;
   removeChecked: () => void;
-  updateSelection: (currentId: TableRowID, checkedIds?: TableRowID[]) => void;
+  updateSelection: (
+    currentId?: TableRowID | null,
+    checkedIds?: TableRowID[]
+  ) => void;
   cancelSelection: () => void;
   makeChanges: () => SqlExecOptions[];
   //---------------------------------------------
@@ -291,10 +294,12 @@ function defineDataListStore(
       }
     },
 
-    updateSelection(currentId: TableRowID, checkedIds?: TableRowID[]) {
-      checkedIds = checkedIds ?? [currentId];
-      _current_id.value = currentId;
-      _checked_ids.value = checkedIds;
+    updateSelection(currentId?: TableRowID | null, checkedIds?: TableRowID[]) {
+      if (_.isEmpty(checkedIds) && !_.isNil(currentId)) {
+        checkedIds = [currentId];
+      }
+      _current_id.value = currentId ?? undefined;
+      _checked_ids.value = checkedIds ?? [];
     },
 
     cancelSelection() {
