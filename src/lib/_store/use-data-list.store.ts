@@ -1,5 +1,6 @@
 import {
   ComboFilterValue,
+  KeepFeature,
   KeepInfo,
   TableRowID,
   TableSelectEmitInfo,
@@ -31,6 +32,8 @@ export type DataListStoreStatus = 'loading' | 'saving';
 export type DataListStoreFeature = {
   //---------------------------------------------
   // 数据模型
+  _keep_query: KeepFeature;
+  _keep_select: KeepFeature;
   _local: any;
   currentId: Ref<TableRowID | undefined>;
   checkedIds: Ref<TableRowID[]>;
@@ -50,6 +53,9 @@ export type DataListStoreFeature = {
   //isChanged: () => boolean;
   getItemId: (it: SqlResult, index: number) => TableRowID;
   getItemById: (id: TableRowID) => SqlResult | undefined;
+  getItemBy: (
+    predicate: (it: SqlResult, index: number) => boolean
+  ) => SqlResult | undefined;
   getCurrentItem: () => SqlResult | undefined;
   getFilterField: (key: string, dft?: any) => any;
   //---------------------------------------------
@@ -73,6 +79,8 @@ export type DataListStoreFeature = {
   // 本地化存储状态
   saveLocalQuery: () => void;
   resetLocalQuery: () => void;
+  saveLocalSelect: () => void;
+  resetLocalSelect: () => void;
   //---------------------------------------------
   // 与控件绑定
   onSelect: (payload: TableSelectEmitInfo) => void;
@@ -88,6 +96,7 @@ export type DataListStoreFeature = {
 export type DataListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
+  keepSelect?: KeepInfo;
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount: string;
@@ -104,7 +113,8 @@ function defineDataListStore(
   let sqlx = useSqlx(options.daoName);
   //---------------------------------------------
   // 本地保存
-  let Keep = useKeep(options.keepQuery);
+  let _keep_query = useKeep(options.keepQuery);
+  let _keep_select = useKeep(options.keepSelect);
   //---------------------------------------------
   //              默认查询条件
   //---------------------------------------------
@@ -120,7 +130,7 @@ function defineDataListStore(
       ct: 1,
     },
   });
-  let _query = Keep.loadObj(_dft_query) as SqlQuery;
+  let _query = _keep_query.loadObj(_dft_query) as SqlQuery;
   _query.pager = _.pick(_query.pager, 'pageSize') as SqlPager;
   _.defaults(_query.pager, {
     pageNumber: 1,
@@ -134,9 +144,13 @@ function defineDataListStore(
   const query = reactive(_query as SqlQuery);
   const _current_id = ref<TableRowID>();
   const _checked_ids = ref<TableRowID[]>([]);
-
+  //---------------------------------------------
+  let selection = _keep_select.loadObj() ?? {};
+  _current_id.value = selection.currentId;
+  _checked_ids.value = selection.checkedIds || [];
+  //---------------------------------------------
   function __save_local_query() {
-    Keep.save({
+    _keep_query.save({
       filter: query.filter,
       sorter: query.sorter,
       pager: {
@@ -144,9 +158,20 @@ function defineDataListStore(
       },
     });
   }
-
+  //---------------------------------------------
   function __reset_local_query() {
-    Keep.reset();
+    _keep_query.reset();
+  }
+  //---------------------------------------------
+  function __save_local_select() {
+    _keep_select.save({
+      currentId: _current_id.value,
+      checkedIds: _checked_ids.value,
+    });
+  }
+  //---------------------------------------------
+  function __reset_local_select() {
+    _keep_select.reset();
   }
   //---------------------------------------------
   //                 组合其他特性
@@ -155,8 +180,6 @@ function defineDataListStore(
 
   function resetLocalChange() {
     _local.value.reset();
-    _current_id.value = undefined;
-    _checked_ids.value = [];
   }
 
   function clearRemoteList() {
@@ -196,6 +219,10 @@ function defineDataListStore(
     return _.find(listData.value, (li, index) => getItemId(li, index) == id);
   }
 
+  function getItemBy(predicate: (it: SqlResult, index: number) => boolean) {
+    return _.find(listData.value, predicate);
+  }
+
   function getCurrentItem(): SqlResult | undefined {
     return getItemById(_current_id.value);
   }
@@ -231,6 +258,8 @@ function defineDataListStore(
   ---------------------------------------------*/
   return {
     // 数据模型
+    _keep_query,
+    _keep_select,
     _local,
     currentId: _current_id,
     checkedIds: _checked_ids,
@@ -254,6 +283,7 @@ function defineDataListStore(
     //isChanged: () => _local.value.isChanged(),
     getItemId,
     getItemById,
+    getItemBy,
     getCurrentItem,
     getFilterField: (key: string, dft?: any) => {
       return _.get(query.filter, key) ?? dft;
@@ -317,6 +347,7 @@ function defineDataListStore(
     cancelSelection() {
       _current_id.value = undefined;
       _checked_ids.value = [];
+      __reset_local_select();
     },
 
     //---------------------------------------------
@@ -324,13 +355,15 @@ function defineDataListStore(
     //---------------------------------------------
     saveLocalQuery: __save_local_query,
     resetLocalQuery: __reset_local_query,
-
+    saveLocalSelect: __save_local_select,
+    resetLocalSelect: __reset_local_select,
     //---------------------------------------------
     //                  与控件绑定
     //---------------------------------------------
     onSelect(payload: TableSelectEmitInfo) {
       _current_id.value = payload.currentId ?? undefined;
       _checked_ids.value = Util.mapTruthyKeys(payload.checkedIds);
+      __save_local_select();
     },
 
     //---------------------------------------------
