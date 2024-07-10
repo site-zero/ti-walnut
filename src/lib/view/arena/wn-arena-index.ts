@@ -12,7 +12,7 @@ const WnArenaInfo: TiComInfo = {
   i18n: I18n.createEmptyI18nSet(),
   exampleProps: [],
   com: WnArena,
-  install: (app: App) => {
+  install: (app: App<Element>) => {
     app.component(COM_TYPE, WnArena);
   },
 };
