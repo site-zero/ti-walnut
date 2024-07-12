@@ -68,6 +68,7 @@ export type DataListStoreFeature = {
   setPager: (page: Partial<SqlPagerInput>) => void;
   addLocalItem: (meta: SqlResult) => void;
   updateCurrent: (meta: SqlResult) => void;
+  updateItems: (meta: SqlResult, forIds?: TableRowID | TableRowID[]) => void;
   removeChecked: () => void;
   updateSelection: (
     currentId?: TableRowID | null,
@@ -328,6 +329,10 @@ function defineDataListStore(
       if (hasCurrent.value) {
         _local.value.batchUpdate(meta, _current_id.value);
       }
+    },
+
+    updateItems(meta: SqlResult, forIds?: TableRowID | TableRowID[]) {
+      _local.value.batchUpdate(meta, forIds);
     },
 
     removeChecked() {

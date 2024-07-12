@@ -201,6 +201,12 @@ export function useLocalListEdit(
     //.............................................
     makeChanges(options: LocalListMakeChangeOptions) {
       let changes = [] as SqlExecOptions[];
+
+      // 如果没有做过任何修改 ...
+      if (!_local_list.value) {
+        return changes;
+      }
+
       // 对远程列表编制索引
       let remoteMap = new Map<TableRowID, SqlResult>();
       if (remoteList.value) {
