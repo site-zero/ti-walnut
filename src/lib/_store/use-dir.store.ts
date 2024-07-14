@@ -28,16 +28,20 @@ export function useDirStore(name?: string): DirFeature {
 
   // 定义新实例
   log.info(`create new DirStore(${name})`);
-  let _dir = useDirInit();
-  let _keep = useDirKeep();
-  let _view = useDirView(_dir);
-  let _query = userDirQuery(_dir);
-  let _agg = userDirAgg({
+  const _dir = useDirInit();
+  const _keep = computed(() => {
+    let context = getGuiContext();
+    let behaviors = Util.explainObj(context, _dir.behaviors.value);
+    return useDirKeep(behaviors);
+  });
+  const _view = useDirView(_dir);
+  const _query = userDirQuery(_dir);
+  const _agg = userDirAgg({
     ..._dir,
     ..._query,
   });
-  let _edit = userObjEdit();
-  let GUIContext = computed(() => {
+  const _edit = userObjEdit();
+  const GUIContext = computed(() => {
     return getGuiContext();
   });
 
@@ -47,7 +51,7 @@ export function useDirStore(name?: string): DirFeature {
       oHome: _dir.oHome.value,
       oHomeIndex: _dir.oHomeIndex.value,
       //............ GUI Loading Path
-      actionsPath: _dir.actionsPath.value,
+      actionsPath: _dir.actionPath.value,
       layoutPath: _dir.layoutPath.value,
       schemaPath: _dir.schemaPath.value,
       methodPaths: _dir.methodPaths.value,
@@ -89,7 +93,41 @@ export function useDirStore(name?: string): DirFeature {
     };
   }
 
+  function updateSelection(
+    currentId?: string,
+    checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
+  ) {
+    if (_.isEmpty(checkedIds) && !_.isNil(currentId)) {
+      checkedIds = [currentId];
+    }
+    let ckIds: Record<string, boolean>;
+    if (_.isArray(checkedIds)) {
+      ckIds = Util.arrayToRecord(checkedIds);
+    } else if (_.isMap(checkedIds)) {
+      ckIds = Util.mapToObj(checkedIds);
+    } else {
+      ckIds = _.cloneDeep(checkedIds) ?? {};
+    }
+    _query.currentId.value = currentId;
+    _query.checkedIds.value = ckIds;
+    console.log(`Keep.saveSelection(${currentId}, ${ckIds});`);
+    _keep.value.saveSelection(currentId, ckIds);
+
+    let meta: WnObj | undefined = undefined;
+    if (currentId) {
+      meta = _.find(_query.list.value, (li) => li.id == currentId);
+      _edit.meta.value = _.cloneDeep(meta);
+    } else {
+      _edit.meta.value = undefined;
+    }
+  }
+  function clearSelection() {
+    _query.currentId.value = undefined;
+    _query.checkedIds.value = {};
+  }
+
   re = {
+    _keep,
     /*-----------<State>---------------*/
     ..._dir,
     ..._query,
@@ -98,7 +136,7 @@ export function useDirStore(name?: string): DirFeature {
     ..._edit,
     /*-----------<Getters>---------------*/
     GUIContext,
-    /*-----------<Actions>---------------*/
+    /*-----------<Methods>---------------*/
     explainLayout: () => {
       let layout = _.cloneDeep(_view.layout.value);
       let context = _.cloneDeep(GUIContext.value);
@@ -114,11 +152,13 @@ export function useDirStore(name?: string): DirFeature {
       return schema2;
     },
     keepState: () => {
-      _keep.saveToLocal({
+      _keep.value.saveToLocal({
         ..._view,
         ..._query,
       });
     },
+    updateSelection,
+    clearSelection,
     reload: async (obj?: WnObj) => {
       await _dir.initDirSettings(obj);
 
@@ -133,12 +173,15 @@ export function useDirStore(name?: string): DirFeature {
         ..._agg,
       });
 
-      _keep.restoreFromLocal({
-        ..._view,
-        ..._query,
-      });
-
       await _query.queryList();
+
+      _keep.value.restoreFromLocal(
+        {
+          ..._view,
+          ..._query,
+        },
+        updateSelection
+      );
       if (_agg.aggAutoReload.value) {
         await _agg.loadAggResult();
       }

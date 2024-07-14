@@ -19,7 +19,7 @@ export function useDirInit(): DirInitFeature {
     moduleName: ref<string>(''),
     oHome: ref<WnObj>(),
     oHomeIndex: ref<WnObj | undefined>(),
-    actionsPath: ref<string>(),
+    actionPath: ref<string>(),
     layoutPath: ref<string>(),
     schemaPath: ref<string>(),
     methodPaths: ref<string[]>([]),
@@ -40,7 +40,7 @@ export function useDirInit(): DirInitFeature {
     } else {
       _init.oHomeIndex.value = undefined;
     }
-    _init.actionsPath.value = view.actionsPath;
+    _init.actionPath.value = view.actionPath;
     _init.layoutPath.value = view.layoutPath;
     _init.schemaPath.value = view.schemaPath;
     if (view.methodPaths && !_.isEmpty(view.methodPaths)) {
@@ -85,10 +85,11 @@ export function useDirInit(): DirInitFeature {
       // 自己的元数据就是视图内容
       else {
         let view = {} as DirGUIViewInfo;
-        view.actionsPath = obj['actions-path'];
+        view.actionPath = obj['actions-path'];
         view.layoutPath = obj['layout-path'];
         view.schemaPath = obj['schema-path'];
         view.methodPaths = obj['method-paths'];
+        view.behaviors = obj['behaviors'];
         await __update_by_view(view);
         if (!_init.oHomeIndex.value) {
           _init.oHomeIndex.value = obj;
@@ -101,7 +102,7 @@ export function useDirInit(): DirInitFeature {
     _init.moduleName.value = '';
     _init.oHome.value = undefined;
     _init.oHomeIndex.value = undefined;
-    _init.actionsPath.value = undefined;
+    _init.actionPath.value = undefined;
     _init.layoutPath.value = undefined;
     _init.schemaPath.value = undefined;
     _init.methodPaths.value = undefined;

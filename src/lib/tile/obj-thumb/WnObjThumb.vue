@@ -1,0 +1,54 @@
+<script lang="ts" setup>
+  import { computed } from 'vue';
+  import { Icons, Iconable, LabelProps, TiLabel } from '@site0/tijs';
+  import { WnObjThumbProps } from './wn-obj-thumb-types';
+  const props = defineProps<WnObjThumbProps>();
+  //-----------------------------------------------------
+  const ObjIcon = computed(() => {
+    let _icon: string | Iconable | undefined;
+    let value = props.value;
+    if (value) {
+      _icon = {
+        tp: value.tp,
+        mime: value.mime,
+        race: value.race,
+        icon: value.icon,
+      };
+    }
+    return Icons.getIcon(_icon);
+  });
+  //-----------------------------------------------------
+  const ObjLabel = computed(() => {
+    let value = props.value ?? {};
+    let re: LabelProps = { autoI18n: true };
+    if (value) {
+      let { title, nm } = value;
+      if (title && nm) {
+        if (title != nm) {
+          re.value = title;
+          re.suffixText = nm;
+        } else {
+          re.value = nm;
+          re.autoI18n = false;
+        }
+      }
+      // 只有名称
+      else {
+        re.value = nm;
+        re.autoI18n = false;
+      }
+    }
+    // 空名称
+    else {
+      re.value = 'i18n:nil';
+    }
+    return re;
+  });
+  //-----------------------------------------------------
+</script>
+<template>
+  <TiLabel v-bind="ObjLabel" :prefix-icon="ObjIcon" />
+</template>
+<style scoped lang="scss">
+  @use '@site0/tijs/scss' as *;
+</style>

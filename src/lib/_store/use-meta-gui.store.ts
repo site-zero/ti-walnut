@@ -6,7 +6,6 @@ import _ from 'lodash';
 
 const log = getLogger('wn.store.meta-gui');
 
-const _meta = ref<WnObj>();
 let _defaultGUI = {
   comType: 'TiRoadblock',
   comConf: {
@@ -25,6 +24,14 @@ export type MetaGUIFeature = {
 };
 
 export function useMetaGUIStore(): MetaGUIFeature {
+  //---------------------------------------------
+  // 数据模型
+  //---------------------------------------------
+  const _meta = ref<WnObj>();
+
+  //---------------------------------------------
+  // 计算属性
+  //---------------------------------------------
   let hasMeta = computed(() => (_meta.value && _meta.value.id ? true : false));
   let GUIView = computed(() => {
     //console.warn('Rebuild GUIView', _.get(_meta.value, 'id'));
@@ -40,6 +47,9 @@ export function useMetaGUIStore(): MetaGUIFeature {
     return real;
   });
 
+  //---------------------------------------------
+  // 输出特性
+  //---------------------------------------------
   return {
     meta: _meta,
     hasMeta,
@@ -55,11 +65,16 @@ export function useMetaGUIStore(): MetaGUIFeature {
       let { id, ph } = info;
       // 获取重新加载对象的路径:
       let objPath;
+      // 直接指定了对象的 ID
       if (id) {
         objPath = `id:${id}`;
-      } else if (ph) {
+      }
+      // 指定了对象全路径
+      else if (ph) {
         objPath = ph;
-      } else if (hasMeta.value) {
+      }
+      // 直接指定了对象
+      else if (hasMeta.value) {
         let meta = _meta.value!;
         if (meta.ph) {
           objPath = meta.ph;

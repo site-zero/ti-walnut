@@ -1,7 +1,8 @@
 import {
-  ActionBarItem,
+  ActionBarProps,
   FieldStatus,
-  KeepMode,
+  KeepFeature,
+  KeepInfo,
   LayoutProps,
   Pager,
   Vars,
@@ -63,7 +64,10 @@ export type ModulePriviledge = {
 };
 
 export type DirGUIViewBehaviors = {
-  keepAt?: string;
+  keepSelection?: KeepInfo;
+  keepFilter?: KeepInfo;
+  keepSorter?: KeepInfo;
+  keepShown?: KeepInfo;
   filterIgnore?: string;
   fixedMatch?: QueryFilter;
   filter?: QueryFilter;
@@ -79,7 +83,7 @@ export type DirGUIViewInfo = {
   // 从哪里加载列表
   indexPath?: string;
   // 动作菜单的加载文件
-  actionsPath?: string;
+  actionPath?: string;
   // 布局文件
   layoutPath?: string;
   // Schema 文件
@@ -100,7 +104,7 @@ export type DirInitSettings = {
   oHome: Ref<WnObj | undefined>;
   oHomeIndex: Ref<WnObj | undefined>;
   //............ GUI Loading Path
-  actionsPath: Ref<string | undefined>;
+  actionPath: Ref<string | undefined>;
   layoutPath: Ref<string | undefined>;
   schemaPath: Ref<string | undefined>;
   methodPaths: Ref<string[] | undefined>;
@@ -129,9 +133,9 @@ export type DirInitFeature = DirInitSettings & DirInitGetters & DirInitActions;
 export type DirViewSettings = {
   pvg: Ref<ModulePriviledge>;
   guiShown: Ref<Vars | undefined>;
-  actions: Ref<ActionBarItem[] | undefined>;
-  layout: Ref<Omit<LayoutProps, 'schema'> | undefined>;
-  schema: Ref<Pick<LayoutProps, 'schema'> | undefined>;
+  actions: Ref<ActionBarProps | undefined>;
+  layout: Ref<Omit<LayoutProps, 'schema'>>;
+  schema: Ref<Pick<LayoutProps, 'schema'>>;
   methods: Ref<Record<string, Function>>;
 };
 
@@ -151,7 +155,10 @@ export type DirViewActions = {
   invoke: (methodName: string, ...args: any[]) => Promise<any>;
 };
 
-export type DirViewFeatures = DirViewSettings & DirViewActions;
+export type DirViewFeatures = DirViewSettings &
+  DirViewActions & {
+    hasActions: ComputedRef<boolean>;
+  };
 
 /*
 ----------------------------------------
@@ -159,21 +166,36 @@ export type DirViewFeatures = DirViewSettings & DirViewActions;
 ----------------------------------------
 */
 
-export type DirKeepSetting = {
-  keepAt: Ref<string | undefined>;
-  keepMode: Ref<KeepMode | undefined>;
-  filterIgnore: Ref<string | undefined>;
-};
-
 export type DirKeeplInfo = Pick<DirViewSettings, 'guiShown'> &
-  Pick<DirQuerySettings, 'filter' | 'sorter'>;
+  Pick<DirQuerySettings, 'filter' | 'sorter'> &
+  Pick<DirSelection, 'currentId' | 'checkedIds'>;
 
-export type DirKeepActions = {
+export type DirUpdateSelection = (
+  currentId?: string,
+  checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
+) => void;
+
+export type DirKeepFeatures = {
+  KeepSelection: ComputedRef<KeepFeature>;
+  KeepFilter: ComputedRef<KeepFeature>;
+  KeepSorter: ComputedRef<KeepFeature>;
+  KeepShown: ComputedRef<KeepFeature>;
+  saveSelection: (
+    currentId?: string,
+    checkedIds?: Record<string, boolean>
+  ) => void;
   saveToLocal: (info: DirKeeplInfo) => void;
-  restoreFromLocal: (info: DirKeeplInfo) => void;
-};
 
-export type DirKeepFeatures = DirKeepSetting & DirKeepActions;
+  restoreSelection: (
+    currentId: Ref<string | undefined>,
+    checkedIds: Ref<Record<string, boolean>>,
+    updateSelection: DirUpdateSelection
+  ) => void;
+  restoreFromLocal: (
+    info: DirKeeplInfo,
+    updateSelection: DirUpdateSelection
+  ) => void;
+};
 
 /*
 ----------------------------------------
@@ -250,6 +272,13 @@ export type DirFeature = DirInitFeature &
     GUIContext: ComputedRef<DirGUIContext>;
     explainLayout: () => Omit<LayoutProps, 'schema'>;
     explainSchema: () => Pick<LayoutProps, 'schema'>;
+    _keep: ComputedRef<DirKeepFeatures>;
+
+    updateSelection: (
+      currentId?: string,
+      checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
+    ) => void;
+    clearSelection: () => void;
   };
 
 export type DirGUIContext = {
@@ -278,6 +307,7 @@ export type DirGUIContext = {
   isLongPager: boolean;
   isShortPager: boolean;
   isPagerEnabled: boolean;
+  currentMeta?: WnObj;
   //........... DirSelection
   currentId?: string;
   checkedIds?: Record<string, boolean>;

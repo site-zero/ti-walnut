@@ -2,7 +2,7 @@ import { TableInputColumn, getFieldUniqKey, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { READONLY_FIELDS } from './define-obj-columns';
 
-const log = getLogger('wn.feature.obj-columns');
+const log = getLogger('wn.obj-columns');
 
 export type ObjColumnsFeature = {
   getColumn: (key: string) => TableInputColumn;

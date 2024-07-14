@@ -1,15 +1,20 @@
 {
-  "wn-obj-nm": "Obj Name",
+  "wn-obj-nm": "Name",
   "wn-obj-title": "Title",
   "wn-obj-tp": "Type",
   "wn-obj-race": "Race",
   "wn-obj-mime": "MIME",
+  "wn-obj-sha1": "SHA1",
+  "wn-obj-len": "Size",
+  "wn-obj-width": "Width",
+  "wn-obj-height": "Height",
   "wn-obj-c": "Creator",
   "wn-obj-m": "Mender",
   "wn-obj-g": "Group",
   "wn-obj-md": "Pvg Mode",
   "wn-obj-ct": "Created",
   "wn-obj-lm": "Modified",
+  "wn-obj-expi": "Expired At",
   "e-auth-account-noexists": "User Not Exists",
   "e-auth-login-invalid-passwd": "User Auth Error"
 }

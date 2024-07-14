@@ -14,36 +14,30 @@ import {
 const log = getLogger('wn.store.dir.view');
 
 export function useDirView(options: DirInitFeature): DirViewFeatures {
-  let { actionsPath, layoutPath, schemaPath, methodPaths } = options;
-  let VIEW: DirViewSettings = {
+  const { actionPath, layoutPath, schemaPath, methodPaths } = options;
+  const _view: DirViewSettings = {
     pvg: ref({}),
     guiShown: ref(),
     actions: ref(),
-    layout: ref(),
-    schema: ref(),
+    layout: ref({ blocks: [] }),
+    schema: ref({}),
     methods: ref({}),
   };
 
-  /*-------------------------------------
+  //-------------------------------------
+  //            Computed
+  //--------------------------------------
 
-                Computed
-
-  --------------------------------------*/
-  let GuiLayout = computed(() => {
-    return;
-  });
-
-  /*-------------------------------------
-
-                Methods
-
-  --------------------------------------*/
+  //-------------------------------------
+  //             Methods
+  //-------------------------------------
 
   async function loadActions() {
-    if (actionsPath.value) {
-      log.debug('loadActions:', actionsPath.value);
-      VIEW.actions.value = await Walnut.loadJson(actionsPath.value);
+    if (actionPath.value) {
+      log.debug('loadActions:', actionPath.value);
+      _view.actions.value = await Walnut.loadJson(actionPath.value);
     } else {
+      _view.actions.value = undefined;
       log.debug('loadActions: NOT Need');
     }
   }
@@ -51,8 +45,9 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
   async function loadLayout() {
     if (layoutPath.value) {
       log.debug('loadLayout:', layoutPath.value);
-      VIEW.layout.value = await Walnut.loadJson(layoutPath.value);
+      _view.layout.value = await Walnut.loadJson(layoutPath.value);
     } else {
+      _view.layout.value = (() => ({ blocks: [] }))();
       log.debug('loadLayout: NOT Need');
     }
   }
@@ -60,8 +55,9 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
   async function loadScheme() {
     if (schemaPath.value) {
       log.debug('loadScheme:', schemaPath.value);
-      VIEW.schema.value = await Walnut.loadJson(schemaPath.value);
+      _view.schema.value = await Walnut.loadJson(schemaPath.value);
     } else {
+      _view.schema.value = (() => ({}))();
       log.debug('loadScheme: NOT Need');
     }
   }
@@ -87,7 +83,7 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
           _.assign(re, loaded);
         }
       }
-      VIEW.methods.value = re;
+      _view.methods.value = re;
     } else {
       log.debug('loadMethods: NOT Need');
     }
@@ -126,18 +122,20 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
 
   return {
     /*-----------<State>---------------*/
-    ...VIEW,
+    ..._view,
     /*-----------<Getters>---------------*/
-
+    hasActions: computed(() => {
+      return !_.isEmpty(_view.actions.value);
+    }),
     /*-----------<Actions>---------------*/
     resetView: () => {
       log.debug('resetView');
-      VIEW.pvg.value = {};
-      VIEW.guiShown.value = {};
-      VIEW.actions.value = undefined;
-      VIEW.layout.value = undefined;
-      VIEW.schema.value = undefined;
-      VIEW.methods.value = {};
+      _view.pvg.value = {};
+      _view.guiShown.value = {};
+      _view.actions.value = undefined;
+      _view.layout.value = (() => ({ blocks: [] }))();
+      _view.schema.value = (() => ({}))();
+      _view.methods.value = {};
     },
     loadView: async () => {
       let loading = [] as any[];
@@ -153,16 +151,16 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
     can_I_update: () => true,
     can_I_save: () => true,
     updateShown: (shown: Vars) => {
-      VIEW.guiShown.value = shown;
+      _view.guiShown.value = shown;
     },
     mergeShown: (shown: Vars) => {
-      if (!VIEW.guiShown.value) {
-        VIEW.guiShown.value = {};
+      if (!_view.guiShown.value) {
+        _view.guiShown.value = {};
       }
-      _.assign(VIEW.guiShown.value, shown);
+      _.assign(_view.guiShown.value, shown);
     },
     invoke: async (methodName: string, ...args: any[]): Promise<any> => {
-      let fn = VIEW.methods.value[methodName];
+      let fn = _view.methods.value[methodName];
       if (_.isFunction(fn)) {
         let re = await fn(...args);
         return re;
@@ -171,7 +169,7 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
       else {
         log.error(
           `Not Function [${methodName}] of methods:`,
-          VIEW.methods.value
+          _view.methods.value
         );
       }
     },

@@ -1,4 +1,4 @@
-import { Pager, WnObjStatus, getLogger } from '@site0/tijs';
+import { getLogger, Pager, WnObjStatus } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { WnObj } from '../../';
@@ -13,66 +13,71 @@ import {
 
 const log = getLogger('wn.store.dir.query');
 
-export function userDirQuery(options: DirInitGetters) {
+export function userDirQuery(options: DirInitGetters): DirQueryFeature {
   log.debug('userDirQuery');
   let { homeIndexId, isHomeExists } = options;
   // Prepare data
-  let fixedMatch = ref<QueryFilter>({});
-  let filter = ref<QueryFilter>({});
-  let sorter = ref<QuerySorter>({});
-  let objKeys = ref<string>('');
-  let joinOne = ref<QueryJoinOne>();
-  let pager = ref<Pager>();
+  let _fixed_match = ref<QueryFilter>({});
+  let _filter = ref<QueryFilter>({});
+  let _sorter = ref<QuerySorter>({});
+  let _obj_keys = ref<string>('');
+  let _join_one = ref<QueryJoinOne>();
+  let _pager = ref<Pager>();
 
-  let currentId = ref<string>();
-  let checkedIds = ref<Record<string, boolean>>({});
-  let list = ref<WnObj[]>([]);
-  let itemStatus = ref<Record<string, WnObjStatus>>({});
+  let _current_id = ref<string>();
+  let _checked_ids = ref<Record<string, boolean>>({});
+  let _list = ref<WnObj[]>([]);
+  let _item_status = ref<Record<string, WnObjStatus>>({});
 
+  //-----------------------------------------------
   // Getters
-  let queryPageNumber = computed(() => {
-    let pg = pager.value;
+  //-----------------------------------------------
+  const queryPageNumber = computed(() => {
+    let pg = _pager.value;
     if (!pg) {
       return 1;
     }
     return pg.pageNumber ?? pg.pn ?? 1;
   });
-  let queryPageSize = computed(() => {
-    let pg = pager.value;
+  //-----------------------------------------------
+  const queryPageSize = computed(() => {
+    let pg = _pager.value;
     if (!pg) {
       return 20;
     }
     return pg.pageSize ?? pg.pgsz ?? 20;
   });
-  let isLongPager = computed(() => {
-    let pg = pager.value;
+  //-----------------------------------------------
+  const isLongPager = computed(() => {
+    let pg = _pager.value;
     if (!pg) {
       return false;
     }
     return (pg.pageSize ?? 0) > 0 && (pg.pageNumber ?? 0) > 0;
   });
-  let isShortPager = computed(() => {
-    let pg = pager.value;
+  //-----------------------------------------------
+  const isShortPager = computed(() => {
+    let pg = _pager.value;
     if (!pg) {
       return false;
     }
     return (pg.pgsz ?? 0) > 0 && (pg.pn ?? 0) > 0;
   });
-  let isPagerEnabled = computed(
-    () => pager.value && (isLongPager.value || isShortPager.value)
+  //-----------------------------------------------
+  const isPagerEnabled = computed(
+    () => _pager.value && (isLongPager.value || isShortPager.value)
   );
-
-  // -----------------------------------------------
-  // Actions
-  // -----------------------------------------------
+  //-----------------------------------------------
+  // Methods
+  //-----------------------------------------------
   function resetQuery() {
     log.debug('resetQuery');
-    fixedMatch.value = {};
-    filter.value = {};
-    sorter.value = {};
-    objKeys.value = '';
-    list.value = [];
-    pager.value = undefined;
+    _fixed_match.value = {};
+    _filter.value = {};
+    _sorter.value = {};
+    _obj_keys.value = '';
+    _list.value = [];
+    _pager.value = undefined;
   }
 
   function makeQueryCommand() {
@@ -89,12 +94,12 @@ export function userDirQuery(options: DirInitGetters) {
     }
 
     // Sorter
-    if (!_.isEmpty(sorter.value)) {
-      cmds.push(`-sort '${JSON.stringify(sorter.value)}'`);
+    if (!_.isEmpty(_sorter.value)) {
+      cmds.push(`-sort '${JSON.stringify(_sorter.value)}'`);
     }
 
     // Join One
-    let jo = joinOne.value;
+    let jo = _join_one.value;
     if (jo && !_.isEmpty(jo.query)) {
       cmds.push('@join_one');
       if (jo.path) {
@@ -116,8 +121,8 @@ export function userDirQuery(options: DirInitGetters) {
     cmds.push(`@json`);
 
     // Show Keys
-    if (objKeys.value) {
-      cmds.push(`'${objKeys.value}'`);
+    if (_obj_keys.value) {
+      cmds.push(`'${_obj_keys.value}'`);
     }
 
     cmds.push('-cqnl');
@@ -128,14 +133,14 @@ export function userDirQuery(options: DirInitGetters) {
   async function queryList(flt?: QueryFilter) {
     if (log.isDebugEnabled()) {
       log.debug('queryList', {
-        fixedMatch: fixedMatch.value,
-        filter: filter.value,
-        sorter: sorter.value,
-        objKeys: objKeys.value,
-        joinOne: joinOne.value,
-        pager: pager.value,
-        currentId: currentId.value,
-        checkedIds: checkedIds.value,
+        fixedMatch: _fixed_match.value,
+        filter: _filter.value,
+        sorter: _sorter.value,
+        objKeys: _obj_keys.value,
+        joinOne: _join_one.value,
+        pager: _pager.value,
+        currentId: _current_id.value,
+        checkedIds: _checked_ids.value,
         queryPageNumber: queryPageNumber.value,
         queryPageSize: queryPageSize.value,
         isLongPager: isLongPager.value,
@@ -144,44 +149,44 @@ export function userDirQuery(options: DirInitGetters) {
       });
     }
     let cmdText = makeQueryCommand();
-    let q = _.assign({}, filter.value, fixedMatch.value, flt);
+    let q = _.assign({}, _filter.value, _fixed_match.value, flt);
     let input = JSON.stringify(q);
     log.info('queryList=>', cmdText, ' << ', q);
 
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
 
     if (_.isArray(reo)) {
-      list.value = reo as unknown as WnObj[];
-      log.info('>> list:', list.value);
+      _list.value = reo as unknown as WnObj[];
+      log.info('>> list:', _list.value);
     } else if (reo.list && reo.pager) {
-      list.value = reo.list;
-      pager.value = reo.pager;
-      log.info('>> list:', list.value);
-      log.info('>> page:', pager.value);
+      _list.value = reo.list;
+      _pager.value = reo.pager;
+      log.info('>> list:', _list.value);
+      log.info('>> page:', _pager.value);
     }
   }
 
   //....................................................
   return {
     // State
-    pager,
-    fixedMatch,
-    filter,
-    sorter,
-    joinOne,
-    objKeys,
+    pager: _pager,
+    fixedMatch: _fixed_match,
+    filter: _filter,
+    sorter: _sorter,
+    joinOne: _join_one,
+    objKeys: _obj_keys,
     // Selections
-    currentId,
-    checkedIds,
-    list,
-    itemStatus,
-    // Getter
+    currentId: _current_id,
+    checkedIds: _checked_ids,
+    list: _list,
+    itemStatus: _item_status,
+    // Computed
     queryPageNumber,
     queryPageSize,
     isLongPager,
     isShortPager,
     isPagerEnabled,
-    // Actions
+    // Methods
     resetQuery,
     queryList,
   } as DirQueryFeature;
