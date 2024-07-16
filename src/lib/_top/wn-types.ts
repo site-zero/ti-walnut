@@ -23,7 +23,7 @@ export interface ServerConfig {
   sidebar?: boolean | string;
   logLevel?: string;
   logger?: Record<string, string>;
-  dicts?: string|Record<string, WnDictSetup>;
+  dicts?: string | Record<string, WnDictSetup>;
 }
 
 export type WnDictSetup = {
@@ -32,7 +32,7 @@ export type WnDictSetup = {
   icon?: string;
   tip?: string;
 
-  data?: string|Vars[];
+  data?: string | Vars[];
   query?: string;
   item?: string;
 };
@@ -65,4 +65,9 @@ export type StoreStatus = {
   removing: boolean;
   processing: boolean;
   changed: boolean;
+};
+
+export type WnMetaSaving = {
+  update: (meta: Vars) => Promise<Vars | undefined>;
+  create: (meta: Vars) => Promise<Vars | undefined>;
 };

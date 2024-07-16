@@ -225,6 +225,10 @@ export class WalnutServer {
     }
   }
 
+  async getObj(id: string, options: FetchObjOptions = {}) {
+    return await this.fetchObj(`id:${id}`, options);
+  }
+
   async fetchObj(
     objPath: string,
     options: FetchObjOptions = {}

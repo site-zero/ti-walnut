@@ -11,6 +11,8 @@ import {
 import { ComputedRef, Ref } from 'vue';
 import { WnObj } from '../../';
 import { ObjEditFeatures } from '../edit/use-obj-edit-types';
+import { ObjMetaStoreFeature } from '../use-obj-meta.store';
+import { ObjContentStoreFeature } from '../use-obj-content.store';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -116,6 +118,7 @@ export type DirInitGetters = {
   homeId: ComputedRef<string | undefined>;
   homeIndexId: ComputedRef<string | undefined>;
   isHomeExists: ComputedRef<boolean>;
+  isThingSet: ComputedRef<boolean>;
 };
 
 export type DirInitActions = {
@@ -226,7 +229,8 @@ export type DirSelection = {
   itemStatus: Ref<Record<string, WnObjStatus>>;
 };
 
-export type DirQueryActions = {
+export type DirQueryMethods = {
+  updateListItem: (meta: WnObj) => boolean;
   resetQuery: () => void;
   queryList: (flt?: QueryFilter) => Promise<void>;
 };
@@ -234,7 +238,7 @@ export type DirQueryActions = {
 export type DirQueryFeature = DirQuerySettings &
   DirQueryGetters &
   DirSelection &
-  DirQueryActions;
+  DirQueryMethods;
 
 /*
 ----------------------------------------
@@ -259,6 +263,54 @@ export type DirAggFeature = DirAggSettings &
 
 /*
 ----------------------------------------
+              Selection
+----------------------------------------
+*/
+export type DirSelectionFeature = {
+  updateSelection: (
+    currentId?: string,
+    checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
+  ) => void;
+  clearSelection: () => void;
+};
+
+/*
+----------------------------------------
+            Reloading
+----------------------------------------
+*/
+export type DirReloadingFeature = {
+  reload: (obj?: WnObj) => Promise<void>;
+  keepState: () => void;
+};
+
+/*
+----------------------------------------
+            GUI About
+----------------------------------------
+*/
+export type DirGUIFeature = {
+  GUIContext: ComputedRef<DirGUIContext>;
+  explainLayout: () => Omit<LayoutProps, 'schema'>;
+  explainSchema: () => Pick<LayoutProps, 'schema'>;
+};
+
+/*
+----------------------------------------
+            Editing
+----------------------------------------
+*/
+export type DirEditingFeature = {
+  guiNeedContent: Ref<boolean>;
+  updateMeta: (meta: Vars) => void;
+  saveMeta: () => Promise<void>;
+  updateAndSave: (meta: Vars) => Promise<void>;
+  create: (meta: Vars) => Promise<void>;
+  autoLoadContent: () => Promise<void>;
+};
+
+/*
+----------------------------------------
         Whole DirStore
 ----------------------------------------
 */
@@ -266,20 +318,26 @@ export type DirFeature = DirInitFeature &
   DirViewFeatures &
   DirQueryFeature &
   DirAggFeature &
-  ObjEditFeatures & {
-    reload: (obj?: WnObj) => Promise<void>;
-    keepState: () => void;
-    GUIContext: ComputedRef<DirGUIContext>;
-    explainLayout: () => Omit<LayoutProps, 'schema'>;
-    explainSchema: () => Pick<LayoutProps, 'schema'>;
+  DirSelectionFeature &
+  DirReloadingFeature &
+  DirGUIFeature &
+  DirEditingFeature & {
     _keep: ComputedRef<DirKeepFeatures>;
-
-    updateSelection: (
-      currentId?: string,
-      checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
-    ) => void;
-    clearSelection: () => void;
+    _meta: ComputedRef<ObjMetaStoreFeature>;
+    _content: ComputedRef<ObjContentStoreFeature>;
   };
+
+export type DirInnerContext = {
+  _dir: DirInitFeature;
+  _query: DirQueryFeature;
+  _agg: DirAggFeature;
+  _view: DirViewFeatures;
+};
+
+export type DirInnerContext2 = DirInnerContext & {
+  _meta: ComputedRef<ObjMetaStoreFeature>;
+  _content: ComputedRef<ObjContentStoreFeature>;
+};
 
 export type DirGUIContext = {
   moduleName: string;
@@ -320,10 +378,10 @@ export type DirGUIContext = {
   aggResult: AggResult;
   //........... ObjEditState
   meta?: WnObj;
-  content?: string;
-  savedContent?: string;
-  contentPath?: string;
-  contentType?: string;
-  contentData?: any;
+  // content?: string;
+  // savedContent?: string;
+  // contentPath?: string;
+  // contentType?: string;
+  // contentData?: any;
   fieldStatus: Record<string, FieldStatus>;
 };

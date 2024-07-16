@@ -224,9 +224,7 @@ function defineDataMetaStore(
   };
 }
 
-/**
- * 维持全局单例
- */
+
 export function useDataMetaStore(
   options: DataMetaStoreOptions
 ): DataMetaStoreFeature {

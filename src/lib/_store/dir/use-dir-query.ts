@@ -80,6 +80,27 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     _pager.value = undefined;
   }
 
+  function updateListItem(meta: WnObj) {
+    let metaId = meta?.id;
+    if (!metaId) {
+      return false;
+    }
+    let re = false;
+    let list = [];
+    if (_list.value) {
+      for (let it of _list.value) {
+        if (it.id == metaId) {
+          re = true;
+          list.push(_.cloneDeep(meta));
+        } else {
+          list.push(it);
+        }
+      }
+    }
+    _list.value = list;
+    return re;
+  }
+
   function makeQueryCommand() {
     if (!isHomeExists.value) {
       throw 'Query:Parent DIR without defined!';
@@ -187,6 +208,7 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     isShortPager,
     isPagerEnabled,
     // Methods
+    updateListItem,
     resetQuery,
     queryList,
   } as DirQueryFeature;

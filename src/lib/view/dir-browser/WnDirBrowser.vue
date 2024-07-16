@@ -1,6 +1,7 @@
 <script lang="ts" setup>
   import {
     BlockEvent,
+    GridItemTabChangeEvent,
     TiActionBar,
     TiLayoutGrid,
     TiLoading,
@@ -38,8 +39,7 @@
     }
     // 修改原数据
     else if ('meta-change' == eventName) {
-     
-      console.log(data);
+      DIR.updateAndSave(data);
     }
     // 警告
     else {
@@ -47,13 +47,17 @@
     }
   }
   //-----------------------------------------------------
+  function onTabChange(event: GridItemTabChangeEvent) {
+    let tabName = event?.to?.value;
+    console.log('---------->', tabName);
+    DIR.guiNeedContent.value = 'content' == tabName;
+  }
+  //-----------------------------------------------------
   watch(
     () => props.value,
     (oDir, oldDir) => {
       console.log('oDir', oDir, 'oldDir', oldDir);
-      //_GS.set('loading', true);
       DIR.reload(oDir);
-      //_GS.reset('loading');
     },
     {
       immediate: true,
@@ -67,7 +71,11 @@
       <TiActionBar v-bind="DIR.actions.value" />
     </header>
     <main class="pos-relative">
-      <TiLayoutGrid v-bind="GUILayout" :schema="GUISchema" @block="onBlock" />
+      <TiLayoutGrid
+        v-bind="GUILayout"
+        :schema="GUISchema"
+        @block="onBlock"
+        @tab-change="onTabChange" />
       <TiLoading
         v-if="_GS.loading"
         class="is-track"
