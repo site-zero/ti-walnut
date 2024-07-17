@@ -1,11 +1,13 @@
 import { Util, Vars } from '@site0/tijs';
-import { Walnut, WalnutServer, WnObjInfo } from '../../..';
-import { WnObj, WnMetaSaving } from '../_top';
+import JSON5 from 'json5';
 import _ from 'lodash';
+import { Walnut } from '../../..';
+import { WnMetaSaving, WnObj } from '../_top';
 
 export type WnObjFeature = WnMetaSaving & {
   fetch: (path: string) => Promise<WnObj | undefined>;
   get: (id: string) => Promise<WnObj | undefined>;
+  remove: (...ids: string[]) => Promise<void>;
   writeText: (path: string, content: string) => Promise<WnObj>;
   loadContent: (path: string) => Promise<string>;
 };
@@ -59,6 +61,22 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
   }
 
   /**
+   * @param path 对象路径
+   * @returns 对象解析后的内容
+   */
+  async function remove(...ids: string[]) {
+    let cmds = ['o @get -ignore'];
+    for (let id of ids) {
+      // 去掉危险的字符串
+      let theId = id.replace(/'/g, '');
+      cmds.push(theId);
+    }
+    cmds.push(`@delete`);
+    let cmdText = cmds.join(' ');
+    await Walnut.exec(cmdText, { as: 'json' });
+  }
+
+  /**
    * @param meta 要更新的原数据，必须包含 id 字段以便确定更新目标
    * @returns 更新后对象
    */
@@ -94,9 +112,10 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
   }
 
   async function writeText(path: string, content: string): Promise<WnObj> {
-    let url = `/o/content?str=${path}`;
-    let re = await Walnut.postFormToGetJson(url, { content });
-    return re;
+    let url = `/o/save/text?str=${path}`;
+    let re = await Walnut.postFormToGetAjax(url, { content });
+    console.log(re);
+    return re.data;
   }
 
   async function loadContent(path: string): Promise<string> {
@@ -111,6 +130,7 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
   return {
     fetch,
     get,
+    remove,
     update,
     create,
     writeText,

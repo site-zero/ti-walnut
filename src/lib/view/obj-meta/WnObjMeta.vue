@@ -11,15 +11,17 @@
     (eventName: 'change', payload: Vars): void;
   }>();
   //-----------------------------------------------------
-  const props = defineProps<WnObjMetaProps>();
+  const props = withDefaults(defineProps<WnObjMetaProps>(), {
+    emptyRoadblock: () => ({
+      icon: 'fas-arrow-left',
+      text: 'i18n:blank-to-edit',
+    }),
+  });
   //-----------------------------------------------------
   const FormConfig = computed(() => {
     return {
       layoutHint: 1,
-      emptyRoadblock: {
-        title: 'i18n:wn-obj-empty',
-        icon: 'fas-cube',
-      },
+      emptyRoadblock: props.emptyRoadblock,
     } as FormProps;
   });
   //-----------------------------------------------------

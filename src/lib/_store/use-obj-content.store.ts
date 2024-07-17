@@ -1,3 +1,4 @@
+import { ObjDataStatus } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef, ref, Ref } from 'vue';
 import { useWnObj } from '../_features/use-wn-obj';
@@ -7,9 +8,9 @@ export type ObjContentFinger = {
   id: string;
   len: number;
   sha1: string;
+  mime: string;
+  tp: string;
 };
-
-export type ObjContentStatus = 'loading' | 'saving';
 
 export type ObjContentStoreFeature = {
   //---------------------------------------------
@@ -18,16 +19,18 @@ export type ObjContentStoreFeature = {
   _local: Ref<string | undefined>;
   _finger: Ref<ObjContentFinger | undefined>;
   //---------------------------------------------
-  status: Ref<ObjContentStatus | undefined>;
+  status: Ref<ObjDataStatus | undefined>;
   //---------------------------------------------
   // 计算属性
   contentText: ComputedRef<string>;
+  contentType: ComputedRef<string>;
+  contentMime: ComputedRef<string>;
   changed: ComputedRef<boolean>;
-  loaded: ComputedRef<boolean>;
   //---------------------------------------------
   // 本地方法
   setContent: (content: string) => void;
-  resetLocalChange: () => void;
+  dropLocalChange: () => void;
+  reset: () => void;
   isSameFinger: (finger: ObjContentFinger) => boolean;
   //---------------------------------------------
   // 远程方法
@@ -48,7 +51,7 @@ export function useObjContentStore(): ObjContentStoreFeature {
   //---------------------------------------------
   const _remote = ref<string>();
   const _local = ref<string>();
-  const _status = ref<ObjContentStatus>();
+  const _status = ref<ObjDataStatus>('empty');
   const _finger = ref<ObjContentFinger>();
 
   /**
@@ -68,14 +71,14 @@ export function useObjContentStore(): ObjContentStoreFeature {
   const contentText = computed(() => {
     return _local.value ?? _remote.value ?? '';
   });
+  const contentType = computed(() => {
+    return _finger.value?.tp || 'txt';
+  });
+  const contentMime = computed(() => {
+    return _finger.value?.mime || 'text/plain';
+  });
 
   const changed = computed(() => isChanged());
-  const loaded = computed(() => {
-    if (_finger.value && _finger.value.id) {
-      return true;
-    }
-    return false;
-  });
   //---------------------------------------------
   //                 本地方法
   //---------------------------------------------
@@ -83,8 +86,15 @@ export function useObjContentStore(): ObjContentStoreFeature {
     _local.value = content;
   }
 
-  function resetLocalChange() {
+  function dropLocalChange() {
     _local.value = undefined;
+  }
+
+  function reset() {
+    _remote.value = undefined;
+    _local.value = undefined;
+    _status.value = 'empty';
+    _finger.value = undefined;
   }
 
   function isSameFinger(finger: ObjContentFinger) {
@@ -113,7 +123,7 @@ export function useObjContentStore(): ObjContentStoreFeature {
     let re = await _obj.writeText(path, _local.value ?? '');
     _remote.value = _local.value;
     _local.value = undefined;
-    _status.value = undefined;
+    _status.value = 'ready';
     return re;
   }
   //---------------------------------------------
@@ -136,10 +146,10 @@ export function useObjContentStore(): ObjContentStoreFeature {
     _status.value = 'loading';
     let re = await _obj.loadContent(path);
     _remote.value = re;
-    _status.value = undefined;
+    _status.value = 'ready';
 
     if (resetLocal) {
-      resetLocalChange();
+      dropLocalChange();
     }
 
     return re;
@@ -158,12 +168,14 @@ export function useObjContentStore(): ObjContentStoreFeature {
     //---------------------------------------------
     // 计算属性
     contentText,
+    contentType,
+    contentMime,
     changed,
-    loaded,
     //---------------------------------------------
     // 本地方法
     setContent,
-    resetLocalChange,
+    dropLocalChange,
+    reset,
     isSameFinger,
     //---------------------------------------------
     // 远程方法

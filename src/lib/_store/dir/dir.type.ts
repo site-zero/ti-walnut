@@ -4,15 +4,15 @@ import {
   KeepFeature,
   KeepInfo,
   LayoutProps,
+  ObjDataStatus,
   Pager,
   Vars,
   WnObjStatus,
 } from '@site0/tijs';
 import { ComputedRef, Ref } from 'vue';
 import { WnObj } from '../../';
-import { ObjEditFeatures } from '../edit/use-obj-edit-types';
-import { ObjMetaStoreFeature } from '../use-obj-meta.store';
 import { ObjContentStoreFeature } from '../use-obj-content.store';
+import { ObjMetaStoreFeature } from '../use-obj-meta.store';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -171,7 +171,7 @@ export type DirViewFeatures = DirViewSettings &
 
 export type DirKeeplInfo = Pick<DirViewSettings, 'guiShown'> &
   Pick<DirQuerySettings, 'filter' | 'sorter'> &
-  Pick<DirSelection, 'currentId' | 'checkedIds'>;
+  DirSelection;
 
 export type DirUpdateSelection = (
   currentId?: string,
@@ -212,6 +212,8 @@ export type DirQuerySettings = {
   objKeys: Ref<string | undefined>;
   joinOne: Ref<QueryJoinOne | undefined>;
   pager: Ref<Pager | undefined>;
+  itemStatus: Ref<Record<string, WnObjStatus>>;
+  queryLoading: Ref<boolean>;
 };
 
 export type DirQueryGetters = {
@@ -222,22 +224,21 @@ export type DirQueryGetters = {
   isPagerEnabled: ComputedRef<boolean>;
 };
 
-export type DirSelection = {
-  currentId: Ref<string | undefined>;
-  checkedIds: Ref<Record<string, boolean>>;
+export type DirQueryData = {
   list: Ref<WnObj[]>;
-  itemStatus: Ref<Record<string, WnObjStatus>>;
 };
 
 export type DirQueryMethods = {
-  updateListItem: (meta: WnObj) => boolean;
+  prependList: (obj: WnObj) => void;
+  appendList: (obj: WnObj) => void;
+  updateListItem: (obj: WnObj) => boolean;
   resetQuery: () => void;
   queryList: (flt?: QueryFilter) => Promise<void>;
 };
 
 export type DirQueryFeature = DirQuerySettings &
   DirQueryGetters &
-  DirSelection &
+  DirQueryData &
   DirQueryMethods;
 
 /*
@@ -250,6 +251,7 @@ export type DirAggSettings = {
   aggQuery: Ref<string | undefined>;
   aggSet: Ref<Record<string, AggQuery>>;
   aggAutoReload: Ref<boolean>;
+  aggLoading: Ref<boolean>;
 };
 
 export type DirAggActions = {
@@ -258,7 +260,7 @@ export type DirAggActions = {
 };
 export type DirAggFeature = DirAggSettings &
   DirAggActions & {
-    aggResult: Ref<AggResult>;
+    aggResult: Ref<AggResult | undefined>;
   };
 
 /*
@@ -266,11 +268,17 @@ export type DirAggFeature = DirAggSettings &
               Selection
 ----------------------------------------
 */
-export type DirSelectionFeature = {
+export type DirSelection = {
+  currentId: Ref<string | undefined>;
+  checkedIds: Ref<Record<string, boolean>>;
+};
+
+export type DirSelectingFeature = {
   updateSelection: (
     currentId?: string,
     checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
   ) => void;
+  syncMetaContentBySelection: () => Promise<void>;
   clearSelection: () => void;
 };
 
@@ -281,6 +289,7 @@ export type DirSelectionFeature = {
 */
 export type DirReloadingFeature = {
   reload: (obj?: WnObj) => Promise<void>;
+  refresh: () => Promise<void>;
   keepState: () => void;
 };
 
@@ -303,10 +312,34 @@ export type DirGUIFeature = {
 export type DirEditingFeature = {
   guiNeedContent: Ref<boolean>;
   updateMeta: (meta: Vars) => void;
+  setContent: (str: string) => void;
+  dropChange: () => void;
   saveMeta: () => Promise<void>;
+  saveContent: () => Promise<void>;
+  saveMetaAndContent: () => Promise<void>;
   updateAndSave: (meta: Vars) => Promise<void>;
   create: (meta: Vars) => Promise<void>;
   autoLoadContent: () => Promise<void>;
+};
+
+/*
+----------------------------------------
+            Invoking
+----------------------------------------
+*/
+export type DirInvokingFeature = {
+  (methodName: string, payload?: any): Promise<any>;
+};
+
+/*
+----------------------------------------
+            Operating
+----------------------------------------
+*/
+export type DirOperatingFeature = {
+  createFile: () => Promise<WnObj | undefined>;
+  createDir: () => Promise<WnObj | undefined>;
+  removeChecked: () => Promise<void>;
 };
 
 /*
@@ -318,13 +351,17 @@ export type DirFeature = DirInitFeature &
   DirViewFeatures &
   DirQueryFeature &
   DirAggFeature &
-  DirSelectionFeature &
+  DirSelection &
+  DirSelectingFeature &
   DirReloadingFeature &
   DirGUIFeature &
-  DirEditingFeature & {
+  DirEditingFeature &
+  DirOperatingFeature & {
     _keep: ComputedRef<DirKeepFeatures>;
     _meta: ComputedRef<ObjMetaStoreFeature>;
     _content: ComputedRef<ObjContentStoreFeature>;
+    actionStatus: ComputedRef<Vars>;
+    getCurrentMeta: () => WnObj | undefined;
   };
 
 export type DirInnerContext = {
@@ -332,11 +369,20 @@ export type DirInnerContext = {
   _query: DirQueryFeature;
   _agg: DirAggFeature;
   _view: DirViewFeatures;
+  _selection: DirSelection;
 };
 
 export type DirInnerContext2 = DirInnerContext & {
   _meta: ComputedRef<ObjMetaStoreFeature>;
   _content: ComputedRef<ObjContentStoreFeature>;
+};
+
+export type DirInnerContext3 = DirInnerContext2 & {
+  _gui: DirGUIFeature;
+  _keep: ComputedRef<DirKeepFeatures>;
+  _selecting: DirSelectingFeature;
+  _editing: DirEditingFeature;
+  _reloading: DirReloadingFeature;
 };
 
 export type DirGUIContext = {
@@ -375,13 +421,13 @@ export type DirGUIContext = {
   aggQuery?: string;
   aggSet: Record<string, AggQuery>;
   aggAutoReload: boolean;
-  aggResult: AggResult;
+  aggResult?: AggResult;
   //........... ObjEditState
   meta?: WnObj;
-  // content?: string;
-  // savedContent?: string;
-  // contentPath?: string;
+  contentText?: string;
+  contentType?: string;
+  contentMime?: string;
+  contentStatus?: ObjDataStatus;
   // contentType?: string;
-  // contentData?: any;
   fieldStatus: Record<string, FieldStatus>;
 };

@@ -1,7 +1,7 @@
 import { DirGUIContext, DirInnerContext2 } from './dir.type';
 
 export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
-  let { _dir, _query, _agg, _meta } = context;
+  let { _dir, _query, _agg, _meta, _content, _selection } = context;
   return {
     moduleName: _dir.moduleName.value,
     oHome: _dir.oHome.value,
@@ -29,8 +29,8 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     isShortPager: _query.isShortPager.value,
     isPagerEnabled: _query.isPagerEnabled.value,
     //........... DirSelection
-    currentId: _query.currentId.value,
-    checkedIds: _query.checkedIds.value,
+    currentId: _selection.currentId.value,
+    checkedIds: _selection.checkedIds.value,
     list: _query.list.value,
     itemStatus: _query.itemStatus.value,
     //........... DirAggFeature
@@ -40,11 +40,10 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     aggResult: _agg.aggResult.value,
     //........... ObjEditState
     meta: _meta.value.metaData.value,
-    // content: _edit.content.value,
-    // savedContent: _edit.savedContent.value,
-    // contentPath: _edit.contentPath.value,
-    // contentType: _edit.contentType.value,
-    // contentData: _edit.contentData.value,
+    contentText: _content.value.contentText.value,
+    contentType: _content.value.contentType.value,
+    contentMime: _content.value.contentMime.value,
+    contentStatus: _content.value.status.value,
     fieldStatus: _meta.value.status.value,
   };
 }

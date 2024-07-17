@@ -1,25 +1,31 @@
 import { ComputedRef } from 'vue';
-import { DirEditingFeature, WnObj } from '../../../..';
+import { DirEditingFeature, DirKeeplInfo, WnObj } from '../../../..';
 import {
   DirInnerContext2,
   DirKeepFeatures,
   DirReloadingFeature,
-  DirSelectionFeature,
+  DirSelectingFeature,
 } from './dir.type';
 
 export function userDirReloading(
   context: DirInnerContext2,
   _keep: ComputedRef<DirKeepFeatures>,
-  _selection: DirSelectionFeature,
+  _selecting: DirSelectingFeature,
   _editing: DirEditingFeature
 ): DirReloadingFeature {
-  let { _dir, _query, _agg, _view, _meta,_content } = context;
+  let { _dir, _query, _agg, _view, _meta, _selection } = context;
 
-  function keepState() {
-    _keep.value.saveToLocal({
+  function _get_current_keep_info(): DirKeeplInfo {
+    return {
       ..._view,
       ..._query,
-    });
+      ..._selection,
+    };
+  }
+
+  function keepState() {
+    let info = _get_current_keep_info();
+    _keep.value.saveToLocal(info);
   }
 
   async function reload(obj?: WnObj) {
@@ -36,27 +42,23 @@ export function userDirReloading(
       ..._agg,
     });
 
-    await _query.queryList();
+    let info = _get_current_keep_info();
+    _keep.value.restoreFromLocal(info, _selecting.updateSelection);
 
-    _keep.value.restoreFromLocal(
-      {
-        ..._view,
-        ..._query,
-      },
-      _selection.updateSelection
-    );
+    await refresh();
+  }
+
+  async function refresh() {
+    await _query.queryList();
     if (_agg.aggAutoReload.value) {
       await _agg.loadAggResult();
     }
-    console.log('NEED CONTNET', _editing.guiNeedContent.value);
-    console.log('isNoEmptyFile', _meta.value.isNoEmptyFile.value);
-    console.log('isFILE', _meta.value.isFILE.value);
-    console.log('isDIR', _meta.value.isDIR.value);
-    await _editing.autoLoadContent()
-    console.log('done for reloading');
+    await _selecting.syncMetaContentBySelection();
   }
+
   return {
     reload,
+    refresh,
     keepState,
   };
 }

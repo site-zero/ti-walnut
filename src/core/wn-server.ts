@@ -90,12 +90,12 @@ export class WalnutServer {
     return `${protocal}://${host}${ports}${sep}${path}`;
   }
 
-  getRequestInit(signal?: AbortSignal): RequestInit {
+  getRequestInit(signal?: AbortSignal, options: RequestInit = {}): RequestInit {
     let headers: HeadersInit = {};
     if (this._ticket) {
       headers['X-Walnut-Ticket'] = this._ticket;
     }
-    return { headers, signal };
+    return { ...options, headers, signal };
   }
 
   async fetchMySession(): Promise<AjaxResult> {
@@ -150,6 +150,30 @@ export class WalnutServer {
     return re;
   }
 
+  async postFormToGetText(
+    path: string,
+    form: Record<string, any>,
+    signal?: AbortSignal
+  ): Promise<any> {
+    let url = this.getUrl(path);
+    const body = new URLSearchParams();
+    _.forEach(form, (v, k) => {
+      body.append(k, v);
+    });
+
+    try {
+      let init = this.getRequestInit(signal, {
+        method: 'post',
+        body,
+        signal,
+      });
+      let resp = await fetch(url, init);
+      return await resp.text();
+    } catch (err) {
+      console.error('postFormToGetText Fail:', err, path, form);
+    }
+  }
+
   async postFormToGetJson(
     path: string,
     form: Record<string, any>,
@@ -160,12 +184,18 @@ export class WalnutServer {
     _.forEach(form, (v, k) => {
       body.append(k, v);
     });
-    let resp = await fetch(url, {
-      method: 'POST',
-      body,
-      signal,
-    });
-    return await resp.json();
+
+    try {
+      let init = this.getRequestInit(signal, {
+        method: 'post',
+        body,
+        signal,
+      });
+      let resp = await fetch(url, init);
+      return await resp.json();
+    } catch (err) {
+      console.error('postFormToGetJson Fail:', err, path, form);
+    }
   }
 
   async postFormToGetAjax(
@@ -217,8 +247,9 @@ export class WalnutServer {
     // (function(ex){/* you can export your module */})(exports)
     let exports = {};
     try {
-      let installModule = new Function('exports', text);
+      let installModule = new Function('outputs', text);
       installModule(exports);
+      console.log('loadJsModule', jsPath, text, exports);
       return exports;
     } catch (error) {
       log.error(`Fail to loadJsModule: ${jsPath} :: ${error}`);

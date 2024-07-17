@@ -6,7 +6,6 @@ import { Walnut } from '../../../core';
 import {
   AggQuery,
   AggResult,
-  DirAggFeature,
   DirInitFeature,
   DirQuerySettings,
   QueryFilter,
@@ -20,12 +19,13 @@ export type AggOptions = Pick<DirInitFeature, 'homeIndexId' | 'isHomeExists'> &
 export function userDirAgg(options: AggOptions) {
   log.debug('userDirAgg');
   // Prepare data
-  let hasDir = options.isHomeExists;
-  let dirId = options.homeIndexId;
-  let aggQuery = ref<string>();
-  let aggSet = ref<Record<string, AggQuery>>({});
-  let aggAutoReload = ref<boolean>(false);
-  let aggResult = ref<AggResult>();
+  const hasDir = options.isHomeExists;
+  const dirId = options.homeIndexId;
+  const aggQuery = ref<string>();
+  const aggSet = ref<Record<string, AggQuery>>({});
+  const aggAutoReload = ref<boolean>(false);
+  const aggResult = ref<AggResult>();
+  const _loading = ref(false);
 
   // -----------------------------------------------
   // Actions
@@ -69,7 +69,10 @@ export function userDirAgg(options: AggOptions) {
 
     // Show Keys
     let cmdText = `o id:${dirId.value}/index @agg ${agg.by} -match -cqn`;
+
+    _loading.value = true;
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
+    _loading.value = false;
 
     // Update
     aggResult.value = reo;
@@ -82,9 +85,10 @@ export function userDirAgg(options: AggOptions) {
     aggSet,
     aggAutoReload,
     aggResult,
+    aggLoading: _loading,
     // Getter
     // Actions
     resetAgg,
     loadAggResult,
-  } as DirAggFeature;
+  };
 }

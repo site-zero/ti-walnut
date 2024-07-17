@@ -23,11 +23,9 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
   let _obj_keys = ref<string>('');
   let _join_one = ref<QueryJoinOne>();
   let _pager = ref<Pager>();
-
-  let _current_id = ref<string>();
-  let _checked_ids = ref<Record<string, boolean>>({});
   let _list = ref<WnObj[]>([]);
   let _item_status = ref<Record<string, WnObjStatus>>({});
+  let _loading = ref(false);
 
   //-----------------------------------------------
   // Getters
@@ -64,9 +62,12 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     return (pg.pgsz ?? 0) > 0 && (pg.pn ?? 0) > 0;
   });
   //-----------------------------------------------
-  const isPagerEnabled = computed(
-    () => _pager.value && (isLongPager.value || isShortPager.value)
-  );
+  const isPagerEnabled = computed(() => {
+    if (_pager.value && (isLongPager.value || isShortPager.value)) {
+      return true;
+    }
+    return false;
+  });
   //-----------------------------------------------
   // Methods
   //-----------------------------------------------
@@ -80,18 +81,26 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     _pager.value = undefined;
   }
 
-  function updateListItem(meta: WnObj) {
-    let metaId = meta?.id;
-    if (!metaId) {
+  function prependList(obj: WnObj) {
+    _list.value.unshift(obj);
+  }
+
+  function appendList(obj: WnObj) {
+    _list.value.push(obj);
+  }
+
+  function updateListItem(obj: WnObj) {
+    let objId = obj?.id;
+    if (!objId) {
       return false;
     }
     let re = false;
     let list = [];
     if (_list.value) {
       for (let it of _list.value) {
-        if (it.id == metaId) {
+        if (it.id == objId) {
           re = true;
-          list.push(_.cloneDeep(meta));
+          list.push(_.cloneDeep(obj));
         } else {
           list.push(it);
         }
@@ -152,30 +161,14 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
   }
 
   async function queryList(flt?: QueryFilter) {
-    if (log.isDebugEnabled()) {
-      log.debug('queryList', {
-        fixedMatch: _fixed_match.value,
-        filter: _filter.value,
-        sorter: _sorter.value,
-        objKeys: _obj_keys.value,
-        joinOne: _join_one.value,
-        pager: _pager.value,
-        currentId: _current_id.value,
-        checkedIds: _checked_ids.value,
-        queryPageNumber: queryPageNumber.value,
-        queryPageSize: queryPageSize.value,
-        isLongPager: isLongPager.value,
-        isShortPager: isShortPager.value,
-        isPagerEnabled: isPagerEnabled.value,
-      });
-    }
     let cmdText = makeQueryCommand();
+    log.debug('queryList', cmdText);
     let q = _.assign({}, _filter.value, _fixed_match.value, flt);
     let input = JSON.stringify(q);
     log.info('queryList=>', cmdText, ' << ', q);
-
+    _loading.value = true;
     let reo = await Walnut.exec(cmdText, { input, as: 'json' });
-
+    _loading.value = false;
     if (_.isArray(reo)) {
       _list.value = reo as unknown as WnObj[];
       log.info('>> list:', _list.value);
@@ -196,20 +189,24 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     sorter: _sorter,
     joinOne: _join_one,
     objKeys: _obj_keys,
-    // Selections
-    currentId: _current_id,
-    checkedIds: _checked_ids,
-    list: _list,
     itemStatus: _item_status,
+    queryLoading: _loading,
+
+    // Selections
+    list: _list,
+
     // Computed
     queryPageNumber,
     queryPageSize,
     isLongPager,
     isShortPager,
     isPagerEnabled,
+
     // Methods
+    prependList,
+    appendList,
     updateListItem,
     resetQuery,
     queryList,
-  } as DirQueryFeature;
+  };
 }

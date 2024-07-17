@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import {
+    ActionBarEvent,
     BlockEvent,
     GridItemTabChangeEvent,
     TiActionBar,
@@ -41,6 +42,10 @@
     else if ('meta-change' == eventName) {
       DIR.updateAndSave(data);
     }
+    // 修改内容
+    else if ('content-change' == eventName) {
+      DIR.setContent(data);
+    }
     // 警告
     else {
       console.warn(`Fail to handle event '${eventName}' data=`, data);
@@ -49,8 +54,13 @@
   //-----------------------------------------------------
   function onTabChange(event: GridItemTabChangeEvent) {
     let tabName = event?.to?.value;
-    console.log('---------->', tabName);
     DIR.guiNeedContent.value = 'content' == tabName;
+    DIR.autoLoadContent();
+  }
+  //-----------------------------------------------------
+  function onActionFire(event: ActionBarEvent) {
+    let { name, payload } = event;
+    DIR.invoke(name, payload);
   }
   //-----------------------------------------------------
   watch(
@@ -68,7 +78,10 @@
 <template>
   <div class="wn-dir-browser fit-parent">
     <header v-if="!_.isEmpty(DIR.actions.value)">
-      <TiActionBar v-bind="DIR.actions.value" />
+      <TiActionBar
+        v-bind="DIR.actions.value"
+        :vars="DIR.actionStatus"
+        @fire="onActionFire" />
     </header>
     <main class="pos-relative">
       <TiLayoutGrid

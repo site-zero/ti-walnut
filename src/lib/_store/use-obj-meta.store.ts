@@ -24,11 +24,11 @@ export type ObjMetaStoreFeature = {
   updateMeta: (meta: Vars) => void;
   setMeta: (meta: Vars) => void;
   initMeta: (meta?: Vars) => void;
-  resetLocalChange: () => void;
+  dropLocalChange: () => void;
   clearStatus: (keys?: string[]) => void;
   //---------------------------------------------
   // 远程方法
-  saveChange: () => Promise<void>;
+  saveChange: () => Promise<WnObj | undefined>;
 };
 
 export type ObjMetaStoreOptions = {
@@ -82,10 +82,8 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
 
   const metaFinger = computed(() => {
     if (metaData.value) {
-      let { id, sha1 = '', len = 0 } = metaData.value;
-      if (id && sha1 && len >= 0) {
-        return { id, sha1, len } as ObjContentFinger;
-      }
+      let { id, sha1 = '', len = 0, mime = '', tp = '' } = metaData.value;
+      return { id, sha1, len, mime, tp } as ObjContentFinger;
     }
   });
 
@@ -126,7 +124,7 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
     }
   }
 
-  function resetLocalChange() {
+  function dropLocalChange() {
     _local.value = undefined;
   }
 
@@ -147,7 +145,7 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
   //---------------------------------------------
   //                远程方法
   //---------------------------------------------
-  async function saveChange() {
+  async function saveChange(): Promise<WnObj | undefined> {
     if (!isChanged() || !_local.value) {
       return;
     }
@@ -172,6 +170,8 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
     _.delay(() => {
       clearStatus();
     }, 500);
+
+    return meta;
   }
 
   //---------------------------------------------
@@ -197,7 +197,7 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
     updateMeta,
     setMeta,
     initMeta,
-    resetLocalChange,
+    dropLocalChange,
     clearStatus,
     //---------------------------------------------
     // 远程方法
