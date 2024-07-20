@@ -1,6 +1,6 @@
 import { Util } from '@site0/tijs';
 import _ from 'lodash';
-import { ComputedRef, ref } from 'vue';
+import { ComputedRef } from 'vue';
 import { DirEditingFeature, DirInnerContext2, WnObj } from '../../../..';
 import { DirKeepFeatures, DirSelectingFeature } from './dir.type';
 
@@ -11,7 +11,7 @@ export function userDirSelecting(
 ): DirSelectingFeature {
   let { _query, _meta, _content, _selection } = context;
 
-  function updateSelection(
+  async function updateSelection(
     currentId?: string,
     checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
   ) {
@@ -30,22 +30,22 @@ export function userDirSelecting(
     // 更新选区
     _selection.currentId.value = currentId;
     _selection.checkedIds.value = ckIds;
-    console.log(`Keep.saveSelection(${currentId}, ${ckIds});`);
+    //console.log(`Keep.saveSelection(${currentId}, ${ckIds});`);
     _keep.value.saveSelection(currentId, ckIds);
 
     // 更新当前元数据和内容
-    syncMetaContentBySelection();
+    await syncMetaContentBySelection();
   }
 
   async function syncMetaContentBySelection() {
-    console.log('syncMetaContentBySelection');
+    // console.log('syncMetaContentBySelection');
     let currentId = _selection.currentId.value;
     // 更新当前元数据
     let meta: WnObj | undefined = undefined;
     if (currentId) {
       meta = _.find(_query.list.value, (li) => li.id == currentId);
     }
-    _meta.value.initMeta(meta);
+    _meta.initMeta(meta);
 
     // 尝试自动加载内容
     if (meta) {
@@ -53,15 +53,15 @@ export function userDirSelecting(
     }
     // 取消当前内容
     else {
-      _content.value.reset();
+      _content.reset();
     }
   }
 
   function clearSelection() {
     _selection.currentId.value = undefined;
     _selection.checkedIds.value = {};
-    _meta.value.initMeta();
-    _content.value.reset();
+    _meta.initMeta();
+    _content.reset();
   }
 
   return {

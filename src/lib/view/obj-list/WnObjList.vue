@@ -1,42 +1,30 @@
 <script lang="ts" setup>
-  import { TableEmitter, TiTable } from '@site0/tijs';
-  import _ from 'lodash';
-  import { computed } from 'vue';
-  import { useObjColumns } from '../../../lib';
+  import { ListEmitter, TiList } from '@site0/tijs';
+  import { getWnObjIcon } from '../../../core';
   import { WnObjListProps } from './wn-obj-list-types';
-  //-----------------------------------------------------
-  const COL = useObjColumns();
   //-------------------------------------------------------
-  let emit = defineEmits<TableEmitter>();
+  let emit = defineEmits<ListEmitter>();
   //-----------------------------------------------------
   const props = withDefaults(defineProps<WnObjListProps>(), {
-    showRowIndex: true,
-    showHeader: true,
-    columnResizable: true,
-    multi: true,
-    showCheckbox: true,
-  });
-  //-----------------------------------------------------
-  const TableConfig = computed(() => {
-    return _.omit(props, 'columns');
-  });
-  //-----------------------------------------------------
-  const TableColumns = computed(() => {
-    let colNames = props.columns || ['obj-nm-title-icon', 'tp', 'lm'];
-    return COL.getColumns(colNames);
+    getIcon: () => (it: any) => {
+      return getWnObjIcon(it);
+    },
+    getValue: 'id',
+    getId: 'id',
+    getText: () => (it: any) => it.title || it.nm || it.id,
+    getTip: () => (it: any) => it.tip || it.brief,
+    size: 'm',
+    canSelect: undefined,
+    canHover: undefined,
+    allowUserSelect: undefined,
+    autoI18n: undefined,
   });
   //-----------------------------------------------------
 </script>
 <template>
-  <TiTable
+  <TiList
     class="fit-parent"
-    v-bind="TableConfig"
-    :columns="TableColumns"
+    v-bind="props"
     @select="emit('select', $event)"
-    @open="emit('open', $event)"
-    @cell-change="emit('cell-change', $event)"
-    @cell-open="emit('cell-open', $event)" />
+    @open="emit('open', $event)" />
 </template>
-<style lang="scss" scoped>
-  @use '@site0/tijs/scss' as *;
-</style>

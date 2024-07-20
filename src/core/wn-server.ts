@@ -249,7 +249,7 @@ export class WalnutServer {
     try {
       let installModule = new Function('outputs', text);
       installModule(exports);
-      console.log('loadJsModule', jsPath, text, exports);
+      //console.log('loadJsModule', jsPath, text, exports);
       return exports;
     } catch (error) {
       log.error(`Fail to loadJsModule: ${jsPath} :: ${error}`);

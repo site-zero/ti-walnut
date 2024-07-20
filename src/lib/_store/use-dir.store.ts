@@ -34,6 +34,7 @@ export function defineDirStore(name?: string): DirFeature {
   log.info(`create new DirStore(${name})`);
   //---------------------------------------------
   // 定义新实例
+  const _vars = ref<Vars>({});
   const _dir = useDirInit();
   //---------------------------------------------
   const _view = useDirView(_dir);
@@ -51,6 +52,7 @@ export function defineDirStore(name?: string): DirFeature {
   });
   //---------------------------------------------
   const _inner_context: DirInnerContext = {
+    _vars,
     _dir,
     _query,
     _agg,
@@ -60,13 +62,28 @@ export function defineDirStore(name?: string): DirFeature {
   //---------------------------------------------
   const _saving = computed(() => useDirSaving(_inner_context));
   //---------------------------------------------
-  const _meta = computed(() => useObjMetaStore({ saving: _saving.value }));
-  const _content = computed(() => useObjContentStore());
+  const _meta = useObjMetaStore({ saving: _saving });
+  const _content = useObjContentStore();
+  //---------------------------------------------
+  const _action_status = computed(() => {
+    return {
+      hasCurrent: !_.isNil(_selection.currentId.value),
+      hasChecked: !_.isEmpty(
+        Util.recordTruthyKeys(_selection.checkedIds.value)
+      ),
+      metaChanged: _meta.changed.value,
+      contentChanged: _content.changed.value,
+      listRefreshing: _query.queryLoading.value,
+      contentLoading: _content.status.value == 'loading',
+      contentSaving: _content.status.value == 'saving',
+    } as Vars;
+  });
   //---------------------------------------------
   const _inner_context2: DirInnerContext2 = {
     ..._inner_context,
     _meta,
     _content,
+    _action_status,
   };
   //---------------------------------------------
   const _gui = userDirGUI(_inner_context2);
@@ -85,20 +102,7 @@ export function defineDirStore(name?: string): DirFeature {
     _selecting,
     _editing
   );
-  //---------------------------------------------
-  const actionStatus = computed(() => {
-    return {
-      hasCurrent: !_.isNil(_selection.currentId.value),
-      hasChecked: !_.isEmpty(
-        Util.recordTruthyKeys(_selection.checkedIds.value)
-      ),
-      metaChanged: _meta.value.changed.value,
-      contentChanged: _content.value.changed.value,
-      listRefreshing: _query.queryLoading.value,
-      contentLoading: _content.value.status.value == 'loading',
-      contentSaving: _content.value.status.value == 'saving',
-    } as Vars;
-  });
+
   //---------------------------------------------
   const _inner_context3: DirInnerContext3 = {
     ..._inner_context2,
@@ -110,6 +114,25 @@ export function defineDirStore(name?: string): DirFeature {
   };
   //---------------------------------------------
   const _operating = userDirOperating(_inner_context3);
+
+  //---------------------------------------------
+  function getCurrentMeta() {
+    if (!_.isEmpty(_meta.metaData.value)) {
+      return _.cloneDeep(_meta.metaData.value);
+    }
+  }
+
+  function getCurrentContentText() {
+    return _content.contentText.value ?? '';
+  }
+
+  function getCurrentContentMime() {
+    return _content.contentMime.value ?? 'text/plain';
+  }
+
+  function getCurrentContentType() {
+    return _content.contentType.value ?? 'txt';
+  }
   //---------------------------------------------
   // 输出特性
   //---------------------------------------------
@@ -118,12 +141,8 @@ export function defineDirStore(name?: string): DirFeature {
     _keep,
     _meta,
     _content,
-    actionStatus,
-    getCurrentMeta: () => {
-      if (_selection.currentId.value) {
-        return _.cloneDeep(_meta.value.metaData.value);
-      }
-    },
+    actionStatus: _action_status,
+
     /*-------------<State>---------------*/
     ..._dir,
     ..._query,
@@ -139,6 +158,30 @@ export function defineDirStore(name?: string): DirFeature {
     /*----------<Later Assign>-----------*/
     invoke: async (_methodName: string, _payload?: any): Promise<any> => {
       throw 'I am just dirInvoking placeholder!';
+    },
+    /*-------------< Meta >------------*/
+    getCurrentMeta,
+    currentMeta: computed(() => getCurrentMeta()),
+    /*-------------< Content >------------*/
+    getCurrentContentText,
+    getCurrentContentMime,
+    getCurrentContentType,
+
+    currentContentText: computed(() => getCurrentContentText()),
+    currentContentMime: computed(() => getCurrentContentMime()),
+    currentContentType: computed(() => getCurrentContentType()),
+    /*-------------< Vars >---------------*/
+    setVars(vars: Vars = {}) {
+      _vars.value = vars;
+    },
+    assignVars(vars: Vars) {
+      _.assign(_vars.value, vars);
+    },
+    setVar(name: string, val: any) {
+      _vars.value[name] = val;
+    },
+    clearVars() {
+      _vars.value = {};
     },
   };
   //---------------------------------------------

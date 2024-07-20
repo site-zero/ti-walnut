@@ -2,6 +2,7 @@ import { TiComSet } from '@site0/tijs';
 import { WnArenaInfo } from './arena/wn-arena-index';
 import { WnDirBrowserInfo } from './dir-browser/wn-dir-browser-index';
 import { WnObjListInfo } from './obj-list/wn-obj-list-index';
+import { WnObjTableInfo } from './obj-table/wn-obj-table-index';
 import { WnObjMetaInfo } from './obj-meta/wn-obj-meta-index';
 import { WnObjViewerInfo } from './obj-viewer/wn-obj-viewer-index';
 import { WnSignInInfo } from './signin/wn-signin-index';
@@ -14,6 +15,7 @@ export default {
   WnObjViewer: WnObjViewerInfo,
   WnDirBrowser: WnDirBrowserInfo,
   WnObjList: WnObjListInfo,
+  WnObjTable: WnObjTableInfo,
   WnObjMeta: WnObjMetaInfo,
 } as TiComSet;
 

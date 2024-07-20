@@ -1,5 +1,3 @@
-import { TableProps } from '@site0/tijs';
+import { ListProps } from '@site0/tijs';
 
-export type WnObjListProps = Omit<TableProps, 'columns'> & {
-  columns?: string[];
-};
+export type WnObjListProps = ListProps;

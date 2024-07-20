@@ -82,11 +82,11 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
   }
 
   function prependList(obj: WnObj) {
-    _list.value.unshift(obj);
+    _list.value.unshift(_.cloneDeep(obj));
   }
 
   function appendList(obj: WnObj) {
-    _list.value.push(obj);
+    _list.value.push(_.cloneDeep(obj));
   }
 
   function updateListItem(obj: WnObj) {

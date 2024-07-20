@@ -114,7 +114,6 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
   async function writeText(path: string, content: string): Promise<WnObj> {
     let url = `/o/save/text?str=${path}`;
     let re = await Walnut.postFormToGetAjax(url, { content });
-    console.log(re);
     return re.data;
   }
 

@@ -120,8 +120,9 @@ export function useObjContentStore(): ObjContentStoreFeature {
     let path = `id:${_finger.value.id}`;
     // 执行
     _status.value = 'saving';
-    let re = await _obj.writeText(path, _local.value ?? '');
-    _remote.value = _local.value;
+    let str = _.cloneDeep(_local.value ?? '');
+    let re = await _obj.writeText(path, str);
+    _remote.value = str;
     _local.value = undefined;
     _status.value = 'ready';
     return re;

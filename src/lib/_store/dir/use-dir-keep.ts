@@ -3,7 +3,7 @@ import { computed, Ref } from 'vue';
 import { DirGUIViewBehaviors, DirKeepFeatures, DirKeeplInfo, DirUpdateSelection } from './dir.type';
 
 export function useDirKeep(options: DirGUIViewBehaviors): DirKeepFeatures {
-  console.log('useDirKeep', options.keepSelection);
+  //console.log('useDirKeep', options.keepSelection);
   const KeepSelection = computed(() => useKeep(options.keepSelection));
   const KeepFilter = computed(() => useKeep(options.keepFilter));
   const KeepSorter = computed(() => useKeep(options.keepSorter));

@@ -1,21 +1,12 @@
 <script lang="ts" setup>
+  import { LabelProps, TiLabel } from '@site0/tijs';
   import { computed } from 'vue';
-  import { Icons, Iconable, LabelProps, TiLabel } from '@site0/tijs';
+  import { getWnObjIcon } from '../../../core';
   import { WnObjThumbProps } from './wn-obj-thumb-types';
   const props = defineProps<WnObjThumbProps>();
   //-----------------------------------------------------
   const ObjIcon = computed(() => {
-    let _icon: string | Iconable | undefined;
-    let value = props.value;
-    if (value) {
-      _icon = {
-        tp: value.tp,
-        mime: value.mime,
-        race: value.race,
-        icon: value.icon,
-      };
-    }
-    return Icons.getIcon(_icon);
+    return getWnObjIcon(props.value);
   });
   //-----------------------------------------------------
   const ObjLabel = computed(() => {

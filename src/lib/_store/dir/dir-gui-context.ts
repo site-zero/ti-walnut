@@ -1,7 +1,18 @@
 import { DirGUIContext, DirInnerContext2 } from './dir.type';
 
 export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
-  let { _dir, _query, _agg, _meta, _content, _selection } = context;
+  let {
+    _vars,
+    _dir,
+    _view,
+    _query,
+    _agg,
+    _meta,
+    _content,
+    _selection,
+    _action_status,
+  } = context;
+
   return {
     moduleName: _dir.moduleName.value,
     oHome: _dir.oHome.value,
@@ -15,6 +26,8 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     homeId: _dir.homeId.value,
     homeIndexId: _dir.homeIndexId.value,
     isHomeExists: _dir.isHomeExists.value,
+    actions: _view.actions.value,
+    actionStatus: _action_status.value,
     //........... DirQuerySettings
     fixedMatch: _query.fixedMatch.value,
     filter: _query.filter.value,
@@ -39,11 +52,12 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     aggAutoReload: _agg.aggAutoReload.value,
     aggResult: _agg.aggResult.value,
     //........... ObjEditState
-    meta: _meta.value.metaData.value,
-    contentText: _content.value.contentText.value,
-    contentType: _content.value.contentType.value,
-    contentMime: _content.value.contentMime.value,
-    contentStatus: _content.value.status.value,
-    fieldStatus: _meta.value.status.value,
+    meta: _meta.metaData.value,
+    contentText: _content.contentText.value,
+    contentType: _content.contentType.value,
+    contentMime: _content.contentMime.value,
+    contentStatus: _content.status.value,
+    fieldStatus: _meta.status.value,
+    vars: _vars.value,
   };
 }

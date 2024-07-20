@@ -23,12 +23,8 @@
   const DIR = useDirStore(props.moduleName);
   const _GS = useGlobalStatus();
   //-----------------------------------------------------
-  const GUILayout = computed(() => {
-    return DIR.explainLayout();
-  });
-  const GUISchema = computed(() => {
-    return DIR.explainSchema();
-  });
+  const GUILayout = computed(() => DIR.explainLayout());
+  const GUISchema = computed(() => DIR.explainSchema());
   //-----------------------------------------------------
   function onBlock(event: BlockEvent) {
     let { eventName, data } = event;

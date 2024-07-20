@@ -32,7 +32,7 @@ export type ObjMetaStoreFeature = {
 };
 
 export type ObjMetaStoreOptions = {
-  saving: WnMetaSaving;
+  saving: ComputedRef<WnMetaSaving>;
 };
 
 function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
@@ -155,11 +155,11 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
     // 新建对象
     let meta: WnObj | undefined;
     if (isNew()) {
-      meta = await saving.create(_local.value);
+      meta = await saving.value.create(_local.value);
     }
     // 更新对象
     else {
-      meta = await saving.update(_local.value);
+      meta = await saving.value.update(_local.value);
     }
 
     if (meta) {
