@@ -275,6 +275,7 @@ export type DirSelection = {
 
 export type DirSelectingFeature = {
   currentMeta: ComputedRef<WnObj | undefined>;
+  getCurrentMeta: () => WnObj | undefined;
   updateSelection: (
     currentId?: string,
     checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>

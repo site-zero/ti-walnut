@@ -84,6 +84,7 @@ export function userDirSelecting(
     updateSelection,
     syncMetaContentBySelection,
     clearSelection,
+    getCurrentMeta,
     currentMeta,
   };
 }
