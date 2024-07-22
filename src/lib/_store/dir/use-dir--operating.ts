@@ -1,4 +1,4 @@
-import { Prompt, Util } from '@site0/tijs';
+import { Alert, Prompt, Util } from '@site0/tijs';
 import _ from 'lodash';
 import {
   DirInnerContext3,
@@ -10,7 +10,7 @@ import {
 export function userDirOperating(
   context: DirInnerContext3
 ): DirOperatingFeature {
-  let { _dir, _query, _meta, _content, _selection, _selecting } = context;
+  let { _dir, _query, _selection, _selecting } = context;
   //---------------------------------------------
   async function createFile(nm?: string): Promise<WnObj | undefined> {
     nm = _.trim(nm);
@@ -82,11 +82,46 @@ export function userDirOperating(
   }
 
   //---------------------------------------------
+  async function renameCurrent() {
+    let obj = _selecting.currentMeta.value;
+    if (!obj) {
+      await Alert('i18n:nil-item', { type: 'warn' });
+      return;
+    }
+    let nm = obj.nm;
+    nm = await Prompt('Pleae enter the FILE new name:', {
+      type: 'info',
+      width: '80%',
+      maxWidth: '1000px',
+      placeholder: 'New File Name',
+      value: nm,
+    });
+    let newName = _.trim(nm);
+    // 用户取消
+    if (!newName) {
+      return;
+    }
+    // 创建
+    let _obj = useWnObj();
+    let meta = await _obj.rename({ id: obj.id }, newName);
+    if (meta) {
+      _query.updateListItem(meta);
+      _selecting.updateSelection(meta.id);
+      return meta;
+    }
+    // 创建失败打印一下警告
+    else {
+      console.warn('Fail to rename obj:', newName);
+    }
+  }
+
+  //---------------------------------------------
   // 输出特性
   //---------------------------------------------
   return {
     createFile,
     createDir,
     removeChecked,
+    renameCurrent,
   };
 }

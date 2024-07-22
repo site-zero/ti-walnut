@@ -10,7 +10,11 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     _meta,
     _content,
     _selection,
-    _action_status,
+    actionStatus,
+    meta,
+    contentText,
+    contentMime,
+    contentType,
   } = context;
 
   return {
@@ -27,7 +31,7 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     homeIndexId: _dir.homeIndexId.value,
     isHomeExists: _dir.isHomeExists.value,
     actions: _view.actions.value,
-    actionStatus: _action_status.value,
+    actionStatus: actionStatus.value,
     //........... DirQuerySettings
     fixedMatch: _query.fixedMatch.value,
     filter: _query.filter.value,
@@ -52,10 +56,10 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     aggAutoReload: _agg.aggAutoReload.value,
     aggResult: _agg.aggResult.value,
     //........... ObjEditState
-    meta: _meta.metaData.value,
-    contentText: _content.contentText.value,
-    contentType: _content.contentType.value,
-    contentMime: _content.contentMime.value,
+    meta: meta.value,
+    contentText: contentText.value,
+    contentType: contentType.value,
+    contentMime: contentMime.value,
     contentStatus: _content.status.value,
     fieldStatus: _meta.status.value,
     vars: _vars.value,

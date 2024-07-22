@@ -1,6 +1,6 @@
 import { Util } from '@site0/tijs';
 import _ from 'lodash';
-import { ComputedRef } from 'vue';
+import { computed, ComputedRef } from 'vue';
 import { DirEditingFeature, DirInnerContext2, WnObj } from '../../../..';
 import { DirKeepFeatures, DirSelectingFeature } from './dir.type';
 
@@ -9,8 +9,11 @@ export function userDirSelecting(
   _keep: ComputedRef<DirKeepFeatures>,
   _editing: DirEditingFeature
 ): DirSelectingFeature {
+  //---------------------------------------------
+  // 解构上下文
   let { _query, _meta, _content, _selection } = context;
 
+  //---------------------------------------------
   async function updateSelection(
     currentId?: string,
     checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
@@ -57,6 +60,7 @@ export function userDirSelecting(
     }
   }
 
+  //---------------------------------------------
   function clearSelection() {
     _selection.currentId.value = undefined;
     _selection.checkedIds.value = {};
@@ -64,9 +68,22 @@ export function userDirSelecting(
     _content.reset();
   }
 
+  //---------------------------------------------
+  function getCurrentMeta(): WnObj | undefined {
+    if (_selection.currentId.value) {
+      let currentId = _selection.currentId.value;
+      return _.find(_query.list.value, (it) => it.id == currentId);
+    }
+  }
+  const currentMeta = computed(() => getCurrentMeta());
+
+  //---------------------------------------------
+  // 输出特性
+  //---------------------------------------------
   return {
     updateSelection,
     syncMetaContentBySelection,
     clearSelection,
+    currentMeta,
   };
 }

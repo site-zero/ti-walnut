@@ -1,7 +1,7 @@
 import { Util, Vars } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
-import { Walnut } from '../../..';
+import { Walnut, WnObjInfo } from '../../..';
 import { WnMetaSaving, WnObj } from '../_top';
 
 export type WnObjFeature = WnMetaSaving & {
@@ -10,6 +10,7 @@ export type WnObjFeature = WnMetaSaving & {
   remove: (...ids: string[]) => Promise<void>;
   writeText: (path: string, content: string) => Promise<WnObj>;
   loadContent: (path: string) => Promise<string>;
+  rename: (info: WnObjInfo, newName: string) => Promise<WnObj | undefined>;
 };
 
 const BUILD_IN_KEYS = [
@@ -123,6 +124,39 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
     return re;
   }
 
+  async function rename(
+    info: WnObjInfo,
+    newName: string
+  ): Promise<WnObj | undefined> {
+    let { id, ph } = info;
+    let cmds = [`rename -cqno`];
+    if (id) {
+      // 去掉危险的字符串
+      let objId = id.replace(/'/g, '');
+      cmds.push(`-id '${objId}'`);
+    } else if (ph) {
+      // 去掉危险的字符串
+      let aph = ph.replace(/'/g, '');
+      // 确保是绝对路径
+      if (!/^[~/]/.test(aph)) {
+        aph = Util.appendPath(_home_path, aph);
+      }
+      cmds.push(`'${aph}'`);
+    }
+    // 没有足够
+    else {
+      return;
+    }
+    cmds.push(`'${newName}'`);
+
+    let cmdText = cmds.join(' ');
+    let re = await Walnut.exec(cmdText);
+    re = _.trim(re);
+    if (re && !/^e./.test(re)) {
+      return JSON5.parse(re);
+    }
+  }
+
   //---------------------------------------------
   //                输出特性
   //---------------------------------------------
@@ -134,5 +168,6 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
     create,
     writeText,
     loadContent,
+    rename,
   };
 }

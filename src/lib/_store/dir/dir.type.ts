@@ -274,6 +274,7 @@ export type DirSelection = {
 };
 
 export type DirSelectingFeature = {
+  currentMeta: ComputedRef<WnObj | undefined>;
   updateSelection: (
     currentId?: string,
     checkedIds?: string[] | Map<string, boolean> | Record<string, boolean>
@@ -340,6 +341,7 @@ export type DirOperatingFeature = {
   createFile: () => Promise<WnObj | undefined>;
   createDir: () => Promise<WnObj | undefined>;
   removeChecked: () => Promise<void>;
+  renameCurrent: () => Promise<WnObj | undefined>;
 };
 
 /*
@@ -356,24 +358,17 @@ export type DirFeature = DirInitFeature &
   DirReloadingFeature &
   DirGUIFeature &
   DirEditingFeature &
-  DirOperatingFeature & {
+  DirOperatingFeature &
+  DirInnerEditing & {
+    _vars: Ref<Vars>;
     _keep: ComputedRef<DirKeepFeatures>;
     _meta: ObjMetaStoreFeature;
     _content: ObjContentStoreFeature;
-    actionStatus: ComputedRef<Vars>;
-
-    getCurrentMeta: () => WnObj | undefined;
-    getCurrentContentText: () => string | undefined;
-    getCurrentContentMime: () => string | undefined;
-    getCurrentContentType: () => string | undefined;
-    currentMeta: ComputedRef<WnObj | undefined>;
-    currentContentText: ComputedRef<string | undefined>;
-    currentContentMime: ComputedRef<string | undefined>;
-    currentContentType: ComputedRef<string | undefined>;
 
     setVars: (vars?: Vars) => void;
     assignVars: (vars: Vars) => void;
     setVar: (name: string, val: any) => void;
+    getVar: (name: string, dft?: any) => any;
     clearVars: () => void;
   };
 
@@ -386,11 +381,23 @@ export type DirInnerContext = {
   _selection: DirSelection;
 };
 
-export type DirInnerContext2 = DirInnerContext & {
-  _meta: ObjMetaStoreFeature;
-  _content: ObjContentStoreFeature;
-  _action_status: ComputedRef<Vars>;
+export type DirInnerEditing = {
+  actionStatus: ComputedRef<Vars>;
+  getMeta: () => WnObj | undefined;
+  getContentText: () => string | undefined;
+  getContentMime: () => string | undefined;
+  getContentType: () => string | undefined;
+  meta: ComputedRef<WnObj | undefined>;
+  contentText: ComputedRef<string | undefined>;
+  contentMime: ComputedRef<string | undefined>;
+  contentType: ComputedRef<string | undefined>;
 };
+
+export type DirInnerContext2 = DirInnerContext &
+  DirInnerEditing & {
+    _meta: ObjMetaStoreFeature;
+    _content: ObjContentStoreFeature;
+  };
 
 export type DirInnerContext3 = DirInnerContext2 & {
   _gui: DirGUIFeature;

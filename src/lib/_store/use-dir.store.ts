@@ -2,6 +2,7 @@ import { Util, Vars, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
+  DirInnerEditing,
   DirFeature,
   DirInnerContext,
   DirInnerContext2,
@@ -65,8 +66,29 @@ export function defineDirStore(name?: string): DirFeature {
   const _meta = useObjMetaStore({ saving: _saving });
   const _content = useObjContentStore();
   //---------------------------------------------
+  function getMeta() {
+    if (!_.isEmpty(_meta.metaData.value)) {
+      return _.cloneDeep(_meta.metaData.value);
+    }
+  }
+  function getContentText() {
+    return _content.contentText.value ?? '';
+  }
+  function getContentMime() {
+    return _content.contentMime.value ?? 'text/plain';
+  }
+  function getContentType() {
+    return _content.contentType.value ?? 'txt';
+  }
+  //---------------------------------------------
+  const meta = computed(() => getMeta());
+  const contentText = computed(() => getContentText());
+  const contentMime = computed(() => getContentMime());
+  const contentType = computed(() => getContentType());
+  //---------------------------------------------
   const _action_status = computed(() => {
     return {
+      ..._vars.value,
       hasCurrent: !_.isNil(_selection.currentId.value),
       hasChecked: !_.isEmpty(
         Util.recordTruthyKeys(_selection.checkedIds.value)
@@ -79,11 +101,24 @@ export function defineDirStore(name?: string): DirFeature {
     } as Vars;
   });
   //---------------------------------------------
+  const _inner_editing: DirInnerEditing = {
+    actionStatus: _action_status,
+    getMeta,
+    getContentText,
+    getContentMime,
+    getContentType,
+
+    meta,
+    contentText,
+    contentMime,
+    contentType,
+  };
+  //---------------------------------------------
   const _inner_context2: DirInnerContext2 = {
     ..._inner_context,
+    ..._inner_editing,
     _meta,
     _content,
-    _action_status,
   };
   //---------------------------------------------
   const _gui = userDirGUI(_inner_context2);
@@ -116,33 +151,14 @@ export function defineDirStore(name?: string): DirFeature {
   const _operating = userDirOperating(_inner_context3);
 
   //---------------------------------------------
-  function getCurrentMeta() {
-    if (!_.isEmpty(_meta.metaData.value)) {
-      return _.cloneDeep(_meta.metaData.value);
-    }
-  }
-
-  function getCurrentContentText() {
-    return _content.contentText.value ?? '';
-  }
-
-  function getCurrentContentMime() {
-    return _content.contentMime.value ?? 'text/plain';
-  }
-
-  function getCurrentContentType() {
-    return _content.contentType.value ?? 'txt';
-  }
-  //---------------------------------------------
   // 输出特性
   //---------------------------------------------
   let re: DirFeature = {
     /*------------<expose>--------------*/
+    _vars,
     _keep,
     _meta,
     _content,
-    actionStatus: _action_status,
-
     /*-------------<State>---------------*/
     ..._dir,
     ..._query,
@@ -155,21 +171,13 @@ export function defineDirStore(name?: string): DirFeature {
     ..._reloading,
     ..._editing,
     ..._operating,
+    ..._inner_editing,
     /*----------<Later Assign>-----------*/
     invoke: async (_methodName: string, _payload?: any): Promise<any> => {
       throw 'I am just dirInvoking placeholder!';
     },
-    /*-------------< Meta >------------*/
-    getCurrentMeta,
-    currentMeta: computed(() => getCurrentMeta()),
-    /*-------------< Content >------------*/
-    getCurrentContentText,
-    getCurrentContentMime,
-    getCurrentContentType,
+    /*----------< Meta/Content >---------*/
 
-    currentContentText: computed(() => getCurrentContentText()),
-    currentContentMime: computed(() => getCurrentContentMime()),
-    currentContentType: computed(() => getCurrentContentType()),
     /*-------------< Vars >---------------*/
     setVars(vars: Vars = {}) {
       _vars.value = vars;
@@ -179,6 +187,9 @@ export function defineDirStore(name?: string): DirFeature {
     },
     setVar(name: string, val: any) {
       _vars.value[name] = val;
+    },
+    getVar(name: string, val?: any) {
+      return _vars.value[name] ?? val;
     },
     clearVars() {
       _vars.value = {};
