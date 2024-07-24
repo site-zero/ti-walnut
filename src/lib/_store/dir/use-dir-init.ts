@@ -97,11 +97,10 @@ export function useDirInit(): DirInitFeature {
       _init.oHome.value = obj;
       let isThingSet = 'thing_set' == obj.tp;
       // 指定了视图
-      // 如果是 ThingSet 则默认视图为 `./thing-view.json`
+      // 如果是 ThingSet 则默认视图为 `./thing-view.json5`
       let viewPath = obj['gui-view'];
-      // 如果是 ThingSet 则默认视图为 `./thing-view.json`
       if (!viewPath && isThingSet) {
-        viewPath = 'thing-view.json';
+        viewPath = 'thing-view.json5';
       }
       if (viewPath && _.isString(viewPath)) {
         log.debug('viewPath=', viewPath);
