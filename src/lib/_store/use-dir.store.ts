@@ -2,11 +2,11 @@ import { Util, Vars, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
-  DirInnerEditing,
   DirFeature,
   DirInnerContext,
   DirInnerContext2,
   DirInnerContext3,
+  DirInnerEditing,
   DirSelection,
 } from './dir/dir.type';
 import { userDirGUI } from './dir/use-dir--gui';
@@ -190,6 +190,9 @@ export function defineDirStore(name?: string): DirFeature {
     },
     getVar(name: string, val?: any) {
       return _vars.value[name] ?? val;
+    },
+    getVars() {
+      return _.cloneDeep(_vars.value);
     },
     clearVars() {
       _vars.value = {};

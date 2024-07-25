@@ -16,6 +16,8 @@ export async function openCmdRunner(
     type: 'info',
     width: '640px',
     height: '90%',
+    textOk: null,
+    textCancel: 'i18n:close',
     ...(options.dialog ?? {}),
     comType: 'WnCmdRunner',
     comConf,

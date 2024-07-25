@@ -1,5 +1,6 @@
 import {
   ActionBarProps,
+  ConfirmOptions,
   FieldStatus,
   KeepFeature,
   KeepInfo,
@@ -370,6 +371,7 @@ export type DirFeature = DirInitFeature &
     assignVars: (vars: Vars) => void;
     setVar: (name: string, val: any) => void;
     getVar: (name: string, dft?: any) => any;
+    getVars: () => Vars;
     clearVars: () => void;
   };
 
@@ -456,4 +458,8 @@ export type DirGUIContext = {
   // contentType?: string;
   fieldStatus: Record<string, FieldStatus>;
   vars: Vars;
+};
+
+export type RemoveOptions = ConfirmOptions & {
+  message?: string;
 };

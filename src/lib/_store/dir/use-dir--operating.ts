@@ -1,8 +1,9 @@
-import { Alert, Prompt, Util } from '@site0/tijs';
+import { Alert, Confirm, Prompt, Util } from '@site0/tijs';
 import _ from 'lodash';
 import {
   DirInnerContext3,
   DirOperatingFeature,
+  RemoveOptions,
   useWnObj,
   WnObj,
 } from '../../../..';
@@ -71,14 +72,39 @@ export function userDirOperating(
   }
 
   //---------------------------------------------
-  async function removeChecked() {
+  async function removeChecked(options?: RemoveOptions) {
+    // 防空
     let ckIds = Util.recordTruthyKeys(_selection.checkedIds.value);
-    if (ckIds && ckIds.length > 0) {
-      let _obj = useWnObj(`id:${_dir.homeIndexId.value}`);
-      await _obj.remove(...ckIds);
-      await _query.queryList();
-      _selecting.clearSelection();
+    if (!ckIds || _.isEmpty(ckIds)) {
+      Alert('i18n:remove-nil', { type: 'info' });
+      return;
     }
+
+    // 主动确认
+    if (options) {
+      let confirm = _.assign({
+        message: 'i18n:remove-confirm-hard',
+        title: 'i18n:remove',
+        icon: 'fas-trash',
+        vars: { N: ckIds.length },
+        bodyIcon: 'fas-circle-radiation',
+        iconOk: 'fas-trash',
+        textOk: 'i18n:remove-now',
+        type: 'warn',
+        textCancel: 'i18n:cancel',
+        ...options,
+      } as RemoveOptions);
+
+      if (!(await Confirm(confirm.message!, confirm))) {
+        return;
+      }
+    }
+
+    // 执行删除
+    let _obj = useWnObj(`id:${_dir.homeIndexId.value}`);
+    await _obj.remove(...ckIds);
+    await _query.queryList();
+    _selecting.clearSelection();
   }
 
   //---------------------------------------------
