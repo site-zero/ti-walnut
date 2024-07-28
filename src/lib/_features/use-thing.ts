@@ -25,6 +25,12 @@ const BUILD_IN_KEYS = [
   'lm',
 ];
 
+/**
+ * 定义数据集访问特性
+ *
+ * @param thSetIdOrPath
+ * @returns 数据集访问特性
+ */
 export function useThing(thSetIdOrPath: string): ThingFeature {
   const _th_set = thSetIdOrPath.replace(/'/g, '');
 

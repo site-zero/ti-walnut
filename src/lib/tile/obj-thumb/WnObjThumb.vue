@@ -17,7 +17,7 @@
       if (title && nm) {
         if (title != nm) {
           re.value = title;
-          re.suffixText = nm;
+          //re.suffixText = nm;
         } else {
           re.value = nm;
           re.autoI18n = false;
@@ -40,6 +40,3 @@
 <template>
   <TiLabel v-bind="ObjLabel" :prefix-icon="ObjIcon" />
 </template>
-<style scoped lang="scss">
-  @use '@site0/tijs/scss' as *;
-</style>

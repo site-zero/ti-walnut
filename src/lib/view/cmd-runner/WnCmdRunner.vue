@@ -21,7 +21,7 @@ import { WnCmdRunnerEmitter, WnCmdRunnerProps } from './wn-cmd-runner-types';
     }
     let el = $main.value;
     el.scrollTop = el.scrollHeight;
-    console.log('line changed');
+    // console.log('line changed');
   });
   //-----------------------------------------------------
   onMounted(() => {

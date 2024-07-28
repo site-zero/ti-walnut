@@ -32,7 +32,6 @@
     if ('list-select' == eventName) {
       let { currentId, checkedIds } = data;
       DIR.updateSelection(currentId, checkedIds);
-      console.log(data);
     }
     // 修改原数据
     else if ('meta-change' == eventName) {
@@ -61,8 +60,8 @@
   //-----------------------------------------------------
   watch(
     () => props.value,
-    (oDir, oldDir) => {
-      console.log('oDir', oDir, 'oldDir', oldDir);
+    (oDir, _oldDir) => {
+      //console.log('oDir', oDir, 'oldDir', oldDir);
       DIR.reload(oDir);
     },
     {

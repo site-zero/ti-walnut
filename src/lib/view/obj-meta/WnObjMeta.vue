@@ -44,6 +44,3 @@
     :data="props.value"
     @change="emit('change', $event)" />
 </template>
-<style lang="scss" scoped>
-  @use '@site0/tijs/scss' as *;
-</style>

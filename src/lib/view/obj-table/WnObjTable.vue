@@ -23,7 +23,7 @@
   //-----------------------------------------------------
   const TableColumns = computed(() => {
     let colNames = props.columns || ['obj-nm-title-icon', 'tp', 'lm'];
-    return COL.getColumns(colNames);
+    return COL.getColumnList(colNames);
   });
   //-----------------------------------------------------
 </script>
