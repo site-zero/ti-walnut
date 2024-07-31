@@ -110,13 +110,13 @@ function defineObjColumns(featureName: string): ObjColumnsFeature {
   };
 }
 //-----------------------------------------------
-const _OBJ_FIELDS_INSTANCES = new Map<string, ObjColumnsFeature>();
+const _OBJ_COLUMN_INSTANCES = new Map<string, ObjColumnsFeature>();
 //-----------------------------------------------
 export function useObjColumns(name = '_DEFAULT_COLUMN_SET'): ObjColumnsFeature {
-  let re = _OBJ_FIELDS_INSTANCES.get(name);
+  let re = _OBJ_COLUMN_INSTANCES.get(name);
   if (!re) {
     re = defineObjColumns(name);
-    _OBJ_FIELDS_INSTANCES.set(name, re);
+    _OBJ_COLUMN_INSTANCES.set(name, re);
   }
   return re;
 }

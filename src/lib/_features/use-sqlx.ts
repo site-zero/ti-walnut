@@ -3,6 +3,7 @@ import JSON5 from 'json5';
 import _ from 'lodash';
 import {
   QueryFilter,
+  SqlExecInfo,
   SqlExecOptions,
   SqlExecResult,
   SqlLimit,
@@ -137,20 +138,33 @@ export function useSqlx(daoName?: string) {
 
   /**
    * 封装 SQL 的执行
-   * @param options  执行的具体细节
+   * @param infos  执行的具体细节
    * @returns 执行结果
    */
   async function exec(
-    options: SqlExecOptions | SqlExecOptions[]
+    infos: SqlExecInfo | SqlExecInfo[],
+    options: SqlExecOptions = {}
   ): Promise<SqlExecResult | undefined> {
     let inputs = {} as Vars;
-    let opts = _.concat(options);
+    let opts = _.concat(infos);
     // 准备命令
     let cmds = [`sqlx`];
     if (daoName) {
       cmds.push(daoName);
     }
     cmds.push('-cqn');
+    
+    // 开启事务
+    let tl = options?.transLevel ?? 0;
+    if (tl > 0) {
+      cmds.push('@trans');
+      // 快速判断给定的事物级别是否是1248其中的一个
+      if ((tl & 15) === tl) {
+        cmds.push(`-level ${tl}`);
+      }
+    }
+
+    // 逐个处理执行对象
     for (let i = 0; i < opts.length; i++) {
       let opt = opts[i];
       // 准备输入

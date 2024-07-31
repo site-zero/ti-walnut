@@ -12,9 +12,12 @@ export function initWalnutObjDefaultColumns() {
     type: 'Object',
     comType: 'WnObjThumb',
   });
+  _ocs.addColumn('nm', { name: 'nm', title: 'i18n:wn-obj-nm' });
+  _ocs.addColumn('race', { name: 'race', title: 'i18n:wn-obj-race' });
+  _ocs.addColumn('sort', { name: 'sort', title: 'i18n:wn-obj-sort' });
+  _ocs.addColumn('race', { name: 'race', title: 'i18n:wn-obj-race' });
   _ocs.addColumn('title', { name: 'title', title: 'i18n:wn-obj-title' });
   _ocs.addColumn('tp', { name: 'tp', title: 'i18n:wn-obj-tp' });
-  _ocs.addColumn('race', { name: 'race', title: 'i18n:wn-obj-race' });
   _ocs.addColumn('mime', { name: 'mime', title: 'i18n:wn-obj-mime' });
   // ----------------------------- 权限
   _ocs.addColumn('d0', { name: 'd0', title: 'D0' });

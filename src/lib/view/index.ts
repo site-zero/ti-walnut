@@ -26,5 +26,6 @@ export * from './cmd-runner/wn-cmd-runner-index';
 export * from './dir-browser/wn-dir-browser-index';
 export * from './obj-list/wn-obj-list-index';
 export * from './obj-meta/wn-obj-meta-index';
+export * from './obj-table/wn-obj-table-index';
 export * from './signin/wn-signin-index';
 export * from './sky/wn-sky-index';

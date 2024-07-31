@@ -5,7 +5,7 @@ import {
   LocalMetaEditOptions,
   LocalMetaMakeChangeOptions,
   QueryFilter,
-  SqlExecOptions,
+  SqlExecInfo,
   SqlResult,
   useLocalMetaEdit,
   useSqlx,
@@ -46,7 +46,7 @@ export type DataMetaStoreFeature = {
   setRemoteMeta: (meta: SqlResult) => void;
   clearRemoteMeta: () => void;
 
-  makeChanges: () => SqlExecOptions[];
+  makeChanges: () => SqlExecInfo[];
   //---------------------------------------------
   //  远程方法
   fetchRemoteMeta: () => Promise<void>;
@@ -122,14 +122,14 @@ function defineDataMetaStore(
     _status.value = undefined;
   }
 
-  function makeChanges(): SqlExecOptions[] {
+  function makeChanges(): SqlExecInfo[] {
     // 保护一下
     if (!options.makeChange) {
       log.warn('without options.makeChange');
       return [];
     }
     // 获取改动信息
-    let changes = [] as SqlExecOptions[];
+    let changes = [] as SqlExecInfo[];
     changes.push(..._local.value.makeChange(options.makeChange));
 
     log.debug('makeChanges', changes);

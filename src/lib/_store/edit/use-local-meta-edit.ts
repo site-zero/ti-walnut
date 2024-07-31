@@ -1,4 +1,4 @@
-import { SqlExecOptions, SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
+import { SqlExecInfo, SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
 import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, ref } from 'vue';
@@ -99,7 +99,7 @@ export function useLocalMetaEdit(
     return {};
   }
 
-  function makeChange(options: LocalMetaMakeChangeOptions): SqlExecOptions[] {
+  function makeChange(options: LocalMetaMakeChangeOptions): SqlExecInfo[] {
     // 检查 Console
     let vars = getDiffMeta();
     if (_.isEmpty(vars)) {

@@ -15,7 +15,7 @@ import {
   LocalListMakeChangeOptions,
   QueryFilter,
   QuerySorter,
-  SqlExecOptions,
+  SqlExecInfo,
   SqlPager,
   SqlPagerInput,
   SqlQuery,
@@ -75,7 +75,7 @@ export type DataListStoreFeature = {
     checkedIds?: TableRowID[]
   ) => void;
   cancelSelection: () => void;
-  makeChanges: () => SqlExecOptions[];
+  makeChanges: () => SqlExecInfo[];
   //---------------------------------------------
   // 本地化存储状态
   saveLocalQuery: () => void;

@@ -1,6 +1,6 @@
 import {
   LocalMetaMakeChangeOptions,
-  SqlExecOptions,
+  SqlExecInfo,
   SqlResult,
 } from '@site0/ti-walnut';
 import {
@@ -200,7 +200,7 @@ export function useLocalListEdit(
     },
     //.............................................
     makeChanges(options: LocalListMakeChangeOptions) {
-      let changes = [] as SqlExecOptions[];
+      let changes = [] as SqlExecInfo[];
 
       // 如果没有做过任何修改 ...
       if (!_local_list.value) {

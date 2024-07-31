@@ -31,7 +31,7 @@ export type SqlQuery = {
   pager: SqlPager;
 };
 
-export type SqlExecOptions = {
+export type SqlExecInfo = {
   sql: string;
   // ------------------- sqlx @vars
   vars: SqlResult | SqlResult[];
@@ -79,4 +79,25 @@ export type SqlExecSetVar = {
   name: string;
   value: string;
   to?: 'list' | 'map' | 'all';
+};
+
+export type SqlExecOptions = {
+  /**
+   * 事务级别:
+   *
+   * - `0` : 没有事务【默认】
+   * - `1` : TRANSACTION_READ_UNCOMMITTED
+   * - `2` : TRANSACTION_READ_COMMITTED
+   * - `4` : TRANSACTION_REPEATABLE_READ
+   * - `8` : TRANSACTION_SERIALIZABLE
+   * 
+   * 
+   * |No.| TRANS LEVEL                     | DR | NRR | PR |
+   * |---|---------------------------------|----|-----|----|
+   * | 1 | TRANSACTION_READ_UNCOMMITTED    | Y  | Y   | Y  |
+   * | 2 | TRANSACTION_READ_COMMITTED      | -  | Y   | Y  |
+   * | 4 | TRANSACTION_REPEATABLE_READ     | -  | -   | Y  |
+   * | 8 | TRANSACTION_SERIALIZABLE        | -  | -   | -  |
+   */
+  transLevel?: number;
 };
