@@ -18,6 +18,7 @@ export interface ServerConfig {
   protocal: 'http' | 'https';
   host: string;
   port: number;
+  domain?: string;
   site?: string;
   lang?: I18nLang;
   sidebar?: boolean | string;

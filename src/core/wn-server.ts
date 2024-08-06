@@ -45,6 +45,7 @@ export class WalnutServer {
       host: 'localhost',
       port: 8080,
       site: undefined,
+      domain: undefined,
       sidebar: false,
     };
     this._ticket = TiStore.local.getString(TICKET_KEY, undefined);
