@@ -1,18 +1,26 @@
 import {
+  Convertor,
   DictSetup,
   Dicts,
+  DynDictMaker,
   IDict,
   LoadData,
   LoadDictItem,
   QueryDictItems,
+  TiDict,
   Tmpl,
+  Util,
   Vars,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { WnDictSetup } from '../lib';
 import { Walnut } from './wn-server';
+import { exec } from 'child_process';
 
-function makeWalnutDictGetData(data?: string | Vars[]): LoadData<any> {
+function makeWalnutDictGetData(
+  data?: string | Vars[],
+  input?: any
+): LoadData<any> {
   if (data) {
     // 命令或者加载静态资源
     if (_.isString(data)) {
@@ -25,7 +33,7 @@ function makeWalnutDictGetData(data?: string | Vars[]): LoadData<any> {
 
       // 命令
       return (signal?: AbortSignal): Promise<any[]> => {
-        return Walnut.exec(data, { as: 'json', signal });
+        return Walnut.exec(data, { as: 'json', input, signal });
       };
     }
     // 静态数组
@@ -44,7 +52,8 @@ function makeWalnutDictGetData(data?: string | Vars[]): LoadData<any> {
 }
 
 function makeWalnutDictQueryItems(
-  query?: string
+  query?: string,
+  execInput?: any
 ): undefined | QueryDictItems<any, any, any> {
   // 默认就是空，字典构造函数  makeDictOptions 会自动填充这个选项
   if (!query) {
@@ -64,12 +73,13 @@ function makeWalnutDictQueryItems(
       vars = { val: input };
     }
     let cmdText = cmdTmpl.render(vars);
-    return Walnut.exec(cmdText, { as: 'json', signal });
+    return Walnut.exec(cmdText, { as: 'json', input: execInput, signal });
   };
 }
 
 function makeWalnutDictGetItem(
-  query?: string
+  query?: string,
+  execInput?: any
 ): undefined | LoadDictItem<any, any> {
   // 默认就是空，字典构造函数  makeDictOptions 会自动填充这个选项
   if (!query) {
@@ -89,15 +99,15 @@ function makeWalnutDictGetItem(
       vars = { val: input };
     }
     let cmdText = cmdTmpl.render(vars);
-    return Walnut.exec(cmdText, { as: 'json', signal });
+    return Walnut.exec(cmdText, { as: 'json', input: execInput, signal });
   };
 }
 
-export function makeWalnutDictOptions(setup: WnDictSetup): DictSetup {
+function makeWalnutDictOptions(setup: WnDictSetup, input?: string): DictSetup {
   return {
-    data: makeWalnutDictGetData(setup.data),
-    query: makeWalnutDictQueryItems(setup.query),
-    item: makeWalnutDictGetItem(setup.item),
+    data: makeWalnutDictGetData(setup.data, input),
+    query: makeWalnutDictQueryItems(setup.query, input),
+    item: makeWalnutDictGetItem(setup.item, input),
     value: setup.value,
     text: setup.text,
     icon: setup.icon,
@@ -105,14 +115,92 @@ export function makeWalnutDictOptions(setup: WnDictSetup): DictSetup {
   };
 }
 
+function __prepare_dyn_dict_query_cmd(
+  _query?: string
+): Convertor<Vars, string | undefined> {
+  if (!_query) {
+    return (_vars: Vars): string | undefined => undefined;
+  }
+  let tmpl = Tmpl.parse(_query);
+  return (_vars: Vars): string | undefined => {
+    return tmpl.render(_vars);
+  };
+}
+
+function __prepare_dyn_dict_input(
+  input?: any
+): Convertor<Vars, string | undefined> {
+  if (!input) {
+    return (_vars: Vars): string | undefined => undefined;
+  }
+  let exp = Util.buildExplainer(input);
+  return (_vars: Vars): string | undefined => {
+    let re = exp.explain(_vars, {
+      evalFunc: true,
+    });
+    if (_.isNil(re)) {
+      return;
+    }
+    if (!_.isString(re)) {
+      return JSON.stringify(re);
+    }
+    return re;
+  };
+}
+
+function makeWalnutDynamicDictCreator(
+  setup: WnDictSetup
+): DynDictMaker<any, any> {
+  // 编制
+  let _get_data = __prepare_dyn_dict_query_cmd(setup.data as string);
+  let _get_query = __prepare_dyn_dict_query_cmd(setup.query as string);
+  let _get_item = __prepare_dyn_dict_query_cmd(setup.item as string);
+  let _get_input = __prepare_dyn_dict_input(setup.input);
+  let value = setup.value;
+  let text = setup.text;
+  let icon = setup.icon;
+  let tip = setup.tip;
+
+  return (vars: Vars): TiDict => {
+    let data = _get_data(vars);
+    let query = _get_query(vars);
+    let item = _get_item(vars);
+    let input = _get_input(vars);
+
+    let setup = makeWalnutDictOptions(
+      {
+        data,
+        query,
+        item,
+        value,
+        text,
+        icon,
+        tip,
+      },
+      input
+    );
+    let options = Dicts.makeDictOptions(setup);
+    return Dicts.getOrCreate(options);
+  };
+}
+
 export function installWalnutDicts(dicts?: Record<string, WnDictSetup>) {
   if (!dicts) {
     return;
   }
-  //console.log('installWalnutDicts', dicts);
+  console.log('installWalnutDicts', dicts);
   for (let dictName of _.keys(dicts)) {
-    let setup = makeWalnutDictOptions(dicts[dictName]);
-    let options = Dicts.makeDictOptions(setup);
-    Dicts.getOrCreate(options, dictName);
+    let _setup = dicts[dictName];
+    // 动态字典
+    if (_setup.dynamic) {
+      let creator = makeWalnutDynamicDictCreator(_setup);
+      Dicts.createDynamicDict(creator, dictName);
+    }
+    // 静态字典
+    else {
+      let setup = makeWalnutDictOptions(_setup);
+      let options = Dicts.makeDictOptions(setup);
+      Dicts.getOrCreate(options, dictName);
+    }
   }
 }

@@ -28,11 +28,26 @@ export interface ServerConfig {
 }
 
 export type WnDictSetup = {
+  /**
+   * 动态字典，那么，会认为 data 为一个命令模板，上下文就是 Vars
+   */
+  dynamic?: boolean;
+  /**
+   * 动态字典命令模板执行的时候标准输入，需要 explain, 上下文就是 Vars
+   */
+  input?:any;
+
+  /**
+   * 字典如何获取标准字段
+   */
   value?: string;
   text?: string;
   icon?: string;
   tip?: string;
 
+  /**
+   * 字典如何获取数据
+   */
   data?: string | Vars[];
   query?: string;
   item?: string;
