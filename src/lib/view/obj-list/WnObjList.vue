@@ -18,6 +18,8 @@
     canHover: undefined,
     allowUserSelect: undefined,
     autoI18n: undefined,
+    textAsHtml: true,
+    borderStyle: 'dotted'
   });
   //-----------------------------------------------------
 </script>
