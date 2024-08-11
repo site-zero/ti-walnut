@@ -26,7 +26,7 @@ import { installWalnutDicts } from './wn-dict';
 import { wnRunCommand } from './wn-run-command';
 
 const TICKET_KEY = 'Walnut-Ticket';
-const log = getLogger('wn.core.server');
+const log = getLogger('wn.server');
 
 export class WalnutServer {
   /**
@@ -62,10 +62,29 @@ export class WalnutServer {
       setDefaultLogLevel(getLogLevel(conf.logLevel));
     }
     if (conf.logger) {
-      _.forEach(conf.logger, (v, k) => {
+      // Logger 的排序，越短的名字越应该排在后面，这样才会覆盖前者
+      // 长度相同的，需要先变成 kebab 然后再比较
+      let loggerKeys = _.keys(conf.logger)
+        .sort((a: string, b: string): number => {
+          if (a.length == b.length) {
+            let _a = _.kebabCase(a);
+            let _b = _.kebabCase(b);
+            if (a.length == b.length) {
+              return _a.localeCompare(_b);
+            }
+            return _b.length - _a.length;
+          }
+          return b.length - a.length;
+        })
+        .reverse();
+
+      log.debug('WnServer: loggerKeys=', loggerKeys);
+      for (let k of loggerKeys) {
+        let v = conf.logger[k];
         let lv = getLogLevel(v);
+        log.debug('addLogger', k, lv);
         addLogger(k, lv);
-      });
+      }
       tidyLogger();
     }
     if (conf.dicts) {

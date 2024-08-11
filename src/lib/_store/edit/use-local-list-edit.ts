@@ -199,7 +199,7 @@ export function useLocalListEdit(
       _local_list.value = list;
     },
     //.............................................
-    makeChanges(options: LocalListMakeChangeOptions) {
+    makeChanges(options: LocalListMakeChangeOptions, _showDebug: boolean = false) {
       let changes = [] as SqlExecInfo[];
 
       // 如果没有做过任何修改 ...

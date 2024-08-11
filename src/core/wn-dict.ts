@@ -11,11 +11,14 @@ import {
   Tmpl,
   Util,
   Vars,
+  getLogger,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { WnDictSetup } from '../lib';
 import { Walnut } from './wn-server';
 import { exec } from 'child_process';
+
+const log = getLogger('wn.dict');
 
 function makeWalnutDictGetData(
   data?: string | Vars[],
@@ -188,7 +191,7 @@ export function installWalnutDicts(dicts?: Record<string, WnDictSetup>) {
   if (!dicts) {
     return;
   }
-  console.log('installWalnutDicts', dicts);
+  log.info('installWalnutDicts', dicts);
   for (let dictName of _.keys(dicts)) {
     let _setup = dicts[dictName];
     // 动态字典
