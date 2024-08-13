@@ -155,6 +155,7 @@ export function useLocalListEdit(
           let id = getRowId(local, i);
           if (forIds == id) {
             _.assign(local, meta);
+            break;
           }
         }
       }
@@ -199,7 +200,10 @@ export function useLocalListEdit(
       _local_list.value = list;
     },
     //.............................................
-    makeChanges(options: LocalListMakeChangeOptions, _showDebug: boolean = false) {
+    makeChanges(
+      options: LocalListMakeChangeOptions,
+      _showDebug: boolean = false
+    ) {
       let changes = [] as SqlExecInfo[];
 
       // 如果没有做过任何修改 ...

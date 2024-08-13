@@ -9,6 +9,7 @@ export type QuickFieldInfo = {
   name?: string;
   title?: string;
   required?: boolean;
+  readonly?: boolean;
   colStart?: number;
   colSpan?: number;
   rowStart?: number;
@@ -48,13 +49,16 @@ function defineObjFields(featureName: string): WnObjFieldsFeature {
     let finfo = parseNameForObjField(uniqKey);
     let _fld = _FIELDS.get(finfo._key);
     if (!_fld) {
-      debugger;
+      console.trace();
       throw `Fail to found field ['${uniqKey}']`;
     }
     let re = _.cloneDeep(_fld);
     _.assign(re, _.omit(field, 'comConf'));
     re.comConf = re.comConf ?? {};
     _.assign(re.comConf, field?.comConf);
+    if (finfo.readonly) {
+      re.comConf.readonly = true;
+    }
 
     if (finfo.required) {
       re.required = true;
@@ -188,25 +192,31 @@ initWalnutObjDefaultFields();
  *
  * uniqKey = 'type:1/2:3'
  * > {name:'type', colStart:1, colSpan:2, rowSpan:3}
+ *
+ * uniqKey = '!type:1/2:3'
+ * > {name:'type', comConf: {readonly:true}}
  * ```
  *
  * @param key 字段键
  */
 export function parseNameForObjField(key: string) {
+  let m = /^([!*]+)(.+)$/.exec(key);
   let required = false;
-  if (key.startsWith('*')) {
-    required = true;
-    key = key.substring(1).trim();
+  let readonly = false;
+  if (m) {
+    required = m[1].indexOf('*') >= 0;
+    readonly = m[1].indexOf('!') >= 0;
+    key = m[2].trim();
   }
 
   let parts = key.split(':');
   let name = parts[0];
   let cols = _.nth(parts, 1) ?? '';
   let rows = _.nth(parts, 2) ?? '';
-  let re = { required } as QuickFieldInfo;
+  let re = { required, readonly } as QuickFieldInfo;
 
   // name/title
-  let m = /^([^=]+)(=(.+))?/.exec(name);
+  m = /^([^=]+)(=(.+))?/.exec(name);
   if (m) {
     re._key = m[1] ?? name;
     let title = m[3];
