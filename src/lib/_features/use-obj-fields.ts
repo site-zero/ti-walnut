@@ -1,4 +1,4 @@
-import { FormField, Str } from '@site0/tijs';
+import { FormField, GridFieldsInput, Str } from '@site0/tijs';
 import _ from 'lodash';
 import { initWalnutObjDefaultFields } from './define-obj-fields';
 
@@ -6,7 +6,7 @@ import { initWalnutObjDefaultFields } from './define-obj-fields';
 
 export type QuickFieldInfo = {
   _key: string;
-  name?: string;
+  name?: string | string[];
   title?: string;
   required?: boolean;
   readonly?: boolean;
@@ -19,11 +19,11 @@ export type QuickFieldInfo = {
 //-----------------------------------------------
 export type WnObjFieldsFeature = {
   getName: () => string;
-  getField: (uniqKey: string, field: FormField) => FormField;
-  getFieldList: (keys: string | string[], fld?: FormField) => FormField[];
+  getField: (uniqKey: string, field?: FormField) => FormField;
+  getFieldList: (keys: string[], fld?: FormField) => FormField[];
   getFieldGroup: (
     title: string,
-    keys: string | string[],
+    keys: string[],
     groupSetup?: FormField
   ) => FormField;
   setField: (uniqKey: string, field: FormField) => void;
@@ -47,7 +47,15 @@ function defineObjFields(featureName: string): WnObjFieldsFeature {
    */
   function getField(uniqKey: string, field: FormField = {}): FormField {
     let finfo = parseNameForObjField(uniqKey);
-    let _fld = _FIELDS.get(finfo._key);
+    let _fld: GridFieldsInput | undefined;
+    if ('-SEP-' == finfo._key) {
+      _fld = _FIELDS.get(uniqKey) ?? {
+        colStart: 1,
+        colSpan: 100,
+      };
+    } else {
+      _fld = _FIELDS.get(finfo._key);
+    }
     if (!_fld) {
       console.trace();
       throw `Fail to found field ['${uniqKey}']`;
@@ -64,7 +72,7 @@ function defineObjFields(featureName: string): WnObjFieldsFeature {
       re.required = true;
     }
     re.name = finfo.name ?? re.name ?? finfo._key;
-    if ('###' == re.name) {
+    if ('-SEP-' == re.name) {
       re.name = undefined;
     }
     re.title = finfo.title ?? re.title;
@@ -91,20 +99,9 @@ function defineObjFields(featureName: string): WnObjFieldsFeature {
    * @param fld
    * @returns 字段定义列表
    */
-  function getFieldList(keys: string | string[], fld?: FormField): FormField[] {
-    let fld_keys: string[];
-    if (_.isString(keys)) {
-      fld_keys = Str.splitIgnoreBlank(keys);
-    } else {
-      fld_keys = [];
-      for (let key of keys) {
-        let ks = Str.splitIgnoreBlank(key);
-        fld_keys.push(...ks);
-      }
-    }
-
+  function getFieldList(keys: string[], fld?: FormField): FormField[] {
     let re = [] as FormField[];
-    for (let key of fld_keys) {
+    for (let key of keys) {
       re.push(getField(key, fld));
     }
     return re;
@@ -119,7 +116,7 @@ function defineObjFields(featureName: string): WnObjFieldsFeature {
    */
   function getFieldGroup(
     title: string,
-    keys: string | string[],
+    keys: string[],
     groupSetup: FormField = {}
   ): FormField {
     return {
@@ -200,33 +197,52 @@ initWalnutObjDefaultFields();
  * @param key 字段键
  */
 export function parseNameForObjField(key: string) {
-  let m = /^([!*]+)(.+)$/.exec(key);
-  let required = false;
-  let readonly = false;
-  if (m) {
-    required = m[1].indexOf('*') >= 0;
-    readonly = m[1].indexOf('!') >= 0;
-    key = m[2].trim();
+  let re: QuickFieldInfo;
+  let cols: string;
+  let rows: string;
+  // 某种分隔符表示 FieldLabel
+  if (/^[=#.-]{3,}/.test(key)) {
+    let parts = key.split(':');
+    let name = parts[0];
+    cols = _.nth(parts, 1) ?? '';
+    rows = _.nth(parts, 2) ?? '';
+    re = { _key: '-SEP-' };
   }
+  // 正式解析
+  else {
+    let m = /^([!*]+)(.+)$/.exec(key);
+    let required = false;
+    let readonly = false;
+    if (m) {
+      required = m[1].indexOf('*') >= 0;
+      readonly = m[1].indexOf('!') >= 0;
+      key = m[2].trim();
+    }
 
-  let parts = key.split(':');
-  let name = parts[0];
-  let cols = _.nth(parts, 1) ?? '';
-  let rows = _.nth(parts, 2) ?? '';
-  let re = { required, readonly } as QuickFieldInfo;
+    let parts = key.split(':');
+    let name = parts[0];
+    cols = _.nth(parts, 1) ?? '';
+    rows = _.nth(parts, 2) ?? '';
+    re = { _key: name, required, readonly };
 
-  // name/title
-  m = /^([^=]+)(=(.+))?/.exec(name);
-  if (m) {
-    re._key = m[1] ?? name;
-    let title = m[3];
-    re.title = title;
-    if (title) {
-      let m2 = /^([^/]*)(\/(.+))?/.exec(title);
-      if (m2) {
-        re.name = m2[1] || undefined;
-        re.title = m2[3];
+    // name/title
+    m = /^([^=]+)(=(.+))?/.exec(name);
+    if (m) {
+      re._key = m[1] ?? name;
+      let title = m[3];
+      re.title = title;
+      if (title) {
+        let m2 = /^([^/]*)(\/(.+))?/.exec(title);
+        if (m2) {
+          re.name = m2[1] || undefined;
+          re.title = m2[3];
+        }
       }
+    }
+
+    // 对于包括 , 的名称，需要变成数组
+    if (_.isString(re.name) && re.name.indexOf(',') >= 0) {
+      re.name = Str.splitIgnoreBlank(re.name);
     }
   }
 

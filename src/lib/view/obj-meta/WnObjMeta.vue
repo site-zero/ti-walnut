@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { TiForm, FormProps, Vars, FormField } from '@site0/tijs';
+  import { TiForm, FormProps, Vars, FormField, Str } from '@site0/tijs';
   import _ from 'lodash';
   import { computed } from 'vue';
   import { useObjFields } from '../..';
@@ -27,11 +27,14 @@
   //-----------------------------------------------------
   const FormFields = computed(() => {
     return [
-      FIELDS.getFieldGroup('General', 'id,race,nm,title'),
-      FIELDS.getFieldGroup('File Content', 'tp,mime,len,sha1', {
+      FIELDS.getFieldGroup('General', ['id', 'race', 'nm', 'title']),
+      FIELDS.getFieldGroup('File Content', ['tp', 'mime', 'len', 'sha1'], {
         visible: { race: 'FILE' },
       }),
-      FIELDS.getFieldGroup('Privilge & Time', 'd0,d1,c,m,g,ct,lm,expi'),
+      FIELDS.getFieldGroup(
+        'Privilge & Time',
+        Str.splitIgnoreBlank('d0,d1,c,m,g,ct,lm,expi')
+      ),
     ];
   });
   //-----------------------------------------------------

@@ -1,4 +1,4 @@
-import { Str, TableInputColumn, getLogger } from '@site0/tijs';
+import { TableInputColumn, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { initWalnutObjDefaultColumns } from './define-obj-columns';
 //-----------------------------------------------
@@ -20,7 +20,7 @@ export type ObjColumnsFeature = {
     column?: Partial<TableInputColumn>
   ) => TableInputColumn;
   getColumnList: (
-    keys: string | string[],
+    keys: string[],
     editable?: boolean,
     column?: Partial<TableInputColumn>
   ) => TableInputColumn[];
@@ -71,19 +71,12 @@ function defineObjColumns(featureName: string): ObjColumnsFeature {
   }
   //---------------------------------------------
   function getColumnList(
-    keys: string | string[],
+    keys: string[],
     editable: boolean = true,
     column: Partial<TableInputColumn> = {}
   ): TableInputColumn[] {
-    let fld_keys: string[];
-    if (_.isString(keys)) {
-      fld_keys = Str.splitIgnoreBlank(keys);
-    } else {
-      fld_keys = keys;
-    }
-
     let re = [] as TableInputColumn[];
-    for (let key of fld_keys) {
+    for (let key of keys) {
       re.push(getColumn(key, editable, column));
     }
     return re;
