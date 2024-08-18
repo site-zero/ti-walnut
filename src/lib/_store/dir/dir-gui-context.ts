@@ -42,8 +42,8 @@ export function createDirGuiContext(context: DirInnerContext2): DirGUIContext {
     //........... DirQueryGetters
     queryPageNumber: _query.queryPageNumber.value,
     queryPageSize: _query.queryPageSize.value,
-    isLongPager: _query.isLongPager.value,
-    isShortPager: _query.isShortPager.value,
+    // isLongPager: _query.isLongPager.value,
+    // isShortPager: _query.isShortPager.value,
     isPagerEnabled: _query.isPagerEnabled.value,
     //........... DirSelection
     currentId: _selection.currentId.value,

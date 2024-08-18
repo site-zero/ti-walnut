@@ -1,5 +1,10 @@
 import { ComputedRef } from 'vue';
-import { DirEditingFeature, DirKeeplInfo, WnObj } from '../../../..';
+import {
+  DirEditingFeature,
+  DirKeeplInfo,
+  DirStoreOptions,
+  WnObj,
+} from '../../../..';
 import {
   DirInnerContext2,
   DirKeepFeatures,
@@ -28,6 +33,10 @@ export function userDirReloading(
     _keep.value.saveToLocal(info);
   }
 
+  /**
+   * Reload all : data & view setting
+   * @param obj
+   */
   async function reload(obj?: WnObj) {
     await _dir.initDirSettings(obj);
 
@@ -36,7 +45,6 @@ export function userDirReloading(
     _agg.resetAgg();
 
     await _view.loadView();
-
     _view.applyView(_dir.behaviors.value, {
       ..._query,
       ..._agg,
@@ -48,6 +56,9 @@ export function userDirReloading(
     await refresh();
   }
 
+  /**
+   * Reload all data
+   */
   async function refresh() {
     await _query.queryList();
     if (_agg.aggAutoReload.value) {

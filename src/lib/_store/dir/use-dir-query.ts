@@ -35,7 +35,8 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     if (!pg) {
       return 1;
     }
-    return pg.pageNumber ?? pg.pn ?? 1;
+    //return pg.pageNumber ?? pg.pn ?? 1;
+    return pg.pageNumber ?? 1;
   });
   //-----------------------------------------------
   const queryPageSize = computed(() => {
@@ -43,28 +44,37 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     if (!pg) {
       return 20;
     }
-    return pg.pageSize ?? pg.pgsz ?? 20;
+    //return pg.pageSize ?? pg.pgsz ?? 20;
+    return pg.pageSize ?? 20;
   });
   //-----------------------------------------------
-  const isLongPager = computed(() => {
-    let pg = _pager.value;
-    if (!pg) {
-      return false;
-    }
-    return (pg.pageSize ?? 0) > 0 && (pg.pageNumber ?? 0) > 0;
-  });
+  // const isLongPager = computed(() => {
+  //   let pg = _pager.value;
+  //   if (!pg) {
+  //     return false;
+  //   }
+  //   return (pg.pageSize ?? 0) > 0 && (pg.pageNumber ?? 0) > 0;
+  // });
+  // //-----------------------------------------------
+  // const isShortPager = computed(() => {
+  //   let pg = _pager.value;
+  //   if (!pg) {
+  //     return false;
+  //   }
+  //   return (pg.pgsz ?? 0) > 0 && (pg.pn ?? 0) > 0;
+  // });
   //-----------------------------------------------
-  const isShortPager = computed(() => {
-    let pg = _pager.value;
-    if (!pg) {
-      return false;
-    }
-    return (pg.pgsz ?? 0) > 0 && (pg.pn ?? 0) > 0;
-  });
+  // const isPagerEnabled = computed(() => {
+  //   if (_pager.value && (isLongPager.value || isShortPager.value)) {
+  //     return true;
+  //   }
+  //   return false;
+  // });
   //-----------------------------------------------
   const isPagerEnabled = computed(() => {
-    if (_pager.value && (isLongPager.value || isShortPager.value)) {
-      return true;
+    let pg = _pager.value;
+    if (pg) {
+      return (pg.pageSize ?? 0) > 0 && (pg.pageNumber ?? 0) > 0;
     }
     return false;
   });
@@ -198,8 +208,8 @@ export function userDirQuery(options: DirInitGetters): DirQueryFeature {
     // Computed
     queryPageNumber,
     queryPageSize,
-    isLongPager,
-    isShortPager,
+    // isLongPager,
+    // isShortPager,
     isPagerEnabled,
 
     // Methods

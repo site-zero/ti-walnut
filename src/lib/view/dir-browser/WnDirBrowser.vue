@@ -20,7 +20,7 @@
   const hasObj = computed(() => (Obj.value.id ? true : false));
   const Meta = computed(() => _.omit(props.value, 'ancestors'));
   //-----------------------------------------------------
-  const DIR = useDirStore(props.moduleName);
+  const DIR = useDirStore({ name: props.moduleName });
   const _GS = useGlobalStatus();
   //-----------------------------------------------------
   const GUILayout = computed(() => DIR.explainLayout());

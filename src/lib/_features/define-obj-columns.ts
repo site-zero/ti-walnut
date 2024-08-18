@@ -3,6 +3,8 @@ import { useObjColumns } from './use-obj-columns';
 
 export function initWalnutObjDefaultColumns() {
   const _ocs = useObjColumns();
+  // ----------------------------- 通用
+  _ocs.addColumn('#LABEL', {});
   // ----------------------------- 基本信息
   _ocs.addColumn('id', { name: 'id', title: 'ID' });
   _ocs.addColumn('pid', { name: 'pid', title: 'PID' });

@@ -3,6 +3,9 @@ import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
   DirFeature,
+  DirGUIViewBehaviors,
+  DirGUIViewInfo,
+  DirInitSettings,
   DirInnerContext,
   DirInnerContext2,
   DirInnerContext3,
@@ -28,15 +31,52 @@ export * from './dir/dir.type';
 //-----------------------------------------------
 const log = getLogger('wn.store.dir');
 //-----------------------------------------------
-export function defineDirStore(name?: string): DirFeature {
-  name = name || 'CurrentDir';
+export type DirStoreOptions = {
+  /**
+   * 模块名称
+   */
+  name?: string;
+
+  /**
+   * 指定了视图配置，这里是最高优先级
+   */
+  view?: DirGUIViewInfo;
+
+  /**
+   * 指定更加优先的视图行为
+   * 
+   * 譬如用来指定 fixedMatch 查询数据的时候，固定的要添加的条件。
+   * 这个选项将比在 view 里指定更加优先。默认的，
+   * 他会代替掉 view 里指定的选项
+   */
+  behaviors?: DirGUIViewBehaviors;
+
+  /**
+   * 融合与 view 里指定 behaviors 的模式
+   * 
+   * - assign : 逐项替换【默认】
+   * - reset  : 直接替换
+   * - merge  : 深层融合
+   */
+  behaviorsMergeMode?: 'reset'|'merge'|'assign';
+
+  /**
+   * 如果还需要更加高级的定制，直接把 settings 传递过来，让你任意定制
+   * 
+   * @param settings 已经加载过的 Settings
+   */
+  customizeSettings?: (settings:DirInitSettings)=>void
+};
+//-----------------------------------------------
+export function defineDirStore(options: DirStoreOptions = {}): DirFeature {
+  let name = options.name || 'CurrentDir';
   log.debug(`defineDirStore(${name || ''})`);
   //---------------------------------------------
   log.info(`create new DirStore(${name})`);
   //---------------------------------------------
   // 定义新实例
   const _vars = ref<Vars>({});
-  const _dir = useDirInit();
+  const _dir = useDirInit(options);
   //---------------------------------------------
   const _view = useDirView(_dir);
   const _query = userDirQuery(_dir);
@@ -204,6 +244,6 @@ export function defineDirStore(name?: string): DirFeature {
   return re;
 }
 
-export function useDirStore(name?: string): DirFeature {
-  return defineDirStore(name);
+export function useDirStore(options?: DirStoreOptions): DirFeature {
+  return defineDirStore(options);
 }

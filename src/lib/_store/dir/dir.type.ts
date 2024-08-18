@@ -220,8 +220,8 @@ export type DirQuerySettings = {
 export type DirQueryGetters = {
   queryPageNumber: ComputedRef<number>;
   queryPageSize: ComputedRef<number>;
-  isLongPager: ComputedRef<boolean>;
-  isShortPager: ComputedRef<boolean>;
+  // isLongPager: ComputedRef<boolean>;
+  // isShortPager: ComputedRef<boolean>;
   isPagerEnabled: ComputedRef<boolean>;
 };
 
@@ -435,8 +435,8 @@ export type DirGUIContext = {
   //........... DirQueryGetters
   queryPageNumber: number;
   queryPageSize: number;
-  isLongPager: boolean;
-  isShortPager: boolean;
+  // isLongPager: boolean;
+  // isShortPager: boolean;
   isPagerEnabled: boolean;
   currentMeta?: WnObj;
   //........... DirSelection

@@ -109,13 +109,13 @@ export function useDirView(options: DirInitFeature): DirViewFeatures {
       settings.pager.value = _.cloneDeep(be.pager);
     } else {
       settings.pager.value = {
-        pn: 1,
-        pgsz: 20,
-        pgc: 0,
-        sum: 0,
+        pageNumber: 1,
+        pageSize: 20,
+        pageCount: 0,
+        totalCount: 0,
         count: 0,
-        skip: 0,
-        limit: 20,
+        // skip: 0,
+        // limit: 20,
       };
     }
   }
