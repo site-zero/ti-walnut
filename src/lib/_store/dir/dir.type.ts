@@ -366,6 +366,7 @@ export type DirFeature = DirInitFeature &
     _keep: ComputedRef<DirKeepFeatures>;
     _meta: ObjMetaStoreFeature;
     _content: ObjContentStoreFeature;
+    _selection: DirSelection;
 
     setVars: (vars?: Vars) => void;
     assignVars: (vars: Vars) => void;

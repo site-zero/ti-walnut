@@ -15,6 +15,9 @@
     columnResizable: true,
     multi: true,
     showCheckbox: true,
+    canHover: true,
+    canSelect: true,
+    canCheck: true,
   });
   //-----------------------------------------------------
   const TableConfig = computed(() => {

@@ -76,7 +76,7 @@ function defineDataMetaStore(
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
-  console.log('defineDataMetaStore', options);
+  //console.log('defineDataMetaStore', options);
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
@@ -112,7 +112,7 @@ function defineDataMetaStore(
   }
 
   async function fetchRemoteMeta(): Promise<void> {
-    console.log('I am fetch remote', _filter.value);
+    //console.log('I am fetch remote', _filter.value);
     _status.value = 'loading';
     let re = await sqlx.fetch(options.sqlFetch, _filter.value);
     if (re && options.patchRemote) {

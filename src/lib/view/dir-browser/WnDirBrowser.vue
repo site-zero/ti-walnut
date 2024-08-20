@@ -28,6 +28,7 @@
   //-----------------------------------------------------
   function onBlock(event: BlockEvent) {
     let { eventName, data } = event;
+    console.log('onBlock', event);
     // 选择列表
     if ('list-select' == eventName) {
       let { currentId, checkedIds } = data;

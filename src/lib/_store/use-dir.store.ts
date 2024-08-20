@@ -44,7 +44,7 @@ export type DirStoreOptions = {
 
   /**
    * 指定更加优先的视图行为
-   * 
+   *
    * 譬如用来指定 fixedMatch 查询数据的时候，固定的要添加的条件。
    * 这个选项将比在 view 里指定更加优先。默认的，
    * 他会代替掉 view 里指定的选项
@@ -53,19 +53,19 @@ export type DirStoreOptions = {
 
   /**
    * 融合与 view 里指定 behaviors 的模式
-   * 
+   *
    * - assign : 逐项替换【默认】
    * - reset  : 直接替换
    * - merge  : 深层融合
    */
-  behaviorsMergeMode?: 'reset'|'merge'|'assign';
+  behaviorsMergeMode?: 'reset' | 'merge' | 'assign';
 
   /**
    * 如果还需要更加高级的定制，直接把 settings 传递过来，让你任意定制
-   * 
+   *
    * @param settings 已经加载过的 Settings
    */
-  customizeSettings?: (settings:DirInitSettings)=>void
+  customizeSettings?: (settings: DirInitSettings) => void;
 };
 //-----------------------------------------------
 export function defineDirStore(options: DirStoreOptions = {}): DirFeature {
@@ -199,6 +199,7 @@ export function defineDirStore(options: DirStoreOptions = {}): DirFeature {
     _keep,
     _meta,
     _content,
+    _selection,
     /*-------------<State>---------------*/
     ..._dir,
     ..._query,

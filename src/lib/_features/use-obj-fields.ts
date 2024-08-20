@@ -57,7 +57,7 @@ function defineObjFields(featureName: string): WnObjFieldsFeature {
       _fld = _FIELDS.get(finfo._key);
     }
     if (!_fld) {
-      console.trace();
+      console.error(`Fail to found field ['${uniqKey}']`, finfo);
       throw `Fail to found field ['${uniqKey}']`;
     }
     let re = _.cloneDeep(_fld);
@@ -200,50 +200,40 @@ export function parseNameForObjField(key: string) {
   let re: QuickFieldInfo;
   let cols: string;
   let rows: string;
-  // 某种分隔符表示 FieldLabel
-  if (/^[=#.-]{3,}/.test(key)) {
-    let parts = key.split(':');
-    let name = parts[0];
-    cols = _.nth(parts, 1) ?? '';
-    rows = _.nth(parts, 2) ?? '';
-    re = { _key: '-SEP-' };
+
+  let m = /^([!*]+)(.+)$/.exec(key);
+  let required = false;
+  let readonly = false;
+  if (m) {
+    required = m[1].indexOf('*') >= 0;
+    readonly = m[1].indexOf('!') >= 0;
+    key = m[2].trim();
   }
-  // 正式解析
-  else {
-    let m = /^([!*]+)(.+)$/.exec(key);
-    let required = false;
-    let readonly = false;
-    if (m) {
-      required = m[1].indexOf('*') >= 0;
-      readonly = m[1].indexOf('!') >= 0;
-      key = m[2].trim();
-    }
 
-    let parts = key.split(':');
-    let name = parts[0];
-    cols = _.nth(parts, 1) ?? '';
-    rows = _.nth(parts, 2) ?? '';
-    re = { _key: name, required, readonly };
+  let parts = key.split(':');
+  let name = parts[0];
+  cols = _.nth(parts, 1) ?? '';
+  rows = _.nth(parts, 2) ?? '';
+  re = { _key: name, required, readonly };
 
-    // name/title
-    m = /^([^=]+)(=(.+))?/.exec(name);
-    if (m) {
-      re._key = m[1] ?? name;
-      let title = m[3];
-      re.title = title;
-      if (title) {
-        let m2 = /^([^/]*)(\/(.+))?/.exec(title);
-        if (m2) {
-          re.name = m2[1] || undefined;
-          re.title = m2[3];
-        }
+  // name/title
+  m = /^([^=]+)(=(.+))?/.exec(name);
+  if (m) {
+    re._key = m[1] ?? name;
+    let title = m[3];
+    re.title = title;
+    if (title) {
+      let m2 = /^([^/]*)(\/(.+))?/.exec(title);
+      if (m2) {
+        re.name = m2[1] || undefined;
+        re.title = m2[3];
       }
     }
+  }
 
-    // 对于包括 , 的名称，需要变成数组
-    if (_.isString(re.name) && re.name.indexOf(',') >= 0) {
-      re.name = Str.splitIgnoreBlank(re.name);
-    }
+  // 对于包括 , 的名称，需要变成数组
+  if (_.isString(re.name) && re.name.indexOf(',') >= 0) {
+    re.name = Str.splitIgnoreBlank(re.name);
   }
 
   const __grid_info = function (input: string) {
@@ -271,6 +261,11 @@ export function parseNameForObjField(key: string) {
     let { start, span } = __grid_info(rows);
     re.rowStart = start;
     re.rowSpan = span;
+  }
+
+  // 某种分隔符表示 FieldLabel
+  if (/^[=#.-]{3,}/.test(re._key)) {
+    re._key = '-SEP-';
   }
 
   return re;
