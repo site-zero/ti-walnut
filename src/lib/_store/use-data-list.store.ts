@@ -155,7 +155,7 @@ function defineDataListStore(
       filter: query.filter,
       sorter: query.sorter,
       pager: {
-        pageSize: query.pager.pageSize,
+        pageSize: query.pager?.pageSize,
       },
     });
   }
@@ -249,7 +249,9 @@ function defineDataListStore(
   async function countRemoteList() {
     status.value = 'loading';
     let total = await sqlx.count(options.sqlCount, query.filter);
-    updatePagerTotal(query.pager, total);
+    if (query.pager) {
+      updatePagerTotal(query.pager, total);
+    }
     status.value = undefined;
   }
   /*---------------------------------------------
@@ -312,6 +314,12 @@ function defineDataListStore(
 
     setPager(page: Partial<SqlPagerInput>) {
       let { pageNumber, pageSize } = page;
+      if (!query.pager) {
+        query.pager = {
+          pageNumber: 1,
+          pageSize: 20,
+        };
+      }
       if (_.isNumber(pageNumber) && pageNumber > 0) {
         query.pager.pageNumber = pageNumber;
       }
