@@ -83,7 +83,7 @@ export function useSqlx(daoName?: string) {
     let q = {
       filter: query.filter,
       sorter: query.sorter,
-      ...pagerToLimit(query.pager),
+      ...getQueryLimit(query),
     } as Vars;
 
     return await __query(sql, q);
@@ -153,7 +153,7 @@ export function useSqlx(daoName?: string) {
       cmds.push(daoName);
     }
     cmds.push('-cqn');
-    
+
     // 开启事务
     let tl = options?.transLevel ?? 0;
     if (tl > 0) {
@@ -235,6 +235,22 @@ export function useSqlx(daoName?: string) {
 
   //-------------< Output Feature >------------------
   return { select, fetch, count, exec };
+}
+
+function getQueryLimit(query: SqlQuery): SqlLimit {
+  if (_.isNumber(query.limit) && query.limit > 0) {
+    return {
+      limit: query.limit,
+      skip: query.skip ?? 0,
+    };
+  }
+  if (query.pager) {
+    return pagerToLimit(query.pager);
+  }
+  return {
+    limit: 10,
+    skip: 0,
+  };
 }
 
 function pagerToLimit(pager: SqlPager): SqlLimit {

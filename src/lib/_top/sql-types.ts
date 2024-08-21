@@ -27,9 +27,9 @@ export type SqlExecResult = {
 
 export type SqlQuery = {
   filter: QueryFilter | QueryFilter[];
-  sorter: QuerySorter;
-  pager: SqlPager;
-};
+  sorter?: QuerySorter;
+  pager?: SqlPager;
+} & Partial<SqlLimit>;
 
 export type SqlExecInfo = {
   sql: string;
@@ -90,8 +90,8 @@ export type SqlExecOptions = {
    * - `2` : TRANSACTION_READ_COMMITTED
    * - `4` : TRANSACTION_REPEATABLE_READ
    * - `8` : TRANSACTION_SERIALIZABLE
-   * 
-   * 
+   *
+   *
    * |No.| TRANS LEVEL                     | DR | NRR | PR |
    * |---|---------------------------------|----|-----|----|
    * | 1 | TRANSACTION_READ_UNCOMMITTED    | Y  | Y   | Y  |
