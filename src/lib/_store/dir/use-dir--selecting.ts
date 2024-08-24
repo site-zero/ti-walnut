@@ -72,10 +72,25 @@ export function userDirSelecting(
   function getCurrentMeta(): WnObj | undefined {
     if (_selection.currentId.value) {
       let currentId = _selection.currentId.value;
-      return _.find(_query.list.value, (it) => it.id == currentId);
+      let re = _.find(_query.list.value, (it) => it.id == currentId);
+      if (re) {
+        return _.cloneDeep(re);
+      }
     }
   }
   const currentMeta = computed(() => getCurrentMeta());
+  //---------------------------------------------
+  function getCheckedItems(): WnObj[] {
+    let items: WnObj[] = [];
+    for (let it of _query.list.value) {
+      if (_selection.checkedIds.value[it.id]) {
+        items.push(_.cloneDeep(it));
+      }
+    }
+
+    return items;
+  }
+  const checkedItems = computed(() => getCheckedItems());
 
   //---------------------------------------------
   // 输出特性
@@ -85,6 +100,8 @@ export function userDirSelecting(
     syncMetaContentBySelection,
     clearSelection,
     getCurrentMeta,
+    getCheckedItems,
+    checkedItems,
     currentMeta,
   };
 }
