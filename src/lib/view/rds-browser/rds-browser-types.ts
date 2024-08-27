@@ -1,5 +1,15 @@
-import { ComboFilterProps, FormProps, KeepMode, TableProps } from '@site0/tijs';
+import {
+  ComboFilterProps,
+  FormProps,
+  KeepMode,
+  TableProps,
+  TableRowID,
+  Vars,
+} from '@site0/tijs';
 import { DataListStoreOptions } from '../../_store';
+import { SqlResult } from '../../_top';
+
+export type RdsBrowserMsgKey = 'warn_refresh' | 'warn_drop_change';
 
 export type RdsBrowserProps = {
   /**
@@ -15,6 +25,10 @@ export type RdsBrowserProps = {
    * 快速的指定界面布局的列，默认就是 '50% 1fr'
    */
   layoutQuickColumns?: string;
+
+  messages?: Record<RdsBrowserMsgKey, string>;
+  createNewItem?: () => Vars;
+  getItemId?: TableRowID | ((it: Vars) => TableRowID | undefined);
 
   //--------------------------------------------------
   // 数据访问

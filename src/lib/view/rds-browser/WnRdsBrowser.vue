@@ -1,12 +1,7 @@
 <script lang="ts" setup>
   //--------------------------------------------------
   import { RdsBrowserProps, useDataListStore } from '@site0/ti-walnut';
-  import {
-    RoadblockProps,
-    TableSelectEmitInfo,
-    TiLayoutGrid,
-    Util,
-  } from '@site0/tijs';
+  import { TiLayoutGrid } from '@site0/tijs';
   import { computed, onMounted } from 'vue';
   import { useRdsBrowserLayout } from './rds-browser-layout';
   import { useRdsBrowserSchema } from './rds-browser-schema';

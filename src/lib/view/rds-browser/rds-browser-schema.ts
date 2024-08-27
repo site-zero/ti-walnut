@@ -7,6 +7,11 @@ export function useRdsBrowserSchema(_RD: RdsBrowserFeature): LayoutSchema {
     actions: {
       comType: 'TiActionBar',
       comConf: useRdsBrowserActions(_RD),
+      events: {
+        fire: (payload: EmitAdaptorPayload) => {
+          _RD.onActionFire(payload.data);
+        },
+      },
     },
     filter: {
       comType: 'TiComboFilter',

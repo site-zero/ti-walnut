@@ -1,5 +1,8 @@
 import {
+  ActionBarEvent,
+  Alert,
   ComboFilterProps,
+  Confirm,
   FormProps,
   GridFieldsProps,
   KeepProps,
@@ -49,6 +52,7 @@ export type RdsBrowserFeature = {
   DataFormConfig: ComputedRef<GridFieldsProps>;
 
   onTableRowSelect: (payload: TableSelectEmitInfo) => void;
+  onActionFire: (barEvent: ActionBarEvent) => void;
 };
 
 /**
@@ -120,6 +124,7 @@ export function useRdsBrowser(
   const DataTableConfig = computed(() => {
     return _.assign(
       {
+        className: 'cover-parent',
         keepColumns: getKeepName(props, 'Table-Columns'),
         multi: true,
         emptyRoadblock: TableEmptyRoadblock.value,
@@ -156,10 +161,68 @@ export function useRdsBrowser(
   });
 
   //--------------------------------------------------
+  let getId: (it: Vars) => TableRowID | undefined;
+  if (_.isFunction(props.getItemId)) {
+    getId = props.getItemId;
+  } else if (_.isString(props.getItemId)) {
+    let key = props.getItemId;
+    getId = (it: Vars) => it[key];
+  } else {
+    getId = (it: Vars) => it.id;
+  }
+
+  //--------------------------------------------------
   // 响应事件
   //--------------------------------------------------
   function onTableRowSelect(payload: TableSelectEmitInfo) {
     Data.value.onSelect(payload);
+  }
+
+  function onActionFire(barEvent: ActionBarEvent) {
+    let { name, payload } = barEvent;
+    console.log('onActionFire', name, payload);
+
+    // Reload
+    if ('reload' == name) {
+      let msg = (props.messages ?? {}).warn_refresh;
+      if (msg) {
+        if (Data.value.changed.value) {
+          Alert(msg, { type: 'warn' });
+          return;
+        }
+      }
+      Data.value.reload();
+    }
+    // Create
+    else if ('create' == name) {
+      if (props.createNewItem) {
+        let it = props.createNewItem();
+        let id = getId(it);
+        Data.value.addLocalItem(it);
+        if (!_.isNil(id)) {
+          Data.value.updateSelection(id);
+        }
+      }
+    }
+    // Save
+    else if ('save' == name) {
+      Data.value.saveChange();
+    }
+    // Drop
+    else if ('reset' == name) {
+      let msg = (props.messages ?? {}).warn_drop_change;
+      if (msg) {
+        Confirm(msg, { type: 'warn' }).then((yes) => {
+          if (yes) {
+            Data.value.resetLocalChange();
+          }
+        });
+      }
+    }
+    // Remove
+    else if ('remove' == name) {
+      Data.value.removeChecked();
+    }
   }
   //--------------------------------------------------
   // 输出特性
@@ -177,5 +240,6 @@ export function useRdsBrowser(
     DataFormConfig,
 
     onTableRowSelect,
+    onActionFire,
   };
 }
