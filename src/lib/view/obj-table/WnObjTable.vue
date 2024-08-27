@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-  import { TableEmitter, TiTable } from '@site0/tijs';
+  import { TableEmitter, TiTable, useObjColumns } from '@site0/tijs';
   import _ from 'lodash';
   import { computed } from 'vue';
-  import { useObjColumns } from '../../../lib';
   import { WnObjTableProps } from './wn-obj-table-types';
   //-----------------------------------------------------
   const COL = useObjColumns();

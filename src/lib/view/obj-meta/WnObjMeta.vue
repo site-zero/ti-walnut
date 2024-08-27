@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-  import { TiForm, FormProps, Vars, FormField, Str } from '@site0/tijs';
-  import _ from 'lodash';
+  import { FormProps, Str, TiForm, Vars, useObjFields } from '@site0/tijs';
   import { computed } from 'vue';
-  import { useObjFields } from '../..';
   import { WnObjMetaProps } from './wn-obj-meta-types';
   //-----------------------------------------------------
   const FIELDS = useObjFields();

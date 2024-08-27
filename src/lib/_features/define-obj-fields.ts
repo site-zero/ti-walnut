@@ -4,8 +4,8 @@ import {
   getEnv,
   InputBoxProps,
   LabelProps,
+  useObjFields,
 } from '@site0/tijs';
-import { useObjFields } from './use-obj-fields';
 
 export function initWalnutObjDefaultFields() {
   const _ofs = useObjFields();

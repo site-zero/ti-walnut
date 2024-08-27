@@ -87,12 +87,16 @@ export function useMetaGUIStore(): MetaGUIFeature {
         throw '!meta.reload: without id or path!';
       }
       // 重新加载
-      let obj = await Walnut.fetchObj(objPath, {
-        loadAxis: true,
-        loadPath: true,
-      });
-      _meta.value = _.cloneDeep(obj);
-      log.debug('fetchObj=>', _meta.value);
+      try {
+        let obj = await Walnut.fetchObj(objPath, {
+          loadAxis: true,
+          loadPath: true,
+        });
+        _meta.value = _.cloneDeep(obj);
+        log.debug('fetchObj=>', _meta.value);
+      } catch (err) {
+        console.error(err);
+      }
     },
   } as MetaGUIFeature;
 }

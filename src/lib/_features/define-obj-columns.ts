@@ -1,5 +1,4 @@
-import { DateTime, ENV_KEYS, getEnv } from '@site0/tijs';
-import { useObjColumns } from './use-obj-columns';
+import { DateTime, ENV_KEYS, getEnv, useObjColumns } from '@site0/tijs';
 
 export function initWalnutObjDefaultColumns() {
   const _ocs = useObjColumns();

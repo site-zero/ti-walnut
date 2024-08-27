@@ -6,6 +6,7 @@ import { WnObjListInfo } from './obj-list/wn-obj-list-index';
 import { WnObjMetaInfo } from './obj-meta/wn-obj-meta-index';
 import { WnObjTableInfo } from './obj-table/wn-obj-table-index';
 import { WnObjViewerInfo } from './obj-viewer/wn-obj-viewer-index';
+import { WnRdsBrowserInfo } from './rds-browser/rds-browser-index';
 import { WnSignInInfo } from './signin/wn-signin-index';
 import { WnSkyInfo } from './sky/wn-sky-index';
 
@@ -19,6 +20,7 @@ export default {
   WnObjTable: WnObjTableInfo,
   WnObjMeta: WnObjMetaInfo,
   WnCmdRunner: WnCmdRunnerInfo,
+  WnRdsBrowser: WnRdsBrowserInfo,
 } as TiComSet;
 
 export * from './arena/wn-arena-index';
@@ -27,5 +29,6 @@ export * from './dir-browser/wn-dir-browser-index';
 export * from './obj-list/wn-obj-list-index';
 export * from './obj-meta/wn-obj-meta-index';
 export * from './obj-table/wn-obj-table-index';
+export * from './rds-browser/rds-browser-index';
 export * from './signin/wn-signin-index';
 export * from './sky/wn-sky-index';
