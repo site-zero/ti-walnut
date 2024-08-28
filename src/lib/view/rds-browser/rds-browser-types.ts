@@ -6,7 +6,7 @@ import {
   TableRowID,
   Vars,
 } from '@site0/tijs';
-import { DataListStoreOptions } from '../../_store';
+import { DataListStoreFeature, DataListStoreOptions } from '../../_store';
 import { SqlResult } from '../../_top';
 
 export type RdsBrowserMsgKey = 'warn_refresh' | 'warn_drop_change';
@@ -27,7 +27,7 @@ export type RdsBrowserProps = {
   layoutQuickColumns?: string;
 
   messages?: Record<RdsBrowserMsgKey, string>;
-  createNewItem?: () => Vars;
+  createNewItem?: (Data:DataListStoreFeature) => Vars;
   getItemId?: TableRowID | ((it: Vars) => TableRowID | undefined);
 
   //--------------------------------------------------

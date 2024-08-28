@@ -395,7 +395,9 @@ function defineDataListStore(
       }
       //console.log('changes', changes);
       // 执行更新
+      status.value = 'saving';
       await sqlx.exec(changes);
+      status.value = undefined;
 
       // 更新远程结果
       if (options.refreshWhenSave) {

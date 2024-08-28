@@ -2,6 +2,7 @@ import {
   ActionBarEvent,
   Alert,
   ComboFilterProps,
+  ComboFilterValue,
   Confirm,
   FormProps,
   GridFieldsProps,
@@ -16,6 +17,7 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef } from 'vue';
+import { SqlQuery, SqlResult } from '../..';
 import { DataListStoreFeature } from '../../_store';
 import { RdsBrowserProps } from './rds-browser-types';
 //--------------------------------------------------
@@ -45,13 +47,23 @@ export type RdsBrowserFeature = {
 
   TableCurrentId: ComputedRef<TableRowID | undefined>;
   TableCheckedIds: ComputedRef<Map<TableRowID, boolean>>;
+  DefaultFilterQuery: ComputedRef<SqlQuery>;
 
   DataFilterConfig: ComputedRef<ComboFilterProps>;
   DataPagerConfig: ComputedRef<PagerProps>;
   DataTableConfig: ComputedRef<TableProps>;
   DataFormConfig: ComputedRef<GridFieldsProps>;
 
+  // 方法
+  refresh: () => Promise<void>;
+
+  // 响应事件
   onTableRowSelect: (payload: TableSelectEmitInfo) => void;
+  onFilterChange: (payload: ComboFilterValue) => void;
+  onFilterReset: () => void;
+  onPageNumberChange: (pn: number) => void;
+  onPageSizeChange: (pgsz: number) => void;
+  onCurrentMetaChange: (payload: SqlResult) => void;
   onActionFire: (barEvent: ActionBarEvent) => void;
 };
 
@@ -89,7 +101,18 @@ export function useRdsBrowser(
     changed: Data.value.changed.value,
     hasChecked: Data.value.hasChecked.value,
     reloading: Data.value.status.value == 'loading',
+    saving: Data.value.status.value == 'saving',
   }));
+
+  //--------------------------------------------------
+  const DefaultFilterQuery = computed(() => {
+    let flt = props.dataStore.query;
+    if (_.isFunction(flt)) {
+      return flt();
+    }
+    return flt;
+  });
+
   //--------------------------------------------------
   // 数据
   //--------------------------------------------------
@@ -105,6 +128,10 @@ export function useRdsBrowser(
     return _.defaults({}, props.filter, {
       layout: 'oneline',
       keepMajor: getKeepName(props, 'Filter-Major'),
+      value: {
+        filter: Data.value.query.filter,
+        sorter: Data.value.query.sorter,
+      },
     } as ComboFilterProps) as ComboFilterProps;
   });
 
@@ -172,10 +199,82 @@ export function useRdsBrowser(
   }
 
   //--------------------------------------------------
+  // 方法
+  //--------------------------------------------------
+  function canRefreshSafely() {
+    let msg = (props.messages ?? {}).warn_refresh;
+    if (msg) {
+      if (Data.value.changed.value) {
+        Alert(msg, { type: 'warn' });
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function refresh() {
+    if (canRefreshSafely()) {
+      await Data.value.reload();
+    }
+  }
+
+  //--------------------------------------------------
   // 响应事件
   //--------------------------------------------------
   function onTableRowSelect(payload: TableSelectEmitInfo) {
     Data.value.onSelect(payload);
+  }
+
+  function onFilterChange(payload: ComboFilterValue) {
+    // 防守
+    if (!canRefreshSafely()) {
+      return;
+    }
+    // 更新 filter / sorter
+    Data.value.setQuery(payload);
+    Data.value.setPager({ pageNumber: 1 });
+
+    // 自动重新加载
+    Data.value.reload();
+  }
+
+  function onFilterReset() {
+    if (!canRefreshSafely()) {
+      return;
+    }
+    // 更新 filter / sorter
+    Data.value.setQuery(DefaultFilterQuery.value);
+    Data.value.setPager({ pageNumber: 1 });
+
+    // 自动重新加载
+    Data.value.reload();
+  }
+
+  function onPageNumberChange(pn: number) {
+    // 防守
+    if (!canRefreshSafely()) {
+      return;
+    }
+    // 更新
+    Data.value.setPager({ pageNumber: pn });
+    // 自动重新加载
+    Data.value.reload();
+  }
+
+  function onPageSizeChange(pgsz: number) {
+    // 防守
+    if (!canRefreshSafely()) {
+      return;
+    }
+    // 更新
+    Data.value.setPager({ pageNumber: 1, pageSize: pgsz });
+    // 自动重新加载
+    Data.value.reload();
+  }
+
+  function onCurrentMetaChange(payload: SqlResult) {
+    console.log('onDetailChange', payload);
+    Data.value.updateCurrent(payload);
   }
 
   function onActionFire(barEvent: ActionBarEvent) {
@@ -184,19 +283,12 @@ export function useRdsBrowser(
 
     // Reload
     if ('reload' == name) {
-      let msg = (props.messages ?? {}).warn_refresh;
-      if (msg) {
-        if (Data.value.changed.value) {
-          Alert(msg, { type: 'warn' });
-          return;
-        }
-      }
-      Data.value.reload();
+      refresh();
     }
     // Create
     else if ('create' == name) {
       if (props.createNewItem) {
-        let it = props.createNewItem();
+        let it = props.createNewItem(Data.value);
         let id = getId(it);
         Data.value.addLocalItem(it);
         if (!_.isNil(id)) {
@@ -233,13 +325,23 @@ export function useRdsBrowser(
 
     TableCurrentId,
     TableCheckedIds,
+    DefaultFilterQuery,
 
     DataFilterConfig,
     DataPagerConfig,
     DataTableConfig,
     DataFormConfig,
 
+    // 方法
+    refresh,
+
+    // 响应事件
     onTableRowSelect,
+    onFilterChange,
+    onFilterReset,
+    onPageNumberChange,
+    onPageSizeChange,
+    onCurrentMetaChange,
     onActionFire,
   };
 }

@@ -8,31 +8,57 @@ export function useRdsBrowserSchema(_RD: RdsBrowserFeature): LayoutSchema {
       comType: 'TiActionBar',
       comConf: useRdsBrowserActions(_RD),
       events: {
-        fire: (payload: EmitAdaptorPayload) => {
-          _RD.onActionFire(payload.data);
+        fire: ({ data }) => {
+          _RD.onActionFire(data);
         },
       },
     },
     filter: {
       comType: 'TiComboFilter',
       comConf: _RD.DataFilterConfig.value,
+      events: {
+        change: ({ data }) => {
+          _RD.onFilterChange(data);
+        },
+        search: () => {
+          _RD.refresh();
+        },
+        reset: () => {
+          _RD.onFilterReset();
+        },
+      },
     },
     pager: {
       comType: 'TiPager',
       comConf: _RD.DataPagerConfig.value,
+      events: {
+        'change-page-number': ({ data }) => {
+          console.log('change-page-number', data);
+          _RD.onPageNumberChange(data);
+        },
+        'change-page-size': ({ data }) => {
+          console.log('change-page-size', data);
+          _RD.onPageSizeChange(data);
+        },
+      },
     },
     list: {
       comType: 'TiTable',
       comConf: _RD.DataTableConfig.value,
       events: {
-        select: (payload: EmitAdaptorPayload) => {
-          _RD.onTableRowSelect(payload.data);
+        select: ({ data }) => {
+          _RD.onTableRowSelect(data);
         },
       },
     },
     detail: {
       comType: 'TiForm',
       comConf: _RD.DataFormConfig.value,
+      events: {
+        change: ({ data }) => {
+          _RD.onCurrentMetaChange(data);
+        },
+      },
     },
   };
 }
