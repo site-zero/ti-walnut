@@ -175,10 +175,6 @@ export function useRdsBrowser(
         layoutHint: [[6, 1500], [5, 1250], [4, 1000], [3, 750], [2, 500], 1],
         defaultComType: 'TiInput',
         emptyRoadblock: { text: 'i18n:nil-item', icon: 'zmdi-arrow-left' },
-        titleStyle: {
-          justifyContent: 'flex-start',
-          padding: '.6em 1em',
-        },
       } as FormProps,
       props.form,
       {
