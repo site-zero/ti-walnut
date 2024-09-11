@@ -42,7 +42,6 @@ export function useSqlx(daoName?: string) {
     try {
       let qobj = Util.filterRecordNilValue(q);
       let qstr = JSON.stringify(qobj);
-      //console.log('query', qstr);
 
       // 准备命令
       let cmds = [`sqlx`];
