@@ -1,5 +1,5 @@
 import { ActionBarProps } from '@site0/tijs';
-import { RdsBrowserFeature } from './use-rds-browser';
+import { RdsBrowserFeature } from './rds-browser-types';
 
 export function useRdsBrowserActions(_RD: RdsBrowserFeature): ActionBarProps {
   return {

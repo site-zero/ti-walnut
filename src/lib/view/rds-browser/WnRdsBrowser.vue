@@ -22,8 +22,20 @@
   //--------------------------------------------------
   const _RD = computed(() => useRdsBrowser(Data, props));
   //--------------------------------------------------
-  const GUILayout = computed(() => useRdsBrowserLayout(props));
-  const GUIScheme = computed(() => useRdsBrowserSchema(_RD.value));
+  const GUILayout = computed(() => {
+    let layout = useRdsBrowserLayout(props);
+    if (props.guiLayout) {
+      return props.guiLayout(layout);
+    }
+    return layout;
+  });
+  const GUIScheme = computed(() => {
+    let schema = useRdsBrowserSchema(_RD.value);
+    if (props.guiSchema) {
+      return props.guiSchema(schema, Data.value, _RD.value);
+    }
+    return schema;
+  });
   //--------------------------------------------------
   onMounted(() => {
     Data.value.reload();

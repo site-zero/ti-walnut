@@ -49,6 +49,7 @@ export type DataListStoreFeature = {
   isEmpty: ComputedRef<boolean>;
   isRemoteEmpty: ComputedRef<boolean>;
   isLocalEmpty: ComputedRef<boolean>;
+  CurrentItem: ComputedRef<SqlResult | undefined>;
   //---------------------------------------------
   //isChanged: () => boolean;
   getItemId: (it: SqlResult, index: number) => TableRowID;
@@ -228,6 +229,8 @@ function defineDataListStore(
     return getItemById(_current_id.value);
   }
 
+  const CurrentItem = computed(() => getCurrentItem());
+
   async function queryRemoteList(): Promise<void> {
     status.value = 'loading';
     let list = await sqlx.select(options.sqlQuery, query);
@@ -280,6 +283,7 @@ function defineDataListStore(
     isEmpty: computed(() => _.isEmpty(listData.value)),
     isRemoteEmpty: computed(() => _.isEmpty(remoteList.value)),
     isLocalEmpty: computed(() => _.isEmpty(_local.value?.localList?.value)),
+    CurrentItem,
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------

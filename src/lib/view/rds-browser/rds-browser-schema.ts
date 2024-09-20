@@ -1,6 +1,6 @@
-import { EmitAdaptorPayload, LayoutSchema } from '@site0/tijs';
-import { RdsBrowserFeature } from './use-rds-browser';
+import { LayoutSchema } from '@site0/tijs';
 import { useRdsBrowserActions } from './rds-browser-actions';
+import { RdsBrowserFeature } from './rds-browser-types';
 
 export function useRdsBrowserSchema(_RD: RdsBrowserFeature): LayoutSchema {
   return {

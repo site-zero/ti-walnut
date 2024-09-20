@@ -19,7 +19,7 @@ import _ from 'lodash';
 import { computed, ComputedRef } from 'vue';
 import { SqlQuery, SqlResult } from '../..';
 import { DataListStoreFeature } from '../../_store';
-import { RdsBrowserProps } from './rds-browser-types';
+import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
 //--------------------------------------------------
 /**
  * 获取本地状态保存的特性
@@ -38,34 +38,7 @@ export function getKeepName(
     };
   }
 }
-//--------------------------------------------------
-// 定义特性
-//--------------------------------------------------
-export type RdsBrowserFeature = {
-  TableEmptyRoadblock: ComputedRef<RoadblockProps>;
-  StatusVars: ComputedRef<Vars>;
-
-  TableCurrentId: ComputedRef<TableRowID | undefined>;
-  TableCheckedIds: ComputedRef<Map<TableRowID, boolean>>;
-  DefaultFilterQuery: ComputedRef<SqlQuery>;
-
-  DataFilterConfig: ComputedRef<ComboFilterProps>;
-  DataPagerConfig: ComputedRef<PagerProps>;
-  DataTableConfig: ComputedRef<TableProps>;
-  DataFormConfig: ComputedRef<GridFieldsProps>;
-
-  // 方法
-  refresh: () => Promise<void>;
-
-  // 响应事件
-  onTableRowSelect: (payload: TableSelectEmitInfo) => void;
-  onFilterChange: (payload: ComboFilterValue) => void;
-  onFilterReset: () => void;
-  onPageNumberChange: (pn: number) => void;
-  onPageSizeChange: (pgsz: number) => void;
-  onCurrentMetaChange: (payload: SqlResult) => void;
-  onActionFire: (barEvent: ActionBarEvent) => void;
-};
+;
 
 /**
  * 视图主体逻辑入口
