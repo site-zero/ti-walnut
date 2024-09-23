@@ -102,7 +102,24 @@ export function useLocalListEdit(
     //.............................................
     isChanged() {
       if (_local_list.value) {
-        return !_.isEqual(remoteList.value, _local_list.value);
+        if (_local_list.value.length != remoteList.value?.length) {
+          // console.log(
+          //   'length not equal',
+          //   _local_list.value.length,
+          //   remoteList.value?.length
+          // );
+          return true;
+        }
+        if (!_.isEqual(remoteList.value, _local_list.value)) {
+          // for (let i = 0; i < _local_list.value.length; i++) {
+          //   let remote = remoteList.value[i];
+          //   let local = _local_list.value[i];
+          //   if (!_.isEqual(remote, local)) {
+          //     console.log(`Item ${i} Not Equal`, remote, local);
+          //   }
+          // }
+          return true;
+        }
       }
       return false;
     },
