@@ -248,7 +248,7 @@ export function useRdsBrowser(
 
   function onActionFire(barEvent: ActionBarEvent) {
     let { name, payload } = barEvent;
-    console.log('onActionFire', name, payload);
+    // console.log('onActionFire', name, payload);
 
     // Reload
     if ('reload' == name) {

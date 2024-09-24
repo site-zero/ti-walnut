@@ -1,6 +1,6 @@
 import { getLogger } from '@site0/tijs';
 import _ from 'lodash';
-import { ComputedRef, Ref, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 import {
   LocalMetaEditOptions,
   LocalMetaMakeChangeOptions,
@@ -15,45 +15,7 @@ const log = getLogger('wn.use-data-meta-store');
 
 export type DataMetaStoreStatus = 'loading' | 'saving';
 
-export type DataMetaStoreFeature = {
-  //---------------------------------------------
-  // 数据模型
-  _local: any;
-  filter: Ref<QueryFilter>;
-  status: Ref<DataMetaStoreStatus | undefined>;
-  remoteMeta: Ref<SqlResult | undefined>;
-  //---------------------------------------------
-  // 计算属性
-  metaData: ComputedRef<SqlResult>;
-  changed: ComputedRef<boolean>;
-  newMeta: ComputedRef<boolean>;
-  hasRemoteMeta: ComputedRef<boolean>;
-  //---------------------------------------------
-  // Getter
-  isNew: () => boolean;
-  isChanged: () => boolean;
-  getFilterField: (key: string, dft?: any) => any;
-  //---------------------------------------------
-  // 本地方法
-  resetLocalChange: () => void;
-
-  updateFilter: (filter: QueryFilter) => void;
-  setFilter: (filter: QueryFilter) => void;
-
-  updateMeta: (meta: SqlResult) => void;
-  setMeta: (meta: SqlResult) => void;
-
-  setRemoteMeta: (meta: SqlResult) => void;
-  clearRemoteMeta: () => void;
-
-  makeChanges: () => SqlExecInfo[];
-  //---------------------------------------------
-  //  远程方法
-  fetchRemoteMeta: () => Promise<void>;
-  saveChange: () => Promise<void>;
-  reload: () => Promise<void>;
-  //---------------------------------------------
-};
+export type DataMetaStoreFeature = ReturnType<typeof defineDataMetaStore>;
 
 export type DataMetaStoreOptions = LocalMetaEditOptions & {
   daoName?: string;
@@ -70,9 +32,7 @@ export type DataMetaStoreOptions = LocalMetaEditOptions & {
  * @param options 配置参数
  * @returns 实例
  */
-function defineDataMetaStore(
-  options: DataMetaStoreOptions
-): DataMetaStoreFeature {
+function defineDataMetaStore(options: DataMetaStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
@@ -223,7 +183,6 @@ function defineDataMetaStore(
     },
   };
 }
-
 
 export function useDataMetaStore(
   options: DataMetaStoreOptions

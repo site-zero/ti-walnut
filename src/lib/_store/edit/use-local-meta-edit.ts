@@ -158,6 +158,7 @@ export function useLocalMetaEdit(
   
   ---------------------------------------------*/
   return {
+    remoteMeta,
     localMeta,
     isNewMeta,
     isChanged,
