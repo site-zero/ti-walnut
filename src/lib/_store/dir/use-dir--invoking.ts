@@ -1,8 +1,8 @@
 import { Util } from '@site0/tijs';
 import _ from 'lodash';
-import { DirFeature, DirInvokingFeature, WnObj } from '../../../..';
+import { DirStore, DirInvokingFeature, WnObj } from '../../../..';
 
-export function userDirInvoking(DIR: DirFeature): DirInvokingFeature {
+export function userDirInvoking(DIR: DirStore): DirInvokingFeature {
   return async (methodName: string, payload?: any): Promise<any> => {
     let invokeName = _.camelCase(methodName);
     let method = DIR.methods.value[invokeName];

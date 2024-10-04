@@ -353,7 +353,7 @@ export type DirOperatingFeature = {
         Whole DirStore
 ----------------------------------------
 */
-export type DirFeature = DirInitFeature &
+export type DirStore = DirInitFeature &
   DirViewFeatures &
   DirQueryFeature &
   DirAggFeature &

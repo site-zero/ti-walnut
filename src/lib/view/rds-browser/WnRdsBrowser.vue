@@ -25,12 +25,12 @@
   const GUILayout = computed(() => {
     let layout = useRdsBrowserLayout(props);
     if (props.guiLayout) {
-      return props.guiLayout(layout);
+      return props.guiLayout(layout, Data.value, _RD.value);
     }
     return layout;
   });
   const GUIScheme = computed(() => {
-    let schema = useRdsBrowserSchema(_RD.value);
+    let schema = useRdsBrowserSchema(props, Data.value, _RD.value);
     if (props.guiSchema) {
       return props.guiSchema(schema, Data.value, _RD.value);
     }

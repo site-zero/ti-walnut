@@ -1,12 +1,17 @@
 import { LayoutSchema } from '@site0/tijs';
+import { DataListStore } from '../../_store';
 import { useRdsBrowserActions } from './rds-browser-actions';
-import { RdsBrowserFeature } from './rds-browser-types';
+import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
 
-export function useRdsBrowserSchema(_RD: RdsBrowserFeature): LayoutSchema {
+export function useRdsBrowserSchema(
+  props: RdsBrowserProps,
+  Data: DataListStore,
+  _RD: RdsBrowserFeature
+): LayoutSchema {
   return {
     actions: {
       comType: 'TiActionBar',
-      comConf: useRdsBrowserActions(_RD),
+      comConf: useRdsBrowserActions(props, Data, _RD),
       events: {
         fire: ({ data }) => {
           _RD.onActionFire(data);

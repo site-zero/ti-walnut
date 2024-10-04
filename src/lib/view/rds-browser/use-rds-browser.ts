@@ -5,7 +5,6 @@ import {
   ComboFilterValue,
   Confirm,
   FormProps,
-  GridFieldsProps,
   KeepProps,
   PagerProps,
   RoadblockProps,
@@ -17,9 +16,9 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef } from 'vue';
-import { SqlQuery, SqlResult } from '../..';
-import { DataListStoreFeature } from '../../_store';
-import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
+import { SqlResult } from '../..';
+import { DataListStore } from '../../_store';
+import { RdsBrowserProps } from './rds-browser-types';
 //--------------------------------------------------
 /**
  * 获取本地状态保存的特性
@@ -38,8 +37,6 @@ export function getKeepName(
     };
   }
 }
-;
-
 /**
  * 视图主体逻辑入口
  *
@@ -48,9 +45,9 @@ export function getKeepName(
  * @returns 视图主体逻辑
  */
 export function useRdsBrowser(
-  Data: ComputedRef<DataListStoreFeature>,
+  Data: ComputedRef<DataListStore>,
   props: RdsBrowserProps
-): RdsBrowserFeature {
+) {
   //--------------------------------------------------
   const TableEmptyRoadblock = computed((): RoadblockProps => {
     if (Data.value.status.value == 'loading') {
@@ -73,6 +70,7 @@ export function useRdsBrowser(
   const StatusVars = computed(() => ({
     changed: Data.value.changed.value,
     hasChecked: Data.value.hasChecked.value,
+    hasCurrent: Data.value.hasCurrent.value,
     reloading: Data.value.status.value == 'loading',
     saving: Data.value.status.value == 'saving',
   }));
@@ -246,9 +244,17 @@ export function useRdsBrowser(
     Data.value.updateCurrent(payload);
   }
 
-  function onActionFire(barEvent: ActionBarEvent) {
+  async function onActionFire(barEvent: ActionBarEvent) {
     let { name, payload } = barEvent;
-    // console.log('onActionFire', name, payload);
+    console.log('onActionFire', name, payload);
+
+    // 自定义处理
+    if (props.handleAction) {
+      let mark = await props.handleAction(Data.value, name, payload) ?? 'unhandled';
+      if (mark == 'handled') {
+        return;
+      }
+    }
 
     // Reload
     if ('reload' == name) {
@@ -283,6 +289,10 @@ export function useRdsBrowser(
     // Remove
     else if ('remove' == name) {
       Data.value.removeChecked();
+    }
+    // warn unhandled action
+    else {
+      console.warn('Unhandled action:', name, payload);
     }
   }
   //--------------------------------------------------

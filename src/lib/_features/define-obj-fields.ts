@@ -1,11 +1,4 @@
-import {
-  DateTime,
-  ENV_KEYS,
-  getEnv,
-  InputBoxProps,
-  LabelProps,
-  useObjFields,
-} from '@site0/tijs';
+import { InputBoxProps, LabelProps, useObjFields } from '@site0/tijs';
 
 export function initWalnutObjDefaultFields() {
   const _ofs = useObjFields();
@@ -171,38 +164,7 @@ export function initWalnutObjDefaultFields() {
     } as LabelProps,
   });
   // ----------------------------- 时间戳
-  const timeTransformer = (ct: number) => {
-    let fmt = getEnv(ENV_KEYS.DFT_DATETIME_FORMAT, 'yyyy-MM-dd HH:mm');
-    return DateTime.format(ct, { fmt });
-  };
-  _ofs.setField('ct', {
-    name: 'ct',
-    title: 'i18n:wn-obj-ct',
-    type: 'AMS',
-    transformer: timeTransformer,
-    comType: 'TiLabel',
-    comConf: {
-      placeholder: 'i18n:unknown',
-    } as LabelProps,
-  });
-  _ofs.setField('lm', {
-    name: 'lm',
-    title: 'i18n:wn-obj-lm',
-    type: 'AMS',
-    transformer: timeTransformer,
-    comType: 'TiLabel',
-    comConf: {
-      placeholder: 'i18n:unknown',
-    } as LabelProps,
-  });
-  _ofs.setField('expi', {
-    name: 'expi',
-    title: 'i18n:wn-obj-expi',
-    type: 'AMS',
-    transformer: timeTransformer,
-    comType: 'TiLabel',
-    comConf: {
-      placeholder: 'i18n:unknown',
-    } as LabelProps,
-  });
+  _ofs.setTimeLabelField('ct', 'i18n:wn-obj-ct');
+  _ofs.setTimeLabelField('lm', 'i18n:wn-obj-lm');
+  _ofs.setTimeLabelField('expi', 'i18n:wn-obj-expi');
 }

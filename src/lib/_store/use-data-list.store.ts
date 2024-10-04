@@ -1,6 +1,5 @@
 import {
   ComboFilterValue,
-  KeepFeature,
   KeepInfo,
   TableRowID,
   TableSelectEmitInfo,
@@ -9,13 +8,12 @@ import {
   useKeep,
 } from '@site0/tijs';
 import _ from 'lodash';
-import { ComputedRef, Ref, computed, reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import {
   LocalListEditOptions,
   LocalListMakeChangeOptions,
   QueryFilter,
   QuerySorter,
-  SqlExecInfo,
   SqlPager,
   SqlPagerInput,
   SqlQuery,
@@ -29,76 +27,13 @@ const log = getLogger('wn.use-data-list-store');
 
 export type DataListStoreStatus = 'loading' | 'saving';
 
-export type DataListStoreFeature = {
-  //---------------------------------------------
-  // 数据模型
-  _keep_query: KeepFeature;
-  _keep_select: KeepFeature;
-  _local: any;
-  currentId: Ref<TableRowID | undefined>;
-  checkedIds: Ref<TableRowID[]>;
-  query: SqlQuery;
-  status: Ref<DataListStoreStatus | undefined>;
-  remoteList: Ref<SqlResult[] | undefined>;
-  //---------------------------------------------
-  // 计算属性
-  listData: ComputedRef<SqlResult[]>;
-  hasCurrent: ComputedRef<boolean>;
-  hasChecked: ComputedRef<boolean>;
-  changed: ComputedRef<boolean>;
-  isEmpty: ComputedRef<boolean>;
-  isRemoteEmpty: ComputedRef<boolean>;
-  isLocalEmpty: ComputedRef<boolean>;
-  CurrentItem: ComputedRef<SqlResult | undefined>;
-  //---------------------------------------------
-  //isChanged: () => boolean;
-  getItemId: (it: SqlResult, index: number) => TableRowID;
-  getItemById: (id: TableRowID) => SqlResult | undefined;
-  getItemBy: (
-    predicate: (it: SqlResult, index: number) => boolean
-  ) => SqlResult | undefined;
-  getCurrentItem: () => SqlResult | undefined;
-  getFilterField: (key: string, dft?: any) => any;
-  //---------------------------------------------
-  // 本地方法
-  resetLocalChange: () => void;
-  clearRemoteList: () => void;
-  setQuery: (query: ComboFilterValue) => void;
-  setFilter: (filter: QueryFilter) => void;
-  setSorter: (sorter: QuerySorter) => void;
-  setPager: (page: Partial<SqlPagerInput>) => void;
-  addLocalItem: (meta: SqlResult) => void;
-  updateCurrent: (meta: SqlResult) => void;
-  updateItems: (meta: SqlResult, forIds?: TableRowID | TableRowID[]) => void;
-  removeChecked: () => void;
-  updateSelection: (
-    currentId?: TableRowID | null,
-    checkedIds?: TableRowID[]
-  ) => void;
-  cancelSelection: () => void;
-  makeChanges: () => SqlExecInfo[];
-  //---------------------------------------------
-  // 本地化存储状态
-  saveLocalQuery: () => void;
-  resetLocalQuery: () => void;
-  saveLocalSelect: () => void;
-  resetLocalSelect: () => void;
-  //---------------------------------------------
-  // 与控件绑定
-  onSelect: (payload: TableSelectEmitInfo) => void;
-  //---------------------------------------------
-  //  远程方法
-  countRemoteList: () => Promise<void>;
-  queryRemoteList: () => Promise<void>;
-  saveChange: () => Promise<void>;
-  reload: () => Promise<void>;
-  //---------------------------------------------
-};
+export type DataListStore = ReturnType<typeof defineDataListStore>;
 
 export type DataListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
+  fixedMatch?: QueryFilter;
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount: string;
@@ -107,9 +42,7 @@ export type DataListStoreOptions = LocalListEditOptions & {
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
 };
 
-function defineDataListStore(
-  options: DataListStoreOptions
-): DataListStoreFeature {
+function defineDataListStore(options: DataListStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
@@ -233,7 +166,14 @@ function defineDataListStore(
 
   async function queryRemoteList(): Promise<void> {
     status.value = 'loading';
-    let list = await sqlx.select(options.sqlQuery, query);
+    // 准备查询条件
+    let q = _.cloneDeep(query);
+    q.filter = q.filter ?? {};
+    if (options.fixedMatch) {
+      _.assign(q.filter, options.fixedMatch);
+    }
+    //console.log('queryRemoteList', q);
+    let list = await sqlx.select(options.sqlQuery, q);
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];
       for (let i = 0; i < list.length; i++) {
@@ -428,7 +368,7 @@ function defineDataListStore(
 export function useDataListStore(
   options: DataListStoreOptions,
   _name?: string
-): DataListStoreFeature {
+): DataListStore {
   // 强制创建新的
   // if ('NEW' == name || Str.isBlank(name)) {
   //   return defineDataListStore(options);

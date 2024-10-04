@@ -2,7 +2,7 @@ import { Util, Vars, getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
-  DirFeature,
+  DirStore,
   DirGUIViewBehaviors,
   DirGUIViewInfo,
   DirInitSettings,
@@ -68,7 +68,7 @@ export type DirStoreOptions = {
   customizeSettings?: (settings: DirInitSettings) => void;
 };
 //-----------------------------------------------
-export function defineDirStore(options: DirStoreOptions = {}): DirFeature {
+export function defineDirStore(options: DirStoreOptions = {}): DirStore {
   let name = options.name || 'CurrentDir';
   log.debug(`defineDirStore(${name || ''})`);
   //---------------------------------------------
@@ -193,7 +193,7 @@ export function defineDirStore(options: DirStoreOptions = {}): DirFeature {
   //---------------------------------------------
   // 输出特性
   //---------------------------------------------
-  let re: DirFeature = {
+  let re: DirStore = {
     /*------------<expose>--------------*/
     _vars,
     _keep,
@@ -245,6 +245,6 @@ export function defineDirStore(options: DirStoreOptions = {}): DirFeature {
   return re;
 }
 
-export function useDirStore(options?: DirStoreOptions): DirFeature {
+export function useDirStore(options?: DirStoreOptions): DirStore {
   return defineDirStore(options);
 }

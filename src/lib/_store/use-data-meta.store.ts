@@ -15,7 +15,7 @@ const log = getLogger('wn.use-data-meta-store');
 
 export type DataMetaStoreStatus = 'loading' | 'saving';
 
-export type DataMetaStoreFeature = ReturnType<typeof defineDataMetaStore>;
+export type DataMetaStore = ReturnType<typeof defineDataMetaStore>;
 
 export type DataMetaStoreOptions = LocalMetaEditOptions & {
   daoName?: string;
@@ -186,6 +186,6 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
 
 export function useDataMetaStore(
   options: DataMetaStoreOptions
-): DataMetaStoreFeature {
+): DataMetaStore {
   return defineDataMetaStore(options);
 }
