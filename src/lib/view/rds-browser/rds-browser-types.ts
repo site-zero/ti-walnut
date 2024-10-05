@@ -9,6 +9,7 @@ import {
   TableRowID,
   Vars,
 } from '@site0/tijs';
+import { ComputedRef } from 'vue';
 import { DataListStore, DataListStoreOptions } from '../../_store';
 import { useRdsBrowser } from './use-rds-browser';
 
@@ -24,6 +25,13 @@ export type RdsBrowserProps = {
   defaultKeepMode?: KeepMode;
 
   keepModes?: Record<string, KeepMode>;
+
+  /**
+   * 界面mount后，是否自动加载数据
+   */
+  autoReload?: boolean;
+
+  onSetup?: (api: ComputedRef<RdsBrowserApi>) => void;
 
   /**
    * 快速的指定界面布局的列，默认就是 '50% 1fr'
@@ -77,6 +85,11 @@ export type RdsBrowserProps = {
   dataStore: DataListStoreOptions;
 
   //--------------------------------------------------
+  // 动作条
+  //--------------------------------------------------
+  actions?: ActionBarProps;
+
+  //--------------------------------------------------
   // 数据表单
   //--------------------------------------------------
   form?: Omit<FormProps, 'data'>;
@@ -96,3 +109,8 @@ export type RdsBrowserProps = {
 // 定义特性
 //--------------------------------------------------
 export type RdsBrowserFeature = ReturnType<typeof useRdsBrowser>;
+
+export type RdsBrowserApi = {
+  Data: DataListStore;
+  rds: RdsBrowserFeature;
+};

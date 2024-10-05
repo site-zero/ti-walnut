@@ -1,26 +1,50 @@
 <script lang="ts" setup>
   //--------------------------------------------------
-  import { RdsBrowserProps, useDataListStore } from '@site0/ti-walnut';
+  import { RdsBrowserApi, useDataListStore } from '@site0/ti-walnut';
   import { TiLayoutGrid } from '@site0/tijs';
-  import { computed, onMounted } from 'vue';
+  import { computed, nextTick, onMounted } from 'vue';
   import { useRdsBrowserLayout } from './rds-browser-layout';
   import { useRdsBrowserSchema } from './rds-browser-schema';
+  import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
   import { getKeepName, useRdsBrowser } from './use-rds-browser';
+
+  //--------------------------------------------------
+  const emit = defineEmits<{
+    (name: 'store-ready', api: RdsBrowserApi): void;
+  }>();
   //--------------------------------------------------
   const props = withDefaults(defineProps<RdsBrowserProps>(), {
     layoutQuickColumns: '50% 1fr',
     defaultKeepMode: 'local',
+    autoReload: true,
   });
   //--------------------------------------------------
-  const Data = computed(() =>
-    useDataListStore({
+  const Data = computed(() => {
+    let store = useDataListStore({
       keepQuery: getKeepName(props, 'Query'),
       keepSelect: getKeepName(props, 'Selection'),
       ...props.dataStore,
+    });
+    nextTick(() => {
+      emit('store-ready', api.value);
+    });
+    return store;
+  });
+  //--------------------------------------------------
+  const _RD = computed(
+    (): RdsBrowserFeature => useRdsBrowser(Data.value, props)
+  );
+  //--------------------------------------------------
+  const api = computed(
+    (): RdsBrowserApi => ({
+      Data: Data.value,
+      rds: _RD.value,
     })
   );
   //--------------------------------------------------
-  const _RD = computed(() => useRdsBrowser(Data, props));
+  if (props.onSetup) {
+    props.onSetup(api);
+  }
   //--------------------------------------------------
   const GUILayout = computed(() => {
     let layout = useRdsBrowserLayout(props);
@@ -29,6 +53,7 @@
     }
     return layout;
   });
+  //--------------------------------------------------
   const GUIScheme = computed(() => {
     let schema = useRdsBrowserSchema(props, Data.value, _RD.value);
     if (props.guiSchema) {
@@ -38,7 +63,9 @@
   });
   //--------------------------------------------------
   onMounted(() => {
-    Data.value.reload();
+    if (props.autoReload) {
+      Data.value.reload();
+    }
   });
   //--------------------------------------------------
 </script>

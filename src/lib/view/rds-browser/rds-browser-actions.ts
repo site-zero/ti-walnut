@@ -1,6 +1,7 @@
 import { ActionBarItem, ActionBarProps } from '@site0/tijs';
 import { DataListStore } from '../../_store';
 import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
+import _ from 'lodash';
 
 export function useRdsBrowserActions(
   props: RdsBrowserProps,
@@ -63,13 +64,16 @@ export function useRdsBrowserActions(
     }
   );
 
-  let actionBar: ActionBarProps = {
-    style: {
-      padding: 'var(--ti-gap-m)',
+  let actionBar: ActionBarProps = _.assign(
+    {
+      style: {
+        padding: 'var(--ti-gap-m)',
+      },
+      vars: _RD.StatusVars.value,
+      items,
     },
-    vars: _RD.StatusVars.value,
-    items,
-  };
+    props.actions
+  );
 
   // 完全定制的菜单条
   if (props.guiActionBar) {

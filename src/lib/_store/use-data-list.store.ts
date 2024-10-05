@@ -172,7 +172,7 @@ function defineDataListStore(options: DataListStoreOptions) {
     if (options.fixedMatch) {
       _.assign(q.filter, options.fixedMatch);
     }
-    //console.log('queryRemoteList', q);
+    console.log('queryRemoteList', q);
     let list = await sqlx.select(options.sqlQuery, q);
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];
