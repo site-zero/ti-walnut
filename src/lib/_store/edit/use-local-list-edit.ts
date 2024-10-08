@@ -40,6 +40,8 @@ export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions & {
   deleteSql?: string;
 };
 
+export type LocalListEdit = ReturnType<typeof useLocalListEdit>;
+
 export function useLocalListEdit(
   remoteList: Ref<SqlResult[] | undefined>,
   options: LocalListEditOptions = {}

@@ -1,5 +1,4 @@
 import { Util, Vars, getLogger } from '@site0/tijs';
-import JSON5 from 'json5';
 import _ from 'lodash';
 import {
   QueryFilter,
@@ -207,7 +206,7 @@ export function useSqlx(daoName?: string) {
         let [by, vars] = opt.fetchBack;
         cmds.push(`-fetch_by ${by}`);
         if (vars && !_.isEmpty(vars)) {
-          cmds.push(`-fetch_vars '${JSON5.stringify(vars)}'`);
+          cmds.push(`-fetch_vars '${JSON.stringify(vars)}'`);
         }
       }
     }
