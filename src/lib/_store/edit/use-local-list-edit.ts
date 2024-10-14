@@ -4,6 +4,7 @@ import {
   SqlResult,
 } from '@site0/ti-walnut';
 import {
+  Match,
   TableRowChanagePayload,
   TableRowID,
   Util,
@@ -191,6 +192,45 @@ export function useLocalListEdit(
           }
         }
       }
+    },
+    //.............................................
+    batchUpdateBy(meta: Vars, match: any): SqlResult[] {
+      let am = Match.parse(match, false);
+      this.initLocalList();
+      let re: SqlResult[] = [];
+      if (_local_list.value) {
+        for (let it of _local_list.value) {
+          if (am.test(it)) {
+            _.assign(it, meta);
+            re.push(it);
+          }
+        }
+      }
+      return re;
+    },
+    //.............................................
+    findAndUpdate(
+      update: (it: SqlResult) => SqlResult | undefined
+    ): SqlResult[] {
+      let re: SqlResult[] = [];
+      let list: SqlResult[] = [];
+      this.initLocalList();
+      if (_local_list.value) {
+        for (let it of _local_list.value) {
+          // 尝试更新数据
+          let updatedShipmentMeta = update(it);
+          if (updatedShipmentMeta) {
+            list.push(updatedShipmentMeta);
+            re.push(updatedShipmentMeta);
+          }
+          // 维持原样
+          else {
+            list.push(it);
+          }
+        }
+        _local_list.value = list;
+      }
+      return re;
     },
     //.............................................
     removeLocalItems(forIds?: TableRowID[]) {
