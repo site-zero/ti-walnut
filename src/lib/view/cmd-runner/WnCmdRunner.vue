@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { onMounted, onUnmounted, ref } from 'vue';
-import { useCmdRunner } from './use-cmd-runner';
-import { WnCmdRunnerEmitter, WnCmdRunnerProps } from './wn-cmd-runner-types';
+  import { useCmdRunner } from './use-cmd-runner';
+  import { WnCmdRunnerEmitter, WnCmdRunnerProps } from './wn-cmd-runner-types';
   //-------------------------------------------------------
   let emit = defineEmits<WnCmdRunnerEmitter>();
   //-----------------------------------------------------
@@ -50,6 +50,5 @@ import { WnCmdRunnerEmitter, WnCmdRunnerProps } from './wn-cmd-runner-types';
   </div>
 </template>
 <style scoped lang="scss">
-  @use '@site0/tijs/scss' as *;
-  @import './wn-cmd-runner.scss';
+  @use './wn-cmd-runner.scss';
 </style>

@@ -24,7 +24,7 @@
   </div>
 </template>
 <style lang="scss" scoped>
-  @use '@site0/tijs/scss' as *;
+  @use '@site0/tijs/sass/_all.scss' as *;
 
   .wn-obj-view {
     padding: 1em;

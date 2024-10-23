@@ -4,15 +4,16 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  // css: {
-  //   preprocessorOptions: {
-  //     scss: {
-  //       additionalData: `
-  //         @use "src/assets/style/_all.scss" as *;
-  //       `
-  //     }
-  //   }
-  // },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler', // or "modern"
+      },
+    },
+  },
+  optimizeDeps: {
+    exclude: ['vitest'],
+  },
   build: {
     // 单位是 KB
     chunkSizeWarningLimit: 800,

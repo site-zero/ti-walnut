@@ -94,6 +94,5 @@
   </div>
 </template>
 <style lang="scss" scoped>
-  @use '@site0/tijs/scss' as *;
-  @import './wn-dir-browser.scss';
+  @use './wn-dir-browser.scss';
 </style>
