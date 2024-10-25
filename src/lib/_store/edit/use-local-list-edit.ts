@@ -80,7 +80,41 @@ export function useLocalListEdit(
   else if (options.patchMetaUpdate) {
     patchMetaUpdate = options.patchMetaUpdate;
   }
-
+  //---------------------------------------------
+  function initLocalList() {
+    if (!_local_list.value) {
+      _local_list.value = _.cloneDeep(remoteList.value || []);
+      return true;
+    }
+    return false;
+  }
+  //---------------------------------------------
+  function updateItem(
+    meta: Vars,
+    { index, id } = {} as { index?: number; id?: TableRowID }
+  ) {
+    // 采用 index 下标
+    if (_.isNumber(index)) {
+      initLocalList();
+      if (_local_list.value && index >= 0 && index < _local_list.value.length) {
+        _.assign(_local_list.value[index], meta);
+      }
+    }
+    // 采用 ID
+    else if (!_.isNil(id)) {
+      initLocalList();
+      if (_local_list.value) {
+        for (let i = 0; i < _local_list.value.length; i++) {
+          let local = _local_list.value[i];
+          let rowId = getRowId(local, i);
+          if (rowId == id) {
+            _.assign(local, meta);
+            break;
+          }
+        }
+      }
+    }
+  }
   /*---------------------------------------------
                     
                   输出特性
@@ -95,13 +129,7 @@ export function useLocalListEdit(
       _local_list.value = undefined;
     },
     //.............................................
-    initLocalList() {
-      if (!_local_list.value) {
-        _local_list.value = _.cloneDeep(remoteList.value || []);
-        return true;
-      }
-      return false;
-    },
+    initLocalList,
     //.............................................
     isChanged() {
       if (_local_list.value) {
@@ -154,6 +182,8 @@ export function useLocalListEdit(
       _local_list.value.push(newItem);
     },
     //.............................................
+    updateItem,
+    //.............................................
     batchUpdate(meta: Vars, forIds?: TableRowID | TableRowID[]) {
       // 自动生成 localList
       if (!_local_list.value) {
@@ -169,15 +199,8 @@ export function useLocalListEdit(
         }
       }
       // 某条指定记录
-      else if (_.isString(forIds)) {
-        for (let i = 0; i < _local_list.value.length; i++) {
-          let local = _local_list.value[i];
-          let id = getRowId(local, i);
-          if (forIds == id) {
-            _.assign(local, meta);
-            break;
-          }
-        }
+      else if (_.isString(forIds) || _.isNumber(forIds)) {
+        updateItem(meta, { id: forIds });
       }
       // 一批记录
       else if (_.isArray(forIds)) {
