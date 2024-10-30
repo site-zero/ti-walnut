@@ -12,7 +12,7 @@ export type LocalMetaMakeChangeOptions = {
   insertSql: string;
   defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
   insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
-  updateMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
+  updateMeta?: (local: SqlResult, remote: SqlResult) => Vars;
   insertSet?: SqlExecSetVar[];
   fetchBack?: (
     local: SqlResult,
@@ -133,7 +133,7 @@ export function useLocalMetaEdit(
     }
     // 已经存在的，那么要把 ID 设置一下
     else if (options.updateMeta) {
-      _.assign(vars, options.updateMeta(local, remote));
+      _.assign(vars, options.updateMeta(local, remote!));
     }
 
     let fb: [string, (Vars | undefined)?] | undefined = undefined;

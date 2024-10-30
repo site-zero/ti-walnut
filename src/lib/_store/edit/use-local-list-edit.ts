@@ -7,12 +7,12 @@ import {
   Match,
   TableRowChanagePayload,
   TableRowID,
+  useFieldChangeDiff,
   Util,
   Vars,
-  useFieldChangeDiff,
 } from '@site0/tijs';
 import _ from 'lodash';
-import { Ref, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
 
 export type LocalListEditOptions = {
   // /**
@@ -52,6 +52,18 @@ export function useLocalListEdit(
   //                 建立数据模型
   //---------------------------------------------
   let _local_list = ref<SqlResult[] | undefined>();
+
+  const _local_id_map = computed(() => {
+    let re = new Map<TableRowID, number>();
+    if (_local_list.value) {
+      for (let i = 0; i < _local_list.value.length; i++) {
+        let local = _local_list.value[i];
+        let id = getRowId(local, i);
+        re.set(id, i);
+      }
+    }
+    return re;
+  });
   //---------------------------------------------
   //                 被内部重用的方法
   //---------------------------------------------
@@ -63,6 +75,9 @@ export function useLocalListEdit(
       return _.get(it, getId) ?? `row-${index}`;
     }
     return getId(it, index) ?? `row-${index}`;
+  }
+  function getRowIndex(id: TableRowID): number {
+    return _local_id_map.value?.get(id) ?? -1;
   }
   /**
    * 补充数据（仅当更新时）
@@ -93,25 +108,17 @@ export function useLocalListEdit(
     meta: Vars,
     { index, id } = {} as { index?: number; id?: TableRowID }
   ) {
-    // 采用 index 下标
-    if (_.isNumber(index)) {
-      initLocalList();
-      if (_local_list.value && index >= 0 && index < _local_list.value.length) {
-        _.assign(_local_list.value[index], meta);
-      }
+    let i = -1;
+    if (!_.isNil(index)) {
+      i = index;
+    } else if (!_.isNil(id)) {
+      i = getRowIndex(id);
     }
-    // 采用 ID
-    else if (!_.isNil(id)) {
+    // 采用 index 下标
+    if (i >= 0) {
       initLocalList();
-      if (_local_list.value) {
-        for (let i = 0; i < _local_list.value.length; i++) {
-          let local = _local_list.value[i];
-          let rowId = getRowId(local, i);
-          if (rowId == id) {
-            _.assign(local, meta);
-            break;
-          }
-        }
+      if (_local_list.value && i < _local_list.value.length) {
+        _.assign(_local_list.value[i], meta);
       }
     }
   }
@@ -124,6 +131,7 @@ export function useLocalListEdit(
     localList: _local_list,
     //.............................................
     getRowId,
+    getRowIndex,
     //.............................................
     reset() {
       _local_list.value = undefined;

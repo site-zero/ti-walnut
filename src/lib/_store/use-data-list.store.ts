@@ -10,6 +10,7 @@ import {
 import _ from 'lodash';
 import { computed, reactive, ref } from 'vue';
 import {
+  DataStoreActionStatus,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
   QueryFilter,
@@ -24,8 +25,6 @@ import {
 } from '../../lib';
 
 const log = getLogger('wn.use-data-list-store');
-
-export type DataListStoreStatus = 'loading' | 'saving';
 
 export type DataListStore = ReturnType<typeof defineDataListStore>;
 
@@ -75,7 +74,7 @@ function defineDataListStore(options: DataListStoreOptions) {
   //                 建立数据模型
   //---------------------------------------------
   const remoteList = ref<SqlResult[]>();
-  const status = ref<DataListStoreStatus>();
+  const _action_status = ref<DataStoreActionStatus>();
   const query = reactive(_query as SqlQuery);
   const _current_id = ref<TableRowID>();
   const _checked_ids = ref<TableRowID[]>([]);
@@ -112,7 +111,22 @@ function defineDataListStore(options: DataListStoreOptions) {
   //                 组合其他特性
   //---------------------------------------------
   const _local = computed(() => useLocalListEdit(remoteList, options));
+  //---------------------------------------------
+  const ActionStatus = computed(() => _action_status.value);
+  //---------------------------------------------
+  const LoadStatus = computed(() => {
+    if (_.isUndefined(remoteList.value)) {
+      return 'unloaded';
+    }
+    if (remoteList.value.length == query.pager?.totalCount) {
+      return 'full';
+    }
+    return 'partial';
+  });
 
+  //---------------------------------------------
+  // 基础本地方法
+  //---------------------------------------------
   function resetLocalChange() {
     _local.value.reset();
   }
@@ -165,7 +179,7 @@ function defineDataListStore(options: DataListStoreOptions) {
   const CurrentItem = computed(() => getCurrentItem());
 
   async function queryRemoteList(): Promise<void> {
-    status.value = 'loading';
+    _action_status.value = 'loading';
     // 准备查询条件
     let q = _.cloneDeep(query);
     q.filter = q.filter ?? {};
@@ -186,16 +200,16 @@ function defineDataListStore(options: DataListStoreOptions) {
       list = list2;
     }
     remoteList.value = list ?? [];
-    status.value = undefined;
+    _action_status.value = undefined;
   }
 
   async function countRemoteList() {
-    status.value = 'loading';
+    _action_status.value = 'loading';
     let total = await sqlx.count(options.sqlCount, query.filter);
     if (query.pager) {
       updatePagerTotal(query.pager, total);
     }
-    status.value = undefined;
+    _action_status.value = undefined;
   }
   /*---------------------------------------------
                     
@@ -210,12 +224,14 @@ function defineDataListStore(options: DataListStoreOptions) {
     currentId: _current_id,
     checkedIds: _checked_ids,
     query,
-    status,
+    status: _action_status,
     remoteList,
 
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
+    ActionStatus,
+    LoadStatus,
     listData,
     hasCurrent,
     hasChecked,
@@ -339,9 +355,9 @@ function defineDataListStore(options: DataListStoreOptions) {
       }
       //console.log('changes', changes);
       // 执行更新
-      status.value = 'saving';
+      _action_status.value = 'saving';
       await sqlx.exec(changes);
-      status.value = undefined;
+      _action_status.value = undefined;
 
       // 更新远程结果
       if (options.refreshWhenSave) {

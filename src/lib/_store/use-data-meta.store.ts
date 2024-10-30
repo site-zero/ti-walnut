@@ -2,6 +2,7 @@ import { getLogger } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
+  DataStoreActionStatus,
   LocalMetaEditOptions,
   LocalMetaMakeChangeOptions,
   QueryFilter,
@@ -12,8 +13,6 @@ import {
 } from '../../lib';
 
 const log = getLogger('wn.use-data-meta-store');
-
-export type DataMetaStoreStatus = 'loading' | 'saving';
 
 export type DataMetaStore = ReturnType<typeof defineDataMetaStore>;
 
@@ -41,7 +40,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   //                 建立数据模型
   //---------------------------------------------
   const remoteMeta = ref<SqlResult>();
-  const _status = ref<DataMetaStoreStatus>();
+  const _status = ref<DataStoreActionStatus>();
   const _filter = ref<QueryFilter>(options.filter);
   const hasRemoteMeta = computed(() => {
     if (!remoteMeta.value || _.isEmpty(remoteMeta.value)) {
@@ -53,6 +52,19 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   //                 组合其他特性
   //---------------------------------------------
   const _local = computed(() => useLocalMetaEdit(remoteMeta, options));
+
+  function reset() {
+    clearRemoteMeta();
+    dropChange();
+  }
+
+  function clearRemoteMeta() {
+    remoteMeta.value = undefined;
+  }
+
+  function dropChange() {
+    _local.value.reset();
+  }
 
   function resetLocalChange() {
     _local.value.reset();
@@ -126,6 +138,9 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     //                  本地方法
     //---------------------------------------------
     resetLocalChange,
+    clearRemoteMeta,
+    reset,
+    dropChange,
 
     updateFilter(filter: QueryFilter) {
       _.assign(_filter.value, filter);
@@ -145,10 +160,6 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
 
     setRemoteMeta(meta: SqlResult) {
       remoteMeta.value = _.cloneDeep(meta);
-    },
-
-    clearRemoteMeta() {
-      remoteMeta.value = undefined;
     },
 
     makeChanges,
@@ -184,8 +195,6 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   };
 }
 
-export function useDataMetaStore(
-  options: DataMetaStoreOptions
-): DataMetaStore {
+export function useDataMetaStore(options: DataMetaStoreOptions): DataMetaStore {
   return defineDataMetaStore(options);
 }
