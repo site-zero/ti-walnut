@@ -4,6 +4,7 @@ import {
   TableRowID,
   TableSelectEmitInfo,
   Util,
+  Vars,
   getLogger,
   useKeep,
 } from '@site0/tijs';
@@ -165,7 +166,10 @@ function defineDataListStore(options: DataListStoreOptions) {
     if (_.isNil(id)) {
       return;
     }
-    return _.find(listData.value, (li, index) => getItemId(li, index) == id);
+    let index = _local.value.getRowIndex(id);
+    if (index >= 0) {
+      return listData.value[index];
+    }
   }
 
   function getItemBy(predicate: (it: SqlResult, index: number) => boolean) {
@@ -299,6 +303,13 @@ function defineDataListStore(options: DataListStoreOptions) {
       }
     },
 
+    updateItem(
+      meta: Vars,
+      { index, id } = {} as { index?: number; id?: TableRowID }
+    ) {
+      _local.value.updateItem(meta, { index, id });
+    },
+
     updateItems(meta: SqlResult, forIds?: TableRowID | TableRowID[]) {
       _local.value.batchUpdate(meta, forIds);
     },
@@ -306,6 +317,13 @@ function defineDataListStore(options: DataListStoreOptions) {
     removeChecked() {
       if (hasChecked.value) {
         _local.value.removeLocalItems(_checked_ids.value);
+      }
+    },
+
+    removeItems(forIds?: TableRowID | TableRowID[]) {
+      if (!_.isNil(forIds)) {
+        let ids = _.concat([], forIds);
+        _local.value.removeLocalItems(ids);
       }
     },
 
