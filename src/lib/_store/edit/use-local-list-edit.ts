@@ -290,6 +290,10 @@ export function useLocalListEdit(
       _local_list.value = list;
     },
     //.............................................
+    clearItems() {
+      _local_list.value = [];
+    },
+    //.............................................
     makeChanges(
       options: LocalListMakeChangeOptions,
       _showDebug: boolean = false

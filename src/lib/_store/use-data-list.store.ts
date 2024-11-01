@@ -180,6 +180,61 @@ function defineDataListStore(options: DataListStoreOptions) {
     return getItemById(_current_id.value);
   }
 
+  function updateCurrent(meta: SqlResult) {
+    if (hasCurrent.value) {
+      _local.value.batchUpdate(meta, _current_id.value);
+    }
+  }
+
+  function updateItem(
+    meta: Vars,
+    { index, id } = {} as { index?: number; id?: TableRowID }
+  ) {
+    _local.value.updateItem(meta, { index, id });
+  }
+
+  function updateItems(meta: SqlResult, forIds?: TableRowID | TableRowID[]) {
+    _local.value.batchUpdate(meta, forIds);
+  }
+
+  function updateChecked(meta: SqlResult) {
+    _local.value.batchUpdate(meta, _checked_ids.value);
+  }
+
+  function removeChecked() {
+    if (hasChecked.value) {
+      _local.value.removeLocalItems(_checked_ids.value);
+    }
+  }
+
+  function clear() {
+    _local.value.clearItems();
+  }
+
+  function removeItems(forIds?: TableRowID | TableRowID[]) {
+    if (!_.isNil(forIds)) {
+      let ids = _.concat([], forIds);
+      _local.value.removeLocalItems(ids);
+    }
+  }
+
+  function updateSelection(
+    currentId?: TableRowID | null,
+    checkedIds?: TableRowID[]
+  ) {
+    if (_.isEmpty(checkedIds) && !_.isNil(currentId)) {
+      checkedIds = [currentId];
+    }
+    _current_id.value = currentId ?? undefined;
+    _checked_ids.value = checkedIds ?? [];
+  }
+
+  function cancelSelection() {
+    _current_id.value = undefined;
+    _checked_ids.value = [];
+    __reset_local_select();
+  }
+
   const CurrentItem = computed(() => getCurrentItem());
 
   async function queryRemoteList(): Promise<void> {
@@ -297,49 +352,16 @@ function defineDataListStore(options: DataListStoreOptions) {
       _local.value.appendToList(meta);
     },
 
-    updateCurrent(meta: SqlResult) {
-      if (hasCurrent.value) {
-        _local.value.batchUpdate(meta, _current_id.value);
-      }
-    },
+    updateCurrent,
+    updateItem,
+    updateItems,
+    updateChecked,
 
-    updateItem(
-      meta: Vars,
-      { index, id } = {} as { index?: number; id?: TableRowID }
-    ) {
-      _local.value.updateItem(meta, { index, id });
-    },
-
-    updateItems(meta: SqlResult, forIds?: TableRowID | TableRowID[]) {
-      _local.value.batchUpdate(meta, forIds);
-    },
-
-    removeChecked() {
-      if (hasChecked.value) {
-        _local.value.removeLocalItems(_checked_ids.value);
-      }
-    },
-
-    removeItems(forIds?: TableRowID | TableRowID[]) {
-      if (!_.isNil(forIds)) {
-        let ids = _.concat([], forIds);
-        _local.value.removeLocalItems(ids);
-      }
-    },
-
-    updateSelection(currentId?: TableRowID | null, checkedIds?: TableRowID[]) {
-      if (_.isEmpty(checkedIds) && !_.isNil(currentId)) {
-        checkedIds = [currentId];
-      }
-      _current_id.value = currentId ?? undefined;
-      _checked_ids.value = checkedIds ?? [];
-    },
-
-    cancelSelection() {
-      _current_id.value = undefined;
-      _checked_ids.value = [];
-      __reset_local_select();
-    },
+    removeChecked,
+    removeItems,
+    clear,
+    updateSelection,
+    cancelSelection,
 
     //---------------------------------------------
     // 本地化存储状态
