@@ -54,13 +54,12 @@ export function useLocalListEdit(
   let _local_list = ref<SqlResult[] | undefined>();
 
   const _local_id_map = computed(() => {
+    let list = _local_list.value || remoteList.value || [];
     let re = new Map<TableRowID, number>();
-    if (_local_list.value) {
-      for (let i = 0; i < _local_list.value.length; i++) {
-        let local = _local_list.value[i];
-        let id = getRowId(local, i);
-        re.set(id, i);
-      }
+    for (let i = 0; i < list.length; i++) {
+      let li = list[i];
+      let id = getRowId(li, i);
+      re.set(id, i);
     }
     return re;
   });
@@ -142,21 +141,21 @@ export function useLocalListEdit(
     isChanged() {
       if (_local_list.value) {
         if (_local_list.value.length != remoteList.value?.length) {
-          // console.log(
-          //   'length not equal',
-          //   _local_list.value.length,
-          //   remoteList.value?.length
-          // );
+          console.log(
+            'length not equal',
+            _local_list.value.length,
+            remoteList.value?.length
+          );
           return true;
         }
         if (!_.isEqual(remoteList.value, _local_list.value)) {
-          // for (let i = 0; i < _local_list.value.length; i++) {
-          //   let remote = remoteList.value[i];
-          //   let local = _local_list.value[i];
-          //   if (!_.isEqual(remote, local)) {
-          //     console.log(`Item ${i} Not Equal`, remote, local);
-          //   }
-          // }
+          for (let i = 0; i < _local_list.value.length; i++) {
+            let remote = remoteList.value[i];
+            let local = _local_list.value[i];
+            if (!_.isEqual(remote, local)) {
+              console.log(`Item ${i} Not Equal`, remote, local);
+            }
+          }
           return true;
         }
       }

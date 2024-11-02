@@ -162,12 +162,17 @@ function defineDataListStore(options: DataListStoreOptions) {
   }
 
   function getItemById(id?: TableRowID) {
-    // console.log('getItemById', id);
     if (_.isNil(id)) {
       return;
     }
     let index = _local.value.getRowIndex(id);
     if (index >= 0) {
+      return listData.value[index];
+    }
+  }
+
+  function getItemByIndex(index: number) {
+    if (index >= 0 && index < listData.value.length) {
       return listData.value[index];
     }
   }
@@ -245,7 +250,7 @@ function defineDataListStore(options: DataListStoreOptions) {
     if (options.fixedMatch) {
       _.assign(q.filter, options.fixedMatch);
     }
-    console.log('queryRemoteList', q);
+    //console.log('queryRemoteList', q);
     let list = await sqlx.select(options.sqlQuery, q);
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];
@@ -305,6 +310,7 @@ function defineDataListStore(options: DataListStoreOptions) {
     //isChanged: () => _local.value.isChanged(),
     getItemId,
     getItemById,
+    getItemByIndex,
     getItemBy,
     getCurrentItem,
     getFilterField: (key: string, dft?: any) => {
