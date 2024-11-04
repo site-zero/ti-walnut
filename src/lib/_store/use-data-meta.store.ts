@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
   DataStoreActionStatus,
+  DataStoreLoadStatus,
   LocalMetaEditOptions,
   LocalMetaMakeChangeOptions,
   QueryFilter,
@@ -116,8 +117,8 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   return {
     // 数据模型
     _local,
-    filter: _filter,
     status: _status,
+    filter: _filter,
     remoteMeta,
     //---------------------------------------------
     //                  计算属性
@@ -126,6 +127,13 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     changed: computed(() => _local.value.isChanged()),
     newMeta: computed(() => isNewMeta()),
     hasRemoteMeta,
+    ActionStatus: computed(() => _status.value),
+    LoadStatus: computed((): Omit<DataStoreLoadStatus, 'partial'> => {
+      if (hasRemoteMeta.value) {
+        return 'full';
+      }
+      return 'unloaded';
+    }),
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------

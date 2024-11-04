@@ -1,6 +1,7 @@
 import {
   ComboFilterValue,
   KeepInfo,
+  Match,
   TableRowID,
   TableSelectEmitInfo,
   Util,
@@ -12,11 +13,11 @@ import _ from 'lodash';
 import { computed, reactive, ref } from 'vue';
 import {
   DataStoreActionStatus,
+  DataStoreLoadStatus,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
   QueryFilter,
   QuerySorter,
-  SqlPager,
   SqlPagerInput,
   SqlQuery,
   SqlResult,
@@ -33,7 +34,7 @@ export type DataListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
-  fixedMatch?: QueryFilter;
+  fixedMatch?: QueryFilter | (() => QueryFilter);
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount: string;
@@ -51,32 +52,40 @@ function defineDataListStore(options: DataListStoreOptions) {
   let _keep_query = useKeep(options.keepQuery);
   let _keep_select = useKeep(options.keepSelect);
   //---------------------------------------------
+  //              固定查询条件
+  //---------------------------------------------
+  function __create_fixed_match(): QueryFilter {
+    if (_.isFunction(options.fixedMatch)) {
+      return options.fixedMatch();
+    }
+    if (options.fixedMatch) {
+      return _.cloneDeep(options.fixedMatch);
+    }
+    return {};
+  }
+  //---------------------------------------------
   //              默认查询条件
   //---------------------------------------------
-  let _dft_query: SqlQuery;
-  if (_.isFunction(options.query)) {
-    _dft_query = options.query();
-  } else {
-    _dft_query = _.cloneDeep(options.query);
+  function __create_data_query(): SqlQuery {
+    let re: SqlQuery = {
+      filter: {},
+      sorter: {},
+      pager: { pageNumber: 1, pageSize: 50 },
+    };
+    if (_.isFunction(options.query)) {
+      let q = options.query();
+      _.assign(re, q);
+    } else {
+      _.assign(re, options.query);
+    }
+    return re;
   }
-  _.defaults(_dft_query, {
-    filter: {},
-    sorter: {
-      ct: 1,
-    },
-  });
-  let _query = _keep_query.loadObj(_dft_query) as SqlQuery;
-  _query.pager = _.pick(_query.pager, 'pageSize') as SqlPager;
-  _.defaults(_query.pager, {
-    pageNumber: 1,
-    pageSize: _dft_query.pager?.pageSize ?? 50,
-  });
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
   const remoteList = ref<SqlResult[]>();
   const _action_status = ref<DataStoreActionStatus>();
-  const query = reactive(_query as SqlQuery);
+  const query = reactive(__create_data_query());
   const _current_id = ref<TableRowID>();
   const _checked_ids = ref<TableRowID[]>([]);
   //---------------------------------------------
@@ -115,7 +124,7 @@ function defineDataListStore(options: DataListStoreOptions) {
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
-  const LoadStatus = computed(() => {
+  const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(remoteList.value)) {
       return 'unloaded';
     }
@@ -177,6 +186,16 @@ function defineDataListStore(options: DataListStoreOptions) {
     }
   }
 
+  function getItemByMatch(match: any): SqlResult | undefined {
+    let am = Match.parse(match, false);
+    for (let i = 0; i < listData.value.length; i++) {
+      let it = listData.value[i];
+      if (am.test(it)) {
+        return it;
+      }
+    }
+  }
+
   function getItemBy(predicate: (it: SqlResult, index: number) => boolean) {
     return _.find(listData.value, predicate);
   }
@@ -185,42 +204,86 @@ function defineDataListStore(options: DataListStoreOptions) {
     return getItemById(_current_id.value);
   }
 
-  function updateCurrent(meta: SqlResult) {
+  function findItemsById(ids: TableRowID[]): SqlResult[] {
+    let indexs = ids.map((id) => _local.value.getRowIndex(id));
+    let re: SqlResult[] = [];
+    for (let i of indexs) {
+      if (i >= 0) {
+        let it = listData.value[i];
+        re.push(it);
+      }
+    }
+    return re;
+  }
+
+  function findItemsByMatch(match: any): SqlResult[] {
+    let re: SqlResult[] = [];
+    let am = Match.parse(match, false);
+    for (let i = 0; i < listData.value.length; i++) {
+      let it = listData.value[i];
+      if (am.test(it)) {
+        re.push(it);
+      }
+    }
+    return re;
+  }
+
+  function findItemsBy(
+    predicate: (it: SqlResult, index: number) => boolean
+  ): SqlResult[] {
+    let re: SqlResult[] = [];
+    for (let i = 0; i < listData.value.length; i++) {
+      let it = listData.value[i];
+      if (predicate(it, i)) {
+        re.push(it);
+      }
+    }
+    return re;
+  }
+
+  function updateCurrent(meta: SqlResult): SqlResult | undefined {
     if (hasCurrent.value) {
-      _local.value.batchUpdate(meta, _current_id.value);
+      let uf = { id: _current_id.value };
+      return _local.value.updateItem(meta, uf);
     }
   }
 
   function updateItem(
     meta: Vars,
     { index, id } = {} as { index?: number; id?: TableRowID }
-  ) {
-    _local.value.updateItem(meta, { index, id });
+  ): SqlResult | undefined {
+    return _local.value.updateItem(meta, { index, id });
   }
 
-  function updateItems(meta: SqlResult, forIds?: TableRowID | TableRowID[]) {
-    _local.value.batchUpdate(meta, forIds);
+  function updateItems(
+    meta: SqlResult,
+    forIds?: TableRowID | TableRowID[]
+  ): SqlResult[] {
+    return _local.value.batchUpdate(meta, forIds);
   }
 
-  function updateChecked(meta: SqlResult) {
-    _local.value.batchUpdate(meta, _checked_ids.value);
+  function updateChecked(meta: SqlResult): SqlResult[] {
+    return _local.value.batchUpdate(meta, _checked_ids.value);
   }
 
-  function removeChecked() {
+  function removeChecked(): SqlResult[] {
     if (hasChecked.value) {
-      _local.value.removeLocalItems(_checked_ids.value);
+      return _local.value.removeLocalItems(_checked_ids.value);
     }
+    return [];
   }
 
   function clear() {
     _local.value.clearItems();
   }
 
-  function removeItems(forIds?: TableRowID | TableRowID[]) {
+  function removeItems(forIds?: TableRowID | TableRowID[]): SqlResult[] {
     if (!_.isNil(forIds)) {
       let ids = _.concat([], forIds);
-      _local.value.removeLocalItems(ids);
+      return _local.value.removeLocalItems(ids);
     }
+
+    return [];
   }
 
   function updateSelection(
@@ -242,14 +305,17 @@ function defineDataListStore(options: DataListStoreOptions) {
 
   const CurrentItem = computed(() => getCurrentItem());
 
+  function __gen_query(): SqlQuery {
+    let q = _.cloneDeep(query);
+    q.filter = q.filter ?? {};
+    _.assign(q.filter, __create_fixed_match());
+    return q;
+  }
+
   async function queryRemoteList(): Promise<void> {
     _action_status.value = 'loading';
     // 准备查询条件
-    let q = _.cloneDeep(query);
-    q.filter = q.filter ?? {};
-    if (options.fixedMatch) {
-      _.assign(q.filter, options.fixedMatch);
-    }
+    let q = __gen_query();
     //console.log('queryRemoteList', q);
     let list = await sqlx.select(options.sqlQuery, q);
     if (options.patchRemote) {
@@ -269,7 +335,8 @@ function defineDataListStore(options: DataListStoreOptions) {
 
   async function countRemoteList() {
     _action_status.value = 'loading';
-    let total = await sqlx.count(options.sqlCount, query.filter);
+    let q = __gen_query();
+    let total = await sqlx.count(options.sqlCount, q.filter);
     if (query.pager) {
       updatePagerTotal(query.pager, total);
     }
@@ -311,8 +378,12 @@ function defineDataListStore(options: DataListStoreOptions) {
     getItemId,
     getItemById,
     getItemByIndex,
+    getItemByMatch,
     getItemBy,
     getCurrentItem,
+    findItemsById,
+    findItemsByMatch,
+    findItemsBy,
     getFilterField: (key: string, dft?: any) => {
       return _.get(query.filter, key) ?? dft;
     },

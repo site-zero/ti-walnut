@@ -106,7 +106,7 @@ export function useLocalListEdit(
   function updateItem(
     meta: Vars,
     { index, id } = {} as { index?: number; id?: TableRowID }
-  ) {
+  ): SqlResult | undefined {
     let i = -1;
     if (!_.isNil(index)) {
       i = index;
@@ -117,7 +117,9 @@ export function useLocalListEdit(
     if (i >= 0) {
       initLocalList();
       if (_local_list.value && i < _local_list.value.length) {
-        _.assign(_local_list.value[i], meta);
+        let re = _local_list.value[i];
+        _.assign(re, meta);
+        return re;
       }
     }
   }
@@ -166,7 +168,7 @@ export function useLocalListEdit(
       return _local_list.value ? true : false;
     },
     //.............................................
-    updateListField(payload: TableRowChanagePayload) {
+    updateListField(payload: TableRowChanagePayload): SqlResult | undefined {
       // 自动生成 localList
       if (!_local_list.value) {
         _local_list.value = _.cloneDeep(remoteList.value || []);
@@ -178,6 +180,8 @@ export function useLocalListEdit(
 
       // 应用修改修改详情列表
       useFieldChangeDiff(changed, row);
+
+      return row;
     },
     //.............................................
     appendToList(newItem: SqlResult) {
@@ -191,7 +195,7 @@ export function useLocalListEdit(
     //.............................................
     updateItem,
     //.............................................
-    batchUpdate(meta: Vars, forIds?: TableRowID | TableRowID[]) {
+    batchUpdate(meta: Vars, forIds?: TableRowID | TableRowID[]): SqlResult[] {
       // 自动生成 localList
       if (!_local_list.value) {
         _local_list.value = _.cloneDeep(remoteList.value || []);
@@ -204,24 +208,33 @@ export function useLocalListEdit(
           let local = _local_list.value[i];
           _.assign(local, meta);
         }
+        return _local_list.value;
       }
+
+      let re: SqlResult[] = [];
       // 某条指定记录
-      else if (_.isString(forIds) || _.isNumber(forIds)) {
-        updateItem(meta, { id: forIds });
+      if (_.isString(forIds) || _.isNumber(forIds)) {
+        let reItem = updateItem(meta, { id: forIds });
+        if (reItem) {
+          re.push(reItem);
+        }
       }
       // 一批记录
       else if (_.isArray(forIds)) {
         if (forIds.length > 0) {
           let ids = Util.arrayToMap(forIds);
           for (let i = 0; i < _local_list.value.length; i++) {
-            let local = _local_list.value[i];
-            let id = getRowId(local, i);
+            let item = _local_list.value[i];
+            let id = getRowId(item, i);
             if (ids.get(id)) {
-              _.assign(local, meta);
+              _.assign(item, meta);
+              re.push(item);
             }
           }
         }
       }
+
+      return re;
     },
     //.............................................
     batchUpdateBy(meta: Vars, match: any): SqlResult[] {
@@ -263,10 +276,10 @@ export function useLocalListEdit(
       return re;
     },
     //.............................................
-    removeLocalItems(forIds?: TableRowID[]) {
+    removeLocalItems(forIds?: TableRowID[]): SqlResult[] {
       // Guard
       if (!forIds || _.isEmpty(forIds)) {
-        return;
+        return [];
       }
 
       // 自动生成 localList
@@ -277,16 +290,25 @@ export function useLocalListEdit(
       // Remove Local list
       let ids = Util.arrayToMap(forIds);
       let list = [] as SqlResult[];
+      let removes = [] as SqlResult[];
       if (_local_list.value) {
         for (let i = 0; i < _local_list.value.length; i++) {
-          let local = _local_list.value[i];
-          let id = getRowId(local, i);
-          if (!ids.get(id)) {
-            list.push(local);
+          let item = _local_list.value[i];
+          let id = getRowId(item, i);
+          // 需要删除的 ID
+          if (ids.has(id)) {
+            removes.push(item);
+          }
+          // 需要保留的 ID
+          else {
+            list.push(item);
           }
         }
       }
       _local_list.value = list;
+
+      // 返回删除的对象列表
+      return removes;
     },
     //.............................................
     clearItems() {
