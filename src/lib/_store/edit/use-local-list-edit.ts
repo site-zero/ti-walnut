@@ -1,6 +1,7 @@
 import {
   LocalMetaMakeChangeOptions,
   SqlExecInfo,
+  SqlExecSetVar,
   SqlResult,
 } from '@site0/ti-walnut';
 import {
@@ -154,8 +155,11 @@ export function useLocalListEdit(
           for (let i = 0; i < _local_list.value.length; i++) {
             let remote = remoteList.value[i];
             let local = _local_list.value[i];
+            let diff = Util.getRecordDiff(remote, local, {
+              checkRemoveFromOrgin: true,
+            });
             if (!_.isEqual(remote, local)) {
-              console.log(`Item ${i} Not Equal`, remote, local);
+              console.log(`Item ${i} [${getRowId(local, i)}] Not Equal`, diff);
             }
           }
           return true;
@@ -409,13 +413,17 @@ export function useLocalListEdit(
 
       // 对插入，生成配置
       for (let vars of insertList) {
+        let insertSets: SqlExecSetVar[] | undefined = undefined;
+        if (options.insertSet) {
+          insertSets = options.insertSet(vars);
+        }
         changes.push({
           sql: options.insertSql,
           vars,
           explain: true,
           reset: true,
           noresult: options.noresult,
-          sets: options.insertSet,
+          sets: insertSets,
         });
       }
 

@@ -10,10 +10,10 @@ export type LocalMetaEditOptions = {
 export type LocalMetaMakeChangeOptions = {
   updateSql: string;
   insertSql: string;
-  defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
-  insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars;
-  updateMeta?: (local: SqlResult, remote: SqlResult) => Vars;
-  insertSet?: SqlExecSetVar[];
+  defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
+  insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
+  updateMeta?: (local: SqlResult, remote: SqlResult) => Vars | undefined;
+  insertSet?: (local: SqlResult) => SqlExecSetVar[] | undefined;
   fetchBack?: (
     local: SqlResult,
     remote?: SqlResult
@@ -128,7 +128,10 @@ export function useLocalMetaEdit(
       }
       // 自动生成 ID
       if (options.insertSet) {
-        sets.push(...options.insertSet);
+        let insertSets = options.insertSet(local);
+        if (insertSets) {
+          sets.push(...insertSets);
+        }
       }
     }
     // 已经存在的，那么要把 ID 设置一下

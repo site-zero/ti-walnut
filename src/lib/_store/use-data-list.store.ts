@@ -18,6 +18,7 @@ import {
   LocalListMakeChangeOptions,
   QueryFilter,
   QuerySorter,
+  SqlPager,
   SqlPagerInput,
   SqlQuery,
   SqlResult,
@@ -27,6 +28,16 @@ import {
 } from '../../lib';
 
 const log = getLogger('wn.use-data-list-store');
+
+export function updatelPager(pager: SqlPager, update: Partial<SqlPagerInput>) {
+  let { pageNumber, pageSize } = update;
+  if (_.isNumber(pageNumber) && pageNumber > 0) {
+    pager.pageNumber = pageNumber;
+  }
+  if (_.isNumber(pageSize) && pageSize > 0) {
+    pager.pageSize = pageSize;
+  }
+}
 
 export type DataListStore = ReturnType<typeof defineDataListStore>;
 
@@ -409,20 +420,14 @@ function defineDataListStore(options: DataListStoreOptions) {
     },
 
     setPager(page: Partial<SqlPagerInput>) {
-      let { pageNumber, pageSize } = page;
       if (!query.pager) {
         query.pager = {
           pageNumber: 1,
           pageSize: 20,
         };
       }
-      if (_.isNumber(pageNumber) && pageNumber > 0) {
-        query.pager.pageNumber = pageNumber;
-      }
-      if (_.isNumber(pageSize) && pageSize > 0) {
-        query.pager.pageSize = pageSize;
-        __save_local_query();
-      }
+      updatelPager(query.pager, page);
+      __save_local_query();
     },
 
     addLocalItem(meta: SqlResult) {
