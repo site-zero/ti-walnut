@@ -8,6 +8,7 @@ import {
   tidyLogger,
   TiStore,
   updateInstalledComponentsLangs,
+  Vars,
 } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
@@ -363,6 +364,45 @@ export class WalnutServer {
     }
     return reo;
   }
+
+  async uploadFile(file: File, options: WnUploadFileOptions) {
+    let {
+      target,
+      uploadName = file.name,
+      mode = 'a',
+      tmpl = '${major}(${nb})${suffix}',
+      progress = (_p) => {},
+      signal,
+    } = options;
+
+    // 文件分块大小，例如 1MB
+    const CHUNK_SIZE = 1024 * 1024;
+
+    // 构建查询参数
+    const params: Vars = {
+      str: target,
+      nm: uploadName,
+      sz: file.size,
+      mime: file.type,
+      m: mode,
+      tmpl,
+    };
+
+    // 将 params 转换为查询字符串
+    const queryString = new URLSearchParams(params).toString();
+
+    // 构建上传的 URL，包含查询字符串
+    const url = `${this.getUrl('/save/stream')}?${queryString}`;
+  }
 }
+
+export type WnUploadFileOptions = {
+  uploadName?: string;
+  target: string;
+  mode: 'a' | 'r' | 's';
+  tmpl: string;
+  progress: (percent: number) => void;
+  signal?: AbortSignal;
+};
 
 export const Walnut = new WalnutServer();

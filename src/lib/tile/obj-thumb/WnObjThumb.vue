@@ -3,6 +3,7 @@
   import { computed } from 'vue';
   import { getWnObjIcon } from '../../../core';
   import { WnObjThumbProps } from './wn-obj-thumb-types';
+  //-----------------------------------------------------
   const props = defineProps<WnObjThumbProps>();
   //-----------------------------------------------------
   const ObjIcon = computed(() => {

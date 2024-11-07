@@ -1,4 +1,5 @@
 import { CommonProps, IconInput } from '@site0/tijs';
+import { WnObjInput } from '../../_top';
 
 export type WnObjThumbInfo = {
   title?: string;
