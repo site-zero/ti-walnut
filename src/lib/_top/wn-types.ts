@@ -1,12 +1,19 @@
 import { I18nLang, SideBarItem, Vars } from '@site0/tijs';
 import _ from 'lodash';
 
-export type AjaxResult<T = any> = {
+export type AjaxResult = {
   ok: boolean;
   errCode?: string;
   msg?: string;
-  data?: T;
+  data?: any;
 };
+
+export function isAjaxResult(re: any): re is AjaxResult {
+  if (re && _.isBoolean(re.ok)) {
+    return true;
+  }
+  return false;
+}
 
 export type WnObj = Record<string, any>;
 

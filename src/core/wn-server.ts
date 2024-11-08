@@ -16,6 +16,7 @@ import { installWalnutI18n } from '../i18n';
 import {
   AjaxResult,
   FetchObjOptions,
+  isWnObj,
   ServerConfig,
   SignInForm,
   UserSidebar,
@@ -241,6 +242,44 @@ export class WalnutServer {
   }
 
   /**
+   * 异步加载指定路径的文件并将其转换为Base64编码的字符串。
+   *
+   * @param objPath - 文件的路径。
+   * @param signal - 可选的AbortSignal对象，用于中止请求。
+   * @returns 返回一个Promise对象，解析为Base64编码的字符串。
+   * @throws 如果请求失败或无法将Blob转换为Base64编码字符串，则抛出错误。
+   * 
+   * @example
+   * 
+   * ```
+   * let base64Data = await Walnut.loadBase64Data('id:xxx');
+   * img.src = `data:image/jpeg;base64,${base64Data}`
+   * ```
+   */
+  async loadBase64Data(objPath: string, signal?: AbortSignal): Promise<string> {
+    let urlPath = this.cookPath(objPath);
+    let url = this.getUrl(urlPath);
+    let init = this.getRequestInit(signal);
+    let resp = await fetch(url, init);
+    if (!resp.ok) {
+      throw new Error(`Fail to loadBase64(${objPath}): ${resp.statusText}`);
+    }
+    const blob = await resp.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          const base64Data = reader.result.toString().split(',')[1];
+          resolve(base64Data);
+        } else {
+          reject(new Error('Failed to convert blob to base64'));
+        }
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  /**
    * @param objPath 存放在 Walnut 系统的对象路径
    * @returns  可以加载的 Walnut 系统的对象路径
    */
@@ -293,8 +332,8 @@ export class WalnutServer {
     if (loadAxis) {
       urlPath += '&axis=true';
     }
-    let re: AjaxResult<WnObj> = await this.fetchAjax(urlPath, signal);
-    if (re.ok && re.data) {
+    let re: AjaxResult = await this.fetchAjax(urlPath, signal);
+    if (re.ok && isWnObj(re.data)) {
       return re.data;
     }
     throw new Error(JSON.stringify(re));
@@ -413,13 +452,16 @@ export class WalnutServer {
     // 发送请求
     return new Promise((resolve, reject) => {
       // Done
-      if (4 == $req.readyState) {
-        if (200 == $req.status) {
-          resolve($req);
-        } else {
-          reject($req);
+      $req.onreadystatechange = () => {
+        if (4 == $req.readyState) {
+          if (200 == $req.status) {
+            resolve($req.responseText);
+          } else {
+            reject($req.responseText);
+          }
         }
-      }
+      };
+
       // Open Connection
       $req.open('POST', url, true);
 
