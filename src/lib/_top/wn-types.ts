@@ -1,4 +1,5 @@
 import { I18nLang, SideBarItem, Vars } from '@site0/tijs';
+import _ from 'lodash';
 
 export type AjaxResult<T = any> = {
   ok: boolean;
@@ -8,6 +9,17 @@ export type AjaxResult<T = any> = {
 };
 
 export type WnObj = Record<string, any>;
+
+export function isWnObj(obj: any): obj is WnObj {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    _.isString(obj.id) &&
+    _.isString(obj.pid) &&
+    /^(DIR|FILE)$/.test(obj.race) &&
+    _.isString(obj.nm)
+  );
+}
 
 export type WnObjInfo = {
   id?: string;
@@ -35,7 +47,7 @@ export type WnDictSetup = {
   /**
    * 动态字典命令模板执行的时候标准输入，需要 explain, 上下文就是 Vars
    */
-  input?:any;
+  input?: any;
 
   /**
    * 字典如何获取标准字段

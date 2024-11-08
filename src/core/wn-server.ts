@@ -371,12 +371,12 @@ export class WalnutServer {
       uploadName = file.name,
       mode = 'a',
       tmpl = '${major}(${nb})${suffix}',
-      progress = (_p) => {},
+      progress,
       signal,
     } = options;
 
-    // 文件分块大小，例如 1MB
-    const CHUNK_SIZE = 1024 * 1024;
+    // 构建请求投
+    let init = this.getRequestInit(signal);
 
     // 构建查询参数
     const params: Vars = {
@@ -392,16 +392,69 @@ export class WalnutServer {
     const queryString = new URLSearchParams(params).toString();
 
     // 构建上传的 URL，包含查询字符串
-    const url = `${this.getUrl('/save/stream')}?${queryString}`;
+    const url = `${this.getUrl('/o/save/stream')}?${queryString}`;
+
+    // 构建请求对象
+    let $req = new XMLHttpRequest();
+    $req.send;
+
+    // 监控请求进度
+    if (progress) {
+      $req.upload.addEventListener('progress', (ev) => {
+        let info: WnUploadFileProgress = {
+          percent: ev.loaded / ev.total,
+          loaded: ev.loaded,
+          total: ev.total,
+        };
+        progress(info);
+      });
+    }
+
+    // 发送请求
+    return new Promise((resolve, reject) => {
+      // Done
+      if (4 == $req.readyState) {
+        if (200 == $req.status) {
+          resolve($req);
+        } else {
+          reject($req);
+        }
+      }
+      // Open Connection
+      $req.open('POST', url, true);
+
+      // Set headers
+      _.forOwn(init.headers, (val, key) => {
+        $req.setRequestHeader(key, val);
+      });
+
+      // Send Data
+      $req.send(file);
+    });
   }
 }
+
+export type WnUploadFileProgress = {
+  /**
+   * 上传进度百分比: 0-1
+   */
+  percent: number;
+  /**
+   * 已上传字节数
+   */
+  loaded: number;
+  /**
+   * 文件总字节数
+   */
+  total: number;
+};
 
 export type WnUploadFileOptions = {
   uploadName?: string;
   target: string;
   mode: 'a' | 'r' | 's';
   tmpl: string;
-  progress: (percent: number) => void;
+  progress?: (info: WnUploadFileProgress) => void;
   signal?: AbortSignal;
 };
 

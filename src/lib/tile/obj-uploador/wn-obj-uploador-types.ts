@@ -1,8 +1,6 @@
-import { CommonProps } from '@site0/tijs';
-import { WnObjInput } from '../..';
+import { CommonProps, UploadBarProps } from '@site0/tijs';
+import { ObjUploaderProps } from '../../';
 
-export type WnObjUploadorProps = CommonProps & {
-  
-  value?: WnObjInput;
-
-};
+export type WnObjUploadorProps = CommonProps &
+  Omit<UploadBarProps, 'actions'> &
+  ObjUploaderProps & {};
