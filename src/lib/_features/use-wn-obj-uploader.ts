@@ -1,4 +1,4 @@
-import { Icons, ImageProps } from '@site0/tijs';
+import { I18n, Icons, ImageProps } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
 import { computed, Ref, ref } from 'vue';
@@ -26,6 +26,7 @@ export type WnObjUploaderProps = {
   value?: WnObjInput;
   valueType?: WnObjInputType;
   upload: Omit<WnUploadFileOptions, 'progress' | 'signal'>;
+  placeholder?: string;
 };
 
 export function useWnObjUploader(
@@ -98,7 +99,7 @@ export function useWnObjUploader(
       return _obj.value.title || _obj.value.nm;
     }
 
-    return '';
+    return I18n.text(props.placeholder || 'i18n:wn-obj-upload-bar-placeholder');
   });
 
   function __set_obj(obj: WnObjInput | undefined) {
@@ -147,7 +148,7 @@ export function useWnObjUploader(
    */
   async function loadObj(input?: WnObjInput) {
     let _input_type = ValueType.value;
-    
+
     // 防空
     if (!input) {
       _obj.value = undefined;
@@ -290,6 +291,21 @@ export function useWnObjUploader(
     }
   }
 
+  async function doClear() {
+    if (_obj.value && _obj.value.id) {
+      _progress.value = _.random(0, 0.8, true);
+      await Walnut.exec(`rm 'id:${_obj.value.id}'`);
+      _progress.value = 1;
+      _.delay(() => {
+        _progress.value = 0;
+        _obj.value = undefined;
+        _base64_data.value = undefined;
+        _fail_message.value = undefined;
+        emit('change', null);
+      }, 200);
+    }
+  }
+
   /**
    * 计算属性，返回一个布尔值，表示是否正在上传文件。
    * 如果 `_file.value` 存在，则返回 `true`，否则返回 `false`。
@@ -297,8 +313,8 @@ export function useWnObjUploader(
    * @returns {boolean} 是否正在上传文件
    */
   const isUploading = computed(() => !!_file.value);
-
   const isInvalid = computed(() => !!_fail_message.value);
+  const hasValue = computed(() => !!props.value);
 
   //---------------------------------------------
   //                输出特性
@@ -307,6 +323,7 @@ export function useWnObjUploader(
     ValueType,
     isUploading,
     isInvalid,
+    hasValue,
     BarPreview,
     BarText,
     Progress: computed(() => _progress.value),
@@ -314,5 +331,6 @@ export function useWnObjUploader(
     loadObj,
     doUpload,
     abortUpload,
+    doClear,
   };
 }

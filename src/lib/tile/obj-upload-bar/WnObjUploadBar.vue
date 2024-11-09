@@ -39,6 +39,13 @@
     // 文字显示
     re.text = Uploader.value.BarText.value;
 
+    // 没有值就不显示删除按钮
+    if (!Uploader.value.hasValue.value) {
+      re.clearButton = false;
+      re.prefixForClean = 'no';
+      re.nilValue = true;
+    }
+
     // 再拼装上上传进度
     if (Uploader.value.isUploading.value && Uploader.value.Progress.value > 0) {
       re.progress = _.assign({}, props.progress);
@@ -66,5 +73,5 @@
   <TiUploadBar
     v-bind="BarConfig"
     @upload="onUploadFile"
-    @clear="emit('change', null)" />
+    @clear="Uploader.doClear()" />
 </template>
