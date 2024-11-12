@@ -78,7 +78,7 @@ export type SqlExecInfo = {
 export type SqlExecSetVar = {
   name: string;
   value: string;
-  to?: 'list' | 'map' | 'all';
+  //to?: 'list' | 'map' | 'all';
 };
 
 export type SqlExecOptions = {

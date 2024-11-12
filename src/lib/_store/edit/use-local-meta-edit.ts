@@ -13,7 +13,7 @@ export type LocalMetaMakeChangeOptions = {
   defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
   insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
   updateMeta?: (local: SqlResult, remote: SqlResult) => Vars | undefined;
-  insertSet?: (local: SqlResult) => SqlExecSetVar[] | undefined;
+  insertSet?: () => SqlExecSetVar[] | undefined;
   fetchBack?: (
     local: SqlResult,
     remote?: SqlResult
@@ -128,7 +128,7 @@ export function useLocalMetaEdit(
       }
       // 自动生成 ID
       if (options.insertSet) {
-        let insertSets = options.insertSet(local);
+        let insertSets = options.insertSet();
         if (insertSets) {
           sets.push(...insertSets);
         }

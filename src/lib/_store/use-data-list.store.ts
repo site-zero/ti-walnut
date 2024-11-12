@@ -347,11 +347,16 @@ function defineDataListStore(options: DataListStoreOptions) {
   async function countRemoteList() {
     _action_status.value = 'loading';
     let q = __gen_query();
-    let total = await sqlx.count(options.sqlCount, q.filter);
+    let total = await countRemote(q.filter);
     if (query.pager) {
       updatePagerTotal(query.pager, total);
     }
     _action_status.value = undefined;
+  }
+
+  async function countRemote(filter: Vars | Vars[]): Promise<number> {
+    let total = await sqlx.count(options.sqlCount, filter);
+    return total;
   }
   /*---------------------------------------------
                     
@@ -465,6 +470,7 @@ function defineDataListStore(options: DataListStoreOptions) {
     //                  远程方法
     //---------------------------------------------
     countRemoteList,
+    countRemote,
     queryRemoteList,
     makeChanges,
     saveChange: async (): Promise<void> => {

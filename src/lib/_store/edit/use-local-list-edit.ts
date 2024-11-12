@@ -197,6 +197,33 @@ export function useLocalListEdit(
       _local_list.value.push(newItem);
     },
     //.............................................
+    append(...newItems: SqlResult[]) {
+      // 自动生成 localList
+      if (!_local_list.value) {
+        _local_list.value = _.cloneDeep(remoteList.value || []);
+      }
+
+      _local_list.value.push(...newItems);
+    },
+    //.............................................
+    prependToList(newItem: SqlResult) {
+      // 自动生成 localList
+      if (!_local_list.value) {
+        _local_list.value = _.cloneDeep(remoteList.value || []);
+      }
+
+      _local_list.value.unshift(newItem);
+    },
+    //.............................................
+    prepend(...newItems: SqlResult[]) {
+      // 自动生成 localList
+      if (!_local_list.value) {
+        _local_list.value = _.cloneDeep(remoteList.value || []);
+      }
+
+      _local_list.value.unshift(...newItems);
+    },
+    //.............................................
     updateItem,
     //.............................................
     batchUpdate(meta: Vars, forIds?: TableRowID | TableRowID[]): SqlResult[] {
@@ -412,14 +439,14 @@ export function useLocalListEdit(
       }
 
       // 对插入，生成配置
-      for (let vars of insertList) {
+      if (!_.isEmpty(insertList)) {
         let insertSets: SqlExecSetVar[] | undefined = undefined;
         if (options.insertSet) {
-          insertSets = options.insertSet(vars);
+          insertSets = options.insertSet();
         }
         changes.push({
           sql: options.insertSql,
-          vars,
+          vars: insertList,
           explain: true,
           reset: true,
           noresult: options.noresult,
@@ -428,10 +455,10 @@ export function useLocalListEdit(
       }
 
       // 对更新，生成配置
-      for (let vars of updateList) {
+      if (!_.isEmpty(updateList)) {
         changes.push({
           sql: options.updateSql,
-          vars,
+          vars: updateList,
           explain: true,
           reset: true,
           noresult: options.noresult,

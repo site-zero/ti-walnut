@@ -191,8 +191,10 @@ export function useSqlx(daoName?: string) {
       if (opt.sets) {
         for (let se of opt.sets) {
           cmds.push(`@set ${se.name} '${se.value}'`);
-          if (se.to) {
-            cmds.push(`-to ${se.to}`);
+          if (_.isArray(opt.vars)) {
+            cmds.push('-to list');
+          } else {
+            cmds.push('-to map');
           }
         }
       }
@@ -217,18 +219,22 @@ export function useSqlx(daoName?: string) {
 
     // 执行查询
     let input = JSON.stringify(inputs);
-    let reo = await Walnut.exec(cmdText, { input, as: 'json' });
+    try {
+      let reo = await Walnut.exec(cmdText, { input, as: 'json' });
 
-    // 错误
-    if (!_.isPlainObject(reo) && !_.isArray(reo)) {
-      return;
-    }
+      // 错误
+      if (!_.isPlainObject(reo) && !_.isArray(reo)) {
+        return;
+      }
 
-    // 处理结果
-    if (reo) {
-      return reo as SqlExecResult;
+      // 处理结果
+      if (reo) {
+        return reo as SqlExecResult;
+      }
+    } catch (err) {
+      console.error(`use-sqlx: ${cmdText}`, err, inputs);
+      throw err;
     }
-    return;
   }
 
   //-------------< Output Feature >------------------
