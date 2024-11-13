@@ -154,6 +154,9 @@ function defineDataListStore(options: DataListStoreOptions) {
 
   function clearRemoteList() {
     remoteList.value = undefined;
+    if (query.pager) {
+      updatePagerTotal(query.pager, 0);
+    }
   }
 
   function makeChanges() {
