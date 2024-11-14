@@ -455,10 +455,10 @@ export function useLocalListEdit(
       }
 
       // 对更新，生成配置
-      if (!_.isEmpty(updateList)) {
+      for (let vars of updateList) {
         changes.push({
           sql: options.updateSql,
-          vars: updateList,
+          vars: vars,
           explain: true,
           reset: true,
           noresult: options.noresult,
