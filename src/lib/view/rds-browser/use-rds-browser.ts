@@ -18,19 +18,23 @@ import _ from 'lodash';
 import { computed } from 'vue';
 import { SqlResult } from '../..';
 import { DataListStore } from '../../_store';
-import { RdsBrowserProps } from './rds-browser-types';
+import { KeepTarget, RdsBrowserProps } from './rds-browser-types';
 //--------------------------------------------------
 /**
  * 获取本地状态保存的特性
  */
 export function getKeepName(
   props: RdsBrowserProps,
-  key: string
+  key: KeepTarget
 ): KeepProps | undefined {
   if (props.keepName) {
     let keepAt = ['WnRdsBrowser', props.keepName, key].join('-');
     let keepMode =
       _.get(props.keepModes, key) ?? props.defaultKeepMode ?? 'local';
+    // 保存模式
+    if (!keepMode || 'no-keep' == keepMode) {
+      return;
+    }
     return {
       keepAt,
       keepMode,

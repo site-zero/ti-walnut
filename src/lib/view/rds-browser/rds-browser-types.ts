@@ -16,6 +16,13 @@ import { useRdsBrowser } from './use-rds-browser';
 export type RdsBrowserMsgKey = 'warn_refresh' | 'warn_drop_change';
 export type RdsBrowserActionHandleMark = 'handled' | 'unhandled';
 
+export type KeepTarget =
+  | 'Query'
+  | 'Selection'
+  | 'Filter-Major'
+  | 'Table-Columns'
+  | 'GUI-Layout-Sizes';
+
 export type RdsBrowserProps = {
   /**
    * 一个唯一的名称，用来作为本地状态持久化的的键的主要特征
@@ -24,7 +31,7 @@ export type RdsBrowserProps = {
 
   defaultKeepMode?: KeepMode;
 
-  keepModes?: Record<string, KeepMode>;
+  keepModes?: Partial<Record<KeepTarget, KeepMode | 'no-keep' | undefined>>;
 
   /**
    * 界面mount后，是否自动加载数据

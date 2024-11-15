@@ -89,6 +89,10 @@ function defineDataListStore(options: DataListStoreOptions) {
     } else {
       _.assign(re, options.query);
     }
+    // 最后处理一下本地数据
+    let local = _keep_query.loadObj();
+    _.merge(re, local);
+    // 搞定
     return re;
   }
   //---------------------------------------------
