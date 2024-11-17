@@ -109,6 +109,10 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     return changes;
   }
 
+  function getDiffMeta() {
+    return _local.value.getDiffMeta();
+  }
+
   /*---------------------------------------------
                     
                   输出特性
@@ -171,6 +175,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     },
 
     makeChanges,
+    getDiffMeta,
     //---------------------------------------------
     //                  远程方法
     //---------------------------------------------
