@@ -44,6 +44,11 @@ export interface ServerConfig {
   logLevel?: string;
   logger?: Record<string, string>;
   dicts?: string | Record<string, WnDictSetup>;
+  /**
+   * 可以给扩展(譬如 WnHub)使用， 一个 objKind 具体
+   * 可以对应到哪个对象的映射
+   */
+  objPath?: Record<string, string>;
 }
 
 export type WnDictSetup = {

@@ -25,7 +25,7 @@ import {
   updatePagerTotal,
   useLocalListEdit,
   useSqlx,
-} from '../../lib';
+} from '../../';
 
 const log = getLogger('wn.use-data-list-store');
 

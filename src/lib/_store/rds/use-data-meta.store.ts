@@ -11,7 +11,7 @@ import {
   SqlResult,
   useLocalMetaEdit,
   useSqlx,
-} from '../../lib';
+} from '../../';
 
 const log = getLogger('wn.use-data-meta-store');
 

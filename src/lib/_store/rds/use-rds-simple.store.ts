@@ -8,7 +8,7 @@ import {
   SqlResult,
   StoreStatus,
   useSqlx,
-} from '../';
+} from '../../';
 
 export type RdsStoreFeature = {
   storeName: string;

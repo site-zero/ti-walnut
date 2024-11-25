@@ -105,6 +105,14 @@ export class WalnutServer {
     return re ?? dft;
   }
 
+  getObjPath(alias: string): string {
+    let path = (this._conf.objPath ?? {})[alias];
+    if (path) {
+      return path;
+    }
+    return `~/${alias}`;
+  }
+
   getUrl(path: string) {
     let sep = path.startsWith('/') ? '' : '/';
     let { protocal, host, port } = this._conf;
@@ -248,9 +256,9 @@ export class WalnutServer {
    * @param signal - 可选的AbortSignal对象，用于中止请求。
    * @returns 返回一个Promise对象，解析为Base64编码的字符串。
    * @throws 如果请求失败或无法将Blob转换为Base64编码字符串，则抛出错误。
-   * 
+   *
    * @example
-   * 
+   *
    * ```
    * let base64Data = await Walnut.loadBase64Data('id:xxx');
    * img.src = `data:image/jpeg;base64,${base64Data}`
