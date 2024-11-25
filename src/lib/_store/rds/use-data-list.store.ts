@@ -1,13 +1,13 @@
 import {
   ComboFilterValue,
+  getLogger,
   KeepInfo,
   Match,
   TableRowID,
   TableSelectEmitInfo,
+  useKeep,
   Util,
   Vars,
-  getLogger,
-  useKeep,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, reactive, ref } from 'vue';
@@ -18,26 +18,16 @@ import {
   LocalListMakeChangeOptions,
   QueryFilter,
   QuerySorter,
-  SqlPager,
   SqlPagerInput,
   SqlQuery,
   SqlResult,
+  updatelPager,
   updatePagerTotal,
   useLocalListEdit,
   useSqlx,
 } from '../../';
 
 const log = getLogger('wn.use-data-list-store');
-
-export function updatelPager(pager: SqlPager, update: Partial<SqlPagerInput>) {
-  let { pageNumber, pageSize } = update;
-  if (_.isNumber(pageNumber) && pageNumber > 0) {
-    pager.pageNumber = pageNumber;
-  }
-  if (_.isNumber(pageSize) && pageSize > 0) {
-    pager.pageSize = pageSize;
-  }
-}
 
 export type DataListStore = ReturnType<typeof defineDataListStore>;
 

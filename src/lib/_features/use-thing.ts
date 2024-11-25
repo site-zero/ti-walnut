@@ -1,7 +1,7 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { Walnut } from '../../..';
-import { WnObj, WnMetaSaving } from '../_top';
+import { WnObj, WnMetaSaving } from '../_types';
 
 export type ThingFeature = WnMetaSaving & {
   get: (id: string) => Promise<WnObj | undefined>;

@@ -1,5 +1,5 @@
 import { Iconable, IconInput, Icons } from '@site0/tijs';
-import { WnObj } from '../lib/_top';
+import { WnObj } from '../lib/_types';
 
 export function I_am_walnut(input: any) {
   console.log('I am walnut', input);

@@ -2,7 +2,7 @@ import { ObjDataStatus } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef, ref, Ref } from 'vue';
 import { useWnObj } from '../_features/use-wn-obj';
-import { WnObj } from '../_top/wn-types';
+import { WnObj } from '../_types/wn-types';
 
 export type ObjContentFinger = {
   id: string;

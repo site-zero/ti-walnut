@@ -1,17 +1,17 @@
 import { Util, Vars } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
-import { Walnut, WnObjInfo } from '../../..';
-import { WnMetaSaving, WnObj } from '../_top';
+import {
+  getQueryLimit,
+  SqlPager,
+  SqlQuery,
+  Walnut,
+  WnObjInfo,
+  WnObjQueryOptions,
+} from '../../..';
+import { WnMetaSaving, WnObj } from '../_types';
 
-export type WnObjFeature = WnMetaSaving & {
-  fetch: (path: string) => Promise<WnObj | undefined>;
-  get: (id: string) => Promise<WnObj | undefined>;
-  remove: (...ids: string[]) => Promise<void>;
-  writeText: (path: string, content: string) => Promise<WnObj>;
-  loadContent: (path: string) => Promise<string>;
-  rename: (info: WnObjInfo, newName: string) => Promise<WnObj | undefined>;
-};
+export type WnObjFeature = WnMetaSaving & ReturnType<typeof useWnObj>;
 
 const BUILD_IN_KEYS = [
   'id',
@@ -31,7 +31,7 @@ const BUILD_IN_KEYS = [
   'lm',
 ];
 
-export function useWnObj(homePath: string = '~'): WnObjFeature {
+export function useWnObj(homePath: string = '~') {
   const _home_path = homePath.replace(/'/g, '');
   /**
    * @param path 对象路径
@@ -112,6 +112,79 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
     return re ?? undefined;
   }
 
+  async function query(
+    oDir: WnObj,
+    options: WnObjQueryOptions,
+    query: SqlQuery = { filter: {} }
+  ): Promise<[WnObj[], SqlPager]> {
+    let list: WnObj[] = [];
+    let page: SqlPager = {
+      pageNumber: 0,
+      pageSize: 0,
+      pageCount: 0,
+      totalCount: 0,
+    };
+
+    // 准备查询条件
+    // [{..}]          # 可多个条件，为 OR 的关系
+    let qs = JSON.stringify(query.filter ?? {});
+
+    // 准备命令
+    var cmds = ['o @query'];
+    // [-p ~/xxx]      # 指定一个父节点
+    if (oDir && oDir.id) {
+      cmds.push(`-p 'id:${oDir.id}'`);
+    }
+
+    // [-sort {ct:1}]  # 排序方式
+    if (query.sorter) {
+      cmds.push(`-sort '${JSON.stringify(query.sorter)}'`);
+    }
+
+    // [-mine]         # 为条件添加 d0:"home", d1:"主组" 两条约束
+    if (false !== options.mine) {
+      cmds.push('-mine');
+    }
+    // [-hidden]       # 如果有隐藏对象，也要输出出来
+    if (options.hidden) {
+      cmds.push('-hidden');
+    }
+    // [-quiet]        # 如果指定的父节点不存在，不要抛错，直接静默忍耐
+    if (options.quiet) {
+      cmds.push('-quiet');
+    }
+    // [-pager]        # 表示要记录翻页信息
+    if (query.pager) {
+      cmds.push('-pager');
+      let ls = getQueryLimit(query);
+
+      // [-limit 10]     # 最多多少条记录
+      if (ls.limit > 0) {
+        cmds.push(`-limit ${ls.limit}`);
+      }
+
+      // [-skip 0]       # 跳过多少条记录
+      if (ls.skip > 0) {
+        cmds.push(`-skip ${ls.skip}`);
+      }
+    }
+    // [-path]         # 确保每个查询出来的对象是有全路径属性的
+    if (options.loadPath) {
+      cmds.push('-path');
+    }
+
+    let cmdText = cmds.join(' ');
+
+    let reo = await Walnut.exec(cmdText, { input: qs, as: 'json' });
+    list = reo.list || [];
+    page.pageNumber = reo.pager.pageNumber;
+    page.pageSize = reo.pager.pageSize;
+    page.pageCount = reo.pager.pageCount;
+    page.totalCount = reo.pager.totalCount;
+
+    return [list, page];
+  }
+
   async function writeText(path: string, content: string): Promise<WnObj> {
     let url = `/o/save/text?str=${path}`;
     let re = await Walnut.postFormToGetAjax(url, { content });
@@ -166,6 +239,7 @@ export function useWnObj(homePath: string = '~'): WnObjFeature {
     remove,
     update,
     create,
+    query,
     writeText,
     loadContent,
     rename,

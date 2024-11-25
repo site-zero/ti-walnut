@@ -16,13 +16,14 @@ export type HubViewOptions = {
    * - 本地数据
    * - 查询/排序等条件
    * - 翻页信息
-   * - 本地保存信息
+   * - 选择状态
+   * - 本地保存的状态信息
    */
   model: HubDataModel;
 
-  // 修改模型的默认行为
+  // 传递模型数据
   // 对应这个对象，不同视图可以有自己不同的理解
-  behaviors?: Vars;
+  modelOptions?: Vars;
 
   // 动作菜单的加载文件
   actionPath?: string;

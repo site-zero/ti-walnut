@@ -9,7 +9,8 @@ tiPutComponents(_com_set_view);
 
 export * from './_features';
 export * from './_store';
-export * from './_top';
+export * from './_support';
+export * from './_types';
 export * from './shelf';
 export * from './tile';
 export * from './view';
