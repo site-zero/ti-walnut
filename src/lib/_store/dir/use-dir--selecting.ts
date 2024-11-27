@@ -33,7 +33,6 @@ export function userDirSelecting(
     // 更新选区
     _selection.currentId.value = currentId;
     _selection.checkedIds.value = ckIds;
-    console.log(`Keep.saveSelection(${currentId}, ${ckIds});`);
     _keep.value.saveSelection(currentId, ckIds);
 
     // 更新当前元数据和内容

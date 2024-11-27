@@ -36,6 +36,7 @@ export type DataListStoreOptions = LocalListEditOptions & {
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
   fixedMatch?: QueryFilter | (() => QueryFilter);
+  defaultFilter?: QueryFilter | (() => QueryFilter);
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount: string;
@@ -61,6 +62,15 @@ function defineDataListStore(options: DataListStoreOptions) {
     }
     if (options.fixedMatch) {
       return _.cloneDeep(options.fixedMatch);
+    }
+    return {};
+  }
+  function __create_default_filter(): QueryFilter {
+    if (_.isFunction(options.defaultFilter)) {
+      return options.defaultFilter();
+    }
+    if (options.defaultFilter) {
+      return _.cloneDeep(options.defaultFilter);
     }
     return {};
   }
@@ -326,6 +336,9 @@ function defineDataListStore(options: DataListStoreOptions) {
     let q = _.cloneDeep(query);
     q.filter = q.filter ?? {};
     _.assign(q.filter, __create_fixed_match());
+    if (_.isEmpty(q.filter)) {
+      q.filter = __create_default_filter();
+    }
     return q;
   }
 
