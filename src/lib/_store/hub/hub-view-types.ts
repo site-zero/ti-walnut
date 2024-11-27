@@ -36,13 +36,13 @@ export type HubViewOptions = {
   modelOptions?: Vars;
 
   // 动作菜单的加载文件
-  actionPath?: string;
+  actions?: string | (() => ActionBarProps) | (() => Promise<ActionBarProps>);
   // 布局文件
-  layoutPath?: string;
+  layout?: string | (() => HubViewLayout) | (() => Promise<HubViewLayout>);
   // Schema 文件
-  schemaPath?: string;
+  schema?: string | (() => LayoutSchema) | (() => Promise<LayoutSchema>);
   // 扩展的自定义函数集合
-  methodPaths?: string[];
+  methods?: string[];
 };
 
 /**
@@ -53,6 +53,7 @@ export type HubDataModelType =
   | 'STD-META'
   | 'RDS-LIST'
   | 'RDS-META';
+
 export type HubViewBehaviors = {
   keepSelection?: KeepInfo;
   keepFilter?: KeepInfo;
