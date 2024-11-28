@@ -22,9 +22,9 @@ export type ObjContentStoreFeature = {
   status: Ref<ObjDataStatus | undefined>;
   //---------------------------------------------
   // 计算属性
-  contentText: ComputedRef<string>;
-  contentType: ComputedRef<string>;
-  contentMime: ComputedRef<string>;
+  ContentText: ComputedRef<string>;
+  ContentType: ComputedRef<string>;
+  ContentMime: ComputedRef<string>;
   changed: ComputedRef<boolean>;
   //---------------------------------------------
   // 本地方法
@@ -68,13 +68,13 @@ export function useObjContentStore(): ObjContentStoreFeature {
   //---------------------------------------------
   //                 计算属性
   //---------------------------------------------
-  const contentText = computed(() => {
+  const ContentText = computed(() => {
     return _local.value ?? _remote.value ?? '';
   });
-  const contentType = computed(() => {
+  const ContentType = computed(() => {
     return _finger.value?.tp || 'txt';
   });
-  const contentMime = computed(() => {
+  const ContentMime = computed(() => {
     return _finger.value?.mime || 'text/plain';
   });
 
@@ -168,9 +168,9 @@ export function useObjContentStore(): ObjContentStoreFeature {
     status: _status,
     //---------------------------------------------
     // 计算属性
-    contentText,
-    contentType,
-    contentMime,
+    ContentText,
+    ContentType,
+    ContentMime,
     changed,
     //---------------------------------------------
     // 本地方法

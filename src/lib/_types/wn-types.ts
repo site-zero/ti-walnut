@@ -28,6 +28,8 @@ export function isWnObj(obj: any): obj is WnObj {
   );
 }
 
+export type WnRace = 'DIR' | 'FILE';
+
 export type WnObjQueryOptions = {
   /**
    * 为条件添加 d0:"home", d1:"主组" 两条约束

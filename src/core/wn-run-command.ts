@@ -32,6 +32,7 @@ export async function wnRunCommand(
         await Alert(html.join(''), {
           type: 'danger',
           maxWidth: '640px',
+          width: '100%',
           contentType: 'html',
         });
         console.error('run-command re-fail to parse json: ', str, errParse);
@@ -39,12 +40,18 @@ export async function wnRunCommand(
     }
     return str;
   } catch (reason) {
+    // 仅仅是 abort
+    if ((reason as any).abort) {
+      throw reason;
+    }
+
     let html = ['<h3>Fail To Process</h3>'];
     html.push('<pre>', cmdText, '</pre>');
     html.push('<blockquote>', `${reason}`, '</blockquote>');
     await Alert(html.join(''), {
-      type: 'danger',
+      type: 'info',
       maxWidth: '640px',
+      width: '100%',
       contentType: 'html',
     });
     console.error('run-command fail: ', reason);

@@ -13,6 +13,10 @@ import { WnMetaSaving, WnObj } from '../_types';
 
 export type WnObjFeature = WnMetaSaving & ReturnType<typeof useWnObj>;
 
+export type WnLoadContentOptions = {
+  as?: 'text' | 'json';
+};
+
 const BUILD_IN_KEYS = [
   'id',
   'ph',
@@ -191,9 +195,16 @@ export function useWnObj(homePath: string = '~') {
     return re.data;
   }
 
-  async function loadContent(path: string): Promise<string> {
+  async function loadContent(
+    path: string,
+    options: WnLoadContentOptions = {}
+  ): Promise<any> {
+    let { as = 'text' } = options;
     let url = `/o/content?str=${path}`;
     let re = await Walnut.fetchText(url);
+    if ('json' == as) {
+      return JSON5.parse(re);
+    }
     return re;
   }
 

@@ -91,7 +91,7 @@ function defineDataListStore(options: DataListStoreOptions) {
     }
     // 最后处理一下本地数据
     let local = _keep_query.loadObj();
-    if (!_.isEmpty(local?.filter)) {
+    if (local?.filter) {
       re.filter = local?.filter;
     }
     if (!_.isEmpty(local?.sorter)) {

@@ -112,13 +112,13 @@ export function defineDirStore(options: DirStoreOptions = {}): DirStore {
     }
   }
   function getContentText() {
-    return _content.contentText.value ?? '';
+    return _content.ContentText.value ?? '';
   }
   function getContentMime() {
-    return _content.contentMime.value ?? 'text/plain';
+    return _content.ContentMime.value ?? 'text/plain';
   }
   function getContentType() {
-    return _content.contentType.value ?? 'txt';
+    return _content.ContentType.value ?? 'txt';
   }
   //---------------------------------------------
   const meta = computed(() => getMeta());
