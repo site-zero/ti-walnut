@@ -31,6 +31,53 @@ export type SqlQuery = {
   pager?: SqlPager;
 } & Partial<SqlLimit>;
 
+/**
+ * 执行完创建语句，还需要把这个最新的插入记录读取回来，
+ * 这个对象声明了读取的方式
+ */
+export type SqlExecFetchBack = {
+  /**
+   * 表示一个 SQL 语句名称
+   */
+  by: string;
+
+  /**
+   * 查询语句的输入参数，通常是一个组合条件，譬如
+   *
+   * ```
+   * {name:'litter red'}
+   * ```
+   * 或者多个条件
+   *
+   * ```
+   * {name:'red', race:'dog'}
+   * ```
+   *
+   * 给定的条件，如果查询出多个结果，服务器会抛错误
+   * 考虑到有些时候，记录的字段（譬如 ID）是
+   * 服务器动态生成的，在客户端没法传递，因此支持 explain 的写法:
+   *
+   * ```
+   * {id:'=id'}
+   * ```
+   *
+   * 这个例子表示，执行完插入语句，紧接着会从服务器的当前上下文变量里，
+   * (这个变量通常是刚才执行插入的输入变量，并且已经被 `@set` 语句设置过 ID 了)
+   * 直接获取 'id' 的值再查询回来
+   */
+  vars: Vars;
+
+  /**
+   * 如果有 fetch 的结果，结果可以暂存在【过滤管线上下文】里，
+   * 注意，这个结果仅仅考虑查询回来结果集的第一个对象
+   * ".." 为默认值，表示将结果对象打撒，放入【过滤管线上下文】
+   * 如果指定一个名称，譬如 "pet"
+   * 则表示将结果及放入【过滤管线上下文】中的 pet 键。
+   * 无论怎样，都是覆盖模式的推入。
+   */
+  save?: string;
+};
+
 export type SqlExecInfo = {
   sql: string;
   // ------------------- sqlx @vars
@@ -40,6 +87,7 @@ export type SqlExecInfo = {
   noresult?: boolean;
   omit?: string;
   pick?: string;
+  put?:string;
   // ------------------- sqlx @set
   sets?: SqlExecSetVar[];
   /**
@@ -72,13 +120,16 @@ export type SqlExecInfo = {
    * 这个例子表示，执行完插入语句，紧接着会从服务器的上下文里，直接获取 'id' 的值，
    * 再查询回来
    */
-  fetchBack?: [string, Vars?];
+  fetchBack?: SqlExecFetchBack;
 };
 
 export type SqlExecSetVar = {
   name: string;
   value: string;
   //to?: 'list' | 'map' | 'all';
+  savepipe?: string;
+  alias?: string;
+  when?: any;
 };
 
 export type SqlExecOptions = {

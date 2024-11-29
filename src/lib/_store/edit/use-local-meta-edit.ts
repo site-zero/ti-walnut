@@ -1,4 +1,9 @@
-import { SqlExecInfo, SqlExecSetVar, SqlResult } from '@site0/ti-walnut';
+import {
+  SqlExecFetchBack,
+  SqlExecInfo,
+  SqlExecSetVar,
+  SqlResult,
+} from '@site0/ti-walnut';
 import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, ref } from 'vue';
@@ -14,10 +19,9 @@ export type LocalMetaMakeChangeOptions = {
   insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
   updateMeta?: (local: SqlResult, remote: SqlResult) => Vars | undefined;
   insertSet?: () => SqlExecSetVar[] | undefined;
-  fetchBack?: (
-    local: SqlResult,
-    remote?: SqlResult
-  ) => [string, (Vars | undefined)?];
+  insertPut?: string;
+  updatePut?: string;
+  fetchBack?: (local: SqlResult, remote?: SqlResult) => SqlExecFetchBack;
   noresult?: boolean;
 };
 
@@ -119,9 +123,11 @@ export function useLocalMetaEdit(
 
     let sets = [] as SqlExecSetVar[];
     let sql = options.updateSql;
-    // 新创建的 consol 需要设置更多字段
+    let put: string | undefined = options.updatePut;
+    // 新创建的记录需要设置更多字段
     if (isNewMeta()) {
       sql = options.insertSql;
+      put = options.insertPut;
       // 创建时间， 对于 st/st_rsn 数据库里有默认值
       if (options.insertMeta) {
         _.assign(vars, options.insertMeta(local, remote));
@@ -139,7 +145,7 @@ export function useLocalMetaEdit(
       _.assign(vars, options.updateMeta(local, remote!));
     }
 
-    let fb: [string, (Vars | undefined)?] | undefined = undefined;
+    let fb: SqlExecFetchBack | undefined = undefined;
     if (options.fetchBack) {
       fb = options.fetchBack(local, remote);
     }
@@ -151,6 +157,7 @@ export function useLocalMetaEdit(
         reset: true,
         noresult: options.noresult,
         sets,
+        put,
         fetchBack: fb,
       },
     ];

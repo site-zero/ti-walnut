@@ -1,4 +1,4 @@
-import { Util, Vars, getLogger } from '@site0/tijs';
+import { getLogger, Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import {
   getQueryLimit,
@@ -6,8 +6,6 @@ import {
   SqlExecInfo,
   SqlExecOptions,
   SqlExecResult,
-  SqlLimit,
-  SqlPager,
   SqlQuery,
   SqlResult,
 } from '..';
@@ -182,6 +180,9 @@ export function useSqlx(daoName?: string) {
       } else {
         cmds.push('-as map');
       }
+      if (opt.put) {
+        cmds.push(`-put '${opt.put}'`);
+      }
       if (opt.omit) {
         cmds.push(`-omit '${opt.omit}'`);
       }
@@ -197,6 +198,15 @@ export function useSqlx(daoName?: string) {
           } else {
             cmds.push('-to map');
           }
+          if (se.savepipe) {
+            cmds.push(`-savepipe '${se.savepipe}'`);
+          }
+          if (se.alias) {
+            cmds.push(`-alias '${se.alias}'`);
+          }
+          if (se.when) {
+            cmds.push(`-when '${JSON.stringify(se.when).replace("'", '')}'`);
+          }
         }
       }
       //............. @exec
@@ -205,11 +215,14 @@ export function useSqlx(daoName?: string) {
         cmds.push('-noresult');
       }
       // 如果需要输出结果，则看看是否需要回查
-      else if (opt.fetchBack) {
-        let [by, vars] = opt.fetchBack;
+      else if (opt.fetchBack && opt.fetchBack.by) {
+        let { by, vars, save } = opt.fetchBack;
         cmds.push(`-fetch_by ${by}`);
         if (vars && !_.isEmpty(vars)) {
           cmds.push(`-fetch_vars '${JSON.stringify(vars)}'`);
+        }
+        if (save) {
+          cmds.push(`-fetch_save '${save}'`);
         }
       }
     }

@@ -54,7 +54,7 @@ export function useLocalListEdit(
   //---------------------------------------------
   let _local_list = ref<SqlResult[] | undefined>();
 
-  const _local_id_map = computed(() => {
+  const _id_index_map = computed(() => {
     let list = _local_list.value || remoteList.value || [];
     let re = new Map<TableRowID, number>();
     for (let i = 0; i < list.length; i++) {
@@ -64,9 +64,28 @@ export function useLocalListEdit(
     }
     return re;
   });
+
+  /**
+   * 对远程列表编制索引
+   */
+  const _remote_map = computed(() => {
+    let re = new Map<TableRowID, SqlResult>();
+    if (remoteList.value) {
+      for (let i = 0; i < remoteList.value.length; i++) {
+        let remote = remoteList.value[i];
+        let id = getRowId(remote, i);
+        re.set(id, remote);
+      }
+    }
+    return re;
+  });
   //---------------------------------------------
   //                 被内部重用的方法
   //---------------------------------------------
+  function existsInRemote(id: TableRowID): boolean {
+    return _remote_map.value.has(id);
+  }
+
   /**
    * 获取数据的 ID
    */
@@ -77,7 +96,7 @@ export function useLocalListEdit(
     return getId(it, index) ?? `row-${index}`;
   }
   function getRowIndex(id: TableRowID): number {
-    return _local_id_map.value?.get(id) ?? -1;
+    return _id_index_map.value?.get(id) ?? -1;
   }
   /**
    * 补充数据（仅当更新时）
@@ -132,6 +151,7 @@ export function useLocalListEdit(
   return {
     localList: _local_list,
     //.............................................
+    existsInRemote,
     getRowId,
     getRowIndex,
     //.............................................
@@ -358,14 +378,7 @@ export function useLocalListEdit(
       }
 
       // 对远程列表编制索引
-      let remoteMap = new Map<TableRowID, SqlResult>();
-      if (remoteList.value) {
-        for (let i = 0; i < remoteList.value.length; i++) {
-          let remote = remoteList.value[i];
-          let id = getRowId(remote, i);
-          remoteMap.set(id, remote);
-        }
-      }
+      let remoteMap = _remote_map.value;
 
       // 准备两个列表
       let insertList = [] as Vars[];
@@ -450,6 +463,7 @@ export function useLocalListEdit(
           explain: true,
           reset: true,
           noresult: options.noresult,
+          put: options.insertPut,
           sets: insertSets,
         });
       }
@@ -462,6 +476,7 @@ export function useLocalListEdit(
           explain: true,
           reset: true,
           noresult: options.noresult,
+          put: options.updatePut,
         });
       }
 
