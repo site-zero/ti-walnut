@@ -13,7 +13,33 @@ import { Walnut } from '../../core';
 
 const log = getLogger('wn.use-sqlx');
 
-export function useSqlx(daoName?: string) {
+export type SqlXApi = ReturnType<typeof defineSqlx>;
+
+const _SQLX = new Map<string, SqlXApi>();
+
+/**
+ * 获取一个 SQLX 的 API
+ *
+ * @param daoName DAO 的名称
+ * @returns SQLX 的 API
+ */
+export function useSqlx(daoName?: string): SqlXApi {
+  let xkey = daoName ?? '__sqlx_default__';
+  let api = _SQLX.get(xkey);
+  if (!api) {
+    api = defineSqlx(daoName);
+    _SQLX.set(xkey, api);
+  }
+  return api;
+}
+
+/**
+ * 定义 SQLX 操作的封装函数
+ *
+ * @param daoName 可选的 DAO 名称
+ * @returns 包含 select、fetch、count 和 exec 等方法的接口对象
+ */
+export function defineSqlx(daoName?: string) {
   /**
    * 封装 SQL 的查询
    *
