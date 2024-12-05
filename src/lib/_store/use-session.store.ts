@@ -1,4 +1,4 @@
-import { Str, Vars, getLogger } from '@site0/tijs';
+import { Gender, Str, Vars, getLogger, toGender } from '@site0/tijs';
 import { ComputedRef, Ref, computed, ref } from 'vue';
 import { SignInForm, UserSidebar, useGlobalStatus } from '..';
 import { Walnut } from '../../core';
@@ -82,10 +82,12 @@ export type UserInfo = {
   mainGroup: string;
   role?: string[];
   nickname?: string;
+  gender?: Gender;
   jobs?: string[];
   depts?: string[];
   roleInOp?: WnRole;
   roleInDomain?: WnRole;
+  sysAccount?: boolean;
   avatar?: string;
 };
 
@@ -104,16 +106,19 @@ const SE = {
 
 function _translate_session_result(data: any) {
   let env = data.envs || {};
+  let me = data.me || {};
   SE.ticket.value = data.ticket;
   SE.me.value = {
-    loginName: data.unm,
-    mainGroup: data.grp,
-    role: Str.splitIgnoreBlank(data.me.role),
-    nickname: data.me.nickname,
-    jobs: data.me.jobs,
-    depts: data.me.depts,
-    roleInOp: data.me.roleInOp,
-    roleInDomain: data.me.roleInDomain,
+    loginName: data.unm || me.name,
+    mainGroup: data.grp || me.groupName,
+    role: Str.splitIgnoreBlank(me.role),
+    gender: toGender(me.sex),
+    nickname: me.nickname,
+    jobs: me.jobs,
+    depts: me.depts,
+    roleInOp: me.roleInOp,
+    roleInDomain: me.roleInDomain,
+    sysAccount: me.sysAccount ? true : false,
   };
   SE.env.value = env;
   SE.loginAt.value = new Date(data.me.login || 0);
