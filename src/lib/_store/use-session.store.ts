@@ -78,8 +78,8 @@ export type UserSessionFeature = UserSession & {
 export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
 
 export type UserInfo = {
-  loginName: string;
-  mainGroup: string;
+  loginName?: string;
+  mainGroup?: string;
   role?: string[];
   nickname?: string;
   gender?: Gender;
