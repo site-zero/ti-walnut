@@ -1,24 +1,26 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { computed } from 'vue';
-import { Walnut } from '../../../../core';
-import {
-  StdListStoreOptions,
-  useStdListStore,
-} from '../../std/use-std-list.store';
+import { RdsListStoreOptions, useRdsListStore } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
-export function createStdListHubModel(
+export function createRdsListHubModel(
   name: string,
   objId: string | undefined,
   options: Vars
 ): HubModel {
-  const homePath = Walnut.getObjPath(name);
-  const storeOptions: StdListStoreOptions = _.assign({}, options, {
-    homePath,
-  });
+  const storeOptions: RdsListStoreOptions = _.assign(
+    {
+      query: {
+        filter: {},
+      },
+      sqlQuery: `${name}.select`,
+      sqlCount: `${name}.count`,
+    },
+    options
+  );
 
-  const store = computed(() => useStdListStore(storeOptions));
+  const store = computed(() => useRdsListStore(storeOptions));
   const guiContext = computed(() => {
     let _s = store.value;
     return {
@@ -35,7 +37,6 @@ export function createStdListHubModel(
       isRemoteEmpty: _s.isRemoteEmpty.value,
       isLocalEmpty: _s.isLocalEmpty.value,
       CurrentItem: _s.CurrentItem.value,
-      CurrentContent: _s.CurrentContent.value,
     };
   });
 
@@ -47,7 +48,7 @@ export function createStdListHubModel(
   }
 
   async function refresh() {
-    await store.value.refresh();
+    await store.value.queryRemoteList();
   }
 
   return {

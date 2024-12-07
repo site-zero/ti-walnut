@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   //--------------------------------------------------
-  import { RdsBrowserApi, useDataListStore } from '@site0/ti-walnut';
+  import { RdsBrowserApi, useRdsListStore } from '@site0/ti-walnut';
   import { TiLayoutGrid } from '@site0/tijs';
   import { computed, nextTick, onMounted } from 'vue';
   import { useRdsBrowserLayout } from './rds-browser-layout';
@@ -20,7 +20,7 @@
   });
   //--------------------------------------------------
   const Data = computed(() => {
-    let store = useDataListStore({
+    let store = useRdsListStore({
       keepQuery: getKeepName(props, 'Query'),
       keepSelect: getKeepName(props, 'Selection'),
       ...props.dataStore,

@@ -17,7 +17,7 @@ import {
 import _ from 'lodash';
 import { computed } from 'vue';
 import { SqlResult } from '../..';
-import { DataListStore } from '../../_store';
+import { RdsListStore } from '../../_store';
 import { KeepTarget, RdsBrowserProps } from './rds-browser-types';
 //--------------------------------------------------
 /**
@@ -48,7 +48,7 @@ export function getKeepName(
  * @param props  控件属性
  * @returns 视图主体逻辑
  */
-export function useRdsBrowser(Data: DataListStore, props: RdsBrowserProps) {
+export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   //--------------------------------------------------
   const TableEmptyRoadblock = computed((): RoadblockProps => {
     if (Data.status.value == 'loading') {

@@ -10,7 +10,7 @@ import {
   Vars,
 } from '@site0/tijs';
 import { ComputedRef } from 'vue';
-import { DataListStore, DataListStoreOptions } from '../../_store';
+import { RdsListStore, RdsListStoreOptions } from '../../_store';
 import { useRdsBrowser } from './use-rds-browser';
 
 export type RdsBrowserMsgKey = 'warn_refresh' | 'warn_drop_change';
@@ -46,7 +46,7 @@ export type RdsBrowserProps = {
   layoutQuickColumns?: string;
 
   messages?: Record<RdsBrowserMsgKey, string>;
-  createNewItem?: null | ((Data: DataListStore) => Vars);
+  createNewItem?: null | ((Data: RdsListStore) => Vars);
   getItemId?: TableRowID | ((it: Vars) => TableRowID | undefined);
 
   //--------------------------------------------------
@@ -54,17 +54,17 @@ export type RdsBrowserProps = {
   //--------------------------------------------------
   guiLayout?: (
     layout: LayoutGridProps,
-    Data: DataListStore,
+    Data: RdsListStore,
     rds: RdsBrowserFeature
   ) => LayoutGridProps;
   guiSchema?: (
     schema: LayoutSchema,
-    Data: DataListStore,
+    Data: RdsListStore,
     rds: RdsBrowserFeature
   ) => LayoutSchema;
   guiActionBar?: (
     actionBar: ActionBarProps,
-    Data: DataListStore,
+    Data: RdsListStore,
     rds: RdsBrowserFeature
   ) => ActionBarProps;
 
@@ -81,7 +81,7 @@ export type RdsBrowserProps = {
    *  - `false` 表示事件未被处理，会采用默认行为处理
    */
   handleAction?: (
-    Data: DataListStore,
+    Data: RdsListStore,
     name: string,
     payload: any
   ) => Promise<RdsBrowserActionHandleMark>;
@@ -89,7 +89,7 @@ export type RdsBrowserProps = {
   //--------------------------------------------------
   // 数据访问
   //--------------------------------------------------
-  dataStore: DataListStoreOptions;
+  dataStore: RdsListStoreOptions;
 
   //--------------------------------------------------
   // 动作条
@@ -118,6 +118,6 @@ export type RdsBrowserProps = {
 export type RdsBrowserFeature = ReturnType<typeof useRdsBrowser>;
 
 export type RdsBrowserApi = {
-  Data: DataListStore;
+  Data: RdsListStore;
   rds: RdsBrowserFeature;
 };

@@ -1,11 +1,11 @@
 import { ActionBarItem, ActionBarProps } from '@site0/tijs';
-import { DataListStore } from '../../_store';
+import { RdsListStore } from '../../_store';
 import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
 import _ from 'lodash';
 
 export function useRdsBrowserActions(
   props: RdsBrowserProps,
-  Data: DataListStore,
+  Data: RdsListStore,
   _RD: RdsBrowserFeature
 ): ActionBarProps {
   // 内置默认的菜单条

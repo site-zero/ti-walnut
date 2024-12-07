@@ -77,6 +77,8 @@ export type HubViewLayout = {
   phone: LayoutProps;
 };
 
+export type HubViewLayoutMode = keyof HubViewLayout;
+
 export function isHubViewLayout(layout: any): layout is HubViewLayout {
   if (!layout) return false;
   let keys = _.keys(layout);
@@ -115,4 +117,6 @@ export type HubViewState = {
 export interface HubModel {
   store: ComputedRef<any>;
   guiContext: ComputedRef<Vars>;
+  reload: () => Promise<void>;
+  refresh: () => Promise<void>;
 }

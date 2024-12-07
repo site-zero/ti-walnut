@@ -1,11 +1,11 @@
 import { LayoutSchema } from '@site0/tijs';
-import { DataListStore } from '../../_store';
+import { RdsListStore } from '../../_store';
 import { useRdsBrowserActions } from './rds-browser-actions';
 import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
 
 export function useRdsBrowserSchema(
   props: RdsBrowserProps,
-  Data: DataListStore,
+  Data: RdsListStore,
   _RD: RdsBrowserFeature
 ): LayoutSchema {
   return {

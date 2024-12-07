@@ -15,9 +15,9 @@ import {
 
 const log = getLogger('wn.use-data-meta-store');
 
-export type DataMetaStore = ReturnType<typeof defineDataMetaStore>;
+export type RdsMetaStore = ReturnType<typeof defineRdsMetaStore>;
 
-export type DataMetaStoreOptions = LocalMetaEditOptions & {
+export type RdsMetaStoreOptions = LocalMetaEditOptions & {
   daoName?: string;
   filter: QueryFilter;
   sqlFetch: string;
@@ -32,7 +32,7 @@ export type DataMetaStoreOptions = LocalMetaEditOptions & {
  * @param options 配置参数
  * @returns 实例
  */
-function defineDataMetaStore(options: DataMetaStoreOptions) {
+function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
@@ -209,6 +209,6 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   };
 }
 
-export function useDataMetaStore(options: DataMetaStoreOptions): DataMetaStore {
-  return defineDataMetaStore(options);
+export function useRdsMetaStore(options: RdsMetaStoreOptions): RdsMetaStore {
+  return defineRdsMetaStore(options);
 }

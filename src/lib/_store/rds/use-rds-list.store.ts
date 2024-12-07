@@ -29,9 +29,9 @@ import {
 
 const log = getLogger('wn.use-data-list-store');
 
-export type DataListStore = ReturnType<typeof defineDataListStore>;
+export type RdsListStore = ReturnType<typeof defineRdsListStore>;
 
-export type DataListStoreOptions = LocalListEditOptions & {
+export type RdsListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
@@ -45,7 +45,7 @@ export type DataListStoreOptions = LocalListEditOptions & {
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
 };
 
-function defineDataListStore(options: DataListStoreOptions) {
+function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
   let sqlx = useSqlx(options.daoName);
@@ -528,10 +528,10 @@ function defineDataListStore(options: DataListStoreOptions) {
  */
 //const _stores = new Map<string, DataListStoreFeature>();
 
-export function useDataListStore(
-  options: DataListStoreOptions,
+export function useRdsListStore(
+  options: RdsListStoreOptions,
   _name?: string
-): DataListStore {
+): RdsListStore {
   // 强制创建新的
   // if ('NEW' == name || Str.isBlank(name)) {
   //   return defineDataListStore(options);
@@ -543,5 +543,5 @@ export function useDataListStore(
   //   _stores.set(name, re);
   // }
   // return re;
-  return defineDataListStore(options);
+  return defineRdsListStore(options);
 }

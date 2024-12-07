@@ -229,7 +229,11 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
    * @returns {Promise<void>} 返回一个 Promise 对象，表示刷新操作的完成。
    */
   async function refresh() {
-    _remote.value = await _obj.fetch(_options.objPath);
+    if (_options.objPath) {
+      _remote.value = await _obj.fetch(_options.objPath);
+    } else {
+      _remote.value = undefined;
+    }
   }
 
   /*---------------------------------------------
