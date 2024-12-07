@@ -5,15 +5,10 @@ import {
   LayoutSchema,
   Vars,
 } from '@site0/tijs';
-import { Ref } from 'vue';
+import _ from 'lodash';
+import { ComputedRef, Ref } from 'vue';
 
-/**
- * 对于 WnHub 每个数据对象（目录|文件）都对应一个统一的逻辑视图
- * 它包括下面的信息
- *
- * 1. 数据模型
- */
-export type HubViewOptions = {
+export type HubModelOptions = {
   /**
    * 视图采用的数据模型
    *
@@ -34,11 +29,22 @@ export type HubViewOptions = {
   // 传递模型的配置数据
   // 对应这个对象，不同视图可以有自己不同的理解
   modelOptions?: Vars;
+};
 
+/**
+ * 对于 WnHub 每个数据对象（目录|文件）都对应一个统一的逻辑视图
+ * 它包括下面的信息
+ *
+ * 1. 数据模型
+ */
+export type HubViewOptions = HubModelOptions & {
   // 动作菜单的加载文件
   actions?: string | (() => ActionBarProps) | (() => Promise<ActionBarProps>);
   // 布局文件
-  layout?: string | (() => HubViewLayout) | (() => Promise<HubViewLayout>);
+  layout?:
+    | string
+    | (() => HubViewLayoutInput)
+    | (() => Promise<HubViewLayoutInput>);
   // Schema 文件
   schema?: string | (() => LayoutSchema) | (() => Promise<LayoutSchema>);
   // 扩展的自定义函数集合
@@ -71,11 +77,23 @@ export type HubViewLayout = {
   phone: LayoutProps;
 };
 
+export function isHubViewLayout(layout: any): layout is HubViewLayout {
+  if (!layout) return false;
+  let keys = _.keys(layout);
+  if (keys.length <= 0 || keys.length > 3) {
+    return false;
+  }
+  for (let k of keys) {
+    if (!/^(desktop|pad|phone)$/.test(k)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export type HubViewLayoutInput = Partial<HubViewLayout> | LayoutProps;
+
 export type HubViewState = {
-  /**
-   * 动态渲染上下文
-   */
-  createContext: () => Vars;
   /**
    * 动作菜单
    */
@@ -93,3 +111,8 @@ export type HubViewState = {
    */
   methods: Record<string, Function>;
 };
+
+export interface HubModel {
+  store: ComputedRef<any>;
+  guiContext: ComputedRef<Vars>;
+}

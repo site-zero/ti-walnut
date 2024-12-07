@@ -1,5 +1,7 @@
-import { ref } from 'vue';
-import { HubViewOptions, HubViewState } from './hub-view-types';
+import { Util } from '@site0/tijs';
+import { computed, ref } from 'vue';
+import { HubModel, HubViewOptions, HubViewState } from './hub-view-types';
+import { useHubModel } from './use-hub--model';
 import {
   _use_hub_actions_reload,
   _use_hub_layout_reload,
@@ -11,8 +13,8 @@ export function useWnHub(options: HubViewOptions) {
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
+  const _model = ref<HubModel>();
   const _state: HubViewState = {
-    createContext: () => ({}),
     actions: ref({}),
     layout: ref({
       desktop: {},
@@ -23,6 +25,21 @@ export function useWnHub(options: HubViewOptions) {
     methods: {},
   };
   //---------------------------------------------
+  // 计算输出
+  //--------------------------------------------
+  const GUIContext = computed(() => {
+    return _model.value?.guiContext.value ?? {};
+  });
+  const GUILayout = computed(() => {
+    return Util.explainObj(GUIContext.value, _state.layout.value);
+  });
+  const GUIScheme = computed(() => {
+    return Util.explainObj(GUIContext.value, _state.schema.value);
+  });
+  const GUIActions = computed(() => {
+    return Util.explainObj(GUIContext.value, _state.actions.value);
+  });
+  //---------------------------------------------
   // 组合加载操作
   //---------------------------------------------
   const reloadActions = _use_hub_actions_reload(options, _state);
@@ -32,7 +49,11 @@ export function useWnHub(options: HubViewOptions) {
   //---------------------------------------------
   // 远程方法
   //---------------------------------------------
-  async function reload() {
+  async function reload(modelName: string) {
+    // 读取数据模型
+    _model.value = useHubModel(modelName, options);
+
+    // 读取所有的资源文件
     await Promise.all([
       reloadActions(),
       reloadLayout(),
@@ -41,6 +62,6 @@ export function useWnHub(options: HubViewOptions) {
     ]);
   }
   //---------------------------------------------
-  // 本地方法
+  // 返回特性
   //---------------------------------------------
 }

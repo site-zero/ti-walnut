@@ -518,7 +518,6 @@ function defineStdListStore(options?: StdListStoreOptions) {
     return re;
   }
 
-  async function removeCurrent() {}
   //---------------------------------------------
   // 初始化本地数据
   //---------------------------------------------
@@ -622,7 +621,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     currentId: _current_id,
     checkedIds: _checked_ids,
     query,
-    status: _action_status,
+    //status: _action_status,
 
     //---------------------------------------------
     //                  计算属性

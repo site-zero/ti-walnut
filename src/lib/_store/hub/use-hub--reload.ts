@@ -1,7 +1,12 @@
 import { isAsyncFunc } from '@site0/tijs';
 import _ from 'lodash';
 import { Walnut } from '../../../core';
-import { HubViewOptions, HubViewState } from './hub-view-types';
+import {
+  HubViewLayout,
+  HubViewOptions,
+  HubViewState,
+  isHubViewLayout,
+} from './hub-view-types';
 
 async function __load<T>(
   input: string | (() => T) | (() => Promise<T>) | undefined,
@@ -40,11 +45,25 @@ export function _use_hub_layout_reload(
   _state: HubViewState
 ) {
   return async () => {
-    _state.layout.value = await __load(options.layout, {
+    let re = await __load(options.layout, {
       desktop: {},
       pad: {},
       phone: {},
     });
+    if (isHubViewLayout(re)) {
+      let {desktop, pad, phone} = re
+      let dft = desktop || pad || phone
+      return {
+        desktop: desktop || dft,
+        pad: pad || dft,
+        phone: phone || dft
+      } as HubViewLayout;
+    }
+    return {
+      desktop: re,
+      pad: re,
+      phone: re,
+    } as HubViewLayout;
   };
 }
 

@@ -40,11 +40,12 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
-  const remoteMeta = ref<SqlResult>();
+  const _remote_meta = ref<SqlResult>();
   const _status = ref<DataStoreActionStatus>();
   const _filter = ref<QueryFilter>(options.filter);
+  //---------------------------------------------
   const hasRemoteMeta = computed(() => {
-    if (!remoteMeta.value || _.isEmpty(remoteMeta.value)) {
+    if (!_remote_meta.value || _.isEmpty(_remote_meta.value)) {
       return false;
     }
     return true;
@@ -52,7 +53,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalMetaEdit(remoteMeta, options));
+  const _local = computed(() => useLocalMetaEdit(_remote_meta, options));
 
   function reset() {
     clearRemoteMeta();
@@ -60,7 +61,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   }
 
   function clearRemoteMeta() {
-    remoteMeta.value = undefined;
+    _remote_meta.value = undefined;
   }
 
   function dropChange() {
@@ -74,14 +75,14 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
   //                 被内部重用的方法
   //---------------------------------------------
   const metaData = computed(() => {
-    return _local.value.localMeta.value || remoteMeta.value || {};
+    return _local.value.localMeta.value || _remote_meta.value || {};
   });
 
   function isNewMeta() {
     if (options.isNew) {
       return options.isNew(metaData);
     }
-    return _.isEmpty(remoteMeta.value);
+    return _.isEmpty(_remote_meta.value);
   }
 
   async function fetchRemoteMeta(): Promise<void> {
@@ -91,7 +92,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     if (re && options.patchRemote) {
       re = options.patchRemote(re);
     }
-    remoteMeta.value = re;
+    _remote_meta.value = re;
     _status.value = undefined;
   }
 
@@ -123,7 +124,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     _local,
     status: _status,
     filter: _filter,
-    remoteMeta,
+    remoteMeta: _remote_meta,
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
@@ -171,7 +172,7 @@ function defineDataMetaStore(options: DataMetaStoreOptions) {
     },
 
     setRemoteMeta(meta: SqlResult) {
-      remoteMeta.value = _.cloneDeep(meta);
+      _remote_meta.value = _.cloneDeep(meta);
     },
 
     makeChanges,

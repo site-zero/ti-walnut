@@ -25,6 +25,8 @@ export type LocalMetaMakeChangeOptions = {
   noresult?: boolean;
 };
 
+export type LocalMetaEdit = ReturnType<typeof useLocalMetaEdit>;
+
 export function useLocalMetaEdit(
   remoteMeta: Ref<SqlResult | undefined>,
   options: LocalMetaEditOptions = {}
