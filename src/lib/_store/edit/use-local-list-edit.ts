@@ -15,6 +15,22 @@ import {
 import _ from 'lodash';
 import { computed, Ref, ref } from 'vue';
 
+export type ListItemUpdateOptions = {
+  /**
+   * 采用下标更新（优先）
+   */
+  index?: number;
+  /**
+   * 采用 ID 更新
+   */
+  id?: TableRowID;
+
+  /**
+   * 指定一组默认值
+   */
+  defaultMeta?: Vars;
+};
+
 export type LocalListEditOptions = {
   // /**
   //  *  判断一个对象是否为新对象
@@ -125,8 +141,9 @@ export function useLocalListEdit(
   //---------------------------------------------
   function updateItem(
     meta: Vars,
-    { index, id } = {} as { index?: number; id?: TableRowID }
+    options: ListItemUpdateOptions
   ): SqlResult | undefined {
+    let { index, id, defaultMeta } = options;
     let i = -1;
     if (!_.isNil(index)) {
       i = index;
@@ -139,6 +156,9 @@ export function useLocalListEdit(
       if (_local_list.value && i < _local_list.value.length) {
         let re = _local_list.value[i];
         _.assign(re, meta);
+        if (defaultMeta) {
+          _.defaults(re, defaultMeta);
+        }
         return re;
       }
     }

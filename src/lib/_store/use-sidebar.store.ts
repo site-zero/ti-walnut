@@ -10,6 +10,7 @@ export function useSidebar() {
   }
 
   return {
+    keepAt: computed(() => _sidebar.value?.statusStoreKey),
     sidebar: computed(() => _sidebar.value?.sidebar),
     reload,
   };

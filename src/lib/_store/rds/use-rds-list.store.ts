@@ -14,6 +14,7 @@ import { computed, reactive, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  ListItemUpdateOptions,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
   QueryFilter,
@@ -277,9 +278,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   function updateItem(
     meta: Vars,
-    { index, id } = {} as { index?: number; id?: TableRowID }
+    options: ListItemUpdateOptions
   ): SqlResult | undefined {
-    return _local.value.updateItem(meta, { index, id });
+    return _local.value.updateItem(meta, options);
   }
 
   function updateItems(

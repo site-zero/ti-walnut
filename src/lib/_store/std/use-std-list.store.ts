@@ -12,6 +12,7 @@ import { computed, reactive, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  ListItemUpdateOptions,
   LocalListEditOptions,
   QueryFilter,
   QuerySorter,
@@ -387,9 +388,9 @@ function defineStdListStore(options?: StdListStoreOptions) {
 
   function updateItem(
     meta: Vars,
-    { index, id } = {} as { index?: number; id?: string }
+    options: ListItemUpdateOptions
   ): WnObj | undefined {
-    return _local.value.updateItem(meta, { index, id });
+    return _local.value.updateItem(meta, options);
   }
 
   function updateItems(meta: WnObj, forIds?: string | string[]): WnObj[] {
