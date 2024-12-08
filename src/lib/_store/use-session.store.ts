@@ -1,6 +1,6 @@
 import { Gender, Str, Vars, getLogger, toGender } from '@site0/tijs';
-import { ComputedRef, Ref, computed, ref } from 'vue';
-import { SignInForm, UserSidebar, useGlobalStatus } from '..';
+import { Ref, computed, ref } from 'vue';
+import { SignInForm, useGlobalStatus } from '..';
 import { Walnut } from '../../core';
 
 const log = getLogger('wn.store.session');
@@ -64,16 +64,9 @@ export type UserSession = {
   theme: Ref<string | undefined>;
   lang: Ref<string | undefined>;
   errCode: Ref<string | undefined>;
-  sidebar: Ref<UserSidebar | undefined>;
 };
 
-export type UserSessionFeature = UserSession & {
-  hasTicket: ComputedRef<boolean>;
-  signIn: (info: SignInForm) => Promise<void>;
-  signOut: () => Promise<void>;
-  resetSession: () => void;
-  reload: () => Promise<void>;
-};
+export type UserSessionFeature = ReturnType<typeof useSessionStore>;
 
 export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
 
@@ -101,7 +94,6 @@ const SE = {
   theme: ref(),
   lang: ref(),
   errCode: ref(),
-  sidebar: ref(),
 } as UserSession;
 
 function _translate_session_result(data: any) {
@@ -128,8 +120,8 @@ function _translate_session_result(data: any) {
   SE.lang.value = env['LANG'];
 }
 
-export function useSessionStore(): UserSessionFeature {
-  async function signIn(info: SignInForm) {
+export function useSessionStore() {
+  async function signIn(info: SignInForm, afterOk: () => Promise<void>) {
     const status = useGlobalStatus();
     try {
       status.processing = '正在执行登录';
@@ -138,9 +130,9 @@ export function useSessionStore(): UserSessionFeature {
       if (re.ok) {
         _translate_session_result(re.data);
         SE.errCode.value = undefined;
-        SE.sidebar.value = undefined;
-        log.info('signIn OK, so fetchSidebar');
-        SE.sidebar.value = await Walnut.fetchSidebar();
+        if (afterOk) {
+          await afterOk();
+        }
       }
       // Sign-in Failed
       else {
@@ -171,9 +163,6 @@ export function useSessionStore(): UserSessionFeature {
       if (re.data && re.data.parent) {
         _translate_session_result(re.data.parent);
         SE.errCode.value = undefined;
-        SE.sidebar.value = undefined;
-        log.info('signOut with parent session, so fetchSidebar');
-        SE.sidebar.value = await Walnut.fetchSidebar();
       }
       // Cancel Session
       else {
@@ -183,7 +172,7 @@ export function useSessionStore(): UserSessionFeature {
     }
   }
 
-  async function reload() {
+  async function reload(afterOk: () => Promise<void>) {
     const status = useGlobalStatus();
     try {
       status.appLoading = true;
@@ -191,9 +180,9 @@ export function useSessionStore(): UserSessionFeature {
       if (re.ok) {
         _translate_session_result(re.data);
         SE.errCode.value = undefined;
-        SE.sidebar.value = undefined;
-        log.info('reload with session, so fetchSidebar');
-        SE.sidebar.value = await Walnut.fetchSidebar();
+        if (afterOk) {
+          await afterOk();
+        }
       }
       // Outpu error
       else {
