@@ -7,7 +7,9 @@ import {
   Str,
   tidyLogger,
   TiStore,
+  Tmpl,
   updateInstalledComponentsLangs,
+  Util,
   Vars,
 } from '@site0/tijs';
 import JSON5 from 'json5';
@@ -16,6 +18,7 @@ import { installWalnutI18n } from '../i18n';
 import {
   AjaxResult,
   FetchObjOptions,
+  HubViewOptions,
   isWnObj,
   ServerConfig,
   SignInForm,
@@ -105,12 +108,74 @@ export class WalnutServer {
     return re ?? dft;
   }
 
-  getObjPath(alias: string): string {
-    let path = (this._conf.objPath ?? {})[alias];
-    if (path) {
-      return path;
+  getObjPath(dirName: string, objId?: string): string {
+    let context = { dirName, objId };
+    let path: string | undefined = undefined;
+
+    // 获取路径规则
+    let __paths = this._conf.objPath ?? {};
+    let pathArms = __paths[dirName];
+    if (!pathArms) {
+      pathArms = __paths['*'];
     }
-    return `~/${alias}`;
+
+    // 挑选路径模板
+    if (pathArms) {
+      path = Util.selectValue(context, pathArms);
+    }
+
+    // 根据模板渲染路径
+    if (path) {
+      // 编译模板，并渲染
+      let tmpl = Tmpl.parse(path);
+      return tmpl.render(context, false);
+    }
+
+    // 默认规则
+    if (objId) {
+      return `id:${dirName}`;
+    }
+    return `~/${dirName}`;
+  }
+
+  getObjView(dirName: string, objId?: string) {
+    let context = { dirName, objId };
+    let view: string | HubViewOptions | undefined = undefined;
+
+    // 获取路径规则
+    let __views = this._conf.views ?? {};
+    let viewArms = __views[dirName];
+    if (!viewArms) {
+      viewArms = __views['*'];
+    }
+
+    // 挑选路径模板
+    if (viewArms) {
+      view = Util.selectValue(context, viewArms);
+    }
+
+    // 根据模板渲染路径
+    if (view) {
+      // 编译模板，并渲染
+      if (_.isString(view)) {
+        let tmpl = Tmpl.parse(view);
+        return tmpl.render(context, false);
+      }
+      // 展开上下文
+      return Util.explainObj(context, view);
+    }
+
+    // 如果找不到 view 通常是不可接受的，因此需要抛出异常
+    throw `Fail to found view for dirName='${dirName}' objId='${objId}'`;
+  }
+
+  async loadHubViewOptions(dirName: string, objId?: string) {
+    let view = this.getObjView(dirName, objId);
+    if (_.isString(view)) {
+      let json = await this.loadContent(view);
+      return JSON5.parse(json) as HubViewOptions;
+    }
+    return view;
   }
 
   getUrl(path: string) {

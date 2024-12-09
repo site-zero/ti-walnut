@@ -14,7 +14,9 @@ import {
   _use_hub_schema_reload,
 } from './use-hub--reload';
 
-export function useWnHub(
+export type HubView = ReturnType<typeof useHubView>;
+
+export function useHubView(
   viewMode: ComputedRef<HubViewLayoutMode>,
   options: HubViewOptions
 ) {
@@ -39,10 +41,11 @@ export function useWnHub(
     return _model.value?.guiContext.value ?? {};
   });
   const GUILayout = computed(() => {
-    return Util.explainObj(GUIContext.value, _state.layout.value);
+    let layout = _state.layout.value[viewMode.value];
+    return Util.explainObj(GUIContext.value, layout);
   });
-  const GUIScheme = computed(() => {
-    let schema = _state.schema.value[viewMode.value];
+  const GUISchema = computed(() => {
+    let schema = _state.schema.value ?? {};
     return Util.explainObj(GUIContext.value, schema);
   });
   const GUIActions = computed(() => {
@@ -102,7 +105,7 @@ export function useWnHub(
   return {
     GUIContext,
     GUILayout,
-    GUIScheme,
+    GUISchema,
     GUIActions,
     reload,
     invoke,

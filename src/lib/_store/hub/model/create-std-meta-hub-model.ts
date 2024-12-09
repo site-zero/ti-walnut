@@ -7,7 +7,11 @@ import {
 } from '../../std/use-std-meta.store';
 import { HubModel } from '../hub-view-types';
 
-export function createStdMetaHubModel(objId: string, options: Vars): HubModel {
+export function createStdMetaHubModel(
+  _dirName: string,
+  objId: string,
+  options: Vars
+): HubModel {
   const storeOptions: StdMetaStoreOptions = _.assign({}, options, {
     objPath: `id:${objId}`,
   });

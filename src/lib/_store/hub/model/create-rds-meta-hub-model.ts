@@ -5,14 +5,14 @@ import { RdsMetaStoreOptions, useRdsMetaStore } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
 export function createRdsMetaHubModel(
-  name: string,
+  tableName: string,
   objId: string | undefined,
   options: Vars
 ): HubModel {
   const storeOptions: RdsMetaStoreOptions = _.assign(
     {
       filter: {},
-      sqlFetch: `${name}.fetch`,
+      sqlFetch: `${tableName}.fetch`,
     },
     Util.explainObj({ id: objId }, options)
   );
