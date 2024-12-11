@@ -4,19 +4,20 @@ import {
   Dicts,
   DynDictMaker,
   IDict,
+  IconInput,
   LoadData,
   LoadDictItem,
   QueryDictItems,
   TiDict,
   Tmpl,
   Util,
+  ValGetter,
   Vars,
   getLogger,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { WnDictSetup } from '../lib';
 import { Walnut } from './wn-server';
-import { exec } from 'child_process';
 
 const log = getLogger('wn.dict');
 
@@ -107,13 +108,24 @@ function makeWalnutDictGetItem(
 }
 
 function makeWalnutDictOptions(setup: WnDictSetup, input?: string): DictSetup {
+  // 获取字典项目的图标，的方法，支持了 select Arm
+  let get_icon: string | ValGetter<any, IconInput | undefined> | undefined =
+    undefined;
+  // 直接指定字典项图标键
+  if (_.isString(setup.icon)) {
+    get_icon = setup.icon;
+  }
+  // 根据配置的 Select Arms 来动态获取图标
+  else if (_.isArray(setup.icon)) {
+    get_icon = Util.buildSelectArms(setup.icon);
+  }
   return {
     data: makeWalnutDictGetData(setup.data, input),
     query: makeWalnutDictQueryItems(setup.query, input),
     item: makeWalnutDictGetItem(setup.item, input),
     value: setup.value,
     text: setup.text,
-    icon: setup.icon,
+    icon: get_icon,
     tip: setup.tip,
   };
 }
