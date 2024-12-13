@@ -235,10 +235,13 @@ export function useWnObj(homePath: string = '~') {
   async function loadContent(
     path: string,
     options: WnLoadContentOptions = {}
-  ): Promise<any> {
+  ): Promise<string | null> {
     let { as = 'text' } = options;
     let url = `/o/content?str=${path}`;
     let re = await Walnut.fetchText(url);
+    if (_.isNil(re)) {
+      return re;
+    }
     if ('json' == as) {
       return JSON5.parse(re);
     }

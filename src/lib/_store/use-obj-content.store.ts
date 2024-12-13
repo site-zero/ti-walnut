@@ -146,6 +146,9 @@ export function useObjContentStore(): ObjContentStoreFeature {
     // 执行
     _status.value = 'loading';
     let re = await _obj.loadContent(path);
+    if (_.isNil(re)) {
+      re = '';
+    }
     _remote.value = re;
     _status.value = 'ready';
 

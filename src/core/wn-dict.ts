@@ -31,7 +31,7 @@ function makeWalnutDictGetData(
       // 加载静态资源
       if (data.startsWith('load://')) {
         return (signal?: AbortSignal): Promise<any[]> => {
-          return Walnut.loadJson(data, signal);
+          return Walnut.loadJson(data, {signal});
         };
       }
 

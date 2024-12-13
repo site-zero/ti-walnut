@@ -473,7 +473,17 @@ function defineStdListStore(options?: StdListStoreOptions) {
     // 准备查询条件
     let q = __gen_query();
     //console.log('queryRemoteList', q);
-    let [list, pager] = await _obj.query(_dir_index.value ?? {}, q, setup);
+    let oDir = _dir_index.value ?? _home_obj.value;
+
+    // 防空，如果未找到主目录对象，就直接清空数据
+    if (!oDir) {
+      _remote.value = [];
+      if (query.pager) {
+        updatelPager(query.pager, { pageNumber: 0, totalCount: 0 });
+      }
+      return;
+    }
+    let [list, pager] = await _obj.query(oDir, q, setup);
 
     // 后续处理
     if (_options.patchRemote) {
@@ -591,6 +601,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
    */
   async function reload() {
     resetLocalChange();
+    await reloadHome();
     //remoteList.value = undefined;
     await queryRemoteList();
   }

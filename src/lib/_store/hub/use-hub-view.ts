@@ -67,6 +67,7 @@ export function useHubView(
 
     // 读取所有的资源文件
     await Promise.all([
+      _model.value.reload(),
       reloadActions(),
       reloadLayout(),
       reloadSchema(),
@@ -103,6 +104,8 @@ export function useHubView(
   // 返回特性
   //---------------------------------------------
   return {
+    _model,
+    _state,
     GUIContext,
     GUILayout,
     GUISchema,
