@@ -173,7 +173,7 @@ export type WnDictSetup = {
    */
   value?: string;
   text?: string;
-  icon?: string;
+  icon?: string | SelectValueArm<string, Vars>;
   tip?: string;
 
   /**
