@@ -17,8 +17,9 @@ import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import {
   AjaxResult,
-  FetchObjOptions,
+  WnFetchObjOptions,
   HubViewOptions,
+  isAjaxResult,
   isWnObj,
   ServerConfig,
   SignInForm,
@@ -26,6 +27,7 @@ import {
   WnDictSetup,
   WnExecOptions,
   WnObj,
+  WnLoadOptions,
 } from '../lib';
 import { installWalnutDicts } from './wn-dict';
 import { wnRunCommand } from './wn-run-command';
@@ -164,15 +166,18 @@ export class WalnutServer {
       // 展开上下文
       return Util.explainObj(context, view);
     }
-
-    // 如果找不到 view 通常是不可接受的，因此需要抛出异常
-    throw `Fail to found view for dirName='${dirName}' objId='${objId}'`;
   }
 
   async loadHubViewOptions(dirName: string, objId?: string) {
     let view = this.getObjView(dirName, objId);
+    if (!view) {
+      return null;
+    }
     if (_.isString(view)) {
       let json = await this.loadContent(view);
+      if (!json) {
+        return null;
+      }
       return JSON5.parse(json) as HubViewOptions;
     }
     return view;
@@ -248,8 +253,9 @@ export class WalnutServer {
   async postFormToGetText(
     path: string,
     form: Record<string, any>,
-    signal?: AbortSignal
-  ): Promise<any> {
+    options: WnLoadOptions = {}
+  ): Promise<string | null> {
+    let { quiet, signal } = options;
     let url = this.getUrl(path);
     const body = new URLSearchParams();
     _.forEach(form, (v, k) => {
@@ -265,15 +271,19 @@ export class WalnutServer {
       let resp = await fetch(url, init);
       return await resp.text();
     } catch (err) {
-      console.error('postFormToGetText Fail:', err, path, form);
+      if (!quiet) {
+        console.error('postFormToGetText Fail:', err, path, form);
+      }
+      return null;
     }
   }
 
   async postFormToGetJson(
     path: string,
     form: Record<string, any>,
-    signal?: AbortSignal
+    options: WnLoadOptions = {}
   ): Promise<any> {
+    let { quiet, signal } = options;
     let url = this.getUrl(path);
     const body = new URLSearchParams();
     _.forEach(form, (v, k) => {
@@ -289,29 +299,36 @@ export class WalnutServer {
       let resp = await fetch(url, init);
       return await resp.json();
     } catch (err) {
-      console.error('postFormToGetJson Fail:', err, path, form);
+      if (!quiet) {
+        console.error('postFormToGetJson Fail:', err, path, form);
+      }
+      return null;
     }
   }
 
   async postFormToGetAjax(
     path: string,
     form: Record<string, any>,
-    signal?: AbortSignal
+    options: WnLoadOptions = {}
   ): Promise<AjaxResult> {
-    let reo = await this.postFormToGetJson(path, form, signal);
+    let reo = await this.postFormToGetJson(path, form, options);
     return reo as AjaxResult;
   }
 
-  async loadContent(objPath: string, signal?: AbortSignal): Promise<string> {
+  async loadContent(
+    objPath: string,
+    options: WnLoadOptions = {}
+  ): Promise<string | null> {
     // 静态路径
     if (objPath.startsWith('load://')) {
+      let { quiet, signal } = options;
       let loadPath = `/${objPath.substring(7)}`;
       let resp = await fetch(loadPath, { signal });
       return await resp.text();
     }
     // Walnut 的动态路径
     let urlPath = this.cookPath(objPath);
-    return await this.fetchText(urlPath, signal);
+    return await this.fetchText(urlPath, options);
   }
 
   /**
@@ -329,7 +346,11 @@ export class WalnutServer {
    * img.src = `data:image/jpeg;base64,${base64Data}`
    * ```
    */
-  async loadBase64Data(objPath: string, signal?: AbortSignal): Promise<string> {
+  async loadBase64Data(
+    objPath: string,
+    options: WnLoadOptions = {}
+  ): Promise<string> {
+    let { quiet, signal } = options;
     let urlPath = this.cookPath(objPath);
     let url = this.getUrl(urlPath);
     let init = this.getRequestInit(signal);
@@ -344,6 +365,8 @@ export class WalnutServer {
         if (reader.result) {
           const base64Data = reader.result.toString().split(',')[1];
           resolve(base64Data);
+        } else if (quiet) {
+          resolve('');
         } else {
           reject(new Error('Failed to convert blob to base64'));
         }
@@ -360,8 +383,14 @@ export class WalnutServer {
     return `/o/content?str=${encodeURIComponent(objPath)}`;
   }
 
-  async loadJson(objPath: string, signal?: AbortSignal): Promise<any> {
-    let re = await this.loadContent(objPath, signal);
+  async loadJson(
+    objPath: string,
+    options: WnLoadOptions = {}
+  ): Promise<any> {
+    let re = await this.loadContent(objPath, options);
+    if (_.isNil(re)) {
+      return re ?? null;
+    }
     try {
       return JSON5.parse(re);
     } catch (err) {
@@ -369,11 +398,12 @@ export class WalnutServer {
     }
   }
 
-  async loadJsModule(jsPath: string, signal?: AbortSignal) {
+  async loadJsModule(jsPath: string, options: WnLoadOptions = {}) {
+    let { quiet, signal } = options;
     //let jsUrl = this.getUrl(jsPath);
     //document.cookie = `SEID=${this._ticket}; path=/`;
-    let text = await this.fetchText(jsPath, signal);
-    if (Str.isBlank(text)) {
+    let text = await this.fetchText(jsPath, options);
+    if (!text || Str.isBlank(text)) {
       return {};
     }
     // 假设， text 的代码类似
@@ -385,17 +415,20 @@ export class WalnutServer {
       //console.log('loadJsModule', jsPath, text, exports);
       return exports;
     } catch (error) {
+      if (quiet) {
+        return {};
+      }
       log.error(`Fail to loadJsModule: ${jsPath} :: ${error}`);
     }
   }
 
-  async getObj(id: string, options: FetchObjOptions = {}) {
+  async getObj(id: string, options: WnFetchObjOptions = {}) {
     return await this.fetchObj(`id:${id}`, options);
   }
 
   async fetchObj(
     objPath: string,
-    options: FetchObjOptions = {}
+    options: WnFetchObjOptions = {}
   ): Promise<WnObj> {
     let { loadAxis, loadPath, signal } = options;
     let urlPath = `/o/fetch?str=${encodeURIComponent(objPath)}`;
@@ -405,31 +438,65 @@ export class WalnutServer {
     if (loadAxis) {
       urlPath += '&axis=true';
     }
-    let re: AjaxResult = await this.fetchAjax(urlPath, signal);
+    let re: AjaxResult = await this.fetchAjax(urlPath, options);
     if (re.ok && isWnObj(re.data)) {
       return re.data;
     }
     throw new Error(JSON.stringify(re));
   }
 
-  async fetchText(urlPath: string, signal?: AbortSignal): Promise<any> {
+  async fetchText(
+    urlPath: string,
+    options: WnLoadOptions = {}
+  ): Promise<string | null> {
+    let { quiet, signal } = options;
     let url = this.getUrl(urlPath);
     let init = this.getRequestInit(signal);
-    let resp = await fetch(url, init);
-    return await resp.text();
+    try {
+      let resp = await fetch(url, init);
+      return await resp.text();
+    } catch (err) {
+      if (!quiet) {
+        console.error('fetchText Fail:', err, urlPath);
+      }
+      return null;
+    }
   }
 
-  async fetchJson(urlPath: string, signal?: AbortSignal): Promise<any> {
-    let url = this.getUrl(urlPath);
-    let init = this.getRequestInit(signal);
-    let resp = await fetch(url, init);
-    let text = await resp.text();
-    return JSON5.parse(text);
+  async fetchJson(
+    urlPath: string,
+    options: WnLoadOptions = {}
+  ): Promise<any> {
+    let { quiet, signal } = options;
+    try {
+      let url = this.getUrl(urlPath);
+      let init = this.getRequestInit(signal);
+      let resp = await fetch(url, init);
+      let text = await resp.text();
+      return JSON5.parse(text);
+    } catch (err) {
+      if (!quiet) {
+        console.error('fetchJson Fail:', err, urlPath);
+      }
+      return null;
+    }
   }
 
-  async fetchAjax(urlPath: string, signal?: AbortSignal): Promise<AjaxResult> {
-    let reo = await this.fetchJson(urlPath, signal);
-    return reo as AjaxResult;
+  async fetchAjax(
+    urlPath: string,
+    options: WnLoadOptions = {}
+  ): Promise<AjaxResult> {
+    let reo = await this.fetchJson(urlPath, options);
+    if (isAjaxResult(reo)) {
+      return reo;
+    }
+    if (reo) {
+      return {
+        ok: true,
+        data: reo,
+      };
+    }
+    return { ok: false, errCode: 'e.wn-server.fetchAjaxNil', data: reo };
   }
 
   async fetchSidebar(): Promise<UserSidebar> {

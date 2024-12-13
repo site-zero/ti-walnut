@@ -2,7 +2,9 @@ import { Util, Vars } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
 import {
+  genWnPath,
   getQueryLimit,
+  QueryFilter,
   SqlPager,
   SqlQuery,
   Walnut,
@@ -43,11 +45,8 @@ export function useWnObj(homePath: string = '~') {
    */
   async function fetch(path: string): Promise<WnObj | undefined> {
     // 去掉危险的字符串
-    let aph = path.replace(/'/g, '');
-    // 确保是绝对路径
-    if (!/^[~/]/.test(aph)) {
-      aph = Util.appendPath(_home_path, aph);
-    }
+    let aph = genWnPath(_home_path, path);
+
     let cmdText = `o @fetch -ignore '${aph}'  @json -cqn`;
     let re = await Walnut.exec(cmdText, { as: 'json' });
     return re ?? undefined;
@@ -117,9 +116,9 @@ export function useWnObj(homePath: string = '~') {
   }
 
   async function query(
-    oDir: WnObj,
-    options: WnObjQueryOptions,
-    query: SqlQuery = { filter: {} }
+    parentPathOrDir: WnObj | string,
+    _q: SqlQuery,
+    options: WnObjQueryOptions = {}
   ): Promise<[WnObj[], SqlPager]> {
     let list: WnObj[] = [];
     let page: SqlPager = {
@@ -131,18 +130,26 @@ export function useWnObj(homePath: string = '~') {
 
     // 准备查询条件
     // [{..}]          # 可多个条件，为 OR 的关系
-    let qs = JSON.stringify(query.filter ?? {});
+    let qs = JSON.stringify(_q.filter ?? {});
 
     // 准备命令
     var cmds = ['o @query'];
     // [-p ~/xxx]      # 指定一个父节点
-    if (oDir && oDir.id) {
-      cmds.push(`-p 'id:${oDir.id}'`);
+    if (parentPathOrDir) {
+      // 字符串，一定是路径
+      if (_.isString(parentPathOrDir)) {
+        let pph = genWnPath(_home_path, parentPathOrDir);
+        cmds.push(`-p '${pph}'`);
+      }
+      // 指定了一个对象
+      else if (parentPathOrDir.id) {
+        cmds.push(`-p 'id:${parentPathOrDir.id}'`);
+      }
     }
 
     // [-sort {ct:1}]  # 排序方式
-    if (query.sorter) {
-      cmds.push(`-sort '${JSON.stringify(query.sorter)}'`);
+    if (_q.sorter) {
+      cmds.push(`-sort '${JSON.stringify(_q.sorter)}'`);
     }
 
     // [-mine]         # 为条件添加 d0:"home", d1:"主组" 两条约束
@@ -158,9 +165,9 @@ export function useWnObj(homePath: string = '~') {
       cmds.push('-quiet');
     }
     // [-pager]        # 表示要记录翻页信息
-    if (query.pager) {
+    if (_q.pager) {
       cmds.push('-pager');
-      let ls = getQueryLimit(query);
+      let ls = getQueryLimit(_q);
 
       // [-limit 10]     # 最多多少条记录
       if (ls.limit > 0) {
@@ -187,6 +194,36 @@ export function useWnObj(homePath: string = '~') {
     page.totalCount = reo.pager.totalCount;
 
     return [list, page];
+  }
+
+  async function queryChildren(q: SqlQuery, options?: WnObjQueryOptions) {
+    return query(_home_path, q, options);
+  }
+
+  async function getChild(filterOrName: string | QueryFilter) {
+    let q: SqlQuery = {
+      filter: {},
+      sorter: { ct: -1 },
+      pager: { pageSize: 1, pageNumber: 1 },
+    };
+    // 查对象名称
+    if (_.isString(filterOrName)) {
+      _.assign(q.filter, { nm: filterOrName });
+    }
+    // 更多设置
+    else {
+      _.assign(q.filter, filterOrName);
+    }
+
+    let [objs] = await queryChildren(q, {
+      hidden: true,
+      loadPath: true,
+      quiet: true,
+    });
+    if (objs.length > 0) {
+      return objs[0];
+    }
+    return null;
   }
 
   async function writeText(path: string, content: string): Promise<WnObj> {
@@ -251,6 +288,8 @@ export function useWnObj(homePath: string = '~') {
     update,
     create,
     query,
+    queryChildren,
+    getChild,
     writeText,
     loadContent,
     rename,

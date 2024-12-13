@@ -473,7 +473,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     // 准备查询条件
     let q = __gen_query();
     //console.log('queryRemoteList', q);
-    let [list, pager] = await _obj.query(_dir_index.value ?? {}, setup, q);
+    let [list, pager] = await _obj.query(_dir_index.value ?? {}, q, setup);
 
     // 后续处理
     if (_options.patchRemote) {

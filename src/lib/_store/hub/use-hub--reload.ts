@@ -1,6 +1,6 @@
 import { isAsyncFunc } from '@site0/tijs';
 import _ from 'lodash';
-import { Walnut } from '../../../core';
+import { genWnPath, safeCmdArg, Walnut } from '../../../core';
 import {
   HubViewLayout,
   HubViewOptions,
@@ -9,6 +9,7 @@ import {
 } from './hub-view-types';
 
 async function __load<T>(
+  homePath: string | undefined,
   input: string | (() => T) | (() => Promise<T>) | undefined,
   dft: T
 ): Promise<T> {
@@ -25,6 +26,10 @@ async function __load<T>(
   }
   // 直接从对象路径加载
   if (_.isString(input)) {
+    let path = safeCmdArg(input);
+    if (homePath) {
+      path = genWnPath(homePath, path);
+    }
     return await Walnut.loadJson(input);
   }
   // 什么都没有，清空
@@ -36,7 +41,11 @@ export function _use_hub_actions_reload(
   _state: HubViewState
 ) {
   return async () => {
-    _state.actions.value = await __load(options.actions, {});
+    _state.actions.value = await __load(
+      options.modelOptions?.homePath,
+      options.actions,
+      {}
+    );
   };
 }
 
@@ -45,18 +54,18 @@ export function _use_hub_layout_reload(
   _state: HubViewState
 ) {
   return async () => {
-    let re = await __load(options.layout, {
+    let re = await __load(options.modelOptions?.homePath, options.layout, {
       desktop: {},
       pad: {},
       phone: {},
     });
     if (isHubViewLayout(re)) {
-      let {desktop, pad, phone} = re
-      let dft = desktop || pad || phone
+      let { desktop, pad, phone } = re;
+      let dft = desktop || pad || phone;
       return {
         desktop: desktop || dft,
         pad: pad || dft,
-        phone: phone || dft
+        phone: phone || dft,
       } as HubViewLayout;
     }
     return {
@@ -72,7 +81,11 @@ export function _use_hub_schema_reload(
   _state: HubViewState
 ) {
   return async () => {
-    _state.schema.value = await __load(options.schema, {});
+    _state.schema.value = await __load(
+      options.modelOptions?.homePath,
+      options.schema,
+      {}
+    );
   };
 }
 
@@ -88,6 +101,11 @@ export function _use_hub_methods_reload(
 
       // 定义一个加载方法
       async function _load_(path: string) {
+        if (options.modelOptions?.homePath) {
+          path = genWnPath(options.modelOptions!.homePath, path);
+        } else {
+          path = safeCmdArg(path);
+        }
         let jsPath = Walnut.cookPath(path);
         let re = await Walnut.loadJsModule(jsPath);
         _loaded_methods.push(re);

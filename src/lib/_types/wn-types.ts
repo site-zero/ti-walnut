@@ -195,10 +195,18 @@ export type WnExecOptions = {
   signal?: AbortSignal;
 };
 
-export type FetchObjOptions = {
+export type WnLoadOptions = {
+  signal?: AbortSignal;
+  /**
+   * 默认 false, 如果 true 表示即使加载不到资源
+   * 也不要抛错，尽量容忍
+   */
+  quiet?: boolean;
+};
+
+export type WnFetchObjOptions = WnLoadOptions & {
   loadAxis?: boolean;
   loadPath?: boolean;
-  signal?: AbortSignal;
 };
 
 export type UserSidebar = {
