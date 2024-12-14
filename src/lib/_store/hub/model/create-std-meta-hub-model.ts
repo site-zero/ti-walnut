@@ -1,6 +1,5 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { computed } from 'vue';
 import {
   StdMetaStoreOptions,
   useStdMetaStore,
@@ -16,9 +15,9 @@ export function createStdMetaHubModel(
     objPath: `id:${objId}`,
   });
 
-  const store = computed(() => useStdMetaStore(storeOptions));
-  const guiContext = computed(() => {
-    let _s = store.value;
+  const store = useStdMetaStore(storeOptions);
+  const createGUIContext = () => {
+    let _s = store;
     return {
       ActionStatus: _s.ActionStatus.value,
       LoadStatus: _s.LoadStatus.value,
@@ -26,19 +25,19 @@ export function createStdMetaHubModel(
       changed: _s.changed.value,
       CurrentContent: _s.CurrentContent.value,
     };
-  });
+  };
 
   async function reload() {
-    await store.value.reload();
+    await store.reload();
   }
 
   async function refresh() {
-    await store.value.refresh();
+    await store.refresh();
   }
 
   return {
     store,
-    guiContext,
+    createGUIContext,
     reload,
     refresh,
   };

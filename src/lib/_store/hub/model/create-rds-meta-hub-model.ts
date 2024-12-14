@@ -1,6 +1,5 @@
 import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { computed } from 'vue';
 import { RdsMetaStoreOptions, useRdsMetaStore } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
@@ -17,28 +16,28 @@ export function createRdsMetaHubModel(
     Util.explainObj({ id: objId }, options)
   );
 
-  const store = computed(() => useRdsMetaStore(storeOptions));
-  const guiContext = computed(() => {
-    let _s = store.value;
+  const store = useRdsMetaStore(storeOptions);
+  const createGUIContext = () => {
+    let _s = store;
     return {
       ActionStatus: _s.ActionStatus.value,
       LoadStatus: _s.LoadStatus.value,
       metaData: _s.metaData.value,
       changed: _s.changed.value,
     };
-  });
+  };
 
   async function reload() {
-    await store.value.reload();
+    await store.reload();
   }
 
   async function refresh() {
-    await store.value.fetchRemoteMeta();
+    await store.fetchRemoteMeta();
   }
 
   return {
     store,
-    guiContext,
+    createGUIContext,
     reload,
     refresh,
   };

@@ -20,9 +20,9 @@ export function createRdsListHubModel(
     options
   );
 
-  const store = computed(() => useRdsListStore(storeOptions));
-  const guiContext = computed(() => {
-    let _s = store.value;
+  const store = useRdsListStore(storeOptions);
+  const createGUIContext = () => {
+    let _s = store;
     return {
       currentId: _s.currentId.value,
       checkedIds: _s.checkedIds.value,
@@ -38,22 +38,22 @@ export function createRdsListHubModel(
       isLocalEmpty: _s.isLocalEmpty.value,
       CurrentItem: _s.CurrentItem.value,
     };
-  });
+  };
 
   async function reload() {
-    await store.value.reload();
+    await store.reload();
     if (objId) {
-      store.value.updateSelection(objId);
+      store.updateSelection(objId);
     }
   }
 
   async function refresh() {
-    await store.value.queryRemoteList();
+    await store.queryRemoteList();
   }
 
   return {
     store,
-    guiContext,
+    createGUIContext,
     reload,
     refresh,
   };
