@@ -36,101 +36,93 @@ async function __load<T>(
   return dft;
 }
 
-export function _use_hub_actions_reload(
+export async function _reload_hub_actions(
   options: HubViewOptions,
   _state: HubViewState
 ) {
-  return async () => {
-    _state.actions.value = await __load(
-      options.modelOptions?.homePath,
-      options.actions,
-      {}
-    );
-  };
+  _state.actions.value = await __load(
+    options.modelOptions?.homePath,
+    options.actions,
+    {}
+  );
 }
 
-export function _use_hub_layout_reload(
+export async function _reload_hub_layout(
   options: HubViewOptions,
   _state: HubViewState
 ) {
-  return async () => {
-    let re = await __load(options.modelOptions?.homePath, options.layout, {
-      desktop: {},
-      pad: {},
-      phone: {},
-    });
-    if (isHubViewLayout(re)) {
-      let { desktop, pad, phone } = re;
-      let dft = desktop || pad || phone;
-      return {
-        desktop: desktop || dft,
-        pad: pad || dft,
-        phone: phone || dft,
-      } as HubViewLayout;
-    }
+  let re = await __load(options.modelOptions?.homePath, options.layout, {
+    desktop: {},
+    pad: {},
+    phone: {},
+  });
+  if (isHubViewLayout(re)) {
+    let { desktop, pad, phone } = re;
+    let dft = desktop || pad || phone;
     return {
-      desktop: re,
-      pad: re,
-      phone: re,
+      desktop: desktop || dft,
+      pad: pad || dft,
+      phone: phone || dft,
     } as HubViewLayout;
-  };
+  }
+  return {
+    desktop: re,
+    pad: re,
+    phone: re,
+  } as HubViewLayout;
 }
 
-export function _use_hub_schema_reload(
+export async function _reload_hub_schema(
   options: HubViewOptions,
   _state: HubViewState
 ) {
-  return async () => {
-    _state.schema.value = await __load(
-      options.modelOptions?.homePath,
-      options.schema,
-      {}
-    );
-  };
+  _state.schema.value = await __load(
+    options.modelOptions?.homePath,
+    options.schema,
+    {}
+  );
 }
 
-export function _use_hub_methods_reload(
+export async function _reload_hub_methods(
   options: HubViewOptions,
   _state: HubViewState
 ) {
-  return async () => {
-    if (options.methods) {
-      // 存储加载结果
-      let _loaded_methods = [] as any[];
-      let loadings = [] as Promise<void>[];
+  if (options.methods) {
+    // 存储加载结果
+    let _loaded_methods = [] as any[];
+    let loadings = [] as Promise<void>[];
 
-      // 定义一个加载方法
-      async function _load_(path: string) {
-        if (options.modelOptions?.homePath) {
-          path = genWnPath(options.modelOptions!.homePath, path);
-        } else {
-          path = safeCmdArg(path);
-        }
-        let jsPath = Walnut.cookPath(path);
-        let re = await Walnut.loadJsModule(jsPath);
-        _loaded_methods.push(re);
+    // 定义一个加载方法
+    async function _load_(path: string) {
+      if (options.modelOptions?.homePath) {
+        path = genWnPath(options.modelOptions!.homePath, path);
+      } else {
+        path = safeCmdArg(path);
       }
-
-      // 准备加载逻辑
-      for (let path of options.methods) {
-        loadings.push(_load_(path));
-      }
-
-      // 归纳最后加载结果
-      let re = {} as Record<string, Function>;
-      if (!_.isEmpty(loadings)) {
-        await Promise.all(loadings);
-        for (let loaded of _loaded_methods) {
-          _.assign(re, loaded);
-        }
-      }
-
-      // 保存
-      _state.methods = re;
+      let jsPath = Walnut.cookPath(path);
+      let re = await Walnut.loadJsModule(jsPath);
+      _loaded_methods.push(re);
     }
-    // 清空方法集合
-    else {
-      _state.methods = {};
+
+    // 准备加载逻辑
+    for (let path of options.methods) {
+      loadings.push(_load_(path));
     }
-  };
+
+    // 归纳最后加载结果
+    let re = {} as Record<string, Function>;
+    if (!_.isEmpty(loadings)) {
+      await Promise.all(loadings);
+      for (let loaded of _loaded_methods) {
+        _.assign(re, loaded);
+      }
+    }
+
+    // 保存
+    _state.methods = re;
+  }
+  // 清空方法集合
+  else {
+    _state.methods = {};
+  }
 }

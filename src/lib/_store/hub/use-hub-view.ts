@@ -1,5 +1,5 @@
-import { Util } from '@site0/tijs';
-import { computed, ComputedRef, ref } from 'vue';
+import { Util, Vars } from '@site0/tijs';
+import { ComputedRef, ref } from 'vue';
 import {
   HubModel,
   HubViewLayoutMode,
@@ -8,10 +8,10 @@ import {
 } from './hub-view-types';
 import { useHubModel } from './use-hub--model';
 import {
-  _use_hub_actions_reload,
-  _use_hub_layout_reload,
-  _use_hub_methods_reload,
-  _use_hub_schema_reload,
+  _reload_hub_actions,
+  _reload_hub_layout,
+  _reload_hub_methods,
+  _reload_hub_schema,
 } from './use-hub--reload';
 
 export type HubView = ReturnType<typeof useHubView>;
@@ -20,6 +20,7 @@ export function useHubView(
   viewMode: ComputedRef<HubViewLayoutMode>,
   options: HubViewOptions
 ) {
+  console.warn('useHubView', viewMode, options);
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
@@ -37,41 +38,34 @@ export function useHubView(
   //---------------------------------------------
   // 计算输出
   //--------------------------------------------
-  const GUIContext = computed(() => {
-    return _model.value?.guiContext.value ?? {};
-  });
-  const GUILayout = computed(() => {
+  const createGUIContext = () => {
+    return _model.value?.createGUIContext() ?? {};
+  };
+  const createGUILayout = (GUIContext: Vars) => {
     let layout = _state.layout.value[viewMode.value];
-    return Util.explainObj(GUIContext.value, layout);
-  });
-  const GUISchema = computed(() => {
+    return Util.explainObj(GUIContext, layout);
+  };
+  const createGUISchema = (GUIContext: Vars) => {
     let schema = _state.schema.value ?? {};
-    return Util.explainObj(GUIContext.value, schema);
-  });
-  const GUIActions = computed(() => {
-    return Util.explainObj(GUIContext.value, _state.actions.value);
-  });
-  //---------------------------------------------
-  // 组合加载操作
-  //---------------------------------------------
-  const reloadActions = _use_hub_actions_reload(options, _state);
-  const reloadLayout = _use_hub_layout_reload(options, _state);
-  const reloadSchema = _use_hub_schema_reload(options, _state);
-  const reloadMethods = _use_hub_methods_reload(options, _state);
+    return Util.explainObj(GUIContext, schema);
+  };
+  const createGUIActions = (GUIContext: Vars) => {
+    return Util.explainObj(GUIContext, _state.actions.value);
+  };
   //---------------------------------------------
   // 远程方法
   //---------------------------------------------
   async function reload(modelName: string, objId?: string) {
     // 读取数据模型
     _model.value = useHubModel(modelName, objId, options);
+    await _model.value.reload();
 
     // 读取所有的资源文件
     await Promise.all([
-      _model.value.reload(),
-      reloadActions(),
-      reloadLayout(),
-      reloadSchema(),
-      reloadMethods(),
+      _reload_hub_actions(options, _state),
+      _reload_hub_layout(options, _state),
+      _reload_hub_schema(options, _state),
+      _reload_hub_methods(options, _state),
     ]);
   }
   //---------------------------------------------
@@ -106,10 +100,10 @@ export function useHubView(
   return {
     _model,
     _state,
-    GUIContext,
-    GUILayout,
-    GUISchema,
-    GUIActions,
+    createGUIContext,
+    createGUILayout,
+    createGUISchema,
+    createGUIActions,
     reload,
     invoke,
   };

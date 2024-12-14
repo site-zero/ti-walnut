@@ -6,7 +6,7 @@ import {
   Vars,
 } from '@site0/tijs';
 import _ from 'lodash';
-import { ComputedRef, Ref } from 'vue';
+import { Ref } from 'vue';
 
 export type HubModelOptions = {
   /**
@@ -115,8 +115,8 @@ export type HubViewState = {
 };
 
 export interface HubModel {
-  store: ComputedRef<any>;
-  guiContext: ComputedRef<Vars>;
+  store: any;
+  createGUIContext: () => Vars;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
 }

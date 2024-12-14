@@ -18,9 +18,9 @@ export function createStdListHubModel(
     homePath,
   });
 
-  const store = computed(() => useStdListStore(storeOptions));
-  const guiContext = computed(() => {
-    let _s = store.value;
+  const store = useStdListStore(storeOptions);
+  const createGUIContext = () => {
+    let _s = store;
     return {
       currentId: _s.currentId.value,
       checkedIds: _s.checkedIds.value,
@@ -37,22 +37,22 @@ export function createStdListHubModel(
       CurrentItem: _s.CurrentItem.value,
       CurrentContent: _s.CurrentContent.value,
     };
-  });
+  };
 
   async function reload() {
-    await store.value.reload();
+    await store.reload();
     if (objId) {
-      store.value.updateSelection(objId);
+      store.updateSelection(objId);
     }
   }
 
   async function refresh() {
-    await store.value.refresh();
+    await store.refresh();
   }
 
   return {
     store,
-    guiContext,
+    createGUIContext,
     reload,
     refresh,
   };
