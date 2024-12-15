@@ -1,8 +1,8 @@
 import { isAsyncFunc } from '@site0/tijs';
 import _ from 'lodash';
 import { genWnPath, safeCmdArg, Walnut } from '../../../core';
+import { GuiViewLayout } from '../../_types';
 import {
-  HubViewLayout,
   HubViewOptions,
   HubViewState,
   isHubViewLayout,
@@ -63,13 +63,13 @@ export async function _reload_hub_layout(
       desktop: desktop || dft,
       pad: pad || dft,
       phone: phone || dft,
-    } as HubViewLayout;
+    } as GuiViewLayout;
   }
   return {
     desktop: re,
     pad: re,
     phone: re,
-  } as HubViewLayout;
+  } as GuiViewLayout;
 }
 
 export async function _reload_hub_schema(

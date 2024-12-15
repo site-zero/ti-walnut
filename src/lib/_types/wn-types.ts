@@ -1,4 +1,10 @@
-import { I18nLang, SelectValueArm, SideBarItem, Vars } from '@site0/tijs';
+import {
+  I18nLang,
+  LayoutProps,
+  SelectValueArm,
+  SideBarItem,
+  Vars,
+} from '@site0/tijs';
 import _ from 'lodash';
 import { HubViewOptions } from '../_store';
 
@@ -226,3 +232,11 @@ export type WnMetaSaving = {
   update: (meta: Vars) => Promise<Vars | undefined>;
   create: (meta: Vars) => Promise<Vars | undefined>;
 };
+
+export type GuiViewLayout = {
+  desktop: LayoutProps;
+  pad: LayoutProps;
+  phone: LayoutProps;
+};
+
+export type GuiViewLayoutMode = keyof GuiViewLayout;

@@ -1,11 +1,7 @@
 import { Util, Vars } from '@site0/tijs';
-import { ComputedRef, ref } from 'vue';
-import {
-  HubModel,
-  HubViewLayoutMode,
-  HubViewOptions,
-  HubViewState,
-} from './hub-view-types';
+import { ref } from 'vue';
+import { GuiViewLayoutMode } from '../../_types';
+import { HubModel, HubViewOptions, HubViewState } from './hub-view-types';
 import { useHubModel } from './use-hub--model';
 import {
   _reload_hub_actions,
@@ -16,11 +12,8 @@ import {
 
 export type HubView = ReturnType<typeof useHubView>;
 
-export function useHubView(
-  viewMode: ComputedRef<HubViewLayoutMode>,
-  options: HubViewOptions
-) {
-  console.warn('useHubView', viewMode, options);
+export function useHubView() {
+  console.warn('useHubView');
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
@@ -41,8 +34,8 @@ export function useHubView(
   const createGUIContext = () => {
     return _model.value?.createGUIContext() ?? {};
   };
-  const createGUILayout = (GUIContext: Vars) => {
-    let layout = _state.layout.value[viewMode.value];
+  const createGUILayout = (GUIContext: Vars, viewMode: GuiViewLayoutMode) => {
+    let layout = _state.layout.value[viewMode] ?? {};
     return Util.explainObj(GUIContext, layout);
   };
   const createGUISchema = (GUIContext: Vars) => {
@@ -55,7 +48,11 @@ export function useHubView(
   //---------------------------------------------
   // 远程方法
   //---------------------------------------------
-  async function reload(modelName: string, objId?: string) {
+  async function reload(
+    modelName: string,
+    objId: string | undefined,
+    options: HubViewOptions
+  ) {
     // 读取数据模型
     _model.value = useHubModel(modelName, objId, options);
     await _model.value.reload();

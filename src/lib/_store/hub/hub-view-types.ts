@@ -7,6 +7,7 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref } from 'vue';
+import { GuiViewLayout } from '../../_types';
 
 export type HubModelOptions = {
   /**
@@ -71,30 +72,6 @@ export type HubViewBehaviors = {
   sorter?: Record<string, number>;
 };
 
-export type HubViewLayout = {
-  desktop: LayoutProps;
-  pad: LayoutProps;
-  phone: LayoutProps;
-};
-
-export type HubViewLayoutMode = keyof HubViewLayout;
-
-export function isHubViewLayout(layout: any): layout is HubViewLayout {
-  if (!layout) return false;
-  let keys = _.keys(layout);
-  if (keys.length <= 0 || keys.length > 3) {
-    return false;
-  }
-  for (let k of keys) {
-    if (!/^(desktop|pad|phone)$/.test(k)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-export type HubViewLayoutInput = Partial<HubViewLayout> | LayoutProps;
-
 export type HubViewState = {
   /**
    * 动作菜单
@@ -103,7 +80,7 @@ export type HubViewState = {
   /**
    * 布局
    */
-  layout: Ref<HubViewLayout>;
+  layout: Ref<GuiViewLayout>;
   /**
    * 控件定义
    */
@@ -120,3 +97,19 @@ export interface HubModel {
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
 }
+
+export function isHubViewLayout(layout: any): layout is GuiViewLayout {
+  if (!layout) return false;
+  let keys = _.keys(layout);
+  if (keys.length <= 0 || keys.length > 3) {
+    return false;
+  }
+  for (let k of keys) {
+    if (!/^(desktop|pad|phone)$/.test(k)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export type HubViewLayoutInput = Partial<GuiViewLayout> | LayoutProps;
