@@ -1,5 +1,5 @@
 import { Util, Vars } from '@site0/tijs';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { GuiViewLayoutMode } from '../../_types';
 import { HubModel, HubViewOptions, HubViewState } from './hub-view-types';
 import { useHubModel } from './use-hub--model';
@@ -17,6 +17,9 @@ export function useHubView() {
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
+  const _modelName = ref<string>();
+  const _objId = ref<string>();
+  const _options = ref<HubViewOptions>();
   const _model = ref<HubModel>();
   const _state: HubViewState = {
     actions: ref({}),
@@ -53,6 +56,9 @@ export function useHubView() {
     objId: string | undefined,
     options: HubViewOptions
   ) {
+    _modelName.value = modelName;
+    _objId.value = objId;
+    _options.value = options;
     // 读取数据模型
     _model.value = useHubModel(modelName, objId, options);
     await _model.value.reload();
@@ -96,7 +102,10 @@ export function useHubView() {
   //---------------------------------------------
   return {
     _model,
-    _state,
+    ModelName: computed(() => _modelName.value),
+    ObjId: computed(() => _objId.value),
+    Options: computed(() => _options.value),
+    ..._state,
     createGUIContext,
     createGUILayout,
     createGUISchema,

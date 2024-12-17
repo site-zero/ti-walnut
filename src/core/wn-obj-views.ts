@@ -46,7 +46,7 @@ export async function createObjViewOptions(
     };
     let _objs = useWnObj(`id:${obj.id}`);
     // 看看内部是否有 `./thing-view.json`
-    let thView = await _objs.getChild('thing-view.json');
+    let thView = await _objs.getChild('thing-view.json5');
     if (thView) {
       let json = await Walnut.loadJson(`id:${thView.id}`);
       __update_view_tmpl(viewTmpl, json);

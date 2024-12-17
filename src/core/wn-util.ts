@@ -24,11 +24,18 @@ export function safeCmdArg(arg: string) {
 }
 
 export function genWnPath(base: string, subPath?: string) {
+  let re: string;
+  // 采用基础路径
   if (!subPath) {
-    return base.replaceAll(/['";]/g, '');
+    re = base;
   }
-  if (/^(id:|~\/|\/)/.test(subPath)) {
-    return subPath.replaceAll(/['";]/g, '');
+  // 指定了绝对子路径
+  else if (/^(id:|~\/|\/)/.test(subPath)) {
+    re = subPath;
   }
-  return appendPath(base, subPath).replaceAll(/['";]/g, '');
+  // 拼合路径
+  else {
+    re = appendPath(base, subPath);
+  }
+  return safeCmdArg(re);
 }

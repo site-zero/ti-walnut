@@ -26,11 +26,13 @@ async function __load<T>(
   }
   // 直接从对象路径加载
   if (_.isString(input)) {
-    let path = safeCmdArg(input);
+    let path: string;
     if (homePath) {
-      path = genWnPath(homePath, path);
+      path = genWnPath(homePath, input);
+    } else {
+      path = safeCmdArg(input);
     }
-    return await Walnut.loadJson(input);
+    return await Walnut.loadJson(path);
   }
   // 什么都没有，清空
   return dft;
@@ -59,17 +61,20 @@ export async function _reload_hub_layout(
   if (isHubViewLayout(re)) {
     let { desktop, pad, phone } = re;
     let dft = desktop || pad || phone;
-    return {
+    _state.layout.value = {
       desktop: desktop || dft,
       pad: pad || dft,
       phone: phone || dft,
     } as GuiViewLayout;
   }
-  return {
-    desktop: re,
-    pad: re,
-    phone: re,
-  } as GuiViewLayout;
+  // 全都一样
+  else {
+    _state.layout.value = {
+      desktop: re,
+      pad: re,
+      phone: re,
+    } as GuiViewLayout;
+  }
 }
 
 export async function _reload_hub_schema(
