@@ -5,6 +5,7 @@ import {
   Match,
   TableRowID,
   TableSelectEmitInfo,
+  TiMatch,
   useKeep,
   Util,
   Vars,
@@ -30,6 +31,27 @@ import {
 
 const log = getLogger('wn.use-data-list-store');
 
+/**
+ * 如果服务器的 SQL 是联合查询，通常查询的字段条件会有前缀
+ * 而这个前缀在客户端设置会很讨厌，这里封装一个逻辑，根据不同的字段
+ * 为其增加对应的前缀。
+ *
+ * 你当然可以通过一个函数自己判断，但是为了便利性也可以通过下面的映射对象
+ * 来配置映射规则:
+ *
+ * ```js
+ * {
+ *    queryprefix : {
+ *       "M." : "^(id|name|age)$",
+ *    }
+ * }
+ *
+ *  {"前缀" : <AutoMatch 对象>}
+ * ```
+ */
+export type RedQueryPrefixSetup = Record<string, any> | RdsQueryPrefixAppender;
+export type RdsQueryPrefixAppender = (key: string) => string;
+
 export type RdsListStore = ReturnType<typeof defineRdsListStore>;
 
 export type RdsListStoreOptions = LocalListEditOptions & {
@@ -41,6 +63,8 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount: string;
+  queryPrefix?: RedQueryPrefixSetup;
+  countPrefix?: RedQueryPrefixSetup;
   makeChange?: LocalListMakeChangeOptions;
   refreshWhenSave?: boolean;
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
@@ -104,6 +128,65 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     // 搞定
     return re;
+  }
+  //---------------------------------------------
+  //              编制自动前缀
+  //---------------------------------------------
+  function __make_prefix_appender(
+    prefix?: RedQueryPrefixSetup
+  ): RdsQueryPrefixAppender {
+    // 没有前缀
+    if (!prefix) {
+      return (key) => key;
+    }
+    // 完全自定义
+    if (_.isFunction(prefix)) {
+      return prefix;
+    }
+    // 采用定制规则
+    let append_rules: [string, TiMatch][] = [];
+    for (let [key, val] of Object.entries(prefix)) {
+      append_rules.push([key, Match.parse(val)]);
+    }
+    return (key) => {
+      for (let rule of append_rules) {
+        let [pfx, am] = rule;
+        if (am.test(key)) {
+          return pfx + key;
+        }
+      }
+      return key;
+    };
+  }
+  const _query_prefix_append = computed(() =>
+    __make_prefix_appender(options.queryPrefix)
+  );
+  const _count_prefix_append = computed(() =>
+    __make_prefix_appender(options.countPrefix)
+  );
+  //---------------------------------------------
+  function apply_query_prefix(
+    query: SqlQuery,
+    appender: RdsQueryPrefixAppender
+  ) {
+    const use_appender = (_v: any, k: string) => {
+      let not = false;
+      if (k.startsWith('!')) {
+        not = true;
+        k = k.substring(1).trim();
+      }
+      let newKey = appender(k);
+      if (not) {
+        return '!' + newKey;
+      }
+      return newKey;
+    };
+    if (query.filter) {
+      query.filter = _.mapKeys(query.filter, use_appender);
+    }
+    if (query.sorter) {
+      query.sorter = _.mapKeys(query.sorter, use_appender);
+    }
   }
   //---------------------------------------------
   //                 建立数据模型
@@ -347,7 +430,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _action_status.value = 'loading';
     // 准备查询条件
     let q = __gen_query();
-    //console.log('queryRemoteList', q);
+    apply_query_prefix(q, _query_prefix_append.value);
+    console.log('queryRemoteList', q);
     let list = await sqlx.select(options.sqlQuery, q);
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];
@@ -367,6 +451,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   async function countRemoteList() {
     _action_status.value = 'loading';
     let q = __gen_query();
+    apply_query_prefix(q, _count_prefix_append.value);
     let total = await countRemote(q.filter);
     if (query.pager) {
       updatePagerTotal(query.pager, total);

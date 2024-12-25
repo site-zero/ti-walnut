@@ -64,7 +64,7 @@ export function defineSqlx(daoName?: string) {
   }
   async function __query(sql: string, q: Vars): Promise<SqlResult[]> {
     try {
-      let qobj = Util.filterRecordNilValue(q);
+      let qobj = Util.filterRecordNilValueDeeply(q);
       let qstr = JSON.stringify(qobj);
 
       // 准备命令
@@ -126,7 +126,7 @@ export function defineSqlx(daoName?: string) {
     countKey: string = 'total'
   ): Promise<number> {
     try {
-      let qobj = Util.filterRecordNilValue(filter);
+      let qobj = Util.filterRecordNilValueDeeply(filter);
       let qstr = JSON.stringify(qobj);
 
       // 准备命令
