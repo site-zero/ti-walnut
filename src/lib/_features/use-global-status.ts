@@ -1,3 +1,4 @@
+import { ProcessProps } from '@site0/tijs';
 import { reactive } from 'vue';
 
 export type GlobalStatus = {
@@ -6,9 +7,12 @@ export type GlobalStatus = {
   loading: boolean | string;
   saving: boolean | string;
   removing: boolean | string;
-  processing: boolean | string;
   changed: boolean;
   exposeHidden: boolean;
+  /**
+   * 表示一个全局唯一的长时工作的进度
+   */
+  process: ProcessProps;
 };
 
 const _G_status_map = new Map<string, GlobalStatus>();
@@ -22,8 +26,27 @@ export function useGlobalStatus(name: string = '_APP') {
       loading: false,
       saving: false,
       removing: false,
-      processing: false,
       changed: false,
+      exposeHidden: false,
+      // process: {
+      //   title: {
+      //     //prefixIcon: 'fas-chalkboard-user',
+      //     text: 'I have some work to do',
+      //   },
+      //   progress: {
+      //     value: 0.4,
+      //   },
+      //   logs: [
+      //     '2023-10-01: Initialized',
+      //     '2023-10-02: Loading resources',
+      //     '2023-10-03: Resources loaded',
+      //     '2023-10-04: Processing data',
+      //     '2023-10-05: Data processed',
+      //     '2023-10-06: Saving results',
+      //     '2023-10-07: Results saved',
+      //     '2023-10-08: Completed',
+      //   ],
+      // },
     } as GlobalStatus);
     _G_status_map.set(name, re);
   }
