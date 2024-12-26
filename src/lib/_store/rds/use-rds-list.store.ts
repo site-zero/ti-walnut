@@ -431,7 +431,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     // 准备查询条件
     let q = __gen_query();
     apply_query_prefix(q, _query_prefix_append.value);
-    console.log('queryRemoteList', q);
+    //console.log('queryRemoteList', q);
     let list = await sqlx.select(options.sqlQuery, q);
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];

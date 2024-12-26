@@ -9,10 +9,12 @@ export type GlobalStatus = {
   removing: boolean | string;
   changed: boolean;
   exposeHidden: boolean;
+  processing: boolean | string;
   /**
    * 表示一个全局唯一的长时工作的进度
+   * 应该全局展示一个遮罩面板
    */
-  process: ProcessProps;
+  process: ProcessProps | null | undefined;
 };
 
 const _G_status_map = new Map<string, GlobalStatus>();
@@ -28,6 +30,7 @@ export function useGlobalStatus(name: string = '_APP') {
       removing: false,
       changed: false,
       exposeHidden: false,
+      processing: false,
       // process: {
       //   title: {
       //     //prefixIcon: 'fas-chalkboard-user',
