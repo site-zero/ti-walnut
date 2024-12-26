@@ -2,7 +2,7 @@
   //--------------------------------------------------
   import { RdsBrowserApi, useRdsListStore } from '@site0/ti-walnut';
   import { TiLayoutGrid } from '@site0/tijs';
-  import { computed, nextTick, onMounted } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import { useRdsBrowserLayout } from './rds-browser-layout';
   import { useRdsBrowserSchema } from './rds-browser-schema';
   import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
@@ -19,25 +19,29 @@
     autoReload: true,
   });
   //--------------------------------------------------
-  const Data = computed(() => {
+  const _store_at = ref(0);
+  //--------------------------------------------------
+  const _store = computed(() => {
     let store = useRdsListStore({
       keepQuery: getKeepName(props, 'Query'),
       keepSelect: getKeepName(props, 'Selection'),
       ...props.dataStore,
     });
-    nextTick(() => {
-      emit('store-ready', api.value);
-    });
+    _store_at.value = Date.now();
+    console.log('store!!!!!!!!!!!!!!', store);
+    // nextTick(() => {
+    //   emit('store-ready', api.value);
+    // });
     return store;
   });
   //--------------------------------------------------
   const _RD = computed(
-    (): RdsBrowserFeature => useRdsBrowser(Data.value, props)
+    (): RdsBrowserFeature => useRdsBrowser(_store.value, props)
   );
   //--------------------------------------------------
   const api = computed(
     (): RdsBrowserApi => ({
-      Data: Data.value,
+      Data: _store.value,
       rds: _RD.value,
     })
   );
@@ -49,24 +53,34 @@
   const GUILayout = computed(() => {
     let layout = useRdsBrowserLayout(props);
     if (props.guiLayout) {
-      return props.guiLayout(layout, Data.value, _RD.value);
+      return props.guiLayout(layout, _store.value, _RD.value);
     }
     return layout;
   });
   //--------------------------------------------------
   const GUIScheme = computed(() => {
-    let schema = useRdsBrowserSchema(props, Data.value, _RD.value);
+    let schema = useRdsBrowserSchema(props, _store.value, _RD.value);
     if (props.guiSchema) {
-      return props.guiSchema(schema, Data.value, _RD.value);
+      return props.guiSchema(schema, _store.value, _RD.value);
     }
     return schema;
   });
   //--------------------------------------------------
-  onMounted(() => {
-    if (props.autoReload) {
-      Data.value.reload();
-    }
-  });
+  watch(
+    () => [_store_at.value, props.autoReload],
+    () => {
+      console.log("watch RdsBrowser", _store_at.value, props.autoReload);
+      if (props.autoReload && _store_at.value > 0) {
+        _store.value.reload();
+      }
+    },
+    { immediate: true }
+  );
+  // onMounted(() => {
+  //   if (props.autoReload) {
+  //     _store.value.reload();
+  //   }
+  // });
   //--------------------------------------------------
 </script>
 <template>
