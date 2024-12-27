@@ -45,7 +45,7 @@
         loadContext &&
         _lazy.value.needLoadContext(ProxiedCom.value.comConf)
       ) {
-        console.log('!!!!!!!!!!!!!WnLazyProxy: loadContext');
+        //console.log('!!!!!!!!!!!!!WnLazyProxy: loadContext');
         await loadContext();
       }
     },

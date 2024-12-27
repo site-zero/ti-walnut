@@ -108,6 +108,9 @@ export function defineSqlx(daoName?: string) {
       sorter: query.sorter,
       ...getQueryLimit(query),
     } as Vars;
+    if (query.columns) {
+      q.columns = _.concat(query.columns).join(',');
+    }
 
     return await __query(sql, q);
   }

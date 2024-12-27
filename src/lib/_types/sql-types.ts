@@ -26,6 +26,7 @@ export type SqlExecResult = {
 };
 
 export type SqlQuery = {
+  columns?: string[] | string;
   filter: QueryFilter | QueryFilter[];
   sorter?: QuerySorter;
   pager?: SqlPager;
@@ -87,7 +88,7 @@ export type SqlExecInfo = {
   noresult?: boolean;
   omit?: string;
   pick?: string;
-  put?:string;
+  put?: string;
   // ------------------- sqlx @set
   sets?: SqlExecSetVar[];
   /**
