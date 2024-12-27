@@ -247,7 +247,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
 
   async function onActionFire(barEvent: ActionBarEvent) {
     let { name, payload } = barEvent;
-    console.log('onActionFire', name, payload);
+    // console.log('onActionFire', name, payload);
 
     // 自定义处理
     if (props.handleAction) {
