@@ -420,6 +420,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     let q = _.cloneDeep(query);
     q.filter = q.filter ?? {};
     _.assign(q.filter, __create_fixed_match());
+    q.filter = Util.filterRecordNilValueDeeply(q.filter);
     if (_.isEmpty(q.filter)) {
       q.filter = __create_default_filter();
     }
@@ -616,7 +617,6 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
 export function useRdsListStore(
   options: RdsListStoreOptions,
-  _name?: string
 ): RdsListStore {
   // 强制创建新的
   // if ('NEW' == name || Str.isBlank(name)) {
