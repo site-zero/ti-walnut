@@ -274,6 +274,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     () => _checked_ids.value && _checked_ids.value.length > 0
   );
 
+  function existsInRemote(id: TableRowID): boolean {
+    return _local.value.existsInRemote(id);
+  }
+
   /**
    * 获取数据的 ID
    */
@@ -313,6 +317,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   function getCurrentItem(): SqlResult | undefined {
     return getItemById(_current_id.value);
+  }
+
+  function getCheckedItems(): SqlResult[] {
+    return findItemsById(_checked_ids.value);
   }
 
   function findItemsById(ids: TableRowID[]): SqlResult[] {
@@ -497,12 +505,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //                  Getters
     //---------------------------------------------
     //isChanged: () => _local.value.isChanged(),
+    existsInRemote,
     getItemId,
     getItemById,
     getItemByIndex,
     getItemByMatch,
     getItemBy,
     getCurrentItem,
+    getCheckedItems,
     findItemsById,
     findItemsByMatch,
     findItemsBy,
@@ -615,9 +625,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
  */
 //const _stores = new Map<string, DataListStoreFeature>();
 
-export function useRdsListStore(
-  options: RdsListStoreOptions,
-): RdsListStore {
+export function useRdsListStore(options: RdsListStoreOptions): RdsListStore {
   // 强制创建新的
   // if ('NEW' == name || Str.isBlank(name)) {
   //   return defineDataListStore(options);
