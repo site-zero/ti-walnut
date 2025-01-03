@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { SqlLimit, SqlPager, SqlQuery } from '../_types';
 
-export function updatelPager(pager: SqlPager, update: Partial<SqlPager>) {
+export function updatePager(pager: SqlPager, update: Partial<SqlPager>) {
   let { pageNumber, pageSize, totalCount } = update;
   if (_.isNumber(pageNumber)) {
     pager.pageNumber = pageNumber;

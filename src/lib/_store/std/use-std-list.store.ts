@@ -18,7 +18,7 @@ import {
   QuerySorter,
   SqlPagerInput,
   SqlQuery,
-  updatelPager,
+  updatePager,
   updatePagerTotal,
   useLocalListEdit,
   useWnObj,
@@ -480,7 +480,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     if (!oDir) {
       _remote.value = [];
       if (query.pager) {
-        updatelPager(query.pager, { pageNumber: 0, totalCount: 0 });
+        updatePager(query.pager, { pageNumber: 0, totalCount: 0 });
       }
       return;
     }
@@ -504,7 +504,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
 
     // 更新翻页信息
     if (query.pager) {
-      updatelPager(query.pager, pager);
+      updatePager(query.pager, pager);
     }
 
     _action_status.value = undefined;
@@ -694,7 +694,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
           pageSize: 20,
         };
       }
-      updatelPager(query.pager, page);
+      updatePager(query.pager, page);
       __save_local_query();
     },
 

@@ -23,7 +23,7 @@ import {
   SqlPagerInput,
   SqlQuery,
   SqlResult,
-  updatelPager,
+  updatePager,
   updatePagerTotal,
   useLocalListEdit,
   useSqlx,
@@ -547,7 +547,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
           pageSize: 20,
         };
       }
-      updatelPager(query.pager, page);
+      updatePager(query.pager, page);
       __save_local_query();
     },
 
