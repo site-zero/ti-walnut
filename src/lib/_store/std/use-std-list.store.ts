@@ -78,7 +78,7 @@ export type StdListStoreOptions = LocalListEditOptions & {
 };
 
 function defineStdListStore(options?: StdListStoreOptions) {
-  console.warn('defineStdListStore', options);
+  //console.warn('defineStdListStore', options);
   //---------------------------------------------
   // 准备数据访问模型
   let _options: StdListStoreOptions = _.cloneDeep(options ?? { homePath: '~' });
