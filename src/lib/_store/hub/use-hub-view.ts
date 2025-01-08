@@ -29,7 +29,6 @@ function isInvokeError(err: any): err is InvokeError {
 }
 
 export function useHubView() {
-  console.warn('useHubView');
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
@@ -120,6 +119,13 @@ export function useHubView() {
     }
   }
 
+  /**
+   * 处理区块事件的异步函数。
+   *
+   * @param event - 包含事件名称和数据的区块事件对象。
+   * @returns 返回一个Promise，表示事件处理的结果。
+   * @throws 如果不是内部调用异常，则抛出错误。
+   */
   async function onBlockEvent(event: BlockEvent) {
     // 尝试直接找到调用函数
     try {
@@ -135,6 +141,12 @@ export function useHubView() {
     return await invoke('handleBlockEvent', event);
   }
 
+  /**
+   * 处理 ActionBar 事件的异步函数。
+   *
+   * @param {ActionBarEvent} event - 触发的 ActionBar 事件。
+   * @returns {Promise<void>} - 一个表示异步操作完成的 Promise。
+   */
   async function onActionFire(event: ActionBarEvent) {
     console.log('onActionFire', event);
   }
