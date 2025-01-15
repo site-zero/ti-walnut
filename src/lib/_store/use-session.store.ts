@@ -138,7 +138,7 @@ export function useSessionStore() {
       else {
         SE.errCode.value = re.errCode;
       }
-      console.log('signIn', re);
+      // console.log('signIn', re);
     } finally {
       status.processing = false;
     }
