@@ -1,9 +1,11 @@
 import {
   addLogger,
+  ENV_KEYS,
   getLogger,
   getLogLevel,
   installTiCoreI18n,
   setDefaultLogLevel,
+  setEnv,
   Str,
   tidyLogger,
   TiStore,
@@ -17,7 +19,6 @@ import _ from 'lodash';
 import { installWalnutI18n } from '../i18n';
 import {
   AjaxResult,
-  WnFetchObjOptions,
   HubViewOptions,
   isAjaxResult,
   isWnObj,
@@ -26,8 +27,9 @@ import {
   UserSidebar,
   WnDictSetup,
   WnExecOptions,
-  WnObj,
+  WnFetchObjOptions,
   WnLoadOptions,
+  WnObj,
 } from '../lib';
 import { installWalnutDicts } from './wn-dict';
 import { wnRunCommand } from './wn-run-command';
@@ -201,9 +203,13 @@ export class WalnutServer {
   async fetchMySession(): Promise<AjaxResult> {
     if (this._ticket) {
       let re = await Walnut.fetchAjax('/a/me');
+      console.log('fetchMySession:', re);
       if (!re.ok) {
         this._ticket = undefined;
         TiStore.local.remove(TICKET_KEY);
+        setEnv(ENV_KEYS.TIMEZONE, null);
+      } else {
+        setEnv(ENV_KEYS.TIMEZONE, re.data.envs.TIMEZONE);
       }
       return re;
     }
@@ -224,6 +230,7 @@ export class WalnutServer {
     if (re && re.ok && re.data) {
       this._ticket = re.data.ticket;
       TiStore.local.set(TICKET_KEY, this._ticket);
+      setEnv(ENV_KEYS.TIMEZONE, re.data.vars.TIMEZONE);
     }
     return re;
   }
@@ -383,10 +390,7 @@ export class WalnutServer {
     return `/o/content?str=${encodeURIComponent(objPath)}`;
   }
 
-  async loadJson(
-    objPath: string,
-    options: WnLoadOptions = {}
-  ): Promise<any> {
+  async loadJson(objPath: string, options: WnLoadOptions = {}): Promise<any> {
     let re = await this.loadContent(objPath, options);
     if (_.isNil(re)) {
       return re ?? null;
@@ -463,10 +467,7 @@ export class WalnutServer {
     }
   }
 
-  async fetchJson(
-    urlPath: string,
-    options: WnLoadOptions = {}
-  ): Promise<any> {
+  async fetchJson(urlPath: string, options: WnLoadOptions = {}): Promise<any> {
     let { quiet, signal } = options;
     try {
       let url = this.getUrl(urlPath);
