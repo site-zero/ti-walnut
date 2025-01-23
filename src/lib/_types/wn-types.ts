@@ -220,13 +220,13 @@ export type UserSidebar = {
   sidebar: SideBarItem[];
 };
 
-export type StoreStatus = {
-  loading: boolean;
-  saving: boolean;
-  removing: boolean;
-  processing: boolean;
-  changed: boolean;
-};
+// export type StoreStatus = {
+//   loading: boolean;
+//   saving: boolean;
+//   removing: boolean;
+//   processing: boolean;
+//   changed: boolean;
+// };
 
 export type WnMetaSaving = {
   update: (meta: Vars) => Promise<Vars | undefined>;

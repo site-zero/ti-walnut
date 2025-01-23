@@ -20,6 +20,7 @@ export function createStdMetaHubModel(
     let _s = store;
     return {
       ActionStatus: _s.ActionStatus.value,
+      ActionBarVars: _s.ActionBarVars.value,
       LoadStatus: _s.LoadStatus.value,
       metaData: _s.metaData.value,
       changed: _s.changed.value,

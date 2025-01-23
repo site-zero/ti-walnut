@@ -232,6 +232,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
+  const ActionBarVars = computed(() => {
+    return {
+      loading: _action_status.value == 'loading',
+      saving: _action_status.value == 'saving',
+    } as Vars;
+  });
+  //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(remoteList.value)) {
       return 'unloaded';
@@ -281,7 +288,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   /**
    * 获取数据的 ID
    */
-  function getItemId(it: SqlResult, index: number): TableRowID {
+  function getItemId(it: SqlResult, index: number = -1): TableRowID {
     return _local.value.getRowId(it, index);
   }
 
@@ -358,6 +365,30 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       }
     }
     return re;
+  }
+
+  function prependItem(item: SqlResult) {
+    // 如果存在就更新
+    let id = getItemId(item);
+    if (getItemById(id)) {
+      updateItem(item, { id });
+    }
+    // 直接添加到结尾
+    else {
+      _local.value.prependToList(item);
+    }
+  }
+
+  function appendItem(item: SqlResult) {
+    // 如果存在就更新
+    let id = getItemId(item);
+    if (getItemById(id)) {
+      updateItem(item, { id });
+    }
+    // 直接添加到结尾
+    else {
+      _local.value.appendToList(item);
+    }
   }
 
   function updateCurrent(meta: SqlResult): SqlResult | undefined {
@@ -492,6 +523,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //                  计算属性
     //---------------------------------------------
     ActionStatus,
+    ActionBarVars,
     LoadStatus,
     listData,
     hasCurrent,
@@ -554,6 +586,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     addLocalItem(meta: SqlResult) {
       _local.value.appendToList(meta);
     },
+
+    appendItem,
+    prependItem,
 
     updateCurrent,
     updateItem,

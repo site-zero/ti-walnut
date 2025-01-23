@@ -55,6 +55,13 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
+  const ActionBarVars = computed(() => {
+    return {
+      loading: _action_status.value == 'loading',
+      saving: _action_status.value == 'saving',
+    } as Vars;
+  });
+  //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(_remote.value)) {
       return 'unloaded';
@@ -251,6 +258,7 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
     //                  计算属性
     //---------------------------------------------
     ActionStatus,
+    ActionBarVars,
     LoadStatus,
     changed: computed(() => _local.value.isChanged()),
     CurrentContent: computed(() => _content.ContentText.value),

@@ -1,6 +1,5 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { computed } from 'vue';
 import { Walnut } from '../../../../core';
 import {
   StdListStoreOptions,
@@ -26,6 +25,7 @@ export function createStdListHubModel(
       checkedIds: _s.checkedIds.value,
       query: _s.query,
       ActionStatus: _s.ActionStatus.value,
+      ActionBarVars: _s.ActionBarVars.value,
       LoadStatus: _s.LoadStatus.value,
       listData: _s.listData.value,
       hasCurrent: _s.hasCurrent.value,

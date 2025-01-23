@@ -1,22 +1,17 @@
+import { Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { Ref, reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import {
+  DataStoreActionStatus,
   QueryFilter,
   QuerySorter,
   SqlPager,
   SqlQuery,
   SqlResult,
-  StoreStatus,
   useSqlx,
 } from '../../';
 
-export type RdsStoreFeature = {
-  storeName: string;
-  status: StoreStatus;
-  query: SqlQuery;
-  remoteList: Ref<SqlResult[]>;
-  queryRemoteList: (sqlName: string) => Promise<void>;
-};
+export type RdsStoreFeature = ReturnType<typeof defineRdsSimpleStore>;
 
 export type RdsStoreDefination = {
   daoName?: string;
@@ -26,18 +21,21 @@ export type RdsStoreDefination = {
   pager?: SqlPager;
 };
 
-export function defineRdsSimpleStore(
-  options: RdsStoreDefination
-): RdsStoreFeature {
-  let sqlx = useSqlx(options.daoName);
-  let remoteList = ref<SqlResult[]>([]);
-  let status = reactive({
-    loading: false,
-    saving: false,
-    removing: false,
-    processing: false,
-    changed: false,
-  } as StoreStatus);
+export function defineRdsSimpleStore(options: RdsStoreDefination) {
+  const sqlx = useSqlx(options.daoName);
+  //---------------------------------------------
+  const _remote_list = ref<SqlResult[]>([]);
+  const _action_status = ref<DataStoreActionStatus>();
+  //---------------------------------------------
+  const ActionStatus = computed(() => _action_status.value);
+  //---------------------------------------------
+  const ActionBarVars = computed(() => {
+    return {
+      loading: _action_status.value == 'loading',
+      saving: _action_status.value == 'saving',
+    } as Vars;
+  });
+  //---------------------------------------------
   let query = reactive({
     filter: _.cloneDeep(options.filter || {}),
     sorter: _.cloneDeep(options.sorter),
@@ -49,38 +47,24 @@ export function defineRdsSimpleStore(
       options.pager
     ),
   } as SqlQuery);
-
+  //---------------------------------------------
   async function queryRemoteList(sqlName: string) {
-    status.loading = true;
-    remoteList.value = await sqlx.select(sqlName, query);
-    status.loading = false;
+    _action_status.value = 'loading';
+    _remote_list.value = await sqlx.select(sqlName, query);
+    _action_status.value = undefined;
   }
 
   //-------------< Output Feature >------------------
   return {
     storeName: options.storeName,
-    status,
     query,
-    remoteList,
+    remoteList: computed(() => _remote_list.value),
+    ActionStatus,
+    ActionBarVars,
     queryRemoteList,
   };
 }
 
-const _stores = new Map<string, RdsStoreFeature>();
-
-export function clearRdsSimpleStore(storeName?: string) {
-  if (storeName) {
-    _stores.delete(storeName);
-  } else {
-    _stores.clear();
-  }
-}
-
 export function useRdsSimpleStore(options: RdsStoreDefination) {
-  let store = _stores.get(options.storeName);
-  if (!store) {
-    store = defineRdsSimpleStore(options);
-    _stores.set(options.storeName, store);
-  }
-  return store;
+  return defineRdsSimpleStore(options);
 }

@@ -123,7 +123,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     }
     // 最后处理一下本地数据
     let local = _keep_query.value.loadObj();
-    _.merge(re, local);
+    _.assign(re, local);
     // 搞定
     return re;
   }
@@ -171,6 +171,13 @@ function defineStdListStore(options?: StdListStoreOptions) {
   const _local = computed(() => useLocalListEdit(_remote, _options));
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
+  //---------------------------------------------
+  const ActionBarVars = computed(() => {
+    return {
+      loading: _action_status.value == 'loading',
+      saving: _action_status.value == 'saving',
+    } as Vars;
+  });
   //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(_remote.value)) {
@@ -305,7 +312,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
   /**
    * 获取数据的 ID
    */
-  function getItemId(it: WnObj, index: number): string {
+  function getItemId(it: WnObj, index: number = -1): string {
     return _local.value.getRowId(it, index) as string;
   }
 
@@ -378,6 +385,30 @@ function defineStdListStore(options?: StdListStoreOptions) {
       }
     }
     return re;
+  }
+
+  function prependItem(o: WnObj) {
+    // 如果存在就更新
+    let id = getItemId(o);
+    if (getItemById(id)) {
+      updateItem(o, { id });
+    }
+    // 直接添加到结尾
+    else {
+      _local.value.prependToList(o);
+    }
+  }
+
+  function appendItem(o: WnObj) {
+    // 如果存在就更新
+    let id = getItemId(o);
+    if (getItemById(id)) {
+      updateItem(o, { id });
+    }
+    // 直接添加到结尾
+    else {
+      _local.value.appendToList(o);
+    }
   }
 
   function updateCurrent(meta: WnObj): WnObj | undefined {
@@ -517,15 +548,23 @@ function defineStdListStore(options?: StdListStoreOptions) {
    * @returns {Promise<WnObj | undefined>} 返回创建的对象，如果创建失败则返回 undefined。
    * @throws 如果没有父 ID，则抛出错误。
    */
-  async function create(meta: WnObj): Promise<WnObj | undefined> {
+  async function create(
+    meta: WnObj,
+    autoAppend: 'append' | 'prepend' | 'none' = 'prepend'
+  ): Promise<WnObj | undefined> {
     meta.pid = _dir_index.value?.id;
     if (!meta.pid) {
       throw 'create need parent id';
     }
     let re = await _obj.create(meta);
     if (re) {
-      _local.value.appendToList(re);
-      _remote.value?.unshift(re);
+      if ('append' == autoAppend) {
+        _local.value.appendToList(re);
+        _remote.value?.push(re);
+      } else if ('prepend' == autoAppend) {
+        _local.value.prependToList(re);
+        _remote.value?.unshift(re);
+      }
     }
     return re;
   }
@@ -640,6 +679,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     //                  计算属性
     //---------------------------------------------
     ActionStatus,
+    ActionBarVars,
     LoadStatus,
     listData,
     hasCurrent,
@@ -701,6 +741,9 @@ function defineStdListStore(options?: StdListStoreOptions) {
     addLocalItem(meta: WnObj) {
       _local.value.appendToList(meta);
     },
+
+    appendItem,
+    prependItem,
 
     updateCurrent,
     updateItem,
