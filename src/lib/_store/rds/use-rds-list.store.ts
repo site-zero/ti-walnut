@@ -191,7 +191,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
-  const remoteList = ref<SqlResult[]>();
+  const _remote = ref<SqlResult[]>();
   const _action_status = ref<DataStoreActionStatus>();
   const query = reactive(__create_data_query());
   const _current_id = ref<TableRowID>();
@@ -228,7 +228,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalListEdit(remoteList, options));
+  const _local = computed(() => useLocalListEdit(_remote, options));
+  //---------------------------------------------
+  const changed = computed(() => _local.value.isChanged());
+  const isEmpty = computed(() => _.isEmpty(listData.value));
+  const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
+  const isLocalEmpty = computed(() =>
+    _.isEmpty(_local.value?.localList?.value)
+  );
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
@@ -236,14 +243,16 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return {
       loading: _action_status.value == 'loading',
       saving: _action_status.value == 'saving',
+      changed: changed.value,
+      empty: isEmpty.value,
     } as Vars;
   });
   //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
-    if (_.isUndefined(remoteList.value)) {
+    if (_.isUndefined(_remote.value)) {
       return 'unloaded';
     }
-    if (remoteList.value.length == query.pager?.totalCount) {
+    if (_remote.value.length == query.pager?.totalCount) {
       return 'full';
     }
     return 'partial';
@@ -257,7 +266,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function clearRemoteList() {
-    remoteList.value = undefined;
+    _remote.value = undefined;
     if (query.pager) {
       updatePagerTotal(query.pager, 0);
     }
@@ -274,7 +283,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //                 被内部重用的方法
   //---------------------------------------------
   const listData = computed(() => {
-    return _local.value.localList.value || remoteList.value || [];
+    return _local.value.localList.value || _remote.value || [];
   });
   const hasCurrent = computed(() => !_.isNil(_current_id.value));
   const hasChecked = computed(
@@ -484,7 +493,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       }
       list = list2;
     }
-    remoteList.value = list ?? [];
+    _remote.value = list ?? [];
     _action_status.value = undefined;
   }
 
@@ -513,25 +522,24 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _keep_query,
     _keep_select,
     _local,
+    _remote,
     currentId: _current_id,
     checkedIds: _checked_ids,
     query,
-    status: _action_status,
-    remoteList,
-
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
+    remoteList: computed(() => _remote.value),
     ActionStatus,
     ActionBarVars,
     LoadStatus,
     listData,
     hasCurrent,
     hasChecked,
-    changed: computed(() => _local.value.isChanged()),
-    isEmpty: computed(() => _.isEmpty(listData.value)),
-    isRemoteEmpty: computed(() => _.isEmpty(remoteList.value)),
-    isLocalEmpty: computed(() => _.isEmpty(_local.value?.localList?.value)),
+    changed,
+    isEmpty,
+    isRemoteEmpty,
+    isLocalEmpty,
     CurrentItem,
     //---------------------------------------------
     //                  Getters

@@ -51,7 +51,7 @@ export function getKeepName(
 export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   //--------------------------------------------------
   const TableEmptyRoadblock = computed((): RoadblockProps => {
-    if (Data.status.value == 'loading') {
+    if (Data.ActionStatus.value == 'loading') {
       return {
         icon: 'fas-spinner fa-pulse',
         text: 'i18n:loading',
@@ -72,8 +72,8 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
     changed: Data.changed.value,
     hasChecked: Data.hasChecked.value,
     hasCurrent: Data.hasCurrent.value,
-    reloading: Data.status.value == 'loading',
-    saving: Data.status.value == 'saving',
+    reloading: Data.ActionStatus.value == 'loading',
+    saving: Data.ActionStatus.value == 'saving',
   }));
 
   //--------------------------------------------------

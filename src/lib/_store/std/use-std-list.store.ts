@@ -170,12 +170,21 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   const _local = computed(() => useLocalListEdit(_remote, _options));
   //---------------------------------------------
+  const changed = computed(() => _local.value.isChanged());
+  const isEmpty = computed(() => _.isEmpty(listData.value));
+  const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
+  const isLocalEmpty = computed(() =>
+    _.isEmpty(_local.value?.localList?.value)
+  );
+  //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
   const ActionBarVars = computed(() => {
     return {
       loading: _action_status.value == 'loading',
       saving: _action_status.value == 'saving',
+      changed: changed.value,
+      empty: isEmpty.value,
     } as Vars;
   });
   //---------------------------------------------
@@ -673,21 +682,20 @@ function defineStdListStore(options?: StdListStoreOptions) {
     currentId: _current_id,
     checkedIds: _checked_ids,
     query,
-    //status: _action_status,
-
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
+    remoteList: computed(() => _remote.value),
     ActionStatus,
     ActionBarVars,
     LoadStatus,
     listData,
     hasCurrent,
     hasChecked,
-    changed: computed(() => _local.value.isChanged()),
-    isEmpty: computed(() => _.isEmpty(listData.value)),
-    isRemoteEmpty: computed(() => _.isEmpty(_remote.value)),
-    isLocalEmpty: computed(() => _.isEmpty(_local.value?.localList?.value)),
+    changed,
+    isEmpty,
+    isRemoteEmpty,
+    isLocalEmpty,
     CurrentItem,
     CurrentContent: computed(() => _content.ContentText.value),
     //---------------------------------------------
