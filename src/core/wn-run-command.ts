@@ -31,8 +31,10 @@ export async function wnRunCommand(
         html.push('</pre>');
         await Alert(html.join(''), {
           type: 'danger',
-          maxWidth: '640px',
-          width: '100%',
+          width: '80%',
+          height: '80%',
+          minWidth: '480px',
+          minHeight: '320px',
           contentType: 'html',
         });
         console.error('run-command re-fail to parse json: ', str, errParse);
@@ -49,9 +51,11 @@ export async function wnRunCommand(
     html.push('<pre>', cmdText, '</pre>');
     html.push('<blockquote>', `${reason}`, '</blockquote>');
     await Alert(html.join(''), {
-      type: 'info',
-      maxWidth: '640px',
-      width: '100%',
+      type: 'warn',
+      width: '80%',
+      height: '80%',
+      minWidth: '480px',
+      minHeight: '320px',
       contentType: 'html',
     });
     console.error('run-command fail: ', reason);
