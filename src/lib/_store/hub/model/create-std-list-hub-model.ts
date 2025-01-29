@@ -53,6 +53,7 @@ export function createStdListHubModel(
   return {
     store,
     createGUIContext,
+    getActionBarVars:()=>store.ActionBarVars.value,
     reload,
     refresh,
   };

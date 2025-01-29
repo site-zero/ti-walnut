@@ -1,5 +1,7 @@
 import { Vars } from '@site0/tijs';
-import { QueryFilter, QuerySorter } from '..';
+
+export type QueryFilter = Vars;
+export type QuerySorter = Record<string, number>;
 
 export type SqlPagerInput = {
   pageNumber: number;

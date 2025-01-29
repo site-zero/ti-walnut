@@ -212,6 +212,7 @@ export function useHubView() {
     ObjId: computed(() => _objId.value),
     Options: computed(() => _options.value),
     isViewLoading: computed(() => _view_loading.value),
+    ActioinBarVars: computed(() => _model.value?.getActionBarVars()),
     ..._state,
     createGUIContext,
     createGUILayout,

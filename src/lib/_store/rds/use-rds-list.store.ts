@@ -20,6 +20,7 @@ import {
   LocalListMakeChangeOptions,
   QueryFilter,
   QuerySorter,
+  RefreshOptions,
   SqlPagerInput,
   SqlQuery,
   SqlResult,
@@ -445,6 +446,20 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return [];
   }
 
+  async function onSelect(payload: TableSelectEmitInfo) {
+    let currentId = (payload.currentId as string) ?? undefined;
+    let checkedIds = Util.mapTruthyKeys(payload.checkedIds) as string[];
+    await updateSelection(currentId, checkedIds);
+    __save_local_select();
+  }
+
+  async function selectItem(id: string) {
+    let currentId = id;
+    let checkedIds = [id];
+    await updateSelection(currentId, checkedIds);
+    __save_local_select();
+  }
+
   function updateSelection(
     currentId?: TableRowID | null,
     checkedIds?: TableRowID[]
@@ -619,12 +634,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //---------------------------------------------
     //                  与控件绑定
     //---------------------------------------------
-    onSelect(payload: TableSelectEmitInfo) {
-      _current_id.value = payload.currentId ?? undefined;
-      _checked_ids.value = Util.mapTruthyKeys(payload.checkedIds);
-      __save_local_select();
-    },
-
+    onSelect,
+    selectItem,
     //---------------------------------------------
     //                  远程方法
     //---------------------------------------------
@@ -659,6 +670,16 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       resetLocalChange();
       //remoteList.value = undefined;
       await Promise.all([queryRemoteList(), countRemoteList()]);
+    },
+
+    /**
+     * 刷新函数，根据提供的选项执行刷新操作。
+     */
+    refresh: async function (options: RefreshOptions = {}) {
+      if (options.reset) {
+        resetLocalChange();
+      }
+      await queryRemoteList();
     },
   };
 }

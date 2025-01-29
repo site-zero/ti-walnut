@@ -24,6 +24,7 @@ export async function wnRunCommand(
       try {
         return JSON5.parse(str);
       } catch (errParse) {
+        console.error('run-command re-fail to parse json: ', str, errParse);
         let html = ['<h3>Fail To Parse JSON</h3>'];
         html.push('<pre style="white-space:pre-wrap; width:100%;">');
         html.push('command: ' + cmdText + '\n\n');
@@ -37,16 +38,20 @@ export async function wnRunCommand(
           minHeight: '320px',
           contentType: 'html',
         });
-        console.error('run-command re-fail to parse json: ', str, errParse);
       }
     }
-    return str;
+    // 那么默认就是返回文本咯
+    else {
+      return str;
+    }
   } catch (reason) {
+    // 被异常中断
     // 仅仅是 abort
     if ((reason as any).abort) {
       throw reason;
     }
-
+    // 要警告一下
+    console.error('run-command fail: ', reason);
     let html = ['<h3>Fail To Process</h3>'];
     html.push('<pre>', cmdText, '</pre>');
     html.push('<blockquote>', `${reason}`, '</blockquote>');
@@ -58,7 +63,6 @@ export async function wnRunCommand(
       minHeight: '320px',
       contentType: 'html',
     });
-    console.error('run-command fail: ', reason);
     throw reason;
   }
 }

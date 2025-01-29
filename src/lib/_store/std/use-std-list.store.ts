@@ -12,10 +12,12 @@ import { computed, reactive, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  isWnObj,
   ListItemUpdateOptions,
   LocalListEditOptions,
   QueryFilter,
   QuerySorter,
+  RefreshOptions,
   SqlPagerInput,
   SqlQuery,
   updatePager,
@@ -197,6 +199,38 @@ function defineStdListStore(options?: StdListStoreOptions) {
     }
     return 'partial';
   });
+
+  //---------------------------------------------
+  // 读写元数据
+  //---------------------------------------------
+  async function saveMeta() {
+    let diffs = _local.value.makeDifferents();
+    _action_status.value = 'saving';
+
+    for (let diff of diffs) {
+      // 修改已经存在对象
+      if (diff.existsInRemote && diff.existsInLocal) {
+        let obj = await _obj.update(diff.delta);
+        if (obj) {
+          updateItem(obj, { id: obj.id });
+        }
+      }
+      // 插入新对象
+      else if (diff.existsInLocal && !diff.existsInRemote) {
+        let obj = await _obj.create(diff.delta);
+        if (obj) {
+          prependItem(obj);
+        }
+      }
+      // 删除远程对象
+      else if (!diff.existsInLocal && diff.existsInRemote) {
+        await _obj.remove(diff.id as string);
+      }
+    }
+    // 最后悄悄更新一下远程
+    queryRemoteList();
+    _action_status.value = undefined;
+  }
 
   //---------------------------------------------
   // 读写内容
@@ -462,6 +496,20 @@ function defineStdListStore(options?: StdListStoreOptions) {
     return [];
   }
 
+  async function onSelect(payload: TableSelectEmitInfo) {
+    let currentId = (payload.currentId as string) ?? undefined;
+    let checkedIds = Util.mapTruthyKeys(payload.checkedIds) as string[];
+    await updateSelection(currentId, checkedIds);
+    __save_local_select();
+  }
+
+  async function selectItem(id: string) {
+    let currentId = id;
+    let checkedIds = [id];
+    await updateSelection(currentId, checkedIds);
+    __save_local_select();
+  }
+
   async function updateSelection(
     currentId?: string | null,
     checkedIds?: string[]
@@ -566,7 +614,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
       throw 'create need parent id';
     }
     let re = await _obj.create(meta);
-    if (re) {
+    if (isWnObj(re)) {
       if ('append' == autoAppend) {
         _local.value.appendToList(re);
         _remote.value?.push(re);
@@ -656,15 +704,12 @@ function defineStdListStore(options?: StdListStoreOptions) {
   }
 
   /**
-   * 刷新远程列表数据。
-   *
-   * 该异步函数调用 `queryRemoteList` 函数以刷新远程列表数据。
-   *
-   * @async
-   * @function
-   * @returns {Promise<void>} 返回一个 Promise 对象，表示刷新操作的完成。
+   * 刷新函数，根据提供的选项执行刷新操作。
    */
-  async function refresh() {
+  async function refresh(options: RefreshOptions = {}) {
+    if (options.reset) {
+      resetLocalChange();
+    }
     await queryRemoteList();
   }
 
@@ -764,6 +809,10 @@ function defineStdListStore(options?: StdListStoreOptions) {
     updateSelection,
     cancelSelection,
     //---------------------------------------------
+    // 修改元数据
+    //---------------------------------------------
+    saveMeta,
+    //---------------------------------------------
     // 读写内容
     //---------------------------------------------
     loadCurrentContent,
@@ -782,13 +831,8 @@ function defineStdListStore(options?: StdListStoreOptions) {
     //---------------------------------------------
     //                  与控件绑定
     //---------------------------------------------
-    async onSelect(payload: TableSelectEmitInfo) {
-      let currentId = (payload.currentId as string) ?? undefined;
-      let checkedIds = Util.mapTruthyKeys(payload.checkedIds) as string[];
-      await updateSelection(currentId, checkedIds);
-      __save_local_select();
-    },
-
+    onSelect,
+    selectItem,
     //---------------------------------------------
     //                  远程方法
     //---------------------------------------------

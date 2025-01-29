@@ -1,6 +1,5 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { computed } from 'vue';
 import { RdsListStoreOptions, useRdsListStore } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
@@ -54,6 +53,7 @@ export function createRdsListHubModel(
   return {
     store,
     createGUIContext,
+    getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
   };

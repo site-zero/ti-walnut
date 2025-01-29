@@ -12,12 +12,15 @@ export type LocalMetaEditOptions = {
   isNew?: (meta: SqlResult) => boolean;
 };
 
-export type LocalMetaMakeChangeOptions = {
-  updateSql: string;
-  insertSql: string;
+export type LocalMetaMakeDiffOptions = {
   defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
   insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
   updateMeta?: (local: SqlResult, remote: SqlResult) => Vars | undefined;
+};
+
+export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
+  updateSql: string;
+  insertSql: string;
   insertSet?: () => SqlExecSetVar[] | undefined;
   insertPut?: string;
   updatePut?: string;

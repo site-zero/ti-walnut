@@ -94,6 +94,7 @@ export type HubViewState = {
 export interface HubModel {
   store: any;
   createGUIContext: () => Vars;
+  getActionBarVars: () => Vars;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
 }

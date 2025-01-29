@@ -39,6 +39,7 @@ export function createStdMetaHubModel(
   return {
     store,
     createGUIContext,
+    getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
   };

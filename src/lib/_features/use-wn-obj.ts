@@ -112,7 +112,10 @@ export function useWnObj(homePath: string = '~') {
     let input = JSON.stringify(_.omit(meta, 'pid', ...BUILD_IN_KEYS));
     let cmdText = `o @create -p '${parentPath}' @json -cqn`;
     let re = await Walnut.exec(cmdText, { as: 'json', input });
-    return re ?? undefined;
+    if (re) {
+      return _.omit(re, '__is_created');
+    }
+    return undefined;
   }
 
   async function query(

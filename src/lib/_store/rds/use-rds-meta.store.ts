@@ -1,4 +1,4 @@
-import { getLogger } from '@site0/tijs';
+import { getLogger, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
@@ -40,12 +40,12 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
-  const _remote_meta = ref<SqlResult>();
-  const _status = ref<DataStoreActionStatus>();
+  const _remote = ref<SqlResult>();
+  const _action_status = ref<DataStoreActionStatus>();
   const _filter = ref<QueryFilter>(options.filter);
   //---------------------------------------------
   const hasRemoteMeta = computed(() => {
-    if (!_remote_meta.value || _.isEmpty(_remote_meta.value)) {
+    if (!_remote.value || _.isEmpty(_remote.value)) {
       return false;
     }
     return true;
@@ -53,15 +53,34 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalMetaEdit(_remote_meta, options));
-
+  const _local = computed(() => useLocalMetaEdit(_remote, options));
+  //---------------------------------------------
+  const changed = computed(() => _local.value.isChanged());
+  //---------------------------------------------
+  const ActionStatus = computed(() => _action_status.value);
+  //---------------------------------------------
+  const ActionBarVars = computed(() => {
+    return {
+      loading: _action_status.value == 'loading',
+      saving: _action_status.value == 'saving',
+      changed: changed.value,
+    } as Vars;
+  });
+  //---------------------------------------------
+  const LoadStatus = computed((): Omit<DataStoreLoadStatus, 'partial'> => {
+    if (hasRemoteMeta.value) {
+      return 'full';
+    }
+    return 'unloaded';
+  });
+  //---------------------------------------------
   function reset() {
     clearRemoteMeta();
     dropChange();
   }
 
   function clearRemoteMeta() {
-    _remote_meta.value = undefined;
+    _remote.value = undefined;
   }
 
   function dropChange() {
@@ -75,25 +94,25 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //                 被内部重用的方法
   //---------------------------------------------
   const metaData = computed(() => {
-    return _local.value.localMeta.value || _remote_meta.value || {};
+    return _local.value.localMeta.value || _remote.value || {};
   });
 
   function isNewMeta() {
     if (options.isNew) {
       return options.isNew(metaData);
     }
-    return _.isEmpty(_remote_meta.value);
+    return _.isEmpty(_remote.value);
   }
 
   async function fetchRemoteMeta(): Promise<void> {
     //console.log('I am fetch remote', _filter.value);
-    _status.value = 'loading';
+    _action_status.value = 'loading';
     let re = await sqlx.fetch(options.sqlFetch, _filter.value);
     if (re && options.patchRemote) {
       re = options.patchRemote(re);
     }
-    _remote_meta.value = re;
-    _status.value = undefined;
+    _remote.value = re;
+    _action_status.value = undefined;
   }
 
   function makeChanges(): SqlExecInfo[] {
@@ -122,9 +141,9 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   return {
     // 数据模型
     _local,
-    status: _status,
+    status: _action_status,
     filter: _filter,
-    remoteMeta: _remote_meta,
+    remoteMeta: _remote,
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
@@ -132,13 +151,9 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     changed: computed(() => _local.value.isChanged()),
     newMeta: computed(() => isNewMeta()),
     hasRemoteMeta,
-    ActionStatus: computed(() => _status.value),
-    LoadStatus: computed((): Omit<DataStoreLoadStatus, 'partial'> => {
-      if (hasRemoteMeta.value) {
-        return 'full';
-      }
-      return 'unloaded';
-    }),
+    ActionStatus,
+    ActionBarVars,
+    LoadStatus,
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
@@ -172,7 +187,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     },
 
     setRemoteMeta(meta: SqlResult) {
-      _remote_meta.value = _.cloneDeep(meta);
+      _remote.value = _.cloneDeep(meta);
     },
 
     makeChanges,

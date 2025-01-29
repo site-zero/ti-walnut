@@ -11,12 +11,10 @@ import {
   WnObjStatus,
 } from '@site0/tijs';
 import { ComputedRef, Ref } from 'vue';
-import { WnObj } from '../../';
+import { QueryFilter, QuerySorter, WnObj } from '../../';
 import { ObjContentStoreFeature } from '../use-obj-content.store';
 import { ObjMetaStoreFeature } from '../use-obj-meta.store';
 
-export type QueryFilter = Vars;
-export type QuerySorter = Record<string, number>;
 export type QueryJoinOne = {
   /**
    * 查询的目标

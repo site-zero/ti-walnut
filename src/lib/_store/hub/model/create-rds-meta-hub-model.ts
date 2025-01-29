@@ -38,6 +38,7 @@ export function createRdsMetaHubModel(
   return {
     store,
     createGUIContext,
+    getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
   };
