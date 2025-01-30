@@ -3,12 +3,12 @@ import JSON5 from 'json5';
 import _ from 'lodash';
 import { ref } from 'vue';
 import { Walnut } from '../../../core';
+import { QueryFilter } from '../../_types';
 import {
   AggQuery,
   AggResult,
   DirInitFeature,
   DirQuerySettings,
-  QueryFilter,
 } from './dir.type';
 
 const log = getLogger('wn.store.dir.agg');

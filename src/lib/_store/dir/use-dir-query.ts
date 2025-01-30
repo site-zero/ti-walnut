@@ -1,15 +1,9 @@
 import { getLogger, Pager, WnObjStatus } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
-import { WnObj } from '../../';
 import { Walnut } from '../../../core';
-import {
-  DirInitGetters,
-  DirQueryFeature,
-  QueryFilter,
-  QueryJoinOne,
-  QuerySorter,
-} from './dir.type';
+import { QueryFilter, QuerySorter, WnObj } from '../../_types';
+import { DirInitGetters, DirQueryFeature, QueryJoinOne } from './dir.type';
 
 const log = getLogger('wn.store.dir.query');
 
