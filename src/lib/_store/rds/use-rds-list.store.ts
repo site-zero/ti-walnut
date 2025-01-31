@@ -213,7 +213,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
   //---------------------------------------------
   function __reset_local_query() {
-    _keep_query.reset();
+    _keep_query.remove();
   }
   //---------------------------------------------
   function __save_local_select() {
@@ -224,7 +224,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
   //---------------------------------------------
   function __reset_local_select() {
-    _keep_select.reset();
+    _keep_select.remove();
   }
   //---------------------------------------------
   //                 组合其他特性

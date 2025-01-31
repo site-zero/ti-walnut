@@ -154,7 +154,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
   }
   //---------------------------------------------
   function __reset_local_query() {
-    _keep_query.value.reset();
+    _keep_query.value.remove();
   }
   //---------------------------------------------
   function __save_local_select() {
@@ -165,7 +165,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
   }
   //---------------------------------------------
   function __reset_local_select() {
-    _keep_select.value.reset();
+    _keep_select.value.remove();
   }
   //---------------------------------------------
   //                 组合其他特性
