@@ -203,7 +203,7 @@ export class WalnutServer {
   async fetchMySession(): Promise<AjaxResult> {
     if (this._ticket) {
       let re = await Walnut.fetchAjax('/a/me');
-      console.log('fetchMySession:', re);
+      //console.log('fetchMySession:', re);
       if (!re.ok) {
         this._ticket = undefined;
         TiStore.local.remove(TICKET_KEY);
