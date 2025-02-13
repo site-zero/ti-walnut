@@ -114,6 +114,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
     return {
       mode: 'jumper',
       ...(Data.query.pager ?? {}),
+      count: Data.listData.value.length,
     } as PagerProps;
   });
 

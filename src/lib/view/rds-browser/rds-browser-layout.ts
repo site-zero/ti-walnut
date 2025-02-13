@@ -30,6 +30,7 @@ export function useRdsBrowserLayout(props: RdsBrowserProps): LayoutGridProps {
       },
       {
         name: 'list',
+        overflowMode:'cover',
         grid: {
           gridColumnStart: '1',
         },
@@ -42,6 +43,7 @@ export function useRdsBrowserLayout(props: RdsBrowserProps): LayoutGridProps {
       },
       {
         name: 'detail',
+        overflowMode:'cover',
         grid: {
           gridColumnStart: '2',
           gridRowStart: '3',
