@@ -2,6 +2,9 @@ import { ProcessProps } from '@site0/tijs';
 import { reactive } from 'vue';
 
 export type GlobalStatus = {
+  appLogo?: string;
+  appTitle?: string;
+  appVersion?: string;
   appPath?: string;
   appLoading: boolean | string;
   loading: boolean | string;

@@ -1,0 +1,47 @@
+@use '@site0/tijs/sass/_all.scss' as *;
+
+.wn-hub-sky {
+  @include flex-align-nowrap($ai: stretch);
+  padding: 0;
+
+  > .as-part {
+    margin: 0 2em 0 0;
+    &.is-logo {
+      @include flex-center;
+      margin: 0;
+      width: 60px;
+      position: relative;
+      // > a img {
+      //   height: 32px;
+      // }
+      > a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .ti-icon {
+        font-size: 32px;
+        &.is-type-image img {
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+    &.is-crumb {
+      @include flex-align-nowrap($ai: center);
+      position: relative;
+      flex: 1 1 auto;
+      > div.as-title {
+        div.as-version {
+          @include font-fixed;
+          background-color: var(--ti-color-selected);
+          color: var(--ti-color-selected-f);
+          font-size: 8px;
+          border-radius: 0.2em;
+          padding: 0.1em 0.5em;
+          line-height: 1.5em;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}

@@ -17,8 +17,6 @@ import {
   _reload_hub_schema,
 } from './use-hub--reload';
 
-export type HubView = ReturnType<typeof useHubView>;
-
 type InvokeError = {
   methodNotFound: boolean;
   methodName: string;
@@ -27,6 +25,8 @@ type InvokeError = {
 function isInvokeError(err: any): err is InvokeError {
   return err && err.methodNotFound && _.isString(err.methodName);
 }
+
+export type HubViewFeature = ReturnType<typeof useHubView>;
 
 export function useHubView() {
   //---------------------------------------------
@@ -207,12 +207,12 @@ export function useHubView() {
   // 返回特性
   //---------------------------------------------
   return {
-    _model,
+    model: computed(() => _model.value),
     ModelName: computed(() => _modelName.value),
     ObjId: computed(() => _objId.value),
     Options: computed(() => _options.value),
     isViewLoading: computed(() => _view_loading.value),
-    ActioinBarVars: computed(() => _model.value?.getActionBarVars()),
+    ActioinBarVars: computed(() => _model.value?.getActionBarVars() ?? {}),
     ..._state,
     createGUIContext,
     createGUILayout,

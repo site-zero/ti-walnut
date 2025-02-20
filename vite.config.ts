@@ -7,7 +7,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        api: 'modern-compiler', // or "modern"
+        api: 'modern-compiler',
       },
     },
   },
@@ -20,6 +20,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: './assert',
     lib: {
+      //entry: './src/main.ts',
       entry: 'index.d.ts',
       name: 'Ti',
       fileName: (format) => `ti-walnut.${format}.js`,

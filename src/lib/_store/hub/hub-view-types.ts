@@ -1,5 +1,7 @@
 import {
+  ActionBarEvent,
   ActionBarProps,
+  BlockEvent,
   KeepInfo,
   LayoutProps,
   LayoutSchema,
@@ -7,7 +9,7 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref } from 'vue';
-import { GuiViewLayout } from '../../_types';
+import { GuiViewLayout, GuiViewLayoutMode } from '../../_types';
 
 export type HubModelOptions = {
   /**
@@ -114,3 +116,39 @@ export function isHubViewLayout(layout: any): layout is GuiViewLayout {
 }
 
 export type HubViewLayoutInput = Partial<GuiViewLayout> | LayoutProps;
+
+/**
+ * 这个是给控件用的类型，通常由 Pinia 包裹导出
+ */
+export type HubView = {
+  model?: HubModel | undefined;
+  ModelName?: string | undefined;
+  ObjId?: string | undefined;
+  Options?: HubViewOptions | undefined;
+  isViewLoading?: boolean;
+  ActioinBarVars?: Vars;
+  // HubViewState
+  actions: Vars;
+  layout: Vars;
+  schema: Vars;
+  methods: Record<string, Function>;
+
+  // methods
+  createGUIContext: () => Vars;
+  createGUILayout: (GUIContext: Vars, viewMode: GuiViewLayoutMode) => Vars;
+  createGUISchema: (GUIContext: Vars) => Vars;
+  createGUIActions: (GUIContext: Vars) => Vars;
+  reload: (
+    modelName: string,
+    objId: string | undefined,
+    options: HubViewOptions
+  ) => Promise<void>;
+  invoke: (methodName: string, ...args: any[]) => Promise<any>;
+  onBlockEvent: (event: BlockEvent) => Promise<any>;
+  onActionFire: (event: ActionBarEvent) => Promise<any>;
+};
+
+export type GuiViewMeasure = {
+  viewMode: keyof GuiViewLayout;
+  setViewMode: (mode: GuiViewLayoutMode) => void;
+};

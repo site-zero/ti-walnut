@@ -63,6 +63,9 @@ export type WnObjInfo = {
 };
 
 export interface ServerConfig {
+  logo?: string;
+  title?: string;
+  version?: string;
   protocal: 'http' | 'https';
   host: string;
   port: number;
