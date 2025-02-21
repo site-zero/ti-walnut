@@ -246,6 +246,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       saving: _action_status.value == 'saving',
       changed: changed.value,
       empty: isEmpty.value,
+      hasCurrent: hasCurrent.value,
+      hasChecked: hasChecked.value,
     } as Vars;
   });
   //---------------------------------------------

@@ -187,6 +187,8 @@ function defineStdListStore(options?: StdListStoreOptions) {
       saving: _action_status.value == 'saving',
       changed: changed.value,
       empty: isEmpty.value,
+      hasCurrent: hasCurrent.value,
+      hasChecked: hasChecked.value,
     } as Vars;
   });
   //---------------------------------------------
@@ -391,6 +393,10 @@ function defineStdListStore(options?: StdListStoreOptions) {
 
   function getCurrentItem(): WnObj | undefined {
     return getItemById(_current_id.value);
+  }
+
+  function getCheckedItems(): WnObj[] {
+    return findItemsById(_checked_ids.value);
   }
 
   function findItemsById(ids: string[]): WnObj[] {
@@ -753,6 +759,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     getItemByMatch,
     getItemBy,
     getCurrentItem,
+    getCheckedItems,
     findItemsById,
     findItemsByMatch,
     findItemsBy,

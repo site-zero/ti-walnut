@@ -62,6 +62,13 @@ export type WnObjInfo = {
   ph?: string;
 };
 
+type ServerUISetup = {
+  useStdFields?: boolean;
+  useStdColumns?: boolean;
+  fields?: string | string[];
+  columns?: string | string[];
+};
+
 export interface ServerConfig {
   logo?: string;
   title?: string;
@@ -72,6 +79,7 @@ export interface ServerConfig {
   domain?: string;
   site?: string;
   lang?: I18nLang;
+  ui?: ServerUISetup;
   sidebar?: boolean | string;
   logLevel?: string;
   logger?: Record<string, string>;

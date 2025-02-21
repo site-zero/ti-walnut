@@ -1,9 +1,14 @@
 <script lang="ts" setup>
-  import { useGlobalStatus } from '@site0/ti-walnut';
-  import { IconInput, TiIcon } from '@site0/tijs';
+  import { useGlobalStatus, WnHubSkyProps } from '@site0/ti-walnut';
+  import { CssUtils, IconInput, TiIcon } from '@site0/tijs';
   import { computed } from 'vue';
   //--------------------------------------------------
+  const props = defineProps<WnHubSkyProps>();
+  //--------------------------------------------------
   const _global = useGlobalStatus();
+  //--------------------------------------------------
+  const TopClass = computed(() => CssUtils.mergeClassName(props.className));
+  const TopStyle = computed(() => CssUtils.toStyle(props.style));
   //--------------------------------------------------
   const LogoIcon = computed(() => {
     let icon: IconInput;
@@ -28,7 +33,7 @@
 </script>
 
 <template>
-  <div class="wn-hub-sky fit-parent">
+  <div class="wn-hub-sky fit-parent" :class="TopClass" :style="TopStyle">
     <div class="as-part is-logo">
       <a @click="emit('gohome')">
         <!--img :src="status.appLogo" -->

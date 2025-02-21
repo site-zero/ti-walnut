@@ -3,6 +3,8 @@ import {
   ENV_KEYS,
   getLogger,
   getLogLevel,
+  init_ti_std_columns,
+  init_ti_std_fields,
   installTiCoreI18n,
   setDefaultLogLevel,
   setEnv,
@@ -11,6 +13,8 @@ import {
   TiStore,
   Tmpl,
   updateInstalledComponentsLangs,
+  useObjColumns,
+  useObjFields,
   Util,
   Vars,
 } from '@site0/tijs';
@@ -67,6 +71,9 @@ export class WalnutServer {
     installTiCoreI18n(lang);
     installWalnutI18n(lang);
     updateInstalledComponentsLangs(lang);
+
+    //---------------------------------------------------
+    // TODO 我准备放弃 Ti.Log 这个模块了
     if (conf.logLevel) {
       setDefaultLogLevel(getLogLevel(conf.logLevel));
     }
@@ -96,6 +103,9 @@ export class WalnutServer {
       }
       tidyLogger();
     }
+    //---------------------------------------------------
+
+    // 初始化字典
     if (conf.dicts) {
       let dicts: Record<string, WnDictSetup> | undefined;
       if (_.isString(conf.dicts)) {
@@ -105,7 +115,37 @@ export class WalnutServer {
       }
       installWalnutDicts(dicts);
     }
-  }
+
+    // 初始化系统界面相关的设定
+    if (conf.ui) {
+      // 启用标准表单字段
+      if (conf.ui.useStdFields) {
+        init_ti_std_fields();
+      }
+
+      // 启用标准表格列
+      if (conf.ui.useStdColumns) {
+        init_ti_std_columns();
+      }
+
+      // 动态加载预定字段
+      let loading = [] as any[];
+      if (conf.ui.fields) {
+        let paths = _.concat(conf.ui.fields);
+        for (let ph of paths) {
+          loading.push(this.fetchUIFields(ph));
+        }
+      }
+      // 表格列
+      if (conf.ui.columns) {
+        let paths = _.concat(conf.ui.columns);
+        for (let ph of paths) {
+          loading.push(this.fetchUIColumns(ph));
+        }
+      }
+      await Promise.all(loading);
+    }
+  } // async init(conf: ServerConfig) {
 
   getConfig<T>(key: string, dft?: T): T {
     let re = _.get(this._conf, key);
@@ -531,6 +571,22 @@ export class WalnutServer {
       }
     }
     return { sidebar: [] };
+  }
+
+  async fetchUIFields(path: string) {
+    const _ofs = useObjFields();
+    let json = await this.loadJson(path);
+    _.forEach(json, (fld, key) => {
+      _ofs.setField(key, fld);
+    });
+  }
+
+  async fetchUIColumns(path: string) {
+    const _cols = useObjColumns();
+    let json = await this.loadJson(path);
+    _.forEach(json, (col, key) => {
+      _cols.addColumn(key, col);
+    });
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
