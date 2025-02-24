@@ -21,9 +21,11 @@ export function createStdListHubModel(
   const createGUIContext = () => {
     let _s = store;
     return {
+      HomeId: _s.HomeObj.value?.id,
+      HomeObj: _s.HomeObj.value,
       currentId: _s.currentId.value,
       checkedIds: _s.checkedIds.value,
-      query: _s.query,
+      query: _s.query.value,
       ActionStatus: _s.ActionStatus.value,
       ActionBarVars: _s.ActionBarVars.value,
       LoadStatus: _s.LoadStatus.value,
@@ -53,7 +55,7 @@ export function createStdListHubModel(
   return {
     store,
     createGUIContext,
-    getActionBarVars:()=>store.ActionBarVars.value,
+    getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
   };

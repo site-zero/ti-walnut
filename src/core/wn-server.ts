@@ -122,28 +122,10 @@ export class WalnutServer {
       if (conf.ui.useStdFields) {
         init_ti_std_fields();
       }
-
       // 启用标准表格列
       if (conf.ui.useStdColumns) {
         init_ti_std_columns();
       }
-
-      // 动态加载预定字段
-      let loading = [] as any[];
-      if (conf.ui.fields) {
-        let paths = _.concat(conf.ui.fields);
-        for (let ph of paths) {
-          loading.push(this.fetchUIFields(ph));
-        }
-      }
-      // 表格列
-      if (conf.ui.columns) {
-        let paths = _.concat(conf.ui.columns);
-        for (let ph of paths) {
-          loading.push(this.fetchUIColumns(ph));
-        }
-      }
-      await Promise.all(loading);
     }
   } // async init(conf: ServerConfig) {
 
@@ -542,7 +524,7 @@ export class WalnutServer {
 
   async fetchSidebar(): Promise<UserSidebar> {
     let sidebar = this._conf.sidebar;
-    log.info('fetchSidebar:', sidebar);
+    // log.info('fetchSidebar:', sidebar);
     if (sidebar) {
       //  Load the  Static sidebar.
       if (_.isString(sidebar) && sidebar.startsWith('load://')) {
@@ -587,6 +569,29 @@ export class WalnutServer {
     _.forEach(json, (col, key) => {
       _cols.addColumn(key, col);
     });
+  }
+
+  async loadMyDynmicUISettings() {
+    if (this._ticket && this._conf.ui) {
+      // 动态加载预定字段
+      let loading = [] as any[];
+      if (this._conf.ui.fields) {
+        let paths = _.concat(this._conf.ui.fields);
+        for (let ph of paths) {
+          loading.push(this.fetchUIFields(ph));
+        }
+      }
+      // 表格列
+      if (this._conf.ui.columns) {
+        let paths = _.concat(this._conf.ui.columns);
+        for (let ph of paths) {
+          loading.push(this.fetchUIColumns(ph));
+        }
+      }
+      if (loading.length > 0) {
+        await Promise.all(loading);
+      }
+    }
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {

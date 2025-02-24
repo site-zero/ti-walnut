@@ -3,9 +3,9 @@
   import { IconInput, TiIcon } from '@site0/tijs';
   import { computed } from 'vue';
   //--------------------------------------------------
-  let emit = defineEmits<{
-    (event: 'logout'): void;
-  }>();
+  // let emit = defineEmits<{
+  //   (event: 'logout'): void;
+  // }>();
   //--------------------------------------------------
   const session = useSessionStore();
   //--------------------------------------------------

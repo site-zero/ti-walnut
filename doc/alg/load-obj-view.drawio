@@ -1,0 +1,221 @@
+<mxfile host="65bd71144e">
+    <diagram id="L5FYMgg6Mksp1jvuDaxC" name="第 1 页">
+        <mxGraphModel dx="2725" dy="779" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="68" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="2" target="3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="&amp;lt;WnHubArena&amp;gt;&lt;br&gt;use-hub-arena-reload" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="80" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="70" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="4">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Walnut&lt;div&gt;::loadHubViewOptions(dir,oid?)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;spacing=6;verticalAlign=top;spacingTop=-3;dashed=1;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="80" width="230" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Walnut&lt;div&gt;:: getObjView(dir,oid?)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;spacing=6;verticalAlign=top;spacingTop=-3;dashed=1;" vertex="1" parent="1">
+                    <mxGeometry x="580" y="80" width="190" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="无值就返回 null" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="15">
+                    <mxGeometry x="-0.0763" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-4" y="-9" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="19">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="有值" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="21">
+                    <mxGeometry x="-0.05" relative="1" as="geometry">
+                        <mxPoint x="13" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6" value="view?" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Lucida Console;" vertex="1" parent="1">
+                    <mxGeometry x="300" y="150" width="95" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="7" target="8">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="否" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="12">
+                    <mxGeometry x="-0.15" y="-3" relative="1" as="geometry">
+                        <mxPoint x="3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="71" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="7" target="9">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="10" y="170"/>
+                            <mxPoint x="10" y="460"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="72" value="存在" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="71">
+                    <mxGeometry x="-0.6762" y="-1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" value="viewOptions?&lt;br&gt;HubViewOptions" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="41.25" y="150" width="137.5" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="9">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="&lt;div&gt;Walnut.getObjPath&amp;nbsp;&lt;/div&gt;&lt;div&gt;&amp;nbsp;- 适配对象抽象路径&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;createObjViewOptions&lt;div&gt;1. 普通文件&lt;/div&gt;&lt;div&gt;2. 视图文件&lt;/div&gt;&lt;div&gt;3.数据集&lt;/div&gt;&lt;div&gt;4.普通目录&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;spacing=6;" vertex="1" parent="1">
+                    <mxGeometry x="33.75" y="230" width="152.5" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="HubView&lt;div&gt;reload(dir,id?,view)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="440" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="20" target="7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="&lt;div&gt;加载失败&lt;/div&gt;&lt;div&gt;返回 null&lt;br&gt;&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="23">
+                    <mxGeometry x="-0.1635" y="4" relative="1" as="geometry">
+                        <mxPoint x="-13" y="-18" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="25" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="19" target="20">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="字符串?" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Lucida Console;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="230" width="75" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="20" target="26">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="加载路径" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="305" y="300" width="85" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="JSON.parse" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="305" y="390" width="85" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" style="edgeStyle=elbowEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="26" target="7">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="305" y="430.5" as="sourcePoint"/>
+                        <mxPoint x="180" y="170" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="220" y="280"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="28" value="文件内容&lt;br&gt;就是视图" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="27">
+                    <mxGeometry x="-0.6881" y="1" relative="1" as="geometry">
+                        <mxPoint x="9" y="-1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="36" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="31" target="33">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="_views[dirName]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;fontFamily=Lucida Console;fontColor=#0000FF;" vertex="1" connectable="0" parent="36">
+                    <mxGeometry x="-0.1111" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;span style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color)); color: rgb(0, 0, 0);&quot;&gt;ViewArms::&lt;/span&gt;&lt;br style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;/div&gt;&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;color: rgb(0, 0, 0); background-color: transparent;&quot;&gt;_conf.views&lt;/span&gt;&lt;/div&gt;&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;spacing=8;" vertex="1" parent="1">
+                    <mxGeometry x="580" y="160" width="100" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="32" target="44">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;font color=&quot;#000000&quot;&gt;{dirName&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;font color=&quot;#000000&quot;&gt;,objId}&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;align=left;spacing=8;" vertex="1" parent="1">
+                    <mxGeometry x="690" y="160" width="80" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="33" target="40">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="不存在" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="41">
+                    <mxGeometry x="-0.2108" y="1" relative="1" as="geometry">
+                        <mxPoint x="1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="49" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="33" target="44">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="viewArms?" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Lucida Console;" vertex="1" parent="1">
+                    <mxGeometry x="582.5" y="287.5" width="95" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="视图路由" style="text;strokeColor=none;fillColor=none;html=1;fontSize=12;fontStyle=1;verticalAlign=middle;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="580" y="140" width="70" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="上下文" style="text;strokeColor=none;fillColor=none;html=1;fontSize=12;fontStyle=1;verticalAlign=middle;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="690" y="140" width="70" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="40" target="33">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="47" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="40" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" value="返回 undefined" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="47">
+                    <mxGeometry x="0.1896" y="1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="40" value="_views[*]" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="257.5" width="80" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="44" target="46">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="选择&lt;div&gt;View&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Lucida Console;" vertex="1" parent="1">
+                    <mxGeometry x="720" y="287.5" width="95" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" style="edgeStyle=none;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="46" target="58">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" value="不存在" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="60">
+                    <mxGeometry x="0.1609" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="61" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="46" target="56">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="对象(非字符串)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="61">
+                    <mxGeometry x="0.1692" y="1" relative="1" as="geometry">
+                        <mxPoint x="11" y="-1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="62" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="46" target="55">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="模板字符串" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="62">
+                    <mxGeometry x="0.1059" y="1" relative="1" as="geometry">
+                        <mxPoint x="1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="46" value="View" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="725" y="400" width="85" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="55" target="58">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="480" y="370" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="55" value="Tmpl.render" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="540" y="450" width="85" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="56" target="58">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="56" value="explainObj" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="540" y="400" width="85" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="58" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="View" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="435" y="330" width="85" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="73" value="WnHubArena 动态加载视图逻辑" style="text;strokeColor=none;fillColor=none;html=1;fontSize=24;fontStyle=1;verticalAlign=middle;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="-20" y="20" width="360" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

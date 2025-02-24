@@ -164,7 +164,7 @@ export function initWalnutObjDefaultFields() {
     } as LabelProps,
   });
   // ----------------------------- 时间戳
-  _ofs.setTimeLabelField('ct', 'i18n:wn-obj-ct');
-  _ofs.setTimeLabelField('lm', 'i18n:wn-obj-lm');
-  _ofs.setTimeLabelField('expi', 'i18n:wn-obj-expi');
+  _ofs.setDateTimeLabelField('ct', 'i18n:wn-obj-ct');
+  _ofs.setDateTimeLabelField('lm', 'i18n:wn-obj-lm');
+  _ofs.setDateTimeLabelField('expi', 'i18n:wn-obj-expi');
 }

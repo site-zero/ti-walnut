@@ -8,7 +8,7 @@ import {
   Vars,
 } from '@site0/tijs';
 import _ from 'lodash';
-import { computed, reactive, ref } from 'vue';
+import { computed, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
@@ -84,14 +84,16 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
   let _options: StdListStoreOptions = _.cloneDeep(options ?? { homePath: '~' });
+  let _keep_query_by = ref(options?.keepQuery);
+  let _keep_select_by = ref(options?.keepSelect);
   const _obj = useWnObj();
   const _home_obj = ref<WnObj>();
   const _dir_index = ref<WnObj>();
   const _dir_data = ref<WnObj>();
   //---------------------------------------------
   // 本地状态数据
-  const _keep_query = computed(() => useKeep(_options.keepQuery));
-  const _keep_select = computed(() => useKeep(_options.keepSelect));
+  const _keep_query = computed(() => useKeep(_keep_query_by.value));
+  const _keep_select = computed(() => useKeep(_keep_select_by.value));
   /**
    * 开启这个选项，如果选择的当前对象是一个文件，那么就自动加载内容
    */
@@ -134,7 +136,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   const _remote = ref<WnObj[]>();
   const _action_status = ref<DataStoreActionStatus>();
-  const query = reactive(__create_data_query());
+  const _query = ref(__create_data_query());
   const _current_id = ref<string>();
   const _checked_ids = ref<string[]>([]);
   const _content = useObjContentStore();
@@ -145,10 +147,10 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   function __save_local_query() {
     _keep_query.value.save({
-      filter: query.filter,
-      sorter: query.sorter,
+      filter: _query.value.filter,
+      sorter: _query.value.sorter,
       pager: {
-        pageSize: query.pager?.pageSize,
+        pageSize: _query.value.pager?.pageSize,
       },
     });
   }
@@ -196,7 +198,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     if (_.isUndefined(_remote.value)) {
       return 'unloaded';
     }
-    if (_remote.value.length == query.pager?.totalCount) {
+    if (_remote.value.length == _query.value.pager?.totalCount) {
       return 'full';
     }
     return 'partial';
@@ -316,8 +318,8 @@ function defineStdListStore(options?: StdListStoreOptions) {
 
   function clearRemoteList() {
     _remote.value = undefined;
-    if (query.pager) {
-      updatePagerTotal(query.pager, 0);
+    if (_query.value.pager) {
+      updatePagerTotal(_query.value.pager, 0);
     }
   }
 
@@ -541,7 +543,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
   const CurrentItem = computed(() => getCurrentItem());
 
   function __gen_query(): SqlQuery {
-    let q = _.cloneDeep(query);
+    let q = _.cloneDeep(_query.value);
     q.filter = q.filter ?? {};
     _.assign(q.filter, __create_fixed_match());
     return q;
@@ -573,8 +575,8 @@ function defineStdListStore(options?: StdListStoreOptions) {
     // 防空，如果未找到主目录对象，就直接清空数据
     if (!oDir) {
       _remote.value = [];
-      if (query.pager) {
-        updatePager(query.pager, { pageNumber: 0, totalCount: 0 });
+      if (_query.value.pager) {
+        updatePager(_query.value.pager, { pageNumber: 0, totalCount: 0 });
       }
       return;
     }
@@ -597,8 +599,8 @@ function defineStdListStore(options?: StdListStoreOptions) {
     _remote.value = list ?? [];
 
     // 更新翻页信息
-    if (query.pager) {
-      updatePager(query.pager, pager);
+    if (_query.value.pager) {
+      updatePager(_query.value.pager, pager);
     }
 
     _action_status.value = undefined;
@@ -689,6 +691,19 @@ function defineStdListStore(options?: StdListStoreOptions) {
       let aph = Util.appendPath(`id:${oHome.id}`, dataPath);
       _dir_data.value = await _obj.fetch(aph);
     }
+
+    // 根据 home 重新评估一下 options
+    let exCtx = { HomeId: _home_obj.value.id, HomeObj: _home_obj.value };
+    _keep_query_by.value = Util.explainObj(exCtx, _options.keepQuery);
+    _keep_select_by.value = Util.explainObj(exCtx, _options.keepSelect);
+
+    // 重新加载查询条件
+    _query.value = __create_data_query();
+
+    // 重新加载选中项目
+    let selection = _keep_select.value.loadObj() ?? {};
+    _current_id.value = selection.currentId;
+    _checked_ids.value = selection.checkedIds || [];
   }
 
   /**
@@ -726,16 +741,19 @@ function defineStdListStore(options?: StdListStoreOptions) {
     ---------------------------------------------*/
   return {
     // 数据模型
+    _keep_query_by,
+    _keep_select_by,
     _keep_query,
     _keep_select,
     _local,
     _remote,
     currentId: _current_id,
     checkedIds: _checked_ids,
-    query,
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
+    query: computed(() => _query.value),
+    HomeObj: computed(() => _home_obj.value),
     remoteList: computed(() => _remote.value),
     ActionStatus,
     ActionBarVars,
@@ -764,7 +782,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     findItemsByMatch,
     findItemsBy,
     getFilterField: (key: string, dft?: any) => {
-      return _.get(query.filter, key) ?? dft;
+      return _.get(_query.value.filter, key) ?? dft;
     },
     //---------------------------------------------
     //                  本地方法
@@ -773,28 +791,28 @@ function defineStdListStore(options?: StdListStoreOptions) {
     clearRemoteList,
 
     setQuery(q: ComboFilterValue) {
-      _.assign(query, q);
+      _.assign(_query.value, q);
       __save_local_query();
     },
 
     setFilter(filter: QueryFilter) {
-      query.filter = _.cloneDeep(filter);
+      _query.value.filter = _.cloneDeep(filter);
       __save_local_query();
     },
 
     setSorter(sorter: QuerySorter) {
-      query.sorter = _.cloneDeep(sorter);
+      _query.value.sorter = _.cloneDeep(sorter);
       __save_local_query();
     },
 
     setPager(page: Partial<SqlPagerInput>) {
-      if (!query.pager) {
-        query.pager = {
+      if (!_query.value.pager) {
+        _query.value.pager = {
           pageNumber: 1,
           pageSize: 20,
         };
       }
-      updatePager(query.pager, page);
+      updatePager(_query.value.pager, page);
       __save_local_query();
     },
 
