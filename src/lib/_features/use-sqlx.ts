@@ -101,7 +101,7 @@ export function defineSqlx(daoName?: string) {
    * @param query 查询条件
    * @returns 查询结果
    */
-  async function select(sql: string, query: SqlQuery): Promise<SqlResult[]> {
+  async function query(sql: string, query: SqlQuery): Promise<SqlResult[]> {
     // 准备查询上下文
     let q = {
       filter: query.filter,
@@ -112,6 +112,18 @@ export function defineSqlx(daoName?: string) {
       q.columns = _.concat(query.columns).join(',');
     }
 
+    return await __query(sql, q);
+  }
+
+  /**
+   * 封装 SQL 的查询
+   *
+   * @param sql SQL 模板名称
+   * @param query 查询条件
+   * @returns 查询结果
+   */
+  async function select(sql: string, q: Vars): Promise<SqlResult[]> {
+    // 准备查询上下文
     return await __query(sql, q);
   }
 
@@ -281,5 +293,5 @@ export function defineSqlx(daoName?: string) {
   }
 
   //-------------< Output Feature >------------------
-  return { select, fetch, count, exec };
+  return { query, fetch, select, count, exec };
 }

@@ -50,7 +50,7 @@ export function defineRdsSimpleStore(options: RdsStoreDefination) {
   //---------------------------------------------
   async function queryRemoteList(sqlName: string) {
     _action_status.value = 'loading';
-    _remote_list.value = await sqlx.select(sqlName, query);
+    _remote_list.value = await sqlx.query(sqlName, query);
     _action_status.value = undefined;
   }
 
