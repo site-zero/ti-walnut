@@ -90,8 +90,14 @@ export function useWnObj(homePath: string = '~') {
     if (!id) {
       throw `update obj need 'id' in meta!`;
     }
-    let theId = id.replace(/'/g, '');
-    let input = JSON.stringify(_.omit(meta, ...BUILD_IN_KEYS));
+    // 确保，防止命令注入
+    let theId = id.replace(/['/\\]/g, '');
+
+    // 准备元数据
+    let newMeta: Vars = _.omit(meta, ...BUILD_IN_KEYS);
+
+    // 准备输入
+    let input = JSON.stringify(newMeta);
     let cmdText = `o @get -ignore '${theId}' @update  @json -cqn`;
     let re = await Walnut.exec(cmdText, { as: 'json', input });
     return re ?? undefined;
@@ -109,7 +115,13 @@ export function useWnObj(homePath: string = '~') {
       let theParentId = pid.replace(/'/g, '');
       parentPath = `id:${theParentId}`;
     }
-    let input = JSON.stringify(_.omit(meta, 'pid', ...BUILD_IN_KEYS));
+
+    // 准备元数据
+    let newMeta: Vars = _.omit(meta, ...BUILD_IN_KEYS);
+    newMeta.race = meta.race ?? 'FILE';
+
+    // 准备输入
+    let input = JSON.stringify(newMeta);
     let cmdText = `o @create -p '${parentPath}' @json -cqn`;
     let re = await Walnut.exec(cmdText, { as: 'json', input });
     if (re) {

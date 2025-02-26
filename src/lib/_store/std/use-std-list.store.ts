@@ -174,7 +174,9 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   const _local = computed(() => useLocalListEdit(_remote, _options));
   //---------------------------------------------
-  const changed = computed(() => _local.value.isChanged());
+  const changed = computed(
+    () => _local.value.isChanged() || _content.changed.value
+  );
   const isEmpty = computed(() => _.isEmpty(listData.value));
   const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
   const isLocalEmpty = computed(() =>
@@ -747,6 +749,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     _keep_select,
     _local,
     _remote,
+    _content,
     currentId: _current_id,
     checkedIds: _checked_ids,
     //---------------------------------------------

@@ -1,32 +1,31 @@
 <script lang="ts" setup>
-  import JSON5 from 'json5';
-  import _ from 'lodash';
+  import { BlockEvent, TiLayoutTabs } from '@site0/tijs';
   import { computed } from 'vue';
-  import { WnObj } from '../../';
-
-  const props = defineProps<{
-    value: WnObj;
-  }>();
-
-  const Obj = computed(() => props.value || {});
-  const hasObj = computed(() => (Obj.value.id ? true : false));
-  const Meta = computed(() => _.omit(props.value, 'ancestors'));
+  import { useObjViewerLayout } from './use-obj-viewer-layout';
+  import { useObjViewerSchema } from './use-obj-viewer-schema';
+  import { useWnObjViewer } from './use-wn-obj-viewer';
+  import { WnObjViewerProps } from './wn-obj-viewer-types';
+  //-----------------------------------------------------
+  const props = withDefaults(defineProps<WnObjViewerProps>(), {
+    tabsAlign: 'left',
+    tabsAt: 'bottom',
+    tabItemSpace: 's',
+  });
+  //-----------------------------------------------------
+  const api = useWnObjViewer(props);
+  //-----------------------------------------------------
+  const GUILayout = computed(() => useObjViewerLayout(props, api));
+  const GUISchema = computed(() => useObjViewerSchema(props, api));
+  //-----------------------------------------------------
+  function onBlock(event: BlockEvent) {
+    console.log('onBlock', event);
+  }
+  //-----------------------------------------------------
 </script>
 <template>
-  <div class="wn-obj-view">
-    <header>Object: {{ Obj.id }}</header>
-    <div>
-      <span v-for="an in Obj.ancestors">{{ an.nm }} > </span>
-      <span v-if="hasObj">{{ Obj.nm }}</span>
-    </div>
-    <hr />
-    <pre>{{ JSON5.stringify(Meta, null, '  ') }}</pre>
-  </div>
+  <TiLayoutTabs
+    className="cover-parent"
+    v-bind="GUILayout"
+    :schema="GUISchema"
+    @block="onBlock" />
 </template>
-<style lang="scss" scoped>
-  @use '@site0/tijs/sass/_all.scss' as *;
-
-  .wn-obj-view {
-    padding: 1em;
-  }
-</style>
