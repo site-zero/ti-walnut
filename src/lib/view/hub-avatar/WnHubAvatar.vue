@@ -10,7 +10,7 @@
   const session = useSessionStore();
   //--------------------------------------------------
   const Me = computed(() => {
-    return session.me.value ?? {};
+    return session.data.me ?? {};
   });
   //--------------------------------------------------
   const MyName = computed(() => {

@@ -2,6 +2,7 @@ import {
   createObjViewOptions,
   GuiViewMeasure,
   HubView,
+  useSessionStore,
   Walnut,
 } from '@site0/ti-walnut';
 import { WnHubArenaProps } from './wn-hub-arena-types';
@@ -37,6 +38,7 @@ export function useHubArenaReload(
   _view_mode: GuiViewMeasure,
   _hub_view: HubView
 ) {
+  const session = useSessionStore();
   /**
    * 重新加载视图的异步函数。
    *
@@ -49,18 +51,25 @@ export function useHubArenaReload(
    * 异步加载视图设置。加载完成后，使用 `useHubView` 重新加载视图并更新 `_view.value`。
    */
   async function reload() {
-    let { dirName, objId } = props;
+    let { hubPath, hashId } = props;
     try {
+      _hub_view.setLoading(true);
+      let path = session.getObjPath(hubPath);
+      let obj = await Walnut.fetchObj(path);
+      // 未找到对象，那么肯定是不能接受的
+      if (!obj) {
+        _hub_view.setLoading(false);
+        return;
+      }
+
       // 获取视图设置
-      let viewOptions = await Walnut.loadHubViewOptions(dirName, objId);
+      let viewOptions = await Walnut.loadHubViewOptions(hubPath, obj);
       // 尝试根据对象的信息加载
       if (!viewOptions) {
-        let objPath = Walnut.getObjPath(dirName, objId);
-        let obj = await Walnut.fetchObj(objPath);
         viewOptions = await createObjViewOptions(obj);
       }
       // 重新加载视图
-      await _hub_view.reload(dirName, objId, viewOptions);
+      await _hub_view.reload(obj, viewOptions, hashId);
     } catch (err) {
       console.error(err);
     }

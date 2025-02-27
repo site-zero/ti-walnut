@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  isWnObj,
   LocalMetaEditOptions,
   useLocalMetaEdit,
   useWnObj,
@@ -17,7 +18,7 @@ export type StdMetaStoreOptions = LocalMetaEditOptions & {
   /**
    * 对象路径，通常就是一个文件对象
    */
-  objPath: string;
+  objPath: string | WnObj;
   /**
    * 保存后自动刷新结果
    */
@@ -236,7 +237,9 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
    * @returns {Promise<void>} 返回一个 Promise 对象，表示刷新操作的完成。
    */
   async function refresh() {
-    if (_options.objPath) {
+    if (isWnObj(_options.objPath)) {
+      _remote.value = _options.objPath;
+    } else if (_.isString(_options.objPath)) {
       _remote.value = await _obj.fetch(_options.objPath);
     } else {
       _remote.value = undefined;

@@ -134,50 +134,20 @@ export class WalnutServer {
     return re ?? dft;
   }
 
-  getObjPath(dirName: string, objId?: string): string {
-    let context = { dirName, objId };
-    let path: string | undefined = undefined;
-
-    // 获取路径规则
-    let __paths = this._conf.objPath ?? {};
-    let pathArms = __paths[dirName];
-    if (!pathArms) {
-      pathArms = __paths['*'];
-    }
-
-    // 挑选路径模板
-    if (pathArms) {
-      path = Util.selectValue(context, pathArms);
-    }
-
-    // 根据模板渲染路径
-    if (path) {
-      // 编译模板，并渲染
-      let tmpl = Tmpl.parse(path);
-      return tmpl.render(context, false);
-    }
-
-    // 默认规则
-    if (objId) {
-      return `id:${dirName}`;
-    }
-    return `~/${dirName}`;
-  }
-
-  getObjView(dirName: string, objId?: string) {
-    let context = { dirName, objId };
+  getObjView(path: string, ctx: Vars = {}) {
+    let aCtx = { path, ...ctx };
     let view: string | HubViewOptions | undefined = undefined;
 
     // 获取路径规则
     let __views = this._conf.views ?? {};
-    let viewArms = __views[dirName];
+    let viewArms = __views[path];
     if (!viewArms) {
       viewArms = __views['*'];
     }
 
     // 挑选路径模板
     if (viewArms) {
-      view = Util.selectValue(context, viewArms);
+      view = Util.selectValue(aCtx, viewArms);
     }
 
     // 根据模板渲染路径
@@ -185,15 +155,15 @@ export class WalnutServer {
       // 编译模板，并渲染
       if (_.isString(view)) {
         let tmpl = Tmpl.parse(view);
-        return tmpl.render(context, false);
+        return tmpl.render(aCtx, false);
       }
       // 展开上下文
-      return Util.explainObj(context, view);
+      return Util.explainObj(aCtx, view);
     }
   }
 
-  async loadHubViewOptions(dirName: string, objId?: string) {
-    let view = this.getObjView(dirName, objId);
+  async loadHubViewOptions(hubPath: string, hubObj: WnObj) {
+    let view = this.getObjView(hubPath, hubObj);
     if (!view) {
       return null;
     }

@@ -1,4 +1,5 @@
 import {
+  Alert,
   ComboFilterValue,
   KeepInfo,
   Match,
@@ -37,7 +38,7 @@ export type StdListStoreOptions = LocalListEditOptions & {
    * 主目录路径，通常就是一个文件夹，如果是 thing 文件夹，
    * 那么，除了生米这个参数，还需要声明 indexPath='index'
    */
-  homePath: string;
+  homePath: string | WnObj;
   /**
    * 数据对象存储的位置，如果未指定，则采用与 homePath 相同的路径
    */
@@ -666,11 +667,16 @@ function defineStdListStore(options?: StdListStoreOptions) {
   async function reloadHome() {
     let { homePath, autoCreateHome, indexPath, dataPath } = _options;
     // 读取 home Obj
-    let oHome = await _obj.fetch(homePath);
+    let oHome: WnObj | undefined = undefined;
+    if (isWnObj(homePath)) {
+      oHome = homePath;
+    } else {
+      oHome = await _obj.fetch(homePath);
+    }
 
     // 防空:自动创建
     if (!oHome) {
-      if (autoCreateHome) {
+      if (autoCreateHome && _.isString(homePath)) {
         oHome = await auto_create_obj(homePath);
       }
     }
@@ -734,6 +740,18 @@ function defineStdListStore(options?: StdListStoreOptions) {
       resetLocalChange();
     }
     await queryRemoteList();
+  }
+
+  async function openDir(path: string) {
+    let newDir = await _obj.fetch(path);
+    if (newDir) {
+      _dir_index.value = newDir;
+      await queryRemoteList();
+    }
+    // 报错
+    else {
+      await Alert(`目录不存在：${path}`, { type: 'warn' });
+    }
   }
 
   /*---------------------------------------------
@@ -869,6 +887,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     init,
     reload,
     refresh,
+    openDir,
   };
 }
 

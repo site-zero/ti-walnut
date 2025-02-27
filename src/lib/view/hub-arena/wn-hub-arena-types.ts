@@ -1,4 +1,4 @@
 export type WnHubArenaProps = {
-  dirName: string;
-  objId?: string; 
+  hubPath: string;
+  hashId?: string; 
 };

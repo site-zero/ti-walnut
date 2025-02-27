@@ -1,24 +1,26 @@
 <script lang="ts" setup>
-  import { BlockEvent, TiLayoutTabs } from '@site0/tijs';
+  import { BlockEvent, TabChangeEvent, TiLayoutTabs } from '@site0/tijs';
   import { computed } from 'vue';
   import { useObjViewerLayout } from './use-obj-viewer-layout';
   import { useObjViewerSchema } from './use-obj-viewer-schema';
   import { useWnObjViewer } from './use-wn-obj-viewer';
-  import { WnObjViewerProps } from './wn-obj-viewer-types';
+  import { WnObjViewerEmitter, WnObjViewerProps } from './wn-obj-viewer-types';
+  //-----------------------------------------------------
+  const emit = defineEmits<WnObjViewerEmitter>();
   //-----------------------------------------------------
   const props = withDefaults(defineProps<WnObjViewerProps>(), {
     tabsAlign: 'left',
     tabsAt: 'bottom',
-    tabItemSpace: 's',
+    tabItemSpace: 'm',
   });
   //-----------------------------------------------------
-  const api = useWnObjViewer(props);
+  const api = useWnObjViewer(props, emit);
   //-----------------------------------------------------
   const GUILayout = computed(() => useObjViewerLayout(props, api));
   const GUISchema = computed(() => useObjViewerSchema(props, api));
   //-----------------------------------------------------
-  function onBlock(event: BlockEvent) {
-    console.log('onBlock', event);
+  function onTabChange(event: TabChangeEvent) {
+    emit('show-content', 'content' == event.to.value);
   }
   //-----------------------------------------------------
 </script>
@@ -27,5 +29,5 @@
     className="cover-parent"
     v-bind="GUILayout"
     :schema="GUISchema"
-    @block="onBlock" />
+    @tab-change="onTabChange" />
 </template>

@@ -9,7 +9,7 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref } from 'vue';
-import { GuiViewLayout, GuiViewLayoutMode } from '../../_types';
+import { GuiViewLayout, GuiViewLayoutMode, WnObj } from '../../_types';
 
 export type HubModelOptions = {
   /**
@@ -122,8 +122,6 @@ export type HubViewLayoutInput = Partial<GuiViewLayout> | LayoutProps;
  */
 export type HubView = {
   model?: HubModel | undefined;
-  ModelName?: string | undefined;
-  ObjId?: string | undefined;
   Options?: HubViewOptions | undefined;
   isViewLoading?: boolean;
   ActioinBarVars?: Vars;
@@ -134,14 +132,15 @@ export type HubView = {
   methods: Record<string, Function>;
 
   // methods
+  setLoading: (loading: boolean) => void;
   createGUIContext: () => Vars;
   createGUILayout: (GUIContext: Vars, viewMode: GuiViewLayoutMode) => Vars;
   createGUISchema: (GUIContext: Vars) => Vars;
   createGUIActions: (GUIContext: Vars) => Vars;
   reload: (
-    modelName: string,
-    objId: string | undefined,
-    options: HubViewOptions
+    hubObj: WnObj,
+    options: HubViewOptions,
+    objId?: string
   ) => Promise<void>;
   invoke: (methodName: string, ...args: any[]) => Promise<any>;
   onBlockEvent: (event: BlockEvent) => Promise<any>;

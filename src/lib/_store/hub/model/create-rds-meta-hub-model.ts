@@ -3,18 +3,11 @@ import _ from 'lodash';
 import { RdsMetaStoreOptions, useRdsMetaStore } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
-export function createRdsMetaHubModel(
-  tableName: string,
-  objId: string | undefined,
-  options: Vars
-): HubModel {
-  const storeOptions: RdsMetaStoreOptions = _.assign(
-    {
-      filter: {},
-      sqlFetch: `${tableName}.fetch`,
-    },
+export function createRdsMetaHubModel(options: Vars, objId?: string): HubModel {
+  const storeOptions = _.assign(
+    { filter: {} },
     Util.explainObj({ id: objId }, options)
-  );
+  ) as RdsMetaStoreOptions;
 
   const store = useRdsMetaStore(storeOptions);
   const createGUIContext = () => {

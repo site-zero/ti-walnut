@@ -40,7 +40,7 @@
   );
   //--------------------------------------------------
   watch(
-    () => [props.dirName, props.objId],
+    () => props.hubPath,
     async () => {
       await _arena_reload.value();
       let actions = _.cloneDeep(GUIAction.value);

@@ -65,7 +65,7 @@ export function useObjViewerSchema(
           comConf: {
             className: 'is-track',
             icon: 'fas-folder-open',
-            text: '这是一个目录，无法查看文本内容',
+            text: '这是一个目录，因此没有内容',
           } as RoadblockProps,
         },
   };

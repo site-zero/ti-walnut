@@ -1,9 +1,7 @@
-import { Gender, Str, Vars, getLogger, toGender } from '@site0/tijs';
-import { Ref, computed, ref } from 'vue';
+import { Gender, Str, Tmpl, Util, Vars, toGender } from '@site0/tijs';
+import { computed, reactive, ref } from 'vue';
 import { SignInForm, useGlobalStatus } from '..';
 import { Walnut } from '../../core';
-
-const log = getLogger('wn.store.session');
 
 /*
 Read data from response:
@@ -55,18 +53,18 @@ Read data from response:
 }
 */
 export type UserSession = {
-  ticket: Ref<string | undefined>;
-  me: Ref<UserInfo | undefined>;
-  env: Ref<Vars>;
-  loginAt: Ref<Date | undefined>;
-  expireAt: Ref<Date | undefined>;
-  homePath: Ref<string | undefined>;
-  theme: Ref<string | undefined>;
-  lang: Ref<string | undefined>;
-  errCode: Ref<string | undefined>;
+  ticket: string | undefined;
+  me: UserInfo | undefined;
+  env: Vars;
+  loginAt: Date | undefined;
+  expireAt: Date | undefined;
+  homePath: string | undefined;
+  theme: string | undefined;
+  lang: string | undefined;
+  errCode: string | undefined;
 };
 
-export type UserSessionFeature = ReturnType<typeof useSessionStore>;
+export type UserSessionApi = ReturnType<typeof useSessionStore>;
 
 export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
 
@@ -84,23 +82,23 @@ export type UserInfo = {
   avatar?: string;
 };
 
-const SE = {
-  ticket: ref(),
-  me: ref(),
+const SE = reactive({
+  ticket: undefined,
+  me: undefined,
   env: ref({}),
-  loginAt: ref(),
-  expireAt: ref(),
-  homePath: ref(),
-  theme: ref(),
-  lang: ref(),
-  errCode: ref(),
-} as UserSession;
+  loginAt: undefined,
+  expireAt: undefined,
+  homePath: undefined,
+  theme: undefined,
+  lang: undefined,
+  errCode: undefined,
+}) as UserSession;
 
 function _translate_session_result(data: any) {
   let env = data.envs || {};
   let me = data.me || {};
-  SE.ticket.value = data.ticket;
-  SE.me.value = {
+  SE.ticket = data.ticket;
+  SE.me = {
     loginName: data.unm || me.name,
     mainGroup: data.grp || me.groupName,
     role: Str.splitIgnoreBlank(me.role),
@@ -112,15 +110,38 @@ function _translate_session_result(data: any) {
     roleInDomain: me.roleInDomain,
     sysAccount: me.sysAccount ? true : false,
   };
-  SE.env.value = env;
-  SE.loginAt.value = new Date(data.me.login || 0);
-  SE.expireAt.value = new Date(data.expi || 0);
-  SE.homePath.value = env['HOME'];
-  SE.theme.value = env['THEME'];
-  SE.lang.value = env['LANG'];
+  SE.env = env;
+  SE.loginAt = new Date(data.me.login || 0);
+  SE.expireAt = new Date(data.expi || 0);
+  SE.homePath = env['HOME'];
+  SE.theme = env['THEME'];
+  SE.lang = env['LANG'];
 }
 
+/**
+ * 创建并返回会话管理的 store。
+ * 提供登录、登出、重置会话、获取对象路径和重新加载会话等功能。
+ */
 export function useSessionStore() {
+  /**
+   * 执行用户登录操作。
+   *
+   * **功能**：
+   * - 使用提供的登录表单数据（用户名和密码）向 Walnut 服务器发起登录请求。
+   * - 登录成功时，更新本地会话状态并执行回调函数（若提供）；失败时记录错误码。
+   *
+   * **参数**：
+   * - `info: SignInForm` - 登录表单数据，包含 `username`（用户名）和 `password`（密码）。
+   * - `afterOk?: () => Promise<void>` - 登录成功后执行的回调函数（可选），支持异步操作。
+   *
+   * **返回值**：
+   * - 无显式返回值（异步函数，通过会话状态 `SE` 反映结果）。
+   *
+   * **设计动机**：
+   * - 提供统一的登录入口，封装与 Walnut 服务器的交互逻辑，简化调用。
+   * - 支持异步处理并通过 `useGlobalStatus` 显示处理状态，提升用户体验。
+   * - 允许开发者在登录后执行自定义操作，例如跳转页面或加载数据。
+   */
   async function signIn(info: SignInForm, afterOk: () => Promise<void>) {
     const status = useGlobalStatus();
     try {
@@ -129,14 +150,14 @@ export function useSessionStore() {
       // Sign-in successfully
       if (re.ok) {
         _translate_session_result(re.data);
-        SE.errCode.value = undefined;
+        SE.errCode = undefined;
         if (afterOk) {
           await afterOk();
         }
       }
       // Sign-in Failed
       else {
-        SE.errCode.value = re.errCode;
+        SE.errCode = re.errCode;
       }
       // console.log('signIn', re);
     } finally {
@@ -144,34 +165,159 @@ export function useSessionStore() {
     }
   }
 
+  /**
+   * 重置会话状态到未登录状态。
+   *
+   * **功能**：
+   * - 清空会话相关数据，包括 ticket、用户信息、环境变量等。
+   *
+   * **参数**：
+   * - 无。
+   *
+   * **返回值**：
+   * - 无。
+   *
+   * **设计动机**：
+   * - 用于在会话失效（如登录失败、会话过期）时快速清除状态。
+   * - 确保应用程序在异常情况下恢复到初始状态，提示用户重新登录。
+   */
   function resetSession() {
-    SE.ticket.value = undefined;
-    SE.me.value = undefined;
-    SE.env.value = {};
-    SE.loginAt.value = undefined;
-    SE.expireAt.value = undefined;
-    SE.homePath.value = undefined;
-    SE.theme.value = undefined;
-    SE.lang.value = undefined;
+    SE.ticket = undefined;
+    SE.me = undefined;
+    SE.env = {};
+    SE.loginAt = undefined;
+    SE.expireAt = undefined;
+    SE.homePath = undefined;
+    SE.theme = undefined;
+    SE.lang = undefined;
   }
 
+  /**
+   * 执行用户登出操作。
+   *
+   * **功能**：
+   * - 向 Walnut 服务器发送登出请求。
+   * - 登出成功时，若存在父会话则恢复到父会话状态，否则重置会话。
+   *
+   * **参数**：
+   * - 无。
+   *
+   * **返回值**：
+   * - 无显式返回值（异步函数，通过会话状态 `SE` 反映结果）。
+   *
+   * **设计动机**：
+   * - 支持 Walnut 的嵌套会话特性，允许从模拟用户会话退回到父会话（如管理员会话）。
+   * - 在无父会话时清空状态，确保登出后应用程序恢复到未登录状态。
+   */
   async function signOut() {
-    log.info('sign out');
     let re = await Walnut.signOut();
-    log.info(re);
     if (re.ok) {
       if (re.data && re.data.parent) {
         _translate_session_result(re.data.parent);
-        SE.errCode.value = undefined;
+        SE.errCode = undefined;
       }
       // Cancel Session
       else {
-        log.info('signOut, resetSession');
         resetSession();
       }
     }
   }
 
+  /**
+   * 根据用户路径生成实际的对象路径。
+   *
+   * **功能**：
+   * - 根据全局配置中的路径规则和当前会话上下文，生成实际的对象路径。
+   * - 支持直接映射和条件路径选择， fallback 到默认规则。
+   *
+   * **参数**：
+   * - `uPath: string` - 用户提供的路径字符串。
+   *
+   * **返回值**：
+   * - `string` - 生成的实际对象路径。
+   *
+   * **设计动机**：
+   * - 提供灵活的路径管理机制，适应 Walnut 系统中不同用户和环境的需求。
+   * - 通过配置文件动态调整路径逻辑，无需硬编码，提升可维护性。
+   */
+  function getObjPath(hubPath: string): string {
+    let aCtx: Vars = { path: hubPath, ...SE };
+    let path: string | undefined = undefined;
+
+    // 获取路径规则
+    let __paths: Vars = Walnut.getConfig('objPath', {});
+
+    // hubPath 的值类似  `setting/a/b/c` 我们需要用下面的逻辑
+    // 来路由这个路径到真正的 Walnut 对象路径
+    // 我们会依次循环尝试：
+    //  - setting/a/b/c
+    //  - setting/a/b
+    //  - setting/a
+    //  - setting
+    // 看看 _paths 里有没有定制对应的映射
+    // 譬如，我们在 setting/a  的时候找到了映射，我们会保留 b/c 部分
+    // 以便最后添加到返回值的结尾，也就是说，如果规则是:
+    //  - setting/a : "~/.domain"
+    // 那么函数最后的返回值应该是 "~/.domain/b/c"
+    let pathArms = __paths[hubPath];
+    // Handle partial path matching: try progressively shorter paths
+    if (!pathArms) {
+      const segments = hubPath.split('/');
+
+      // 尝试逐步缩短路径来匹配
+      for (let i = segments.length - 1; i > 0; i--) {
+        let partialPath = segments.slice(0, i).join('/');
+        pathArms = __paths[partialPath];
+
+        if (pathArms) {
+          // 构造剩余路径并加入上下文，以便渲染
+          aCtx.remain = segments.slice(i).join('/') || '';
+          break;
+        }
+      }
+    }
+
+    // 还是木有？！最后尝试一下通配符
+    if (!pathArms) {
+      pathArms = __paths['*'];
+    }
+
+    // 挑选路径模板
+    if (pathArms) {
+      path = Util.selectValue(aCtx, pathArms);
+    }
+
+    // 根据模板渲染路径
+    if (path) {
+      // 编译模板，并渲染
+      let tmpl = Tmpl.parse(path);
+      return tmpl.render(aCtx, false);
+    }
+
+    // 默认规则
+    if (/^~\//.test(hubPath)) {
+      return hubPath;
+    }
+    return `~/${hubPath}`;
+  }
+
+  /**
+   * 重新加载当前会话信息。
+   *
+   * **功能**：
+   * - 从 Walnut 服务器获取最新会话数据并更新本地状态。
+   * - 获取失败时重置会话状态。
+   *
+   * **参数**：
+   * - `afterOk?: () => Promise<void>` - 加载成功后执行的回调函数（可选），支持异步操作。
+   *
+   * **返回值**：
+   * - 无显式返回值（异步函数，通过会话状态 `SE` 反映结果）。
+   *
+   * **设计动机**：
+   * - 保持本地会话与服务器同步，适用于会话可能变更的场景（如过期或修改）。
+   * - 在失败时重置状态以便使用者可以有契机提示用户登录，增强安全性和一致性。
+   */
   async function reload(afterOk: () => Promise<void>) {
     const status = useGlobalStatus();
     try {
@@ -179,7 +325,7 @@ export function useSessionStore() {
       let re = await Walnut.fetchMySession();
       if (re.ok) {
         _translate_session_result(re.data);
-        SE.errCode.value = undefined;
+        SE.errCode = undefined;
         if (afterOk) {
           await afterOk();
         }
@@ -194,10 +340,11 @@ export function useSessionStore() {
   }
 
   return {
-    ...SE,
+    data: SE,
     // ........................ Getters
-    hasTicket: computed(() => (SE.ticket.value ? true : false)),
+    hasTicket: computed(() => (SE.ticket ? true : false)),
     // ........................ Actions
+    getObjPath,
     signIn,
     signOut,
     resetSession,

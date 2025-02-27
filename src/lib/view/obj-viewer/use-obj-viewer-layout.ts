@@ -1,4 +1,4 @@
-import { LayoutBlock, TabsLayoutProps } from '@site0/tijs';
+import { TabsLayoutProps } from '@site0/tijs';
 import { WnObjViewerApi } from './use-wn-obj-viewer';
 import { WnObjViewerProps } from './wn-obj-viewer-types';
 
@@ -15,8 +15,8 @@ export function useObjViewerLayout(
     defaultTab: props.defaultTab,
     keepTab: props.keepTab,
     blocks: [
-      { icon: 'zmdi-info', name: 'meta' },
-      { icon: 'fas-file', name: 'content' },
+      { icon: 'zmdi-info', name: 'meta', title: '属性' },
+      { icon: 'zmdi-eye', name: 'content', title: '查看' },
     ],
   };
 }

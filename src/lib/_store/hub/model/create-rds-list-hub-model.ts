@@ -3,21 +3,11 @@ import _ from 'lodash';
 import { RdsListStoreOptions, useRdsListStore } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
-export function createRdsListHubModel(
-  name: string,
-  objId: string | undefined,
-  options: Vars
-): HubModel {
-  const storeOptions: RdsListStoreOptions = _.assign(
-    {
-      query: {
-        filter: {},
-      },
-      sqlQuery: `${name}.select`,
-      sqlCount: `${name}.count`,
-    },
+export function createRdsListHubModel(options: Vars, objId?: string): HubModel {
+  const storeOptions = _.assign(
+    { query: { filter: {} } },
     options
-  );
+  ) as RdsListStoreOptions;
 
   const store = useRdsListStore(storeOptions);
   const createGUIContext = () => {

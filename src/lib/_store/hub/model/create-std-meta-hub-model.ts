@@ -1,18 +1,15 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
+import { WnObj } from '../../../_types';
 import {
   StdMetaStoreOptions,
   useStdMetaStore,
 } from '../../std/use-std-meta.store';
 import { HubModel } from '../hub-view-types';
 
-export function createStdMetaHubModel(
-  _dirName: string,
-  objId: string,
-  options: Vars
-): HubModel {
+export function createStdMetaHubModel(hubObj: WnObj, options: Vars): HubModel {
   const storeOptions: StdMetaStoreOptions = _.assign({}, options, {
-    objPath: `id:${objId}`,
+    objPath: hubObj,
   });
 
   const store = useStdMetaStore(storeOptions);

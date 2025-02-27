@@ -7,7 +7,10 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
-import { GuiViewLayoutMode } from '../../_types';
+import { useRouter } from 'vue-router';
+import { useGlobalStatus } from '../../_features';
+import { GuiViewLayoutMode, WnObj } from '../../_types';
+import { useSessionStore } from '../use-session.store';
 import { HubModel, HubViewOptions, HubViewState } from './hub-view-types';
 import { useHubModel } from './use-hub--model';
 import {
@@ -16,6 +19,7 @@ import {
   _reload_hub_methods,
   _reload_hub_schema,
 } from './use-hub--reload';
+import { HubNav, useHubNav } from './use-hub-nav';
 
 type InvokeError = {
   methodNotFound: boolean;
@@ -29,12 +33,14 @@ function isInvokeError(err: any): err is InvokeError {
 export type HubViewFeature = ReturnType<typeof useHubView>;
 
 export function useHubView() {
+  const session = useSessionStore();
+  const _global = useGlobalStatus();
+  const _router = useRouter();
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
   const _view_loading = ref(false);
-  const _modelName = ref<string>();
-  const _objId = ref<string>();
+  const _hub_obj = ref<WnObj>();
   const _options = ref<HubViewOptions>();
   const _model = ref<HubModel>();
   const _state: HubViewState = {
@@ -64,19 +70,34 @@ export function useHubView() {
   const createGUIActions = (GUIContext: Vars) => {
     return Util.explainObj(GUIContext, _state.actions.value);
   };
+  //--------------------------------------------
+  function setLoading(loading: boolean) {
+    _view_loading.value = loading;
+  }
+
   //---------------------------------------------
   // 远程方法
   //---------------------------------------------
+  /**
+   * 加载视图的入口方法 。 这个方法会加载模型、布局、方法、动作等所有的资源。
+   *
+   * @param modelName 模块名称：
+   *  - std 就是顶级目录名
+   *  - rds 就是数据实体名
+   * @param objPath 模块内部对象路径【选】
+   *  - std 就是目录下的对象相对路径。
+   *  - rds 就是数据实体的对象主键
+   * @param options 视图选项。
+   */
   async function reload(
-    modelName: string,
-    objId: string | undefined,
-    options: HubViewOptions
+    hubObj: WnObj,
+    options: HubViewOptions,
+    objId?: string
   ) {
-    _modelName.value = modelName;
-    _objId.value = objId;
+    _hub_obj.value = hubObj;
     _options.value = options;
     // 读取数据模型
-    _model.value = useHubModel(modelName, objId, options);
+    _model.value = useHubModel(hubObj, options, objId);
     await _model.value.reload();
 
     // 读取所有的资源文件
@@ -89,9 +110,10 @@ export function useHubView() {
     ]);
     _view_loading.value = false;
   }
+
   //---------------------------------------------
   // 为控件提供的操作方法
-  type InvokeThat = {
+  type InvokeThat = HubNav & {
     api: any;
     methods: Record<string, Function>;
     invoke: (methodName: string, ...args: any[]) => Promise<any>;
@@ -102,8 +124,12 @@ export function useHubView() {
       throw `Model not loaded`;
     }
 
+    // nav 相关
+    const _nav = useHubNav(_model.value.store, _global, _router, session);
+
     // 定义调用时的 this
     const that = {
+      ..._nav,
       api: _model.value.store,
       methods: _state.methods,
     } as InvokeThat;
@@ -208,12 +234,11 @@ export function useHubView() {
   //---------------------------------------------
   return {
     model: computed(() => _model.value),
-    ModelName: computed(() => _modelName.value),
-    ObjId: computed(() => _objId.value),
     Options: computed(() => _options.value),
     isViewLoading: computed(() => _view_loading.value),
     ActioinBarVars: computed(() => _model.value?.getActionBarVars() ?? {}),
     ..._state,
+    setLoading,
     createGUIContext,
     createGUILayout,
     createGUISchema,

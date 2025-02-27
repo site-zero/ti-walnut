@@ -1,6 +1,6 @@
 import { Vars } from '@site0/tijs';
 import _ from 'lodash';
-import { Walnut } from '../../../../core';
+import { WnObj } from '../../../_types';
 import {
   StdListStoreOptions,
   useStdListStore,
@@ -8,13 +8,12 @@ import {
 import { HubModel } from '../hub-view-types';
 
 export function createStdListHubModel(
-  name: string,
-  objId: string | undefined,
-  options: Vars
+  hubObj: WnObj,
+  options: Vars,
+  objId?: string
 ): HubModel {
-  const homePath = Walnut.getObjPath(name);
   const storeOptions: StdListStoreOptions = _.assign({}, options, {
-    homePath,
+    homePath: hubObj,
   });
 
   const store = useStdListStore(storeOptions);
