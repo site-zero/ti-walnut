@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-  import { WN_HUB_APP_INST } from '@site0/ti-walnut';
   import { ActionBarEvent, ActionBarProps, TiActionBar } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, inject } from 'vue';
+  import { WN_HUB_APP_INST } from '../../../lib';
   import { menuExists } from './find-menu-item';
   //--------------------------------------------------
   let emit = defineEmits<{

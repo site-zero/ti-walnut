@@ -8,8 +8,6 @@ import {
   isHubViewLayout,
 } from './hub-view-types';
 
-const _CACHE = new Map<string, any>();
-
 async function __load<T>(
   homePath: string | undefined,
   input: string | (() => T) | (() => Promise<T>) | undefined,
@@ -34,15 +32,8 @@ async function __load<T>(
     } else {
       path = safeCmdArg(input);
     }
-    // 尝试缓存
-    let re = _CACHE.get(path);
-    if (re) {
-      return re as T;
-    }
     // 真正读取
-    re = await Walnut.loadJson(path);
-    _CACHE.set(path, re);
-    return re as T;
+    return await Walnut.loadJson(path, { cache: true });
   }
   // 什么都没有，清空
   return dft;
@@ -107,21 +98,35 @@ export async function _reload_hub_methods(
     let _loaded_methods = [] as any[];
     let loadings = [] as Promise<void>[];
 
-    // 定义一个加载方法
-    async function _load_(path: string) {
+    /**
+     * 动态加载指定路径的 JavaScript 模块。
+     *
+     * @private
+     * @async
+     *
+     * 此函数用于动态加载 JavaScript 模块，并根据配置选项调整模块路径。
+     * 它确保路径格式正确，然后使用 `Walnut.loadJsModule` 加载模块，
+     * 并将加载的模块合并至上一层函数的输出结果集
+     *
+     * @param path - 要加载的 JavaScript 模块的路径。
+     * 如果设置了 `options.modelOptions.homePath`，则此路径是相对于它的相对路径。
+     *
+     * @returns {Promise<void>} - 一个 Promise，在模块加载并存储后解析。
+     */
+    async function __do_load_js_mod(path: string) {
       if (options.modelOptions?.homePath) {
         path = genWnPath(options.modelOptions!.homePath, path);
       } else {
         path = safeCmdArg(path);
       }
       let jsPath = Walnut.cookPath(path);
-      let re = await Walnut.loadJsModule(jsPath);
+      let re = await Walnut.loadJsModule(jsPath, { cache: true });
       _loaded_methods.push(re);
     }
 
     // 准备加载逻辑
     for (let path of options.methods) {
-      loadings.push(_load_(path));
+      loadings.push(__do_load_js_mod(path));
     }
 
     // 归纳最后加载结果

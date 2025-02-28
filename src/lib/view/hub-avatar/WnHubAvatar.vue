@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-  import { useSessionStore } from '@site0/ti-walnut';
   import { IconInput, TiIcon } from '@site0/tijs';
   import { computed } from 'vue';
+  import { useSessionStore } from '../../../lib';
   //--------------------------------------------------
   // let emit = defineEmits<{
   //   (event: 'logout'): void;

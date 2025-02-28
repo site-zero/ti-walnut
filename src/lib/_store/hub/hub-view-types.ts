@@ -9,7 +9,10 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref } from 'vue';
+import { GlobalStatusApi } from '../../_features';
 import { GuiViewLayout, GuiViewLayoutMode, WnObj } from '../../_types';
+import { GuiViewMeasureApi } from '../use-gui-view-measure.store';
+import { UserSessionApi } from '../use-session.store';
 
 export type HubModelOptions = {
   /**
@@ -125,6 +128,12 @@ export type HubView = {
   Options?: HubViewOptions | undefined;
   isViewLoading?: boolean;
   ActioinBarVars?: Vars;
+
+  // Other API
+  global: GlobalStatusApi;
+  session: UserSessionApi;
+  measure: GuiViewMeasureApi;
+
   // HubViewState
   actions: Vars;
   layout: Vars;

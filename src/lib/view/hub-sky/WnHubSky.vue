@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { useGlobalStatus, WnHubSkyProps } from '@site0/ti-walnut';
+  import { useGlobalStatus, WnHubSkyProps } from '../../../lib';
   import { CssUtils, IconInput, TiIcon } from '@site0/tijs';
   import { computed } from 'vue';
   //--------------------------------------------------

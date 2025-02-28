@@ -3,7 +3,7 @@
     useGlobalStatus,
     useSidebar,
     WnHubSideNavProps,
-  } from '@site0/ti-walnut';
+  } from '../../../lib';
   import { SideBarItem, TiSidebar } from '@site0/tijs';
   //--------------------------------------------------
   const emit = defineEmits<{

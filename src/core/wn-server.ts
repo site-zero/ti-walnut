@@ -1,7 +1,6 @@
 import {
   addLogger,
   ENV_KEYS,
-  getLogger,
   getLogLevel,
   init_ti_std_columns,
   init_ti_std_fields,
@@ -39,7 +38,7 @@ import { installWalnutDicts } from './wn-dict';
 import { wnRunCommand } from './wn-run-command';
 
 const TICKET_KEY = 'Walnut-Ticket';
-const log = getLogger('wn.server');
+const debug = false;
 
 export class WalnutServer {
   /**
@@ -52,6 +51,11 @@ export class WalnutServer {
    */
   private _ticket?: string;
 
+  /**
+   * 全局缓存
+   */
+  private _cache: Map<string, any>;
+
   constructor() {
     this._conf = {
       protocal: 'http',
@@ -62,10 +66,10 @@ export class WalnutServer {
       sidebar: false,
     };
     this._ticket = TiStore.local.getString(TICKET_KEY, undefined);
+    this._cache = new Map<string, any>();
   }
 
   async init(conf: ServerConfig) {
-    log.info('init server', conf);
     this._conf = conf;
     let lang = conf.lang ?? 'zh-cn';
     installTiCoreI18n(lang);
@@ -94,11 +98,11 @@ export class WalnutServer {
         })
         .reverse();
 
-      log.debug('WnServer: loggerKeys=', loggerKeys);
+      if (debug) console.log('WnServer: loggerKeys=', loggerKeys);
       for (let k of loggerKeys) {
         let v = conf.logger[k];
         let lv = getLogLevel(v);
-        log.debug('addLogger', k, lv);
+        if (debug) console.log('addLogger', k, lv);
         addLogger(k, lv);
       }
       tidyLogger();
@@ -168,7 +172,7 @@ export class WalnutServer {
       return null;
     }
     if (_.isString(view)) {
-      let json = await this.loadContent(view);
+      let json = await this.loadContent(view, { cache: true });
       if (!json) {
         return null;
       }
@@ -325,9 +329,23 @@ export class WalnutServer {
       let resp = await fetch(loadPath, { signal });
       return await resp.text();
     }
+    // 尝试缓存
+    let cache: Map<string, any> | undefined = undefined;
+    if (options.cache) {
+      cache = _.isBoolean(options.cache) ? this._cache : options.cache;
+      let re = cache.get(objPath);
+      if (re) {
+        return re;
+      }
+    }
+
     // Walnut 的动态路径
     let urlPath = this.cookPath(objPath);
-    return await this.fetchText(urlPath, options);
+    let re = await this.fetchText(urlPath, _.omit(options, 'cache'));
+    if (cache) {
+      cache.set(objPath, re);
+    }
+    return re;
   }
 
   /**
@@ -375,14 +393,19 @@ export class WalnutServer {
   }
 
   /**
-   * @param objPath 存放在 Walnut 系统的对象路径
-   * @returns  可以加载的 Walnut 系统的对象路径
+   * 将对象路径转换为可用于获取内容的 URL。
+   *
+   * @param objPath 对象系统路径。譬如 `~/.tmp/a.txt`
+   * @returns 编码后的 URL 字符串，可用于获取指定路径的内容。
    */
   cookPath(objPath: string): string {
     return `/o/content?str=${encodeURIComponent(objPath)}`;
   }
 
   async loadJson(objPath: string, options: WnLoadOptions = {}): Promise<any> {
+    if (options.cache) {
+    }
+
     let re = await this.loadContent(objPath, options);
     if (_.isNil(re)) {
       return re ?? null;
@@ -390,7 +413,7 @@ export class WalnutServer {
     try {
       return JSON5.parse(re);
     } catch (err) {
-      log.error(`loadJson(${objPath}) fail to parse JSON:`, re, err);
+      console.error(`loadJson(${objPath}) fail to parse JSON:`, re, err);
     }
   }
 
@@ -414,7 +437,7 @@ export class WalnutServer {
       if (quiet) {
         return {};
       }
-      log.error(`Fail to loadJsModule: ${jsPath} :: ${error}`);
+      console.error(`Fail to loadJsModule: ${jsPath} :: ${error}`);
     }
   }
 
@@ -445,12 +468,25 @@ export class WalnutServer {
     urlPath: string,
     options: WnLoadOptions = {}
   ): Promise<string | null> {
+    // 尝试缓存
+    let cache: Map<string, any> | undefined = undefined;
+    if (options.cache) {
+      cache = _.isBoolean(options.cache) ? this._cache : options.cache;
+      let re = cache.get(urlPath);
+      if (re) {
+        return re;
+      }
+    }
     let { quiet, signal } = options;
     let url = this.getUrl(urlPath);
     let init = this.getRequestInit(signal);
     try {
       let resp = await fetch(url, init);
-      return await resp.text();
+      let re = await resp.text();
+      if (cache) {
+        cache.set(urlPath, re);
+      }
+      return re;
     } catch (err) {
       if (!quiet) {
         console.error('fetchText Fail:', err, urlPath);
@@ -460,12 +496,24 @@ export class WalnutServer {
   }
 
   async fetchJson(urlPath: string, options: WnLoadOptions = {}): Promise<any> {
+    // 尝试缓存
+    let cache: Map<string, any> | undefined = undefined;
+    if (options.cache) {
+      cache = _.isBoolean(options.cache) ? this._cache : options.cache;
+      let text = cache.get(urlPath);
+      if (text) {
+        return JSON5.parse(text);
+      }
+    }
     let { quiet, signal } = options;
     try {
       let url = this.getUrl(urlPath);
       let init = this.getRequestInit(signal);
       let resp = await fetch(url, init);
       let text = await resp.text();
+      if (cache) {
+        cache.set(urlPath, text);
+      }
       return JSON5.parse(text);
     } catch (err) {
       if (!quiet) {
@@ -494,18 +542,16 @@ export class WalnutServer {
 
   async fetchSidebar(): Promise<UserSidebar> {
     let sidebar = this._conf.sidebar;
-    // log.info('fetchSidebar:', sidebar);
+    if (debug) console.log('fetchSidebar:', sidebar);
     if (sidebar) {
       //  Load the  Static sidebar.
       if (_.isString(sidebar) && sidebar.startsWith('load://')) {
         let url = `/${sidebar.substring(7)}`;
-        log.info('fetchSidebar:url=>', url);
+        if (debug) console.log('fetchSidebar:url=>', url);
         let resp = await fetch(url);
         let text = await resp.text();
         let json = JSON5.parse(text);
-        if (log.isDebugEnabled()) {
-          log.debug('sidebar is:', json);
-        }
+        if (debug) console.log('sidebar is:', json);
         return json;
       }
       //  load the side bar of Walnut
@@ -514,11 +560,9 @@ export class WalnutServer {
         if (_.isString(sidebar)) {
           cmdText += ' ' + sidebar;
         }
-        log.info('fetchSidebar:cmd=>', cmdText);
+        if (debug) console.log('fetchSidebar:cmd=>', cmdText);
         let json = await this.exec(cmdText, { as: 'json' });
-        if (log.isDebugEnabled()) {
-          log.debug('sidebar is:', json);
-        }
+        if (debug) console.log('sidebar is:', json);
         return json;
       }
     }
@@ -566,13 +610,11 @@ export class WalnutServer {
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
     // 执行命令
-    log.info('exec>:', cmdText, options);
+    if (debug) console.log('exec>:', cmdText, options);
     let url = this.getUrl('/a/run/wn.manager');
     let init = this.getRequestInit(options.signal);
     let reo = await wnRunCommand(url, init, cmdText, options);
-    if (log.isDebugEnabled()) {
-      log.debug('exec>:', reo);
-    }
+    if (debug) console.log('exec>:', reo);
     return reo;
   }
 

@@ -1,11 +1,4 @@
 import {
-  LocalMetaMakeChangeOptions,
-  LocalMetaMakeDiffOptions,
-  SqlExecInfo,
-  SqlExecSetVar,
-  SqlResult,
-} from '@site0/ti-walnut';
-import {
   Match,
   TableRowChanagePayload,
   TableRowID,
@@ -15,6 +8,13 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, Ref, ref } from 'vue';
+import {
+  LocalMetaMakeChangeOptions,
+  LocalMetaMakeDiffOptions,
+  SqlExecInfo,
+  SqlExecSetVar,
+  SqlResult,
+} from '../../../lib';
 
 /**
  * 列表项更新选项

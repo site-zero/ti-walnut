@@ -219,6 +219,13 @@ export type WnLoadOptions = {
    * 也不要抛错，尽量容忍
    */
   quiet?: boolean;
+
+  /**
+   * 是否开启缓存 默认 false
+   * 如果是 true, 那么会使用全局缓存
+   * 如果是 Map<string, any> 那么会使用这个 Map 作为缓存 
+   */
+  cache?: boolean|Map<string, any>;
 };
 
 export type WnFetchObjOptions = WnLoadOptions & {

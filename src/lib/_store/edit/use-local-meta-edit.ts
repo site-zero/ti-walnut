@@ -3,7 +3,7 @@ import {
   SqlExecInfo,
   SqlExecSetVar,
   SqlResult,
-} from '@site0/ti-walnut';
+} from '../../../lib';
 import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { Ref, ref } from 'vue';

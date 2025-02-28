@@ -2,14 +2,14 @@ import { ActionBarProps } from '@site0/tijs';
 import { computed, InjectionKey, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useGlobalStatus } from '../../_features';
-import { GuiViewMeasure, HubView } from '../../_store';
+import { HubView } from '../../_store';
 
 export type WnHubApp = ReturnType<typeof useWnHubApp>;
 
 export const WN_HUB_APP_INST: InjectionKey<WnHubApp> =
   Symbol('WN_HUB_APP_INST');
 
-export function useWnHubApp(_hub_view: HubView, _measure: GuiViewMeasure) {
+export function useWnHubApp(_hub_view: HubView) {
   const _gb_st = useGlobalStatus();
   const router = useRouter();
   //--------------------------------------------------
@@ -34,6 +34,5 @@ export function useWnHubApp(_hub_view: HubView, _measure: GuiViewMeasure) {
     setMainActions,
     MainActions: computed(() => _main_actions.value ?? {}),
     view: _hub_view,
-    measure: _measure,
   };
 }

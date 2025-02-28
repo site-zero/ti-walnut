@@ -1,10 +1,5 @@
-import {
-  createObjViewOptions,
-  GuiViewMeasure,
-  HubView,
-  useSessionStore,
-  Walnut,
-} from '@site0/ti-walnut';
+import { createObjViewOptions, Walnut } from '../../../core';
+import { HubView } from '../../../lib';
 import { WnHubArenaProps } from './wn-hub-arena-types';
 
 /**
@@ -33,12 +28,8 @@ import { WnHubArenaProps } from './wn-hub-arena-types';
  *
  * @param _props
  */
-export function useHubArenaReload(
-  props: WnHubArenaProps,
-  _view_mode: GuiViewMeasure,
-  _hub_view: HubView
-) {
-  const session = useSessionStore();
+export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
+  const session = _hub_view.session;
   /**
    * 重新加载视图的异步函数。
    *

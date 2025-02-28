@@ -18,6 +18,7 @@
       if (title && nm) {
         if (title != nm) {
           re.value = title;
+          re.autoI18n = true;
           //re.suffixText = nm;
         } else {
           re.value = nm;

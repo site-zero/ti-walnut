@@ -7,10 +7,11 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useGlobalStatus } from '../../_features';
+import { Router } from 'vue-router';
+import { GlobalStatusApi } from '../../_features';
 import { GuiViewLayoutMode, WnObj } from '../../_types';
-import { useSessionStore } from '../use-session.store';
+import { GuiViewMeasureApi } from '../use-gui-view-measure.store';
+import { UserSessionApi } from '../use-session.store';
 import { HubModel, HubViewOptions, HubViewState } from './hub-view-types';
 import { useHubModel } from './use-hub--model';
 import {
@@ -30,12 +31,19 @@ function isInvokeError(err: any): err is InvokeError {
   return err && err.methodNotFound && _.isString(err.methodName);
 }
 
-export type HubViewFeature = ReturnType<typeof useHubView>;
+export type HubViewApi = ReturnType<typeof useHubViewApi>;
 
-export function useHubView() {
-  const session = useSessionStore();
-  const _gb_sta = useGlobalStatus();
-  const _router = useRouter();
+export type HubViewApiOptions = {
+  global: GlobalStatusApi;
+  router: Router;
+  session: UserSessionApi;
+  measure: GuiViewMeasureApi;
+};
+
+export function useHubViewApi(options: HubViewApiOptions) {
+  const session = options.session;
+  const _gb_sta = options.global;
+  const _router = options.router;
   //---------------------------------------------
   // 数据模型
   //---------------------------------------------
@@ -253,7 +261,16 @@ export function useHubView() {
     Options: computed(() => _options.value),
     isViewLoading: computed(() => _view_loading.value),
     ActioinBarVars: computed(() => _model.value?.getActionBarVars() ?? {}),
+
+    // Other API
+    global: computed(() => options.global),
+    session: computed(() => options.session),
+    measure: computed(() => options.measure),
+
+    // HubViewState
     ..._state,
+
+    // methods
     setLoading,
     createGUIContext,
     createGUILayout,

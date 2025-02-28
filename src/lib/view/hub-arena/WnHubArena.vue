@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-  import { WN_HUB_APP_INST } from '@site0/ti-walnut';
   import {
     ActionBarEvent,
     BlockEvent,
@@ -9,6 +8,7 @@
   } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, inject, watch } from 'vue';
+  import { WN_HUB_APP_INST } from '../../_store';
   import { useHubArenaReload } from './use-hub-arena-reload';
   import { WnHubArenaProps } from './wn-hub-arena-types';
   //--------------------------------------------------
@@ -16,9 +16,7 @@
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
-  const _arena_reload = computed(() =>
-    useHubArenaReload(props, _hub!.measure, _hub!.view)
-  );
+  const _arena_reload = computed(() => useHubArenaReload(props, _hub!.view));
   //--------------------------------------------------
   const GUIAction = computed(() => {
     let ctx = _hub!.view.createGUIContext();
@@ -32,7 +30,10 @@
   });
   //--------------------------------------------------
   const GUILayout = computed(() =>
-    _hub!.view.createGUILayout(GUIContext.value, _hub!.measure.viewMode)
+    _hub!.view.createGUILayout(
+      GUIContext.value,
+      _hub!.view.measure.viewMode.value
+    )
   );
   //--------------------------------------------------
   const GUISchema = computed(
@@ -59,9 +60,12 @@
 </script>
 <template>
   <div class="wn-hub-arena fit-parent">
-    <TiLoading v-if="_hub!.view.isViewLoading" text="Loading View ..." />
+    <TiLoading
+      v-if="_hub!.view.isViewLoading"
+      text="Loading View ..."
+      mode="cover"
+      :opacity="0.618" />
     <TiLayoutGrid
-      v-else
       v-bind="GUILayout"
       :schema="GUISchema"
       @block="onBlock"

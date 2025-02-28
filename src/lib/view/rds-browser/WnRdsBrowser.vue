@@ -1,8 +1,8 @@
 <script lang="ts" setup>
   //--------------------------------------------------
-  import { RdsBrowserApi, useRdsListStore } from '@site0/ti-walnut';
   import { TiLayoutGrid } from '@site0/tijs';
   import { computed, ref, watch } from 'vue';
+  import { RdsBrowserApi, useRdsListStore } from '../../../lib';
   import { useRdsBrowserLayout } from './rds-browser-layout';
   import { useRdsBrowserSchema } from './rds-browser-schema';
   import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
