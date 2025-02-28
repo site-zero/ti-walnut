@@ -21,7 +21,7 @@
   const Meta = computed(() => _.omit(props.value, 'ancestors'));
   //-----------------------------------------------------
   const DIR = useDirStore({ name: props.moduleName });
-  const _GS = useGlobalStatus();
+  const _gb_sta = useGlobalStatus();
   //-----------------------------------------------------
   const GUILayout = computed(() => DIR.explainLayout());
   const GUISchema = computed(() => DIR.explainSchema());
@@ -86,7 +86,7 @@
         @block="onBlock"
         @tab-change="onTabChange" />
       <TiLoading
-        v-if="_GS.loading"
+        v-if="_gb_sta.data.loading"
         class="is-track"
         mode="cover"
         opacity="faint" />

@@ -34,7 +34,7 @@ export type HubViewFeature = ReturnType<typeof useHubView>;
 
 export function useHubView() {
   const session = useSessionStore();
-  const _global = useGlobalStatus();
+  const _gb_sta = useGlobalStatus();
   const _router = useRouter();
   //---------------------------------------------
   // 数据模型
@@ -57,7 +57,23 @@ export function useHubView() {
   // 计算输出
   //--------------------------------------------
   const createGUIContext = () => {
-    return _model.value?.createGUIContext() ?? {};
+    let gbs = {
+      session: _.cloneDeep(session.data),
+      G: _.cloneDeep(_gb_sta.data),
+      appPath: _gb_sta.parseAppPath(),
+    };
+
+    // 根据模型创建基础上下文
+    let re = _model.value?.createGUIContext() ?? {};
+
+    // 融合全局状态
+    _.assign(re, gbs);
+
+    // 将全局状态传递给主动作条
+    if (re.ActionBarVars) {
+      _.assign(re.ActionBarVars, gbs);
+    }
+    return re;
   };
   const createGUILayout = (GUIContext: Vars, viewMode: GuiViewLayoutMode) => {
     let layout = _state.layout.value[viewMode] ?? {};
@@ -125,7 +141,7 @@ export function useHubView() {
     }
 
     // nav 相关
-    const _nav = useHubNav(_model.value.store, _global, _router, session);
+    const _nav = useHubNav(_gb_sta, _router);
 
     // 定义调用时的 this
     const that = {

@@ -12,7 +12,7 @@
   //--------------------------------------------------
   const props = defineProps<WnHubSideNavProps>();
   //--------------------------------------------------
-  const _global = useGlobalStatus();
+  const _gl_sta = useGlobalStatus();
   const _sidebar = useSidebar();
   //--------------------------------------------------
   function OnFireItem(it: SideBarItem) {
@@ -21,7 +21,7 @@
   //--------------------------------------------------
   function isCurrentItem(it: SideBarItem): boolean {
     if (it.href) {
-      return (_global.appPath || '').startsWith(it.href || '');
+      return (_gl_sta.data.appPath || '').startsWith(it.href || '');
     }
     return false;
   }

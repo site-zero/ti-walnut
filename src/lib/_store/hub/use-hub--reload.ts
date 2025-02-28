@@ -8,6 +8,8 @@ import {
   isHubViewLayout,
 } from './hub-view-types';
 
+const _CACHE = new Map<string, any>();
+
 async function __load<T>(
   homePath: string | undefined,
   input: string | (() => T) | (() => Promise<T>) | undefined,
@@ -32,7 +34,15 @@ async function __load<T>(
     } else {
       path = safeCmdArg(input);
     }
-    return await Walnut.loadJson(path);
+    // 尝试缓存
+    let re = _CACHE.get(path);
+    if (re) {
+      return re as T;
+    }
+    // 真正读取
+    re = await Walnut.loadJson(path);
+    _CACHE.set(path, re);
+    return re as T;
   }
   // 什么都没有，清空
   return dft;

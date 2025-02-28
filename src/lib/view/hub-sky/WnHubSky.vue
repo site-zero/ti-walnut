@@ -5,14 +5,14 @@
   //--------------------------------------------------
   const props = defineProps<WnHubSkyProps>();
   //--------------------------------------------------
-  const _global = useGlobalStatus();
+  const _gb_sta = useGlobalStatus();
   //--------------------------------------------------
   const TopClass = computed(() => CssUtils.mergeClassName(props.className));
   const TopStyle = computed(() => CssUtils.toStyle(props.style));
   //--------------------------------------------------
   const LogoIcon = computed(() => {
     let icon: IconInput;
-    if (!_global.appLogo) {
+    if (!_gb_sta.data.appLogo) {
       icon = 'fas-globe';
     }
     // 指定图标
@@ -21,7 +21,7 @@
     // }
     // 默认就是图片
     else {
-      icon = _global.appLogo;
+      icon = _gb_sta.data.appLogo;
     }
     return icon;
   });
@@ -42,8 +42,8 @@
     </div>
     <div class="as-part is-crumb">
       <div class="as-title">
-        <strong>{{ _global.appTitle }}</strong>
-        <div class="as-version">V {{ _global.appVersion }}</div>
+        <strong>{{ _gb_sta.data.appTitle }}</strong>
+        <div class="as-version">V {{ _gb_sta.data.appVersion }}</div>
       </div>
     </div>
   </div>

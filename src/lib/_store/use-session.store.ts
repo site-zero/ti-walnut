@@ -143,9 +143,9 @@ export function useSessionStore() {
    * - 允许开发者在登录后执行自定义操作，例如跳转页面或加载数据。
    */
   async function signIn(info: SignInForm, afterOk: () => Promise<void>) {
-    const status = useGlobalStatus();
+    const _gl_sta = useGlobalStatus();
     try {
-      status.processing = '正在执行登录';
+      _gl_sta.data.processing = '正在执行登录';
       let re = await Walnut.signInToDomain(info);
       // Sign-in successfully
       if (re.ok) {
@@ -161,7 +161,7 @@ export function useSessionStore() {
       }
       // console.log('signIn', re);
     } finally {
-      status.processing = false;
+      _gl_sta.data.processing = false;
     }
   }
 
@@ -321,7 +321,7 @@ export function useSessionStore() {
   async function reload(afterOk: () => Promise<void>) {
     const status = useGlobalStatus();
     try {
-      status.appLoading = true;
+      status.data.appLoading = true;
       let re = await Walnut.fetchMySession();
       if (re.ok) {
         _translate_session_result(re.data);
@@ -335,7 +335,7 @@ export function useSessionStore() {
         resetSession();
       }
     } finally {
-      status.appLoading = false;
+      status.data.appLoading = false;
     }
   }
 

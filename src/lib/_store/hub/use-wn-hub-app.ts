@@ -10,7 +10,7 @@ export const WN_HUB_APP_INST: InjectionKey<WnHubApp> =
   Symbol('WN_HUB_APP_INST');
 
 export function useWnHubApp(_hub_view: HubView, _measure: GuiViewMeasure) {
-  const status = useGlobalStatus();
+  const _gb_st = useGlobalStatus();
   const router = useRouter();
   //--------------------------------------------------
   const _main_actions = ref<ActionBarProps>();
@@ -21,11 +21,16 @@ export function useWnHubApp(_hub_view: HubView, _measure: GuiViewMeasure) {
   //--------------------------------------------------
   function open(href: string) {
     router.push(href);
-    status.appPath = href;
+    _gb_st.data.appPath = href;
+  }
+  //--------------------------------------------------
+  function setAppPath(appPath: string) {
+    _gb_st.data.appPath = appPath;
   }
   //--------------------------------------------------
   return {
     open,
+    setAppPath,
     setMainActions,
     MainActions: computed(() => _main_actions.value ?? {}),
     view: _hub_view,
