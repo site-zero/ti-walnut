@@ -1,3 +1,5 @@
 {
-  "com-name": "Object Viewer"
+  "com-name": "Object Viewer",
+  "tab-title-meta": "Properties",
+  "tab-title-content": "Content"
 }

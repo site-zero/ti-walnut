@@ -15,12 +15,12 @@ export function useWnObjViewer(
   }
 
   function onMetaChange(delta: Vars) {
-    console.log('onMetaChange', delta);
+    //console.log('onMetaChange', delta);
     emit('meta-change', delta);
   }
 
   function onContentChange(content: string) {
-    console.log('onContentChange', content);
+    //console.log('onContentChange', content);
     emit('content-change', content);
   }
 

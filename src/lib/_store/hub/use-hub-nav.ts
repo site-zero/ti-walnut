@@ -1,4 +1,4 @@
-import { Util } from '@site0/tijs';
+import { Be, Util } from '@site0/tijs';
 import { Router } from 'vue-router';
 import { GlobalStatusApi } from '../../_features';
 
@@ -45,8 +45,7 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
       : '/open';
     let newPath = Util.appendPath(basePath, objName);
     // 使用 router 导航到新路径
-    _gl_sta.data.appPath = newPath;
-    _router.push(newPath);
+    Be.OpenUrl(newPath);
   }
 
   return {

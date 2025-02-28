@@ -1,4 +1,4 @@
-import { Vars } from '@site0/tijs';
+import { Alert, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
@@ -6,6 +6,7 @@ import {
   DataStoreLoadStatus,
   isWnObj,
   LocalMetaEditOptions,
+  RefreshOptions,
   useLocalMetaEdit,
   useWnObj,
   WnObj,
@@ -31,18 +32,27 @@ export type StdMetaStoreOptions = LocalMetaEditOptions & {
    * @returns
    */
   patchRemote?: (remote: WnObj, index: number) => WnObj;
+
+  /**
+   * 是否自动加载内容。
+   *
+   * > 通常，这个选项可以不设置，在界面如果显示内容，会主动设置对应的状态
+   *
+   * @default false
+   */
+  autoLoadContent?: boolean;
 };
 
-function defineStdMetaStore(options: StdMetaStoreOptions) {
+function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
-  let _options: StdMetaStoreOptions = _.cloneDeep(options);
+  let _options: StdMetaStoreOptions = _.cloneDeep(options ?? { objPath: '~' });
   const _obj = useWnObj();
   //---------------------------------------------
   /**
    * 开启这个选项，如果选择的当前对象是一个文件，那么就自动加载内容
    */
-  const _auto_load_content = ref<boolean>(false);
+  const _auto_load_content = ref<boolean>(options?.autoLoadContent ?? false);
   //---------------------------------------------
   //                 建立数据模型
   //---------------------------------------------
@@ -54,12 +64,23 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
   //---------------------------------------------
   const _local = computed(() => useLocalMetaEdit(_remote, _options));
   //---------------------------------------------
+  const MetaData = computed(() => {
+    return _local.value.localMeta.value || _remote.value || {};
+  });
+  //---------------------------------------------
+  const MetaId = computed(() => MetaData.value.id);
+  //---------------------------------------------
+  const changed = computed(
+    () => _local.value.isChanged() || _content.changed.value
+  );
+  //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
   const ActionBarVars = computed(() => {
     return {
       loading: _action_status.value == 'loading',
       saving: _action_status.value == 'saving',
+      changed: changed.value,
     } as Vars;
   });
   //---------------------------------------------
@@ -71,16 +92,36 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
   });
 
   //---------------------------------------------
+  // 读写元数据
+  //---------------------------------------------
+  async function saveMeta() {
+    if (!MetaId.value) {
+      await Alert('StdMeta without init data.id', { type: 'danger' });
+    }
+    let diff = _local.value.getDiffMeta();
+    if (_.isEmpty(diff)) {
+      return;
+    }
+    diff.id = MetaId.value;
+    _action_status.value = 'saving';
+    let re = await _obj.update(diff);
+    if (re) {
+      _remote.value = re;
+    }
+    _action_status.value = undefined;
+  }
+
+  //---------------------------------------------
   // 读写内容
   //---------------------------------------------
   function getCurrentContentFinger(): ObjContentFinger | undefined {
     // 防空
-    if (!metaData.value) {
+    if (!MetaData.value) {
       return;
     }
 
     // 读取指纹
-    let { id, len, sha1, mime, tp } = metaData.value;
+    let { id, len, sha1, mime, tp } = MetaData.value;
     return { id, len, sha1, mime, tp };
   }
 
@@ -117,7 +158,7 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
    */
   function setCurrentContent(content: string) {
     // 防空
-    if (!metaData.value) {
+    if (!MetaData.value) {
       return;
     }
     _content.setContent(content);
@@ -135,7 +176,7 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
    */
   async function saveCurrentContent() {
     // 防空
-    if (!metaData.value) {
+    if (!MetaData.value) {
       return;
     }
     // 保存内容
@@ -179,21 +220,17 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
   //---------------------------------------------
   //                 被内部重用的方法
   //---------------------------------------------
-  const metaData = computed(() => {
-    return _local.value.localMeta.value || _remote.value || {};
-  });
-
   function updateMeta(meta: Vars) {
     _local.value.updateMeta(meta);
   }
 
-  function setMeta(meta: Vars) {
-    _local.value.setMeta(meta);
-  }
+  // function setMeta(meta: Vars) {
+  //   _local.value.setMeta(meta);
+  // }
 
-  function setRemoteMeta(meta: Vars) {
-    _remote.value = _.cloneDeep(meta);
-  }
+  // function setRemoteMeta(meta: Vars) {
+  //   _remote.value = _.cloneDeep(meta);
+  // }
 
   function clear() {
     _local.value.reset();
@@ -236,13 +273,39 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
    * @function
    * @returns {Promise<void>} 返回一个 Promise 对象，表示刷新操作的完成。
    */
-  async function refresh() {
+  async function refresh(options: RefreshOptions = {}) {
+    // 传入就是一个对象
     if (isWnObj(_options.objPath)) {
-      _remote.value = _options.objPath;
-    } else if (_.isString(_options.objPath)) {
+      if (options.reset) {
+        let id = _options.objPath.id;
+        if (id) {
+          _remote.value = await _obj.fetch(`id:${id}`);
+        }
+        // 警告
+        else {
+          await Alert(
+            `refresh force need obj.id: ${JSON.stringify(_options.objPath)}`,
+            { type: 'danger' }
+          );
+        }
+      }
+      // 直接赋值
+      else {
+        _remote.value = _.cloneDeep(_options.objPath);
+      }
+    }
+    // 一定重新加载
+    else if (_.isString(_options.objPath)) {
       _remote.value = await _obj.fetch(_options.objPath);
-    } else {
+    }
+    // 加载不出啥
+    else {
       _remote.value = undefined;
+    }
+
+    // 自动重新加载内容
+    if (_remote.value && _auto_load_content.value) {
+      await loadCurrentContent();
     }
   }
 
@@ -255,17 +318,18 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
     // 数据模型
     _local,
     _remote,
-    //status: _action_status,
-
+    _content,
+    _auto_load_content,
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
     ActionStatus,
     ActionBarVars,
     LoadStatus,
-    changed: computed(() => _local.value.isChanged()),
     CurrentContent: computed(() => _content.ContentText.value),
-    metaData,
+    MetaId,
+    MetaData,
+    changed,
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
@@ -277,6 +341,7 @@ function defineStdMetaStore(options: StdMetaStoreOptions) {
     clear,
     updateMeta,
     //---------------------------------------------
+    saveMeta,
     loadCurrentContent,
     setCurrentContent,
     saveCurrentContent,

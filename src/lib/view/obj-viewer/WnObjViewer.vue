@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { BlockEvent, TabChangeEvent, TiLayoutTabs } from '@site0/tijs';
+  import { TabChangeEvent, TiLayoutTabs } from '@site0/tijs';
   import { computed } from 'vue';
   import { useObjViewerLayout } from './use-obj-viewer-layout';
   import { useObjViewerSchema } from './use-obj-viewer-schema';
@@ -12,6 +12,7 @@
     tabsAlign: 'left',
     tabsAt: 'bottom',
     tabItemSpace: 'm',
+    tabs: () => ['meta', 'content'],
   });
   //-----------------------------------------------------
   const api = useWnObjViewer(props, emit);

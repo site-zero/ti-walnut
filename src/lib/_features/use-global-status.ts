@@ -7,6 +7,10 @@ export type GlobalStatus = {
   appVersion?: string;
   appPath?: string;
   appLoading: boolean | string;
+  /**
+   * 默认为 true， false 表示隐藏侧边栏
+   */
+  appSidebar?: boolean;
   loading: boolean | string;
   saving: boolean | string;
   removing: boolean | string;

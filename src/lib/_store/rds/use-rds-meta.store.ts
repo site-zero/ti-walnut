@@ -55,7 +55,14 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   const _local = computed(() => useLocalMetaEdit(_remote, options));
   //---------------------------------------------
+  const MetaData = computed(() => {
+    return _local.value.localMeta.value || _remote.value || {};
+  });
+  //---------------------------------------------
+  const MetaId = computed(() => MetaData.value.id);
+  //---------------------------------------------
   const changed = computed(() => _local.value.isChanged());
+  const isNew = computed(() => isNewMeta());
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
@@ -93,13 +100,9 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   //                 被内部重用的方法
   //---------------------------------------------
-  const metaData = computed(() => {
-    return _local.value.localMeta.value || _remote.value || {};
-  });
-
   function isNewMeta() {
     if (options.isNew) {
-      return options.isNew(metaData);
+      return options.isNew(MetaData);
     }
     return _.isEmpty(_remote.value);
   }
@@ -147,9 +150,10 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
-    metaData,
-    changed: computed(() => _local.value.isChanged()),
-    newMeta: computed(() => isNewMeta()),
+    MetaId,
+    MetaData,
+    changed,
+    isNew,
     hasRemoteMeta,
     ActionStatus,
     ActionBarVars,
@@ -157,7 +161,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
-    isNew: isNewMeta,
     isChanged: () => _local.value.isChanged(),
     getFilterField: (key: string, dft?: any) => {
       return _.get(_filter, key) ?? dft;

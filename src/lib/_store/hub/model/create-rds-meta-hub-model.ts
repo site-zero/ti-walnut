@@ -15,7 +15,7 @@ export function createRdsMetaHubModel(options: Vars, objId?: string): HubModel {
     return {
       ActionStatus: _s.ActionStatus.value,
       LoadStatus: _s.LoadStatus.value,
-      metaData: _s.metaData.value,
+      MetaData: _s.MetaData.value,
       changed: _s.changed.value,
     };
   };
@@ -29,6 +29,7 @@ export function createRdsMetaHubModel(options: Vars, objId?: string): HubModel {
   }
 
   return {
+    modelType: 'RDS-META',
     store,
     createGUIContext,
     getActionBarVars: () => store.ActionBarVars.value,

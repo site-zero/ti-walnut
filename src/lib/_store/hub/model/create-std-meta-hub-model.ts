@@ -1,4 +1,4 @@
-import { Vars } from '@site0/tijs';
+import { Icons, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { WnObj } from '../../../_types';
 import {
@@ -16,10 +16,12 @@ export function createStdMetaHubModel(hubObj: WnObj, options: Vars): HubModel {
   const createGUIContext = () => {
     let _s = store;
     return {
+      HomeIcon: Icons.getIcon(_s.MetaData.value, 'far-file-alt'),
       ActionStatus: _s.ActionStatus.value,
       ActionBarVars: _s.ActionBarVars.value,
       LoadStatus: _s.LoadStatus.value,
-      metaData: _s.metaData.value,
+      MetaData: _s.MetaData.value,
+      MetaId: _s.MetaId.value,
       changed: _s.changed.value,
       CurrentContent: _s.CurrentContent.value,
     };
@@ -34,6 +36,7 @@ export function createStdMetaHubModel(hubObj: WnObj, options: Vars): HubModel {
   }
 
   return {
+    modelType: 'STD-META',
     store,
     createGUIContext,
     getActionBarVars: () => store.ActionBarVars.value,

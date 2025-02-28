@@ -1,5 +1,10 @@
 <script lang="ts" setup>
-  import { ActionBarEvent, ActionBarProps, TiActionBar } from '@site0/tijs';
+  import {
+    ActionBarEvent,
+    ActionBarItem,
+    ActionBarProps,
+    TiActionBar,
+  } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, inject } from 'vue';
   import { WN_HUB_APP_INST } from '../../../lib';
@@ -12,7 +17,7 @@
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const ActionItems = computed(() => {
-    let re: ActionBarProps = _hub?.MainActions.value ?? {};
+    let re: ActionBarProps = _.cloneDeep(_hub?.MainActions.value) ?? {};
 
     const logout = {
       name: 'logout',
@@ -33,11 +38,21 @@
       if (!menuExists(re.items ?? [], finding)) {
         re.items?.push({}, logout);
         // 太长了，自动缩一缩
-        if (re.items?.length ?? 0 > 3) {
+        if (re.items && (re.items?.length ?? 0 > 3)) {
+          // 缩之前，将顶级菜单的纯图标项目都去掉，因为不太好看
+          let newItems = [] as ActionBarItem[];
+          for (let barItem of re.items) {
+            if (barItem.icon && !barItem.text && _.isEmpty(barItem.items)) {
+              continue;
+            }
+            newItems.push(barItem);
+          }
+
+          // 缩入一个统一的顶级图标里
           re.items = [
             {
               icon: 'fas-bars',
-              items: re.items,
+              items: newItems,
             },
           ];
         }

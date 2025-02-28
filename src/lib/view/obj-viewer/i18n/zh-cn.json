@@ -1,3 +1,5 @@
 {
-  "com-name": "对象查看器"
+  "com-name": "对象查看器",
+  "tab-title-meta": "属性",
+  "tab-title-content": "内容"
 }

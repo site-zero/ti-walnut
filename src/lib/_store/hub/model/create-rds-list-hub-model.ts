@@ -41,6 +41,7 @@ export function createRdsListHubModel(options: Vars, objId?: string): HubModel {
   }
 
   return {
+    modelType: 'RDS-LIST',
     store,
     createGUIContext,
     getActionBarVars: () => store.ActionBarVars.value,

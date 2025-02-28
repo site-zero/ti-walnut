@@ -1,4 +1,4 @@
-import { Vars } from '@site0/tijs';
+import { Icons, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { WnObj } from '../../../_types';
 import {
@@ -20,6 +20,7 @@ export function createStdListHubModel(
   const createGUIContext = () => {
     let _s = store;
     return {
+      HomeIcon: Icons.getIcon(_s.HomeObj.value, 'far-file-alt'),
       HomeId: _s.HomeObj.value?.id,
       HomeObj: _s.HomeObj.value,
       currentId: _s.currentId.value,
@@ -52,6 +53,7 @@ export function createStdListHubModel(
   }
 
   return {
+    modelType: 'STD-LIST',
     store,
     createGUIContext,
     getActionBarVars: () => store.ActionBarVars.value,

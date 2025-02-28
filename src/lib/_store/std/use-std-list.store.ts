@@ -78,6 +78,15 @@ export type StdListStoreOptions = LocalListEditOptions & {
    * @returns
    */
   patchRemote?: (remote: WnObj, index: number) => WnObj;
+
+  /**
+   * 是否自动加载内容。
+   *
+   * > 通常，这个选项可以不设置，在界面如果显示内容，会主动设置对应的状态
+   *
+   * @default false
+   */
+  autoLoadContent?: boolean;
 };
 
 function defineStdListStore(options?: StdListStoreOptions) {
@@ -98,7 +107,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
   /**
    * 开启这个选项，如果选择的当前对象是一个文件，那么就自动加载内容
    */
-  const _auto_load_content = ref<boolean>(false);
+  const _auto_load_content = ref<boolean>(options?.autoLoadContent ?? false);
   //---------------------------------------------
   //              固定查询条件
   //---------------------------------------------
@@ -740,6 +749,11 @@ function defineStdListStore(options?: StdListStoreOptions) {
       resetLocalChange();
     }
     await queryRemoteList();
+
+    // 自动重新加载内容
+    if (hasCurrent.value && _auto_load_content.value) {
+      await loadCurrentContent();
+    }
   }
 
   async function openDir(path: string) {
@@ -791,7 +805,6 @@ function defineStdListStore(options?: StdListStoreOptions) {
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
-    //isChanged: () => _local.value.isChanged(),
     getItemId,
     getItemById,
     getItemByIndex,

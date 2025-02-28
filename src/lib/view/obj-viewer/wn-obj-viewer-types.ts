@@ -6,9 +6,15 @@ export type WnObjViewerEmitter = {
   (event: 'content-change', content: string): void;
 };
 
+export type WnObjViewerTabName = 'meta' | 'content';
+
 export type WnObjViewerProps = TabsAspect & {
   meta?: Vars;
 
   // 对于 DIR 无论如何都是不显示的
   content?: string;
+
+  // Tab 的顺序
+  // 默认为 ['meta', 'content']
+  tabs?: WnObjViewerTabName[];
 };
