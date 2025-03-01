@@ -131,24 +131,24 @@ export function useLocalListEdit(
   function isChanged() {
     if (_local_list.value) {
       if (_local_list.value.length != remoteList.value?.length) {
-        // console.log(
-        //   'length not equal',
-        //   _local_list.value.length,
-        //   remoteList.value?.length
-        // );
+        console.log(
+          'length not equal',
+          _local_list.value.length,
+          remoteList.value?.length
+        );
         return true;
       }
       if (!_.isEqual(remoteList.value, _local_list.value)) {
-        // for (let i = 0; i < _local_list.value.length; i++) {
-        //   let remote = remoteList.value[i];
-        //   let local = _local_list.value[i];
-        //   let diff = Util.getRecordDiff(remote, local, {
-        //     checkRemoveFromOrgin: true,
-        //   });
-        //   if (!_.isEqual(remote, local)) {
-        //     console.log(`Item ${i} [${getRowId(local, i)}] Not Equal`, diff);
-        //   }
-        // }
+        for (let i = 0; i < _local_list.value.length; i++) {
+          let remote = remoteList.value[i];
+          let local = _local_list.value[i];
+          let diff = Util.getRecordDiff(remote, local, {
+            checkRemoveFromOrgin: true,
+          });
+          if (!_.isEqual(remote, local)) {
+            console.log(`Item ${i} [${getRowId(local, i)}] Not Equal`, diff);
+          }
+        }
         return true;
       }
     }

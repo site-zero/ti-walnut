@@ -182,6 +182,8 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
+  const IndexDirObj = computed(() => _dir_index.value ?? _home_obj.value);
+  //---------------------------------------------
   const _local = computed(() => useLocalListEdit(_remote, _options));
   //---------------------------------------------
   const changed = computed(
@@ -582,7 +584,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     // 准备查询条件
     let q = __gen_query();
     //console.log('queryRemoteList', q);
-    let oDir = _dir_index.value ?? _home_obj.value;
+    let oDir = IndexDirObj.value;
 
     // 防空，如果未找到主目录对象，就直接清空数据
     if (!oDir) {
@@ -789,6 +791,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     //---------------------------------------------
     query: computed(() => _query.value),
     HomeObj: computed(() => _home_obj.value),
+    IndexDirObj,
     remoteList: computed(() => _remote.value),
     ActionStatus,
     ActionBarVars,

@@ -136,15 +136,20 @@ export function useWnObjUploader(
   }
 
   /**
-   * 异步加载对象的方法，根据输入的类型加载对象并设置到 `_obj.value` 中。
+   * 根据传入的 `WnObjInput` 加载 `WnObj` 对象及其 base64 数据。
+   *
+   * @param {WnObjInput} [input] - 可以是 `WnObj` 对象, 对象ID, "id:xxxx" 格式的ID路径, 或 "/path/to/obj" 格式的对象路径。如果为空，则会清空当前对象和 base64 数据。
+   *
+   * @returns {Promise<void>} - 无返回值。异步加载对象和 base64 数据。
    *
    * @remarks
-   * 该方法会根据输入的类型进行不同的处理：
-   * - 如果输入是 WnObj 对象且类型为 'obj'，则直接克隆并设置到 `_obj.value`。
-   * - 如果输入是字符串且类型为 'id'，则通过 `objs.get` 方法获取对象并设置到 `_obj.value`。
-   * - 如果输入是字符串且类型为 'idPath' 或 'path'，则通过 `objs.fetch` 方法获取对象并设置到 `_obj.value`。
-   * - 如果输入类型未知，则会在控制台输出错误信息，并将 `_obj.value` 设置为 undefined。
-   *
+   *  - 如果传入的是 `WnObj` 对象，则会深拷贝该对象。
+   *  - 如果传入的是字符串，则会根据 `_input_type` 决定如何加载对象：
+   *      - `id`: 从缓存或服务器加载对象。
+   *      - `idPath`: 从 "id:xxxx" 格式的字符串中提取 ID，然后从缓存或服务器加载对象。
+   *      - `path`: 从服务器加载指定路径的对象。
+   *  - 加载对象后，如果对象有 `thumb` 属性，则会异步加载其 base64 数据。
+   *  - 加载失败时，会将 `_obj.value` 设置为 `undefined`。
    */
   async function loadObj(input?: WnObjInput) {
     let _input_type = ValueType.value;

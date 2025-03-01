@@ -1,4 +1,5 @@
 import { BlockProps, LayoutPanelProps, TabsAspect, Vars } from '@site0/tijs';
+import { WnUploadFileOptions } from '../../../../core';
 
 export type WnObjViewerEmitter = {
   (event: 'show-content', contentIsShown: boolean): void;
@@ -32,4 +33,9 @@ export type WnObjViewerProps = TabsAspect & {
    * 弹出面板的默认属性，如果不设置回从右侧滑入，占 62% 宽度
    */
   panelProps?: LayoutPanelProps;
+
+  /**
+   * 上传文件的设置
+   */
+  upload?: WnUploadFileOptions;
 };

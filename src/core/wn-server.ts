@@ -708,8 +708,8 @@ export type WnUploadFileProgress = {
 export type WnUploadFileOptions = {
   uploadName?: string;
   target: string;
-  mode: 'a' | 'r' | 's';
-  tmpl: string;
+  mode?: 'a' | 'r' | 's';
+  tmpl?: string;
   progress?: (info: WnUploadFileProgress) => void;
   signal?: AbortSignal;
 };

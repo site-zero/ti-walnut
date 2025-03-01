@@ -23,6 +23,7 @@ export function createStdListHubModel(
       HomeIcon: Icons.getIcon(_s.HomeObj.value, 'far-file-alt'),
       HomeId: _s.HomeObj.value?.id,
       HomeObj: _s.HomeObj.value,
+      IndexDirObj: _s.IndexDirObj.value,
       currentId: _s.currentId.value,
       checkedIds: _s.checkedIds.value,
       query: _s.query.value,
