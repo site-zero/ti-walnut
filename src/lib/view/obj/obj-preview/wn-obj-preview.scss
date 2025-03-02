@@ -32,5 +32,47 @@
       }
     }
     //----------------------------------------
+    // image
+    &.is-image {
+      background: var(--ti-color-mask-thin);
+      overflow: hidden;
+      padding: var(--ti-gap-m);
+      @include flex-center;
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: var(--ti-measure-r-s);
+        box-shadow: 2px 2px 6px var(--ti-color-mask-thin);
+      }
+    }
+    //----------------------------------------
+    // audio
+    &.is-audio {
+      background: var(--ti-color-mask-thin);
+      overflow: hidden;
+      padding: var(--ti-gap-m);
+      @include flex-center;
+      audio {
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
+    //----------------------------------------
+    // video
+    &.is-video {
+      background: var(--ti-color-mask-thin);
+      overflow: hidden;
+      padding: var(--ti-gap-m);
+      @include flex-center;
+      video {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: var(--ti-measure-r-s);
+        box-shadow: 2px 2px 8px var(--ti-color-mask-bushy);
+      }
+    }
+    //----------------------------------------
   }
 }

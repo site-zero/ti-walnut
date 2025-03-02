@@ -40,6 +40,12 @@ import { wnRunCommand } from './wn-run-command';
 const TICKET_KEY = 'Walnut-Ticket';
 const debug = false;
 
+export type GetUrlForObjContentOptions = {
+  download?: 'auto' | 'force' | 'raw';
+  downName?: string;
+  withTicket?: boolean;
+};
+
 export class WalnutServer {
   /**
    * 记录远端服务器属性
@@ -186,6 +192,21 @@ export class WalnutServer {
     let { protocal, host, port } = this._conf;
     let ports = port == 80 ? '' : ':' + port;
     return `${protocal}://${host}${ports}${sep}${path}`;
+  }
+
+  getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
+    let uri = [`/o/content?str=id:${id}`];
+    let { download = 'auto', downName, withTicket } = options;
+    if (download) {
+      uri.push(`d=${download}`);
+    }
+    if (downName) {
+      uri.push(`dnm=${encodeURIComponent(downName)}`);
+    }
+    if (withTicket && this._ticket) {
+      uri.push(`_wn_ticket_=${this._ticket}`);
+    }
+    return this.getUrl(uri.join('&'));
   }
 
   getRequestInit(signal?: AbortSignal, options: RequestInit = {}): RequestInit {

@@ -1,7 +1,7 @@
 import { Ref } from 'vue';
-import { Walnut } from '../../../../core';
-import { WnObjPreivewInfo, WnObjPreviewProps } from './wn-obj-preview-types';
+import { GetUrlForObjContentOptions, Walnut } from '../../../../core';
 import { WnObj } from '../../../_types';
+import { WnObjPreivewInfo, WnObjPreviewProps } from './wn-obj-preview-types';
 
 export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
   let { id, race, mime } = props.value ?? {};
@@ -14,50 +14,62 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
   }
 
   // /o/content?str=id:3c..8c&d=(auto|force|raw）
-  let src = Walnut.getUrl(`/o/content?str=id:${id}&d=`);
+  let down: GetUrlForObjContentOptions = {
+    withTicket: true,
+    download: 'auto',
+  };
+
+  // 默认当作二进制
+  let info: WnObjPreivewInfo = {
+    type: 'binary',
+    src: '',
+  };
 
   // 不知道什么类型，就直接下载了
   if (!mime) {
-    return { type: 'binary', src: [src, 'auto'].join('') };
+    down.download = 'auto';
   }
-
   // 网页
-  if ('text/html' == mime) {
-    return { type: 'html', src: [src, 'raw'].join('') };
+  else if ('text/html' == mime) {
+    info.type = 'html';
+    down.download = 'raw';
   }
-
   // JSON
-  if (
+  else if (
     'text/json' == mime ||
     'application/json' == mime ||
     'text/json5' == mime ||
     'application/json5' == mime
   ) {
-    return { type: 'json', src: `cat id:${id}` };
+    info.type = 'json';
+    info.src = `cat id:${id}`;
   }
-
   // 文本
-  if (/^text\//.test(mime)) {
-    return { type: 'text', src: `cat id:${id}` };
+  else if (/^text\//.test(mime)) {
+    info.type = 'text';
+    info.src = `cat id:${id}`;
   }
-
   // 图片
-  if (/^image\//.test(mime)) {
-    return { type: 'image', src: [src, 'raw'].join('') };
+  else if (/^image\//.test(mime)) {
+    info.type = 'image';
+    down.download = 'raw';
   }
-
   // 音频
-  if (/^audio\//.test(mime)) {
-    return { type: 'audio', src: [src, 'raw'].join('') };
+  else if (/^audio\//.test(mime)) {
+    info.type = 'audio';
+    down.download = 'raw';
   }
-
   // 视频
   if (/^video\//.test(mime)) {
-    return { type: 'video', src: [src, 'raw'].join('') };
+    info.type = 'video';
+    down.download = 'raw';
   }
 
-  // 默认当作二进制
-  return { type: 'binary', src: [src, 'auto'].join('') };
+  // 补完 src
+  if (!info.src) {
+    info.src = Walnut.getUrlForObjContent(id, down);
+  }
+  return info;
 }
 
 export async function loadTextPreviewContent(
