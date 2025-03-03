@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { TableEmitter, TiTable, TiThumb } from '@site0/tijs';
+  import { TiTable, TiThumb } from '@site0/tijs';
   import { computed, onMounted, ref, useTemplateRef } from 'vue';
   import { ObjUploadItem, useObjDropToUpload } from './use-obj-drop-to-upload';
   import { getObjTableColumns } from './use-obj-table-columns';
@@ -29,7 +29,7 @@
         _drag_enter,
         _upload_files,
         target: () => ($el.value ? ($el.value as HTMLElement) : null),
-        uploadOptions: props.upload,
+        uploadOptions: () => props.upload,
         emit,
       });
     }

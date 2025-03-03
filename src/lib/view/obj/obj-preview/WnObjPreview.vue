@@ -46,7 +46,7 @@
     if (!$main.value) {
       return;
     }
-    console.log($main.value);
+    //console.log($main.value);
     let $code = Dom.find(':scope > pre > code', $main.value);
     if ($code) {
       hljs.highlightElement($code);

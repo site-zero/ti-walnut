@@ -16,7 +16,8 @@ export type ObjDropToUploadOptions = {
   _drag_enter: Ref<boolean>;
   _upload_files: Ref<ObjUploadItem[]>;
   target: () => HTMLElement | null;
-  uploadOptions: WnUploadFileOptions;
+  // 需要采用动态上传参数，因为随着目录的变化，上传参数可能会变化
+  uploadOptions: () => WnUploadFileOptions | undefined;
   emit: WnObjTableEmitter;
 };
 
@@ -69,6 +70,12 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
    * @private
    */
   function _do_upload() {
+    let up_options = uploadOptions();
+    if (!up_options || !up_options.target) {
+      console.error('No upload options');
+      return
+    };
+
     for (let i = 0; i < _upload_files.value.length; i++) {
       let item = _upload_files.value[i];
       // 正在上传的文件跳过
@@ -79,7 +86,7 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
 
       // 准备上传参数
       let uploading: WnUploadFileOptions = {
-        ...uploadOptions,
+        ...up_options,
         uploadName: item.file.name,
         progress: (info) => {
           item.progress = info.percent;
