@@ -75,26 +75,26 @@ export function findGUIofRules(
   throw `Fail to found view by '${JSON5.stringify(input)}'`;
 }
 
-export function installAllDefaultGUIs() {
-  // ----------------- DIR ---------------------
-  addGUIRule(
-    'view-dir',
-    {
-      comType: 'WnDirBrowser',
-      comConf: {
-        value: '=..',
-      },
-    },
-    {
-      race: 'DIR',
-    }
-  );
-  // ----------------- any ---------------------
-  addGUIRule('view-any', {
-    comType: 'WnObjViewer',
-    comConf: {
-      value: '=..',
-    },
-  });
-  // ----------------- END -----------------
-}
+// export function installAllDefaultGUIs() {
+//   // ----------------- DIR ---------------------
+//   addGUIRule(
+//     'view-dir',
+//     {
+//       comType: 'WnDirBrowser',
+//       comConf: {
+//         value: '=..',
+//       },
+//     },
+//     {
+//       race: 'DIR',
+//     }
+//   );
+//   // ----------------- any ---------------------
+//   addGUIRule('view-any', {
+//     comType: 'WnObjViewer',
+//     comConf: {
+//       value: '=..',
+//     },
+//   });
+//   // ----------------- END -----------------
+// }

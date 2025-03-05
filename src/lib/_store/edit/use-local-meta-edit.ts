@@ -1,21 +1,30 @@
+import { Util, Vars } from '@site0/tijs';
+import _ from 'lodash';
+import { Ref, ref } from 'vue';
 import {
   SqlExecFetchBack,
   SqlExecInfo,
   SqlExecSetVar,
   SqlResult,
 } from '../../../lib';
-import { Util, Vars } from '@site0/tijs';
-import _ from 'lodash';
-import { Ref, ref } from 'vue';
 
 export type LocalMetaEditOptions = {
   isNew?: (meta: SqlResult) => boolean;
 };
 
+export type LocalMetaPatcher = (
+  local: SqlResult,
+  remote?: SqlResult
+) => Vars | undefined;
+export type LocalUpdateMetaPatcher = (
+  local: SqlResult,
+  remote: SqlResult
+) => Vars | undefined;
+
 export type LocalMetaMakeDiffOptions = {
-  defaultMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
-  insertMeta?: (local: SqlResult, remote?: SqlResult) => Vars | undefined;
-  updateMeta?: (local: SqlResult, remote: SqlResult) => Vars | undefined;
+  defaultMeta?: LocalMetaPatcher;
+  insertMeta?: LocalMetaPatcher;
+  updateMeta?: LocalUpdateMetaPatcher;
 };
 
 export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {

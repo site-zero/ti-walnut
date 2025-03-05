@@ -1,28 +1,5 @@
-import { ProcessProps } from '@site0/tijs';
+import { ProcessProps, Vars } from '@site0/tijs';
 import { reactive } from 'vue';
-
-export type GlobalStatus = {
-  appLogo?: string;
-  appTitle?: string;
-  appVersion?: string;
-  appPath?: string;
-  appLoading: boolean | string;
-  /**
-   * 默认为 true， false 表示隐藏侧边栏
-   */
-  appSidebar?: boolean;
-  loading: boolean | string;
-  saving: boolean | string;
-  removing: boolean | string;
-  changed: boolean;
-  exposeHidden: boolean;
-  processing: boolean | string;
-  /**
-   * 表示一个全局唯一的长时工作的进度
-   * 应该全局展示一个遮罩面板
-   */
-  process: ProcessProps | null | undefined;
-};
 
 /**
  * 描述了一个应用路径的解析后信息。
@@ -56,10 +33,42 @@ export type AppPathInfo = {
   remain?: string;
 };
 
+export type GlobalStatus = {
+  //..........................................
+  // 应用整体状态
+  appLogo?: string;
+  appTitle?: string;
+  appVersion?: string;
+  appPath?: string;
+  appLoading: boolean | string;
+  /**
+   * 默认为 true， false 表示隐藏侧边栏
+   */
+  appSidebar?: boolean;
+  loading: boolean | string;
+  saving: boolean | string;
+  removing: boolean | string;
+  changed: boolean;
+  exposeHidden: boolean;
+  processing: boolean | string;
+  //..........................................
+  /**
+   * 表示一个全局唯一的长时工作的进度
+   * 应该全局展示一个遮罩面板
+   */
+  process: ProcessProps | null | undefined;
+  //..........................................
+  // 全局列表选定状态等
+  selectedRows?: number;
+  selectedCols?: number;
+  currentObj?: Vars;
+};
+
 export type GlobalStatusApi = ReturnType<typeof defineGlobalStatus>;
 
 function defineGlobalStatus() {
   let _data = reactive({
+    // 应用整体状态
     appPath: undefined,
     appLoading: false,
     loading: false,
@@ -67,7 +76,10 @@ function defineGlobalStatus() {
     removing: false,
     changed: false,
     exposeHidden: false,
+
+    // 全局执行状态
     processing: false,
+    process: undefined,
     // process: {
     //   title: {
     //     //prefixIcon: 'fas-chalkboard-user',
@@ -87,7 +99,20 @@ function defineGlobalStatus() {
     //     '2023-10-08: Completed',
     //   ],
     // },
+
+    // 全局列表选定状态等
+    selectedRows: undefined,
+    selectedCols: undefined,
+    currentObj: undefined,
   } as GlobalStatus);
+
+  function resetData() {
+    _data.processing = false;
+    _data.process = undefined;
+    _data.selectedCols = undefined;
+    _data.selectedRows = undefined;
+    _data.currentObj = undefined;
+  }
 
   /**
    * 解析应用路径，提取路径信息
@@ -126,6 +151,7 @@ function defineGlobalStatus() {
   return {
     data: _data,
     parseAppPath,
+    resetData,
   };
 }
 

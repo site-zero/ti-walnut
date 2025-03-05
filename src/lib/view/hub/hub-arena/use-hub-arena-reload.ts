@@ -49,7 +49,6 @@ export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
       let obj = await Walnut.fetchObj(path);
       // 未找到对象，那么肯定是不能接受的
       if (!obj) {
-        _hub_view.setLoading(false);
         return;
       }
 
@@ -61,8 +60,14 @@ export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
       }
       // 重新加载视图
       await _hub_view.reload(obj, viewOptions, hashId);
-    } catch (err) {
+    }
+    // 捕获错误
+    catch (err) {
       console.error(err);
+    }
+    // 总之要关闭加载状态
+    finally {
+      _hub_view.setLoading(false);
     }
   }
 

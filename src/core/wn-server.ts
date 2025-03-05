@@ -144,7 +144,7 @@ export class WalnutServer {
     return re ?? dft;
   }
 
-  getObjView(path: string, ctx: Vars = {}) {
+  findView(path: string, ctx: Vars = {}) {
     let aCtx = { path, ...ctx };
     let view: string | HubViewOptions | undefined = undefined;
 
@@ -172,11 +172,41 @@ export class WalnutServer {
     }
   }
 
-  async loadHubViewOptions(hubPath: string, hubObj: WnObj) {
-    let view = this.getObjView(hubPath, hubObj);
+  /**
+   * 加载指定对象的视图选项。
+   *
+   * 首先，它会检查 Hub 节点本身是否为一个视图对象。如果不是，它会基于 `server.config.json#views` 查找视图设置。
+   * 如果找到的视图是一个字符串，它会被视为一个 JSON5 文件的路径，然后该文件会被加载并解析为 `HubViewOptions`。
+   * 如果视图已经是一个 `HubViewOptions` 对象，则直接返回。
+   *
+   * @param hubPath Hub 节点的路径，用于在 `server.config.json#views` 中查找视图设置。
+   * @param hubObj Hub 节点对象，用于确定它是否为视图对象以及查找视图设置。
+   * @returns `HubViewOptions` 对象，如果未找到则返回 `null`
+   */
+  async loadHubViewOptions(
+    hubPath: string,
+    hubObj: WnObj
+  ): Promise<HubViewOptions | null> {
+    let view: HubViewOptions | string | undefined = undefined;
+    // 对象本身就是一个视图对象
+    if (
+      isWnObj(hubObj) &&
+      (('hub_view' == hubObj.tp && 'FILE' == hubObj.race) ||
+        /\.view.json5?$/.test(hubObj.nm))
+    ) {
+      view = `id:${hubObj.id}`;
+    }
+    // 根据 server.config.json#views 的定义，获取视图设置
+    else {
+      view = this.findView(hubPath, hubObj);
+    }
+
+    // 防空
     if (!view) {
       return null;
     }
+
+    // View 是一个 JSON5 文件, 需要加载一下
     if (_.isString(view)) {
       let json = await this.loadContent(view, { cache: true });
       if (!json) {
@@ -184,6 +214,8 @@ export class WalnutServer {
       }
       return JSON5.parse(json) as HubViewOptions;
     }
+
+    // 直接就是 View 本身
     return view;
   }
 

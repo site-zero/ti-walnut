@@ -1,4 +1,5 @@
 import { Vars } from '@site0/tijs';
+import _ from 'lodash';
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -81,6 +82,35 @@ export type SqlExecFetchBack = {
   save?: string;
 };
 
+export function isSqlExecFetchBack(input: any): input is SqlExecFetchBack {
+  for (let key of _.keys(input)) {
+    let val = input[key];
+    // 语句名称
+    if ('by' == key) {
+      if (!_.isString(val)) {
+        return false;
+      }
+    }
+    // 上下文变量
+    else if ('vars' == key) {
+      if (!_.isObject(val)) {
+        return false;
+      }
+    }
+    // 可选值
+    else if (/^(save)$/.test(key)) {
+      if (!_.isNil(val) && !_.isString(val)) {
+        return false;
+      }
+    }
+    // 条件
+    else {
+      return false;
+    }
+  }
+  return true;
+}
+
 export type SqlExecInfo = {
   sql: string;
   // ------------------- sqlx @vars
@@ -134,6 +164,29 @@ export type SqlExecSetVar = {
   alias?: string;
   when?: any;
 };
+
+export function isSqlExecSetVar(input: any): input is SqlExecSetVar {
+  for (let key of _.keys(input)) {
+    if (/^(name|value)$/.test(key)) {
+      let val = input[key];
+      if (!_.isString(val)) {
+        return false;
+      }
+    }
+    // 可选值
+    else if (/^(savepipe|alias)$/.test(key)) {
+      let val = input[key];
+      if (!_.isNil(val) && !_.isString(val)) {
+        return false;
+      }
+    }
+    // 条件
+    else if (!/^(when)$/.test(key)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export type SqlExecOptions = {
   /**

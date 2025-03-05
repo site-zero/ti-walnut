@@ -1,17 +1,18 @@
 <script lang="ts" setup>
   //--------------------------------------------------
   import { TiLayoutGrid } from '@site0/tijs';
-  import { computed, ref, watch } from 'vue';
-  import { RdsBrowserApi, useRdsListStore } from '../../../../lib';
+  import { computed, inject, ref, watch } from 'vue';
+  import {
+    RdsBrowserApi,
+    useRdsListStore,
+    WN_HUB_APP_INST,
+  } from '../../../../lib';
   import { useRdsBrowserLayout } from './rds-browser-layout';
   import { useRdsBrowserSchema } from './rds-browser-schema';
   import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
   import { getKeepName, useRdsBrowser } from './use-rds-browser';
-
   //--------------------------------------------------
-  const emit = defineEmits<{
-    (name: 'store-ready', api: RdsBrowserApi): void;
-  }>();
+  const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const props = withDefaults(defineProps<RdsBrowserProps>(), {
     layoutQuickColumns: '50% 1fr',
@@ -59,7 +60,12 @@
   });
   //--------------------------------------------------
   const GUIScheme = computed(() => {
-    let schema = useRdsBrowserSchema(props, _store.value, _RD.value);
+    let schema = useRdsBrowserSchema(
+      props,
+      _store.value,
+      _RD.value,
+      _hub?.view
+    );
     if (props.guiSchema) {
       return props.guiSchema(schema, _store.value, _RD.value);
     }

@@ -1,12 +1,13 @@
 import { LayoutSchema } from '@site0/tijs';
-import { RdsListStore } from '../../../_store';
+import { HubView, RdsListStore } from '../../../_store';
 import { useRdsBrowserActions } from './rds-browser-actions';
 import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
 
 export function useRdsBrowserSchema(
   props: RdsBrowserProps,
   Data: RdsListStore,
-  _RD: RdsBrowserFeature
+  _RD: RdsBrowserFeature,
+  _hub_view?: HubView
 ): LayoutSchema {
   return {
     actions: {
@@ -53,6 +54,11 @@ export function useRdsBrowserSchema(
       events: {
         select: ({ data }) => {
           _RD.onTableRowSelect(data);
+          let { checked, current } = data;
+          if (_hub_view) {
+            _hub_view.global.data.selectedRows = checked.length;
+            _hub_view.global.data.currentObj = current;
+          }
         },
       },
     },

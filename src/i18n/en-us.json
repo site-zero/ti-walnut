@@ -15,7 +15,7 @@
   "wn-obj-g": "Group",
   "wn-obj-md": "Pvg Mode",
   "wn-obj-ct": "Created On",
-  "wn-obj-lm": "Last Modified",
+  "wn-obj-lm": "Modified On",
   "wn-obj-expi": "Expired At",
   "e-auth-account-noexists": "User Not Exists",
   "e-auth-login-invalid-passwd": "User Auth Error"
