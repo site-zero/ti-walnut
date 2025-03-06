@@ -1,4 +1,4 @@
-import { BlockProps, LayoutPanelProps, TabsAspect, Vars } from '@site0/tijs';
+import { BlockProps, LayoutPanelProps, RoadblockProps, TabsAspect, Vars } from '@site0/tijs';
 import { WnUploadFileOptions } from '../../../../core';
 
 export type WnObjViewerEmitter = {
@@ -37,4 +37,8 @@ export type WnObjViewerProps = TabsAspect & {
    * 上传文件的设置
    */
   upload?: WnUploadFileOptions;
+  /**
+   * 空白数据，显示的样式
+   */
+  emptyRoadblock?: RoadblockProps;
 };

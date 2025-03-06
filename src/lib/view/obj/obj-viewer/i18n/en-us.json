@@ -3,5 +3,7 @@
   "tab-title-meta": "Properties",
   "tab-title-content": "Content",
   "tab-title-preview": "Preview",
-  "tab-title-edit": "Edit"
+  "tab-title-edit": "Edit",
+  "can-not-edit-folder": "The object is a FOLDER, so it cannot be edited",
+  "can-not-edit-file": "Although the object is a FILE, its content type is ${mime}, and we cannot support you to edit it for now."
 }

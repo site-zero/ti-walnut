@@ -1,4 +1,4 @@
-import { ProcessProps, Vars } from '@site0/tijs';
+import { ProcessProps, TableSelectEmitInfo, Vars } from '@site0/tijs';
 import { reactive } from 'vue';
 
 /**
@@ -148,10 +148,22 @@ function defineGlobalStatus() {
     };
   }
 
+  function onListSelect(selection: TableSelectEmitInfo) {
+    let { checkedIds, current } = selection;
+    _data.selectedCols = 0;
+    _data.currentObj = current ?? undefined;
+    if (checkedIds) {
+      _data.selectedRows = checkedIds.size ?? 0;
+    } else {
+      _data.selectedRows = 0;
+    }
+  }
+
   return {
     data: _data,
     parseAppPath,
     resetData,
+    onListSelect,
   };
 }
 

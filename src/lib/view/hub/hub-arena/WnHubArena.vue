@@ -72,3 +72,4 @@
       @fire="onFire" />
   </div>
 </template>
+

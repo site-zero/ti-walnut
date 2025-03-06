@@ -1,3 +1,4 @@
+import { GlobalStatusApi } from '../../_features';
 import { WnObj } from '../../_types';
 import { HubModel, HubModelOptions } from './hub-view-types';
 import { createRdsListHubModel } from './model/create-rds-list-hub-model';
@@ -17,6 +18,7 @@ import { createStdMetaHubModel } from './model/create-std-meta-hub-model';
  * @param options 模型选项。
  */
 export function useHubModel(
+  _gb_sta: GlobalStatusApi,
   hubObj: WnObj,
   options: HubModelOptions,
   objId?: string
@@ -26,7 +28,7 @@ export function useHubModel(
   let re: HubModel;
   // 标准对象列表
   if ('STD-LIST' == model) {
-    re = createStdListHubModel(hubObj, modelOptions, objId);
+    re = createStdListHubModel(_gb_sta, hubObj, modelOptions, objId);
   }
   // 标准对象元数据
   else if ('STD-META' == model) {
@@ -34,7 +36,7 @@ export function useHubModel(
   }
   // RDS 数据列表
   else if ('RDS-LIST' == model) {
-    re = createRdsListHubModel(modelOptions, objId);
+    re = createRdsListHubModel(_gb_sta, modelOptions, objId);
   }
   // RDS 数据元数据
   else if ('RDS-META' == model) {

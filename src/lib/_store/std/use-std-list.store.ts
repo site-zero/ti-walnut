@@ -26,9 +26,11 @@ import {
   useLocalListEdit,
   useWnObj,
   WnObj,
+  WnObjContentFinger,
   WnObjQueryOptions,
 } from '../../';
-import { ObjContentFinger, useObjContentStore } from '../use-obj-content.store';
+import { getObjContentFinger, isObjContentEditable } from '../../../core/wn';
+import { useObjContentStore } from '../use-obj-content.store';
 import { auto_create_obj } from './support/auto-create-home';
 
 export type StdListStore = ReturnType<typeof defineStdListStore>;
@@ -201,6 +203,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     return {
       loading: _action_status.value == 'loading',
       saving: _action_status.value == 'saving',
+      deleting: _action_status.value == 'deleting',
       changed: changed.value,
       empty: isEmpty.value,
       hasCurrent: hasCurrent.value,
@@ -253,15 +256,14 @@ function defineStdListStore(options?: StdListStoreOptions) {
   //---------------------------------------------
   // 读写内容
   //---------------------------------------------
-  function getCurrentContentFinger(): ObjContentFinger | undefined {
+  function getCurrentContentFinger(): WnObjContentFinger | undefined {
     // 防空
     if (!CurrentItem.value) {
       return;
     }
 
     // 读取指纹
-    let { id, len, sha1, mime, tp } = CurrentItem.value;
-    return { id, len, sha1, mime, tp };
+    return getObjContentFinger(CurrentItem.value);
   }
 
   /**
@@ -274,11 +276,21 @@ function defineStdListStore(options?: StdListStoreOptions) {
    * @returns {Promise<void>} 一个表示异步操作的 Promise 对象。
    */
   async function loadCurrentContent() {
+    // 防空
+    if (!CurrentItem.value) {
+      return;
+    }
+
     // 读取指纹
     let finger = getCurrentContentFinger();
 
     // 防空
     if (!finger) {
+      return;
+    }
+
+    // 看看是否可以直接读取，图片等大文件就不要读了
+    if (!isObjContentEditable(CurrentItem.value)) {
       return;
     }
 
@@ -385,6 +397,10 @@ function defineStdListStore(options?: StdListStoreOptions) {
     if (index >= 0) {
       return listData.value[index];
     }
+  }
+
+  function getItemIndex(id: string) {
+    return _local.value.getRowIndex(id);
   }
 
   function getItemByIndex(index: number) {
@@ -499,8 +515,25 @@ function defineStdListStore(options?: StdListStoreOptions) {
   }
 
   function removeChecked(): WnObj[] {
-    if (hasChecked.value) {
-      return _local.value.removeLocalItems(_checked_ids.value);
+    if (hasChecked.value && !_.isEmpty(_checked_ids.value)) {
+      // 首先查找一下可能是否需要高亮下一个的 ID
+      let nextId = _local.value.getNextRowId(_checked_ids.value) as string;
+
+      _action_status.value = 'deleting';
+      let re = _local.value.removeLocalItems(_checked_ids.value);
+      _action_status.value = undefined;
+
+      // 选择下一个对象
+      if (nextId) {
+        selectItem(nextId);
+      }
+      // 没有后续可选的 id
+      else {
+        _current_id.value = undefined;
+        _checked_ids.value = [];
+      }
+
+      return re;
     }
     return [];
   }
@@ -810,6 +843,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     //                  Getters
     //---------------------------------------------
     getItemId,
+    getItemIndex,
     getItemById,
     getItemByIndex,
     getItemByMatch,

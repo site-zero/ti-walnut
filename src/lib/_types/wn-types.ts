@@ -35,6 +35,14 @@ export function isWnObj(obj: any): obj is WnObj {
   );
 }
 
+export type WnObjContentFinger = {
+  id: string;
+  len: number;
+  sha1: string;
+  mime: string;
+  tp: string;
+};
+
 export type WnRace = 'DIR' | 'FILE';
 
 export type WnObjQueryOptions = {
@@ -223,9 +231,9 @@ export type WnLoadOptions = {
   /**
    * 是否开启缓存 默认 false
    * 如果是 true, 那么会使用全局缓存
-   * 如果是 Map<string, any> 那么会使用这个 Map 作为缓存 
+   * 如果是 Map<string, any> 那么会使用这个 Map 作为缓存
    */
-  cache?: boolean|Map<string, any>;
+  cache?: boolean | Map<string, any>;
 };
 
 export type WnFetchObjOptions = WnLoadOptions & {

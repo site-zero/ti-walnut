@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { FormField, FormProps, TiForm, Vars } from '@site0/tijs';
+  import { FieldRefer, FormProps, TiForm, Vars } from '@site0/tijs';
   import { computed } from 'vue';
   import { WnObjMetaProps } from './wn-obj-meta-types';
   //-------------------------------------------------------
@@ -12,6 +12,31 @@
       icon: 'fas-arrow-left',
       text: 'i18n:nil-detail',
     }),
+    fields: () =>
+      [
+        '###=/基本信息',
+        'obj.nm',
+        'obj.title',
+        //'obj.pid',
+        'obj.race',
+        ['###=/文件信息', { visible: { race: 'FILE' } }],
+        'obj.tp',
+        'obj.mime',
+        'obj.len',
+        'obj.sha1',
+        '###=/时间戳',
+        'obj.ct',
+        'obj.lm',
+        'obj.expi',
+        '###=/权限信息',
+        'obj.id',
+        'obj.d0',
+        'obj.d1',
+        'obj.c',
+        'obj.m',
+        'obj.g',
+        'obj.md',
+      ] as FieldRefer[],
   });
   //-----------------------------------------------------
   const FormConfig = computed(() => {
@@ -24,39 +49,12 @@
     } as FormProps;
   });
   //-----------------------------------------------------
-  const FormFields = computed(() => {
-    return [
-      '###=/基本信息',
-      'obj.nm',
-      'obj.title',
-      //'obj.pid',
-      'obj.race',
-      ['###=/文件信息', { visible: { race: 'FILE' } }],
-      'obj.tp',
-      'obj.mime',
-      'obj.len',
-      'obj.sha1',
-      '###=/时间戳',
-      'obj.ct',
-      'obj.lm',
-      'obj.expi',
-      '###=/权限信息',
-      'obj.id',
-      'obj.d0',
-      'obj.d1',
-      'obj.c',
-      'obj.m',
-      'obj.g',
-      'obj.md',
-    ] as FormField[];
-  });
-  //-----------------------------------------------------
 </script>
 <template>
   <TiForm
     class="fit-parent"
     v-bind="FormConfig"
-    :fields="FormFields"
+    :fields="props.fields"
     :data="props.value"
     @change="emit('change', $event)" />
 </template>

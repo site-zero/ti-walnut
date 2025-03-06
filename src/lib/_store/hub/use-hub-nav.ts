@@ -6,13 +6,28 @@ export type HubNav = ReturnType<typeof useHubNav>;
 
 export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
   //---------------------------------------------
+  function set_hash(hash?: string | null) {
+    if (hash && !/^#/.test(hash)) {
+      hash = '#' + hash;
+    }
+    let newPath = _gl_sta.data.appPath + (hash || '');
+    if (!newPath.startsWith('/')) {
+      newPath = '/' + newPath;
+    }
+    _router.push(newPath);
+  }
+  //---------------------------------------------
   function nav_into(dirName: string) {
     let newPath = _gl_sta.data.appPath
       ? Util.appendPath(_gl_sta.data.appPath, dirName)
-      : `/${dirName}`;
+      : dirName;
+    // 确保路径以开头没有斜杠
+    if (newPath.startsWith('/')) {
+      newPath = newPath.substring(1);
+    }
     // 使用 router 导航到新路径
     _gl_sta.data.appPath = newPath;
-    _router.push(newPath);
+    _router.push(`/${newPath}`);
   }
   //---------------------------------------------
   /**
@@ -52,5 +67,6 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
     nav_into,
     nav_out,
     nav_open,
+    set_hash,
   };
 }

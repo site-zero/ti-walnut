@@ -1,0 +1,41 @@
+@use '@site0/tijs/sass/_all.scss' as *;
+
+.wn-foot {
+  @include flex-align-nowrap($ai: stretch);
+  color: var(--ti-color-border-dark);
+  padding-top: var(--ti-gap-t);
+  font-size: var(--ti-fontsz-t);
+  border-top: 1px solid var(--ti-color-border-thin);
+  // Each part
+  > section {
+    flex: 1 1 auto;
+    @include flex-align-nowrap($ai: stretch);
+    > .part-icon,
+    > .part-text {
+      @include flex-align-nowrap($jc: center);
+    }
+    > dl {
+      @include flex-align-nowrap($ai: stretch);
+      padding: 1px;
+      margin: 0;
+      border-left: 1px dotted var(--ti-color-border-thin);
+      cursor: pointer;
+      dt {
+        @include flex-align-nowrap($jc: center);
+        padding: 0 0 0 0.5em;
+        margin: 0;
+      }
+      dd {
+        @include flex-align-nowrap($jc: center);
+        @include font-fixed;
+        padding: 0 0.5em;
+        margin: 0em;
+      }
+      &:hover {
+        color: var(--ti-color-box-f);
+        background-color: var(--ti-color-mask-weak);
+      }
+    }
+  }
+  // End of part
+}

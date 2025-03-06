@@ -1,15 +1,96 @@
 <script lang="ts" setup>
-  import { computed, inject } from 'vue';
+  import { Be, Dom, I18n, TI_TIPS_API, TiIcon } from '@site0/tijs';
+  import {
+    computed,
+    inject,
+    onMounted,
+    onUnmounted,
+    useTemplateRef,
+  } from 'vue';
   import { WN_HUB_APP_INST } from '../../../_store';
+  import { DisplayFootPartItem, useHutFoot } from './use-hub-foot';
+  import { FootPart, WnHubFootProps } from './wn-hub-foot-types';
+  //--------------------------------------------------
+  const _app_tips = inject(TI_TIPS_API);
+  const $el = useTemplateRef('el');
+  const _tips = _app_tips?.createComTips({
+    getScope: () => $el.value,
+    onMounted,
+    onUnmounted,
+  });
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
-  const AppPath = computed(() => _hub?.view.global.parseAppPath());
+  const props = withDefaults(defineProps<WnHubFootProps>(), {
+    align: 'flex-start',
+    parts: () =>
+      [
+        {
+          type: 'info',
+          icon: 'zmdi-cloud-outline',
+          items: [
+            { value: '=id' },
+            { value: '=c', icon: 'far-user' },
+            { value: '=ct', icon: 'zmdi-time', valuePiping: '$TIME_TEXT' },
+            { value: '=sha1', icon: 'fas-fingerprint' },
+            { value: '=len', valuePiping: '$SIZE_TEXT' },
+          ],
+        },
+        { type: 'selection', icon: 'zmdi-mouse', align: 'flex-end' },
+      ] as FootPart[],
+  });
+  //--------------------------------------------------
+  const _parts = computed(() => useHutFoot(props, _hub?.view!, _tips!));
+  //--------------------------------------------------
+  const TopStyle = computed(() => {
+    return {
+      'justify-content': props.align ?? 'flex-start',
+    };
+  });
+  //--------------------------------------------------
+  function onClickItem(it: DisplayFootPartItem, event: MouseEvent) {
+    // 复制裸值: Ctrl + 点击
+    if (event.ctrlKey) {
+      Be.Clipboard.write(it.rawValue);
+    }
+    // 复制显示值
+    else {
+      Be.Clipboard.write(it.value);
+    }
+    let $item = Dom.find(`[data-item-key="${it.itemKey}"]`, $el.value!);
+    if ($item) {
+      Be.BlinkIt($item);
+    }
+  }
   //--------------------------------------------------
 </script>
 
 <template>
-  <div class="wn-foot">
-    AppPath: {{ _hub?.view.global.data.appPath }} :: {{ AppPath }}
+  <div class="wn-foot" ref="el" :style="TopStyle">
+    <section
+      v-for="part in _parts"
+      :key="part.uniqKey"
+      :data-type="part.type"
+      :style="part.style">
+      <div class="part-icon" v-if="part.icon">
+        <TiIcon :value="part.icon" />
+      </div>
+      <div class="part-text" v-if="part.text">{{ I18n.text(part.text) }}</div>
+      <template v-for="it in part.items" :key="it.itemKey">
+        <dl
+          v-if="it.text || it.value || it.suffix || (it.icon && it.tip)"
+          :style="it.style"
+          :data-item-key="it.itemKey"
+          @click.left="onClickItem(it, $event)">
+          <dt v-if="it.icon"><TiIcon :value="it.icon" /></dt>
+          <dt v-if="it.text">{{ I18n.text(it.text) }}</dt>
+          <dd v-if="it.value">{{ it.value }}</dd>
+          <dd v-if="it.suffix">{{ it.suffix }}</dd>
+        </dl>
+      </template>
+    </section>
   </div>
 </template>
+<style scoped lang="scss">
+  @use './wn-hub-foot.scss';
+</style>

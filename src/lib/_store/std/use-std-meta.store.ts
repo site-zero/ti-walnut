@@ -10,8 +10,10 @@ import {
   useLocalMetaEdit,
   useWnObj,
   WnObj,
+  WnObjContentFinger,
 } from '../../';
-import { ObjContentFinger, useObjContentStore } from '../use-obj-content.store';
+import { getObjContentFinger } from '../../../core';
+import { useObjContentStore } from '../use-obj-content.store';
 
 export type StdMetaStore = ReturnType<typeof defineStdMetaStore>;
 
@@ -114,15 +116,14 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   // 读写内容
   //---------------------------------------------
-  function getCurrentContentFinger(): ObjContentFinger | undefined {
+  function getCurrentContentFinger(): WnObjContentFinger | undefined {
     // 防空
     if (!MetaData.value) {
       return;
     }
 
     // 读取指纹
-    let { id, len, sha1, mime, tp } = MetaData.value;
-    return { id, len, sha1, mime, tp };
+    return getObjContentFinger(MetaData.value);
   }
 
   /**

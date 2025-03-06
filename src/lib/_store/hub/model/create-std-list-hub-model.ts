@@ -1,5 +1,6 @@
 import { Icons, Vars } from '@site0/tijs';
 import _ from 'lodash';
+import { GlobalStatusApi } from '../../../_features';
 import { WnObj } from '../../../_types';
 import {
   StdListStoreOptions,
@@ -8,6 +9,7 @@ import {
 import { HubModel } from '../hub-view-types';
 
 export function createStdListHubModel(
+  _gb_sta: GlobalStatusApi,
   hubObj: WnObj,
   options: Vars,
   objId?: string
@@ -46,6 +48,8 @@ export function createStdListHubModel(
     await store.reload();
     if (objId) {
       store.updateSelection(objId);
+      _gb_sta.data.selectedRows = 1;
+      _gb_sta.data.currentObj = store.CurrentItem.value;
     }
   }
 

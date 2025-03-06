@@ -93,11 +93,48 @@
       <!-- binary: 显示摘要以及下载链接-->
       <template v-else-if="'binary' == _info.type">
         <header>
-          <TiIcon :value="ObjIcon" />
+          <TiIcon
+            :value="ObjIcon"
+            :font-size="64"
+            width="unset"
+            height="unset" />
           <h1>{{ ObjText }}</h1>
         </header>
+        <main>
+          <table>
+            <tbody>
+              <tr>
+                <th>{{ I18n.get('wn-obj-nm') }}</th>
+                <td>{{ ObjMeta.nm }}</td>
+              </tr>
+              <tr>
+                <th>{{ I18n.get('wn-obj-title') }}</th>
+                <td>{{ ObjMeta.title }}</td>
+              </tr>
+              <tr>
+                <th>{{ I18n.get('wn-obj-tp') }}</th>
+                <td>{{ ObjMeta.tp }}</td>
+              </tr>
+              <tr>
+                <th>{{ I18n.get('wn-obj-mime') }}</th>
+                <td>{{ ObjMeta.mime }}</td>
+              </tr>
+              <tr>
+                <th>{{ I18n.get('wn-obj-len') }}</th>
+                <td>{{ ObjMeta.len }}</td>
+              </tr>
+              <tr>
+                <th>{{ I18n.get('wn-obj-sha1') }}</th>
+                <td>{{ ObjMeta.sha1 }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
         <footer>
-          <a :href="_info.src" download>{{ I18n.text('i18n:download') }}</a>
+          <a :href="_info.src" download>
+            <i class="fa-solid fa-download"></i>
+            <span>{{ I18n.text('i18n:download-to-local') }}</span></a
+          >
         </footer>
       </template>
       <!-- none: 默认就是空-->

@@ -121,7 +121,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     _hub_obj.value = hubObj;
     _options.value = options;
     // 读取数据模型
-    _model.value = useHubModel(hubObj, options, objId);
+    _model.value = useHubModel(_gb_sta, hubObj, options, objId);
     await _model.value.reload();
 
     // 读取所有的资源文件
@@ -137,11 +137,12 @@ export function useHubViewApi(options: HubViewApiOptions) {
 
   //---------------------------------------------
   // 为控件提供的操作方法
-  type InvokeThat = HubNav & {
-    api: any;
-    methods: Record<string, Function>;
-    invoke: (methodName: string, ...args: any[]) => Promise<any>;
-  };
+  type InvokeThat = HubNav &
+    GlobalStatusApi & {
+      api: any;
+      methods: Record<string, Function>;
+      invoke: (methodName: string, ...args: any[]) => Promise<any>;
+    };
   //---------------------------------------------
   async function invoke(methodName: string, ...args: any[]) {
     if (!_model.value) {
@@ -154,6 +155,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     // 定义调用时的 this
     const that = {
       ..._nav,
+      ..._gb_sta,
       api: _model.value.store,
       methods: _state.methods,
     } as InvokeThat;

@@ -3,7 +3,6 @@
 .wn-obj-preview {
   overflow: hidden;
   > main {
-    overflow: auto;
     width: 100%;
     height: 100%;
     position: relative;
@@ -12,12 +11,18 @@
     &.is-text,
     &.is-json {
       > pre {
+        position: absolute;
+        inset: 0;
         font-size: var(--ti-fontsz-m);
         padding: 0.8em;
         margin: 0;
+        overflow: auto;
         > code {
           background-color: transparent;
           @include font-fixed;
+          &.hljs {
+            overflow: visible;
+          }
         }
       }
     }
@@ -72,6 +77,57 @@
         object-fit: contain;
         border-radius: var(--ti-measure-r-s);
         box-shadow: 2px 2px 8px var(--ti-color-mask-bushy);
+      }
+    }
+    //----------------------------------------
+    // Binary
+    &.is-binary {
+      @include flex-align-v-nowrap($jc: center);
+      > header {
+        padding: var(--ti-gap-h);
+        > h1 {
+          padding: 0.5em 0 0 0;
+          margin: 1em 0 0 0;
+          font-size: var(--ti-fontsz-m);
+          text-align: center;
+        }
+      }
+      > main {
+        padding: var(--ti-gap-b);
+        table {
+          border-collapse: collapse;
+          margin: 0 auto;
+          max-width: 90%;
+          border: 3px solid var(--ti-color-border-thin);
+          border-radius: var(--ti-measure-r-b);
+          overflow: hidden;
+          box-shadow: 2px 2px 8px var(--ti-color-mask-thin);
+        }
+        th,
+        td {
+          border: 1px dashed var(--ti-color-border-thin);
+          padding: var(--ti-box-pad-s);
+          text-align: left;
+        }
+        th {
+          background-color: var(--ti-color-border-shallow);
+          text-align: right;
+          padding: 0 0.6em 0 1.6em;
+        }
+        td {
+          word-break: break-all;
+          overflow-wrap: break-word;
+          padding: 0.4em 0.6em;
+        }
+      }
+      > footer {
+        padding: 0.7em 0;
+        > a {
+          @include flex-align-nowrap($jc: center);
+          > span {
+            margin-left: 0.6em;
+          }
+        }
       }
     }
     //----------------------------------------

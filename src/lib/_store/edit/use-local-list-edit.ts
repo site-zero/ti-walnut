@@ -172,9 +172,47 @@ export function useLocalListEdit(
     }
     return getId(it, index) ?? `row-${index}`;
   }
+  /**
+   * 获取数据的下标
+   */
   function getRowIndex(id: TableRowID): number {
     return _id_index_map.value?.get(id) ?? -1;
   }
+  //---------------------------------------------
+  function getNextRowId(checkedIds: TableRowID[]): TableRowID | undefined {
+    if (_.isEmpty(checkedIds)) {
+      return;
+    }
+    // 编制索引
+    let idMap = Util.arrayToMap(checkedIds);
+    let lastId = _.last(checkedIds);
+
+    // 开始查找
+    let index = getRowIndex(lastId!);
+    if (index < 0) {
+      return;
+    }
+
+    // 待选列表
+    let list = _local_list.value || remoteList.value || [];
+
+    // 向后找，遇到第一个非选中的对象ID
+    for (let i = index + 1; i < list.length; i++) {
+      let id = getRowId(list[i], i);
+      if (!idMap.has(id)) {
+        return id;
+      }
+    }
+
+    // 向前找，遇到第一个非选中的对象ID
+    for (let i = index - 1; i >= 0; i--) {
+      let id = getRowId(_local_list.value![i], i);
+      if (!idMap.has(id)) {
+        return id;
+      }
+    }
+  }
+
   /**
    * 补充数据（仅当更新时）
    */
@@ -645,6 +683,7 @@ export function useLocalListEdit(
     existsInRemote,
     getRowId,
     getRowIndex,
+    getNextRowId,
     //.....................
     reset() {
       _local_list.value = undefined;

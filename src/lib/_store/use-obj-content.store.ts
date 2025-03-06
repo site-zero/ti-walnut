@@ -2,22 +2,14 @@ import { ObjDataStatus } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef, ref, Ref } from 'vue';
 import { useWnObj } from '../_features/use-wn-obj';
-import { WnObj } from '../_types/wn-types';
-
-export type ObjContentFinger = {
-  id: string;
-  len: number;
-  sha1: string;
-  mime: string;
-  tp: string;
-};
+import { WnObjContentFinger, WnObj } from '../_types/wn-types';
 
 export type ObjContentStoreFeature = {
   //---------------------------------------------
   // 数据模型
   _remote: Ref<string | undefined>;
   _local: Ref<string | undefined>;
-  _finger: Ref<ObjContentFinger | undefined>;
+  _finger: Ref<WnObjContentFinger | undefined>;
   //---------------------------------------------
   status: Ref<ObjDataStatus | undefined>;
   //---------------------------------------------
@@ -31,12 +23,12 @@ export type ObjContentStoreFeature = {
   setContent: (content: string) => void;
   dropLocalChange: () => void;
   reset: () => void;
-  isSameFinger: (finger: ObjContentFinger) => boolean;
+  isSameFinger: (finger: WnObjContentFinger) => boolean;
   //---------------------------------------------
   // 远程方法
   saveChange: (force?: boolean) => Promise<WnObj | undefined>;
   loadContent: (
-    finger: ObjContentFinger,
+    finger: WnObjContentFinger,
     resetLocal?: boolean
   ) => Promise<string>;
   refreshContent: (resetLocal?: boolean) => Promise<string>;
@@ -52,7 +44,7 @@ export function useObjContentStore(): ObjContentStoreFeature {
   const _remote = ref<string>();
   const _local = ref<string>();
   const _status = ref<ObjDataStatus>('empty');
-  const _finger = ref<ObjContentFinger>();
+  const _finger = ref<WnObjContentFinger>();
 
   /**
    * 判断本地端是否发生改变。当然如果远端不存在，本地端如果有值就是改变
@@ -97,7 +89,7 @@ export function useObjContentStore(): ObjContentStoreFeature {
     _finger.value = undefined;
   }
 
-  function isSameFinger(finger: ObjContentFinger) {
+  function isSameFinger(finger: WnObjContentFinger) {
     if (_finger.value) {
       let { id, sha1, len } = _finger.value;
       return id == finger.id && sha1 == finger.sha1 && len == finger.len;
@@ -129,7 +121,7 @@ export function useObjContentStore(): ObjContentStoreFeature {
   }
   //---------------------------------------------
   async function loadContent(
-    finger: ObjContentFinger,
+    finger: WnObjContentFinger,
     resetLocal = true
   ): Promise<string> {
     _finger.value = { ...finger };

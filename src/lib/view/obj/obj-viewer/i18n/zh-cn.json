@@ -3,5 +3,7 @@
   "tab-title-meta": "属性",
   "tab-title-content": "内容",
   "tab-title-preview": "预览",
-  "tab-title-edit": "编辑"
+  "tab-title-edit": "编辑",
+  "can-not-edit-folder": "对象是一个目录, 所以不能编辑",
+  "can-not-edit-file": "对象虽然是一个文件, 但是它的内容类型是 ${mime}, 我们暂时不能支持你来编辑它"
 }

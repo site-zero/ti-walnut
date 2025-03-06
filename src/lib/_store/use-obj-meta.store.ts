@@ -1,8 +1,7 @@
 import { FieldStatus, Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef, Ref, ref } from 'vue';
-import { WnMetaSaving, WnObj } from '../../..';
-import { ObjContentFinger } from './use-obj-content.store';
+import { WnMetaSaving, WnObj, WnObjContentFinger } from '../../..';
 
 export type ObjMetaStoreFeature = {
   //---------------------------------------------
@@ -14,7 +13,7 @@ export type ObjMetaStoreFeature = {
   //---------------------------------------------
   // 计算属性
   metaData: ComputedRef<WnObj>;
-  metaFinger: ComputedRef<ObjContentFinger | undefined>;
+  metaFinger: ComputedRef<WnObjContentFinger | undefined>;
   changed: ComputedRef<boolean>;
   isNoEmptyFile: ComputedRef<boolean>;
   isFILE: ComputedRef<boolean>;
@@ -83,7 +82,7 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
   const metaFinger = computed(() => {
     if (metaData.value) {
       let { id, sha1 = '', len = 0, mime = '', tp = '' } = metaData.value;
-      return { id, sha1, len, mime, tp } as ObjContentFinger;
+      return { id, sha1, len, mime, tp } as WnObjContentFinger;
     }
   });
 

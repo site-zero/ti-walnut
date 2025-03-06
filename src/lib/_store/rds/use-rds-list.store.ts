@@ -314,6 +314,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
+  function getItemIndex(id: string) {
+    return _local.value.getRowIndex(id);
+  }
+
   function getItemByIndex(index: number) {
     if (index >= 0 && index < listData.value.length) {
       return listData.value[index];
@@ -430,7 +434,24 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   function removeChecked(): SqlResult[] {
     if (hasChecked.value) {
-      return _local.value.removeLocalItems(_checked_ids.value);
+      // 首先查找一下可能是否需要高亮下一个的 ID
+      let nextId = _local.value.getNextRowId(_checked_ids.value) as string;
+
+      _action_status.value = 'deleting';
+      let re = _local.value.removeLocalItems(_checked_ids.value);
+      _action_status.value = undefined;
+
+      // 选择下一个对象
+      if (nextId) {
+        selectItem(nextId);
+      }
+      // 没有后续可选的 id
+      else {
+        _current_id.value = undefined;
+        _checked_ids.value = [];
+      }
+
+      return re;
     }
     return [];
   }
@@ -564,6 +585,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //isChanged: () => _local.value.isChanged(),
     existsInRemote,
     getItemId,
+    getItemIndex,
     getItemById,
     getItemByIndex,
     getItemByMatch,

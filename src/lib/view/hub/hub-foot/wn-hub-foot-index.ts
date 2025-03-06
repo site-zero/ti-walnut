@@ -2,8 +2,12 @@ import { TiComInfo, TiComRace } from '@site0/tijs';
 import { App } from 'vue';
 import WnHubFoot from './WnHubFoot.vue';
 
-const en_us = {};
-const zh_cn = {};
+const en_us = {
+  selected: 'Selected',
+};
+const zh_cn = {
+  selected: '已选',
+};
 
 const COM_TYPE = 'WnHubFoot';
 

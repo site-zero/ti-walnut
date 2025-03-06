@@ -1,4 +1,4 @@
-export type DataStoreActionStatus = 'loading' | 'saving';
+export type DataStoreActionStatus = 'loading' | 'saving' | 'deleting';
 
 export type DataStoreLoadStatus = 'unloaded' | 'partial' | 'full';
 

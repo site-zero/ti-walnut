@@ -1,9 +1,17 @@
 import { Vars } from '@site0/tijs';
-import { RdsListStoreOptions, useRdsListStore } from '../../../../..';
+import {
+  GlobalStatusApi,
+  RdsListStoreOptions,
+  useRdsListStore,
+} from '../../../../..';
 import { HubModel } from '../hub-view-types';
 import { useModelOptionGetter } from './use-model-option-getter';
 
-export function createRdsListHubModel(options: Vars, objId?: string): HubModel {
+export function createRdsListHubModel(
+  _gb_sta: GlobalStatusApi,
+  options: Vars,
+  objId?: string
+): HubModel {
   // const storeOptions = _.assign(
   //   { query: { filter: {} } },
   //   options
@@ -69,6 +77,8 @@ export function createRdsListHubModel(options: Vars, objId?: string): HubModel {
     await store.reload();
     if (objId) {
       store.updateSelection(objId);
+      _gb_sta.data.selectedRows = 1;
+      _gb_sta.data.currentObj = store.CurrentItem.value;
     }
   }
 

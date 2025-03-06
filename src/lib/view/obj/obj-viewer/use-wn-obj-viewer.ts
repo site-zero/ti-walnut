@@ -1,5 +1,6 @@
 import { Vars } from '@site0/tijs';
 import { WnObjViewerEmitter, WnObjViewerProps } from './wn-obj-viewer-types';
+import { isObjContentEditable } from '../../../../core';
 
 export type WnObjViewerApi = ReturnType<typeof useWnObjViewer>;
 
@@ -15,14 +16,10 @@ export function useWnObjViewer(
   }
 
   function canEditContent() {
-    if (isDIR()) {
+    if (!props.meta) {
       return false;
     }
-    let { mime = '' } = props.meta ?? {};
-    return (
-      /^text\//.test(mime) ||
-      /^application\/(java|json5?|(x-)?javascript)/.test(mime)
-    );
+    return isObjContentEditable(props.meta);
   }
 
   function onMetaChange(delta: Vars) {
