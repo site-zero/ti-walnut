@@ -12,7 +12,7 @@
     tabsAlign: 'left',
     tabsAt: 'bottom',
     tabItemSpace: 'm',
-    tabs: () => ['meta', 'content', 'preview', 'edit'],
+    tabs: () => ['meta', 'preview', 'content'],
   });
   //-----------------------------------------------------
   const api = useWnObjViewer(props, emit);
@@ -21,6 +21,7 @@
   const GUISchema = computed(() => useObjViewerSchema(props, api));
   //-----------------------------------------------------
   function onTabChange(event: TabChangeEvent) {
+    console.log('onTabChange', event, 'content' == event.to.value);
     emit('show-content', 'content' == event.to.value);
   }
   //-----------------------------------------------------

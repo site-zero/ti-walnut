@@ -777,6 +777,7 @@ function defineStdListStore(options?: StdListStoreOptions) {
     ---------------------------------------------*/
   return {
     // 数据模型
+    _auto_load_content,
     _keep_query_by,
     _keep_select_by,
     _keep_query,

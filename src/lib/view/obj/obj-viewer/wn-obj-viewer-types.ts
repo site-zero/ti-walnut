@@ -9,9 +9,8 @@ export type WnObjViewerEmitter = {
 
 export type WnObjViewerBlocks = {
   meta: BlockProps;
-  content: BlockProps;
   preview: BlockProps;
-  edit: BlockProps;
+  content: BlockProps;
 };
 
 export type WnObjViewerBlockName = keyof WnObjViewerBlocks;

@@ -8,19 +8,14 @@ const _blocks: WnObjViewerBlocks = {
     name: 'meta',
     title: 'i18n:wn-obj-viewer-tab-title-meta',
   },
-  content: {
-    icon: 'fas-align-justify',
-    name: 'content',
-    title: 'i18n:wn-obj-viewer-tab-title-content',
-  },
   preview: {
     icon: 'zmdi-eye',
     name: 'preview',
     title: 'i18n:wn-obj-viewer-tab-title-preview',
   },
-  edit: {
+  content: {
     icon: 'fa-solid fa-pen-to-square',
-    name: 'edit',
+    name: 'content',
     title: 'i18n:wn-obj-viewer-tab-title-edit',
   },
 };
@@ -31,7 +26,7 @@ export function useObjViewerLayout(
 ): TabsLayoutProps {
   // 获取内容块
   let blocks = [] as LayoutBlock[];
-  for (let tabName of props.tabs ?? ['meta', 'content', 'preview', 'edit']) {
+  for (let tabName of props.tabs ?? ['meta', 'preview', 'content']) {
     let tab = _blocks[tabName];
     if (tab) {
       blocks.push(tab);

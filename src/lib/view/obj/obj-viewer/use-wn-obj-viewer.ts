@@ -14,6 +14,17 @@ export function useWnObjViewer(
     return 'FILE' === props.meta?.race;
   }
 
+  function canEditContent() {
+    if (isDIR()) {
+      return false;
+    }
+    let { mime = '' } = props.meta ?? {};
+    return (
+      /^text\//.test(mime) ||
+      /^application\/(java|json5?|(x-)?javascript)/.test(mime)
+    );
+  }
+
   function onMetaChange(delta: Vars) {
     //console.log('onMetaChange', delta);
     emit('meta-change', delta);
@@ -24,5 +35,5 @@ export function useWnObjViewer(
     emit('content-change', content);
   }
 
-  return { isDIR, isFILE, onMetaChange, onContentChange };
+  return { isDIR, isFILE, canEditContent, onMetaChange, onContentChange };
 }

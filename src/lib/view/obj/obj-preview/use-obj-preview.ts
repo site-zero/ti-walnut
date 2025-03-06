@@ -29,8 +29,8 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
   if (!mime) {
     down.download = 'auto';
   }
-  // 网页
-  else if ('text/html' == mime) {
+  // 网页 & PDF
+  else if (/^(text\/html)|(application\/pdf)$/.test(mime)) {
     info.type = 'html';
     down.download = 'raw';
   }
