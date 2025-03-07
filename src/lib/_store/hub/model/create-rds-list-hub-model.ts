@@ -78,8 +78,6 @@ export function createRdsListHubModel(
     await store.reload();
     if (objId) {
       store.updateSelection(objId);
-      _gb_sta.data.selectedRows = 1;
-      _gb_sta.data.currentObj = store.CurrentItem.value;
     }
   }
 

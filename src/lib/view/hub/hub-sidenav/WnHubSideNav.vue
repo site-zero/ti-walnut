@@ -1,10 +1,10 @@
 <script lang="ts" setup>
+  import { SideBarItem, TiSidebar } from '@site0/tijs';
   import {
     useGlobalStatus,
     useSidebar,
     WnHubSideNavProps,
   } from '../../../../lib';
-  import { SideBarItem, TiSidebar } from '@site0/tijs';
   //--------------------------------------------------
   const emit = defineEmits<{
     (eventName: 'fire', item: SideBarItem): void;
@@ -21,7 +21,11 @@
   //--------------------------------------------------
   function isCurrentItem(it: SideBarItem): boolean {
     if (it.href) {
-      return (_gl_sta.data.appPath || '').startsWith(it.href || '');
+      let path = _gl_sta.data.appPath || '';
+      if (!/^\//.test(path)) {
+        path = '/' + path;
+      }
+      return path.startsWith(it.href || '');
     }
     return false;
   }
