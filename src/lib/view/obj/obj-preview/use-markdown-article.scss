@@ -1,0 +1,267 @@
+@use '@site0/tijs/sass/_all.scss' as *;
+
+article.as-markdown {
+  // =============================================
+  // 全局变量
+  // =============================================
+  --base-font-size: 16px; // 基准字体尺寸
+  --base-line-height: 1.5em; // 基准行高
+  --text-main: inherit; // 主文本色
+  --text-muted: #718096; // 弱化文本色
+  --primary-color: var(--ti-color-primary); // 主色调
+  --surface-1: var(--ti-color-card); // 背景基准色
+  --surface-2: var(--ti-color-body); // 次级背景
+  --surface-3: var(--ti-color-bar); // 强调背景
+  --line-color: var(--ti-color-border-thin); // 分割线/边框
+  --code-bg: var(--ti-color-tip-r); // 代码背景
+  --code-color: var(--ti-color-tip); // 代码文本
+  --pre-bg: var(--ti-color-box-f); // 代码背景
+  --pre-color: var(--ti-color-box); // 代码文本
+  --link-color: #4299e1; // 链接色
+  --strong-color: var(--ti-color-primary); // 强调文本
+  --em-color: var(--ti-color-primary); // 斜体色
+  --u-color: var(--ti-color-primary); // 下划线色
+  --table-bg: transparent; // 表格背景
+  --table-border: var(--ti-color-border-thin); // 表格边框
+  --blockquote-border: var(--ti-color-info-b); // 引用块装饰色
+  --marker-color: inherit; // 列表标记色
+
+  // =============================================
+  // 基础样式
+  // =============================================
+  font-size: var(--base-font-size);
+  letter-spacing: 0.1em;
+  line-height: var(--base-line-height);
+  color: var(--text-main);
+  background: var(--surface-1);
+  padding: 2rem 3em;
+
+  // =============================================
+  // 表格系统
+  // =============================================
+  table {
+    background: var(--table-bg);
+    border: 1px solid var(--table-border);
+    margin: 1em 0;
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+
+    th {
+      background: var(--surface-3);
+      font-weight: 600;
+      padding: 0.3em 0.8em;
+      border: 1px solid var(--table-border);
+    }
+
+    td {
+      padding: 0.4em 0.6em;
+      border: 1px solid var(--table-border);
+    }
+  }
+
+  // =============================================
+  // 列表系统
+  // =============================================
+  ul,
+  ol {
+    padding-left: 2.2em;
+    margin: 1.2em 0;
+
+    li {
+      margin: 0.6em 0;
+      &::marker {
+        color: var(--marker-color);
+      }
+    }
+  }
+
+  // =============================================
+  // 前置内容
+  // =============================================
+  table.front-matter-table {
+    background: none;
+    width: unset;
+    border-radius: unset;
+    color: var(--text-muted);
+    th,
+    td {
+      padding: 0.2em 0.4em;
+      font-size: 0.8em;
+      color: inherit;
+    }
+
+    th {
+      text-align: right;
+      background-color: var(--surface-2);
+      padding-left: 1em;
+      text-transform: capitalize;
+    }
+  }
+
+  ul.front-matter-list {
+    list-style: none;
+    padding: 0.5em;
+    margin: 0;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    li {
+      @include flex-align-nowrap;
+      strong {
+        display: block;
+        min-width: 8em;
+        color: inherit;
+        text-transform: capitalize;
+      }
+      span {
+        display: block;
+      }
+    }
+  }
+
+  // =============================================
+  // 引用块
+  // =============================================
+  blockquote {
+    background: var(--surface-2);
+    border-left: 4px solid var(--blockquote-border);
+    margin: 1.5em 0;
+    padding: 0.7em 1em;
+    color: var(--text-muted);
+    font-size: 0.8em;
+
+    p:first-child {
+      margin-top: 0;
+    }
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // =============================================
+  // 代码系统
+  // =============================================
+  pre {
+    @include font-fixed;
+    background: var(--pre-bg);
+    color: var(--pre-color);
+    padding: 1.5em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1.5em 0;
+    font-size: 0.8em;
+    line-height: 1.5em;
+    letter-spacing: 0;
+
+    code {
+      background: transparent;
+      padding: 0;
+      display: block;
+    }
+  }
+
+  code:not(pre code) {
+    background: var(--code-bg);
+    color: var(--code-color);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+    margin: 0 0.2em;
+  }
+
+  // =============================================
+  // 排版系统
+  // =============================================
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1em 0 0;
+  }
+  h1 {
+    font-size: 1.8em;
+    border-bottom: 1px dashed var(--line-color);
+    padding-bottom: 0.3em;
+  }
+
+  h2 {
+    font-size: 1.6em;
+    margin: 1em 0 0;
+    position: relative;
+    padding-left: 0.3em;
+    border-left: 0.3em solid var(--text-main);
+  }
+
+  h3 {
+    font-size: 1.4em;
+    margin: 1em 0 0.8em;
+  }
+  h4 {
+    font-size: 1.2em;
+    margin: 1em 0 0.7em;
+  }
+  h5 {
+    font-size: 1.1em;
+    margin: 1em 0 0.6em;
+  }
+  h6 {
+    font-size: 1em;
+    margin: 1em 0 0.5em;
+  }
+
+  p {
+    margin: 1em 0;
+  }
+
+  // =============================================
+  // 交互元素
+  // =============================================
+  a {
+    color: var(--link-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+
+    &:hover {
+      border-bottom-color: currentColor;
+      opacity: 0.8;
+    }
+  }
+
+  strong {
+    color: var(--strong-color);
+    margin: 0 0.2em;
+  }
+  em {
+    color: var(--em-color);
+    margin: 0 0.2em;
+  }
+  u {
+    color: var(--u-color);
+    margin: 0 0.2em;
+  }
+
+  // =============================================
+  // 装饰元素
+  // =============================================
+  hr {
+    margin: 2.4em 0;
+    border: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--line-color) 50%,
+      transparent
+    );
+  }
+
+  img {
+    max-width: 100%;
+    // border-radius: 6px;
+    // box-shadow: var(--shadow-base);
+  }
+}

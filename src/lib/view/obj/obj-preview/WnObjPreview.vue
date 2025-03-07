@@ -151,6 +151,7 @@
     </main>
   </div>
 </template>
-<style scoped lang="scss">
+<style lang="scss">
   @use './wn-obj-preview.scss';
+  @use './use-markdown-article.scss';
 </style>

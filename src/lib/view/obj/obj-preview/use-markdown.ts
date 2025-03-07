@@ -1,23 +1,22 @@
+import { Vars } from '@site0/tijs';
 import MarkdownIt from 'markdown-it';
-//import markdownItFrontMatter from 'markdown-it-front-matter';
+import {
+  MarkdownItFrontMatterOptions,
+  markdownItFrontMatterPlugin,
+} from './use-markdown-front-matter.ts';
 import { WnObjPreivewInfo } from './wn-obj-preview-types';
-
-/*
- 手动修改类型定义文件：若更新插件无法解决问题，
- 你可以手动修改 node_modules/markdown-it-front-matter/index.d.ts 文件，
- 把 import MarkdownIt from 'markdown-it/lib' 
- 改为 import MarkdownIt from 'markdown-it'。
- */
-
-const md = new MarkdownIt();
-// md.use(markdownItFrontMatter, (frontMatter: string) => {
-//   console.log('frontMatter', frontMatter);
-// });
 
 export function renderMarkdown(
   info: WnObjPreivewInfo,
   content: string
 ): string {
   if (!content || info.type != 'markdown') return '';
+  const md = new MarkdownIt();
+  md.use(markdownItFrontMatterPlugin, {
+    renderAs: 'list',
+    callback: (preface: Vars) => {
+      console.log('这里是解析出来的前言', preface);
+    },
+  } as MarkdownItFrontMatterOptions);
   return md.render(content);
 }
