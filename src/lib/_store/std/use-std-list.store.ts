@@ -13,6 +13,7 @@ import { computed, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  GlobalStatusApi,
   isWnObj,
   ListItemUpdateOptions,
   LocalListEditOptions,
@@ -89,9 +90,14 @@ export type StdListStoreOptions = LocalListEditOptions & {
    * @default false
    */
   autoLoadContent?: boolean;
+
+  /**
+   * 可选全局状态接口，如果指定，则在 Select 等时机会自动更新状态
+   */
+  globalStatus?: GlobalStatusApi;
 };
 
-function defineStdListStore(options?: StdListStoreOptions) {
+function defineStdListStore(options: StdListStoreOptions) {
   //console.warn('defineStdListStore', options);
   //---------------------------------------------
   // 准备数据访问模型
@@ -579,6 +585,12 @@ function defineStdListStore(options?: StdListStoreOptions) {
     _checked_ids.value = checkedIds ?? [];
 
     await __try_auto_load_content();
+
+    // 更新全局状态
+    if (options.globalStatus) {
+      options.globalStatus.data.selectedRows = _checked_ids.value.length;
+      options.globalStatus.data.currentObj = CurrentItem.value;
+    }
   }
 
   function cancelSelection() {
@@ -947,6 +959,6 @@ function defineStdListStore(options?: StdListStoreOptions) {
  */
 //const _stores = new Map<string, DataListStoreFeature>();
 
-export function useStdListStore(options?: StdListStoreOptions): StdListStore {
+export function useStdListStore(options: StdListStoreOptions): StdListStore {
   return defineStdListStore(options);
 }

@@ -1,4 +1,4 @@
-import { RoadblockProps, Vars } from '@site0/tijs';
+import { RoadblockProps } from '@site0/tijs';
 import { WnObj } from '../../../_types';
 
 export type WnObjPreviewProps = {
@@ -19,6 +19,7 @@ export type WnObjPreivewInfo = {
     | 'text'
     | 'json'
     | 'html'
+    | 'markdown'
     | 'image'
     | 'audio'
     | 'video'

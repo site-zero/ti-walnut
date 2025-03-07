@@ -4,6 +4,7 @@
   import 'highlight.js/styles/default.css';
   import _ from 'lodash';
   import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
+  import { renderMarkdown } from './use-markdown';
   import {
     getObjCodeType,
     getObjPreviewInfo,
@@ -32,6 +33,10 @@
     }
     return nm ?? id;
   });
+  //-----------------------------------------------------
+  const ObjContentAsMarkdown = computed(() =>
+    renderMarkdown(_info.value, _text.value)
+  );
   //-----------------------------------------------------
   const ObjCodeType = computed(() => getObjCodeType(ObjMeta.value));
   //-----------------------------------------------------
@@ -73,6 +78,10 @@
       <!-- text: 显示一个 <pre> 包裹文本-->
       <template v-else-if="'text' == _info.type || 'json' == _info.type">
         <pre><code :class="ObjCodeType">{{ _text }}</code></pre>
+      </template>
+      <!-- markdown: 执行渲染结果-->
+      <template v-else-if="'markdown' == _info.type">
+        <article class="as-markdown" v-html="ObjContentAsMarkdown"></article>
       </template>
       <!-- html: 用 iframe 引入 html-->
       <template v-else-if="'html' == _info.type">

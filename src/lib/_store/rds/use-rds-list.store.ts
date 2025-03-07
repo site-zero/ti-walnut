@@ -15,6 +15,7 @@ import { computed, reactive, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  GlobalStatusApi,
   ListItemUpdateOptions,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
@@ -69,6 +70,10 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   makeChange?: LocalListMakeChangeOptions;
   refreshWhenSave?: boolean;
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
+  /**
+   * 可选全局状态接口，如果指定，则在 Select 等时机会自动更新状态
+   */
+  globalStatus?: GlobalStatusApi;
 };
 
 function defineRdsListStore(options: RdsListStoreOptions) {
@@ -492,6 +497,12 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     _current_id.value = currentId ?? undefined;
     _checked_ids.value = checkedIds ?? [];
+
+    // 更新全局状态
+    if (options.globalStatus) {
+      options.globalStatus.data.selectedRows = _checked_ids.value.length;
+      options.globalStatus.data.currentObj = CurrentItem.value;
+    }
   }
 
   function cancelSelection() {

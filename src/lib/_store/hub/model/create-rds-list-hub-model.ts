@@ -20,6 +20,7 @@ export function createRdsListHubModel(
   const _opt = useModelOptionGetter(options);
 
   const storeOptions: RdsListStoreOptions = {
+    globalStatus: _gb_sta,
     daoName: _opt.getString('daoName'),
     keepQuery: _opt.getKeepInfo('keepQuery'),
     keepSelect: _opt.getKeepInfo('keepSelect'),

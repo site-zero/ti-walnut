@@ -44,6 +44,11 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
     info.type = 'json';
     info.src = `cat id:${id}`;
   }
+  // Markdown
+  else if ('text/markdown' == mime) {
+    info.type = 'markdown';
+    info.src = `cat id:${id}`;
+  }
   // 文本
   else if (/^text\//.test(mime)) {
     info.type = 'text';
@@ -76,7 +81,7 @@ export async function loadTextPreviewContent(
   info: WnObjPreivewInfo,
   _text: Ref<string>
 ) {
-  if (/^(json|text)$/.test(info.type)) {
+  if (/^(json|text|markdown)$/.test(info.type)) {
     _text.value = await Walnut.exec(info.src);
   } else {
     _text.value = '';

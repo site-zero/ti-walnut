@@ -96,7 +96,7 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
 
       // 执行上传
       Walnut.uploadFile(item.file, uploading).then((re: any) => {
-        console.log('Upload Done:', re.data);
+        //console.log('Upload Done:', re.data);
         // 上传完成
         item.abort = null;
         item.newObj = re.data;

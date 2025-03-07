@@ -16,6 +16,7 @@ export function createStdListHubModel(
 ): HubModel {
   const storeOptions: StdListStoreOptions = _.assign({}, options, {
     homePath: hubObj,
+    globalStatus: _gb_sta,
   });
 
   const store = useStdListStore(storeOptions);
@@ -48,8 +49,6 @@ export function createStdListHubModel(
     await store.reload();
     if (objId) {
       store.updateSelection(objId);
-      _gb_sta.data.selectedRows = 1;
-      _gb_sta.data.currentObj = store.CurrentItem.value;
     }
   }
 
