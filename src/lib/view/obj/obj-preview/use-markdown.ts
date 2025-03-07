@@ -14,8 +14,8 @@ export function renderMarkdown(
   const md = new MarkdownIt();
   md.use(markdownItFrontMatterPlugin, {
     renderAs: 'list',
-    callback: (preface: Vars) => {
-      console.log('这里是解析出来的前言', preface);
+    callback: (_preface: Vars) => {
+      //console.log('这里是解析出来的前言', preface);
     },
   } as MarkdownItFrontMatterOptions);
   return md.render(content);
