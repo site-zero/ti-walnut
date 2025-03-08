@@ -45,6 +45,9 @@ export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
     let { hubPath, hashId } = props;
     try {
       _hub_view.setLoading(true);
+      if (!hubPath) {
+        hubPath = '%HOME%';
+      }
       let path = session.getObjPath(hubPath);
       let obj = await Walnut.fetchObj(path);
       // 未找到对象，那么肯定是不能接受的
@@ -60,13 +63,11 @@ export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
       }
       // 重新加载视图
       await _hub_view.reload(obj, viewOptions, hashId);
-    }
-    // 捕获错误
-    catch (err) {
+    } catch (err) {
+      // 捕获错误
       console.error(err);
-    }
-    // 总之要关闭加载状态
-    finally {
+    } finally {
+      // 总之要关闭加载状态
       _hub_view.setLoading(false);
     }
   }

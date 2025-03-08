@@ -192,8 +192,8 @@ declare module '*.vue' {
   at <AsyncComponentWrapper className="cover-parent" tabsAlign="left" tabsAt="bottom"  ... >
   at <WnObjViewer meta=undefined content="" keepTab="local: Wn-Hub-DIR-Detail-Tabs-orjkfqgbr0h3gqt66aeppcj8al"  ... >
   at <TiBlock key=0 ref_for=true name="detail"  ... >
-  at <TiLayoutGrid className="fit-parent as-card with-shadown r-s" keepSizes="local: Wn-Hub-DIR-MainSizes-${HomeId}" gridStyle= {backgroundColor: 'var(--ti-color-body)', padding: 'var(--ti-gap-m)'}  ... >
-  at <AsyncComponentWrapper className="fit-parent as-card with-shadown r-s" keepSizes="local: Wn-Hub-DIR-MainSizes-${HomeId}" gridStyle= {backgroundColor: 'var(--ti-color-body)', padding: 'var(--ti-gap-m)'}  ... >
+  at <TiLayoutGrid className="fit-parent as-card with-shadow r-s" keepSizes="local: Wn-Hub-DIR-MainSizes-${HomeId}" gridStyle= {backgroundColor: 'var(--ti-color-body)', padding: 'var(--ti-gap-m)'}  ... >
+  at <AsyncComponentWrapper className="fit-parent as-card with-shadow r-s" keepSizes="local: Wn-Hub-DIR-MainSizes-${HomeId}" gridStyle= {backgroundColor: 'var(--ti-color-body)', padding: 'var(--ti-gap-m)'}  ... >
   at <WnHubArena hubPath="settings/_test" hashId=undefined onVnodeUnmounted=fn<onVnodeUnmounted>  ... >
   at <RouterView name="arena" key="arena" >
   at <TiLayoutGrid className="fit-parent as-card" blockOverflowMode="cover" keepSizes= {keepAt: 'WnHub-APP-Main-Layout-Sizes'}  ... >

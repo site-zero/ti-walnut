@@ -35,6 +35,7 @@ import {
   WnObj,
 } from '../lib';
 import { installWalnutDicts } from './wn-dict';
+import { anyToHubViewOptions } from './wn-obj-views';
 import { wnRunCommand } from './wn-run-command';
 
 const TICKET_KEY = 'Walnut-Ticket';
@@ -196,6 +197,10 @@ export class WalnutServer {
     ) {
       view = `id:${hubObj.id}`;
     }
+    // 对象关联了视图
+    else if (hubObj && hubObj.view) {
+      view = hubObj.view;
+    }
     // 根据 server.config.json#views 的定义，获取视图设置
     else {
       view = this.findView(hubPath, hubObj);
@@ -212,11 +217,12 @@ export class WalnutServer {
       if (!json) {
         return null;
       }
-      return JSON5.parse(json) as HubViewOptions;
+      let input = JSON5.parse(json);
+      return anyToHubViewOptions(input);
     }
 
     // 直接就是 View 本身
-    return view;
+    return anyToHubViewOptions(view);
   }
 
   getUrl(path: string) {

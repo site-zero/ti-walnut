@@ -21,7 +21,7 @@
 
     const logout = {
       name: 'logout',
-      text: 'Logout',
+      text: 'i18n:logout',
       icon: 'fas-arrow-right-from-bracket',
       action: 'logout',
     };
@@ -58,7 +58,6 @@
         }
       }
     }
-
     return re;
   });
   //--------------------------------------------------
@@ -74,10 +73,22 @@
   }
   //--------------------------------------------------
 </script>
-
 <template>
   <TiActionBar
     v-bind="ActionItems"
+    class="wn-hub-menu"
     :vars="_hub!.view.ActioinBarVars"
     @fire="onActionFire" />
 </template>
+<style lang="scss">
+  @use '@site0/tijs/sass/_all.scss' as *;
+  .wn-hub-menu {
+    .bar-item-info.is-enabled[aspect='top'] {
+      background-color: transparent;
+      color: var(--ti-color-box);
+      &:hover {
+        background-color: var(--ti-color-highlight);
+      }
+    }
+  }
+</style>

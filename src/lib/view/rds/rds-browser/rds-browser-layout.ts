@@ -4,7 +4,7 @@ import { getKeepName } from './use-rds-browser';
 
 export function useRdsBrowserLayout(props: RdsBrowserProps): LayoutGridProps {
   return {
-    className: 'fit-parent as-card with-shadown r-s',
+    className: 'fit-parent as-card with-shadow r-s',
     keepSizes: getKeepName(props, 'GUI-Layout-Sizes'),
     gridStyle: {
       backgroundColor: 'var(--ti-color-body)',

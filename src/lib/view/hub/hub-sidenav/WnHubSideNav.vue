@@ -33,6 +33,7 @@
 </script>
 <template>
   <TiSidebar
+    class="cover-parent"
     :class="props.className"
     :style="props.style"
     :items="_sidebar.sidebar.value ?? []"

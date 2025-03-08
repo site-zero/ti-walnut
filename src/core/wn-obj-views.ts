@@ -70,3 +70,41 @@ export async function createObjViewOptions(
   // 最后输出视图配置
   return Util.explainObj(obj, viewTmpl);
 }
+
+export function anyToHubViewOptions(input: any): HubViewOptions {
+  if (_.isEmpty(input)) {
+    return { model: 'STD-LIST' };
+  }
+  // 逐个设置键
+  let re: HubViewOptions = {
+    model: input.model ?? 'STD-LIST',
+    modelOptions: input.modelOptions ?? {},
+  };
+
+  const _to_value = (val: any) => {
+    if (_.isString(val)) {
+      return val;
+    }
+    if (_.isFunction(val)) {
+      return val;
+    }
+    if (_.isPlainObject(val)) {
+      return () => _.cloneDeep(val);
+    }
+  };
+
+  re.actions = _to_value(input.actions);
+  re.layout = _to_value(input.layout);
+  re.schema = _to_value(input.schema);
+
+  if (input.methods) {
+    if (_.isString(input.methods)) {
+      re.methods = [input.methods];
+    } else if (_.isArray(input.methods)) {
+      re.methods = input.methods;
+    }
+  }
+
+  // 搞定了
+  return re;
+}
