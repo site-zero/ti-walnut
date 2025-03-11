@@ -33,13 +33,14 @@
       > div.as-title {
         div.as-version {
           @include font-fixed;
-          background-color: var(--ti-color-selected);
-          color: var(--ti-color-selected-f);
+          background-color: var(--ti-color-mask-weak);
+          color: var(--ti-color-border-shallow);
           font-size: 8px;
           border-radius: 0.2em;
           padding: 0.1em 0.5em;
           line-height: 1.5em;
           white-space: nowrap;
+          justify-self: flex-start;
         }
       }
     }

@@ -206,7 +206,7 @@ export function useLocalListEdit(
 
     // 向前找，遇到第一个非选中的对象ID
     for (let i = index - 1; i >= 0; i--) {
-      let id = getRowId(_local_list.value![i], i);
+      let id = getRowId(list![i], i);
       if (!idMap.has(id)) {
         return id;
       }

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+  import { I18n } from '@site0/tijs';
   import { reactive } from 'vue';
   import { SignInForm } from '../../../';
-  import { I18n } from '@site0/tijs';
 
   let emit = defineEmits<(event: 'submit', info: SignInForm) => void>();
 
@@ -28,6 +28,7 @@
 </script>
 <template>
   <div class="wn-signup-panel as-signin">
+    <slot name="header"> </slot>
     <main>
       <dl>
         <dt>用户名</dt>
@@ -55,6 +56,7 @@
         <div class="as-error">{{ I18n.get(props.errCode!) }}</div>
       </dl>
     </main>
+    <slot name="footer"> </slot>
   </div>
 </template>
 <style lang="scss" scoped>

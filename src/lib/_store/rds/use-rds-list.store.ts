@@ -288,7 +288,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return _local.value.makeChanges(options.makeChange);
   }
   //---------------------------------------------
-  //                 被内部重用的方法
+  //                计算属性
   //---------------------------------------------
   const listData = computed(() => {
     return _local.value.localList.value || _remote.value || [];
@@ -388,6 +388,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return re;
   }
 
+  function getFilterField(key: string, dft?: any) {
+    return _.get(query.filter, key) ?? dft;
+  }
+
   function prependItem(item: SqlResult) {
     // 如果存在就更新
     let id = getItemId(item);
@@ -473,7 +477,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     return [];
   }
-
+  //---------------------------------------------
+  // 选择方法
+  //---------------------------------------------
   async function onSelect(payload: TableSelectEmitInfo) {
     let currentId = (payload.currentId as string) ?? undefined;
     let checkedIds = Util.mapTruthyKeys(payload.checkedIds) as string[];
@@ -513,6 +519,36 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   const CurrentItem = computed(() => getCurrentItem());
 
+  function setQuery(q: ComboFilterValue) {
+    _.assign(query, q);
+    __save_local_query();
+  }
+
+  function setFilter(filter: QueryFilter) {
+    query.filter = _.cloneDeep(filter);
+    __save_local_query();
+  }
+
+  function setSorter(sorter: QuerySorter) {
+    query.sorter = _.cloneDeep(sorter);
+    __save_local_query();
+  }
+
+  function setPager(page: Partial<SqlPagerInput>) {
+    if (!query.pager) {
+      query.pager = {
+        pageNumber: 1,
+        pageSize: 20,
+      };
+    }
+    updatePager(query.pager, page);
+    __save_local_query();
+  }
+
+  function addLocalItem(meta: SqlResult) {
+    _local.value.appendToList(meta);
+  }
+
   function __gen_query(): SqlQuery {
     let q = _.cloneDeep(query);
     q.filter = q.filter ?? {};
@@ -523,7 +559,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     return q;
   }
-
+  //---------------------------------------------
+  //               远程查询方法
+  //---------------------------------------------
   async function queryRemoteList(): Promise<void> {
     _action_status.value = 'loading';
     // 准备查询条件
@@ -545,7 +583,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _remote.value = list ?? [];
     _action_status.value = undefined;
   }
-
+  //---------------------------------------------
   async function countRemoteList() {
     _action_status.value = 'loading';
     let q = __gen_query();
@@ -556,16 +594,56 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     _action_status.value = undefined;
   }
-
+  //---------------------------------------------
   async function countRemote(filter: Vars | Vars[]): Promise<number> {
     let total = await sqlx.count(options.sqlCount, filter);
     return total;
   }
-  /*---------------------------------------------
-                    
-                  输出特性
-  
-  ---------------------------------------------*/
+  //---------------------------------------------
+  async function reload() {
+    resetLocalChange();
+    //remoteList.value = undefined;
+    await Promise.all([queryRemoteList(), countRemoteList()]);
+  }
+  //---------------------------------------------
+  /**
+   * 刷新函数，根据提供的选项执行刷新操作。
+   */
+  async function refresh(options: RefreshOptions = {}) {
+    if (options.reset) {
+      resetLocalChange();
+    }
+    await Promise.all([queryRemoteList(), countRemoteList()]);
+  }
+  //---------------------------------------------
+  //               远程更新方法
+  //---------------------------------------------
+  async function saveChange() {
+    // 获取改动信息
+    let changes = makeChanges();
+    log.debug('saveChange', changes);
+    // 保护一下
+    if (changes.length == 0) {
+      return;
+    }
+    //console.log('changes', changes);
+    // 执行更新
+    _action_status.value = 'saving';
+    await sqlx.exec(changes);
+    _action_status.value = undefined;
+
+    // 更新远程结果
+    if (options.refreshWhenSave) {
+      queryRemoteList().then(() => {
+        //强制取消本地改动
+        _local.value.reset();
+      });
+    }
+  }
+
+  //---------------------------------------------
+  //  输出特性
+  //---------------------------------------------
   return {
     // 数据模型
     _keep_query,
@@ -606,44 +684,19 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     findItemsById,
     findItemsByMatch,
     findItemsBy,
-    getFilterField: (key: string, dft?: any) => {
-      return _.get(query.filter, key) ?? dft;
-    },
+    getFilterField,
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
     resetLocalChange,
     clearRemoteList,
 
-    setQuery(q: ComboFilterValue) {
-      _.assign(query, q);
-      __save_local_query();
-    },
+    setQuery,
+    setFilter,
+    setSorter,
+    setPager,
 
-    setFilter(filter: QueryFilter) {
-      query.filter = _.cloneDeep(filter);
-      __save_local_query();
-    },
-
-    setSorter(sorter: QuerySorter) {
-      query.sorter = _.cloneDeep(sorter);
-      __save_local_query();
-    },
-
-    setPager(page: Partial<SqlPagerInput>) {
-      if (!query.pager) {
-        query.pager = {
-          pageNumber: 1,
-          pageSize: 20,
-        };
-      }
-      updatePager(query.pager, page);
-      __save_local_query();
-    },
-
-    addLocalItem(meta: SqlResult) {
-      _local.value.appendToList(meta);
-    },
+    addLocalItem,
 
     appendItem,
     prependItem,
@@ -678,44 +731,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     countRemote,
     queryRemoteList,
     makeChanges,
-    saveChange: async (): Promise<void> => {
-      // 获取改动信息
-      let changes = makeChanges();
-      log.debug('saveChange', changes);
-      // 保护一下
-      if (changes.length == 0) {
-        return;
-      }
-      //console.log('changes', changes);
-      // 执行更新
-      _action_status.value = 'saving';
-      await sqlx.exec(changes);
-      _action_status.value = undefined;
-
-      // 更新远程结果
-      if (options.refreshWhenSave) {
-        queryRemoteList().then(() => {
-          //强制取消本地改动
-          _local.value.reset();
-        });
-      }
-    },
-
-    reload: async (): Promise<void> => {
-      resetLocalChange();
-      //remoteList.value = undefined;
-      await Promise.all([queryRemoteList(), countRemoteList()]);
-    },
-
-    /**
-     * 刷新函数，根据提供的选项执行刷新操作。
-     */
-    refresh: async function (options: RefreshOptions = {}) {
-      if (options.reset) {
-        resetLocalChange();
-      }
-      await queryRemoteList();
-    },
+    saveChange,
+    reload,
+    refresh,
   };
 }
 
@@ -725,16 +743,5 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 //const _stores = new Map<string, DataListStoreFeature>();
 
 export function useRdsListStore(options: RdsListStoreOptions): RdsListStore {
-  // 强制创建新的
-  // if ('NEW' == name || Str.isBlank(name)) {
-  //   return defineDataListStore(options);
-  // }
-  // // 持久化的实例
-  // let re = _stores.get(name);
-  // if (!re) {
-  //   re = defineDataListStore(options);
-  //   _stores.set(name, re);
-  // }
-  // return re;
   return defineRdsListStore(options);
 }

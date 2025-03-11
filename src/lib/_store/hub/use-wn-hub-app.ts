@@ -1,7 +1,7 @@
 import { ActionBarProps } from '@site0/tijs';
 import { computed, InjectionKey, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useGlobalStatus } from '../../_features';
+import { Router } from 'vue-router';
+import { GlobalStatusApi } from '../../_features';
 import { HubView } from '../../_store';
 
 export type WnHubApp = ReturnType<typeof useWnHubApp>;
@@ -10,8 +10,8 @@ export const WN_HUB_APP_INST: InjectionKey<WnHubApp> =
   Symbol('WN_HUB_APP_INST');
 
 export function useWnHubApp(_hub_view: HubView) {
-  const _gb_st = useGlobalStatus();
-  const router = useRouter();
+  const _gb_st: GlobalStatusApi = _hub_view.global;
+  const router: Router = _hub_view.router;
   //--------------------------------------------------
   const _main_actions = ref<ActionBarProps>();
   //--------------------------------------------------

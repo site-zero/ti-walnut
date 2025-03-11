@@ -2,7 +2,7 @@
 
 .wn-foot {
   @include flex-align-nowrap($ai: stretch);
-  color: var(--ti-color-border-dark);
+  color: var(--ti-color-bar-f);
   padding-top: var(--ti-gap-t);
   font-size: var(--ti-fontsz-t);
   border-top: 1px solid var(--ti-color-border-thin);

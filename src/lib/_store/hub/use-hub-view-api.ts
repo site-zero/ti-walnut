@@ -268,6 +268,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     global: computed(() => options.global),
     session: computed(() => options.session),
     measure: computed(() => options.measure),
+    router: _router,
 
     // HubViewState
     ..._state,

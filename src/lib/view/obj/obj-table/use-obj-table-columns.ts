@@ -22,7 +22,7 @@ export function getObjTableColumns(): ColumnRefer[] {
     '~obj.g::50',
     '~obj.md::50',
     //时间戳',
-    '~obj.ct::120',
-    'obj.lm::120',
+    'obj.ct::120',
+    '~obj.lm::120',
   ];
 }
