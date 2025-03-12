@@ -2,7 +2,7 @@ import {
   Match,
   TableRowChanagePayload,
   TableRowID,
-  useFieldChangeDiff,
+  applyFieldChangeDiff,
   Util,
   Vars,
 } from '@site0/tijs';
@@ -276,7 +276,7 @@ export function useLocalListEdit(
     let row = _local_list.value[rowIndex];
 
     // 应用修改修改详情列表
-    useFieldChangeDiff(changed, row);
+    applyFieldChangeDiff(changed, row);
 
     return row;
   }
