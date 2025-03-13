@@ -124,13 +124,15 @@ export function useHubViewApi(options: HubViewApiOptions) {
     _model.value = useHubModel(_gb_sta, hubObj, options, objId);
     await _model.value.reload();
 
+    // 预先加载所有方法
+    await _reload_hub_methods(options, _state),
+
     // 读取所有的资源文件
     _view_loading.value = true;
     await Promise.all([
       _reload_hub_schema(options, _state),
       _reload_hub_actions(options, _state),
       _reload_hub_layout(options, _state),
-      _reload_hub_methods(options, _state),
     ]);
     _view_loading.value = false;
   }

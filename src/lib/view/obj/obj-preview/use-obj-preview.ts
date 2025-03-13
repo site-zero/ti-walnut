@@ -50,7 +50,7 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
     info.src = `cat id:${id}`;
   }
   // 文本
-  else if (/^text\//.test(mime)) {
+  else if (/^text\//.test(mime)||/^application\/(x-)?javascript|sql/.test(mime)) {
     info.type = 'text';
     info.src = `cat id:${id}`;
   }
@@ -101,12 +101,14 @@ export function getObjCodeType(meta: WnObj) {
       'application/json': 'language-json',
       'application/json5': 'language-json5',
       'application/x-javascript': 'language-javascript',
+      'application/javascript': 'language-javascript',
       'text/css': 'language-css',
       'text/html': 'language-html',
       'text/iuls': 'language-uls',
       'text/json': 'language-json',
       'text/json5': 'language-json5',
       'text/less': 'language-less',
+      'text/sql': 'language-sql',
       'text/markdown': 'language-md',
       'text/plain': 'language-text',
       'text/richtext': 'language-rtx',
