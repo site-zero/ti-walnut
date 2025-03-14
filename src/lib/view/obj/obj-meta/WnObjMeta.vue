@@ -45,7 +45,7 @@
       emptyRoadblock: props.emptyRoadblock,
       maxFieldNameWidth: 80,
       layoutHint: '<300>',
-      bodyPartGap: 'b',
+      bodyPartGap: 'm',
     } as FormProps;
   });
   //-----------------------------------------------------
