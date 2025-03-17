@@ -25,7 +25,7 @@ import {
   RedQueryPrefixSetup,
 } from './use-rds-list.store';
 
-export type RdsStoreFeature = ReturnType<typeof defineRdsSimpleStore>;
+export type RdsSimpleStoreApi = ReturnType<typeof defineRdsSimpleStore>;
 
 export type RdsStoreDefination = {
   daoName?: string;

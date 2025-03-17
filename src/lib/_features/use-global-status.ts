@@ -39,8 +39,10 @@ export type GlobalStatus = {
   appLogo?: string;
   appTitle?: string;
   appVersion?: string;
+  viewName?: string;
   appPath?: string;
   appLoading: boolean | string;
+
   /**
    * 默认为 true， false 表示隐藏侧边栏
    */
@@ -69,6 +71,7 @@ export type GlobalStatusApi = ReturnType<typeof defineGlobalStatus>;
 function defineGlobalStatus() {
   let _data = reactive({
     // 应用整体状态
+    viewName: 'unknown',
     appPath: undefined,
     appLoading: false,
     loading: false,

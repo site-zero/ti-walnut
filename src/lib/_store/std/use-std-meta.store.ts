@@ -15,7 +15,7 @@ import {
 import { getObjContentFinger } from '../../../core';
 import { useObjContentStore } from '../use-obj-content.store';
 
-export type StdMetaStore = ReturnType<typeof defineStdMetaStore>;
+export type StdMetaStoreApi = ReturnType<typeof defineStdMetaStore>;
 
 export type StdMetaStoreOptions = LocalMetaEditOptions & {
   /**
@@ -367,6 +367,6 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
  */
 //const _stores = new Map<string, DataListStoreFeature>();
 
-export function useStdMetaStore(options: StdMetaStoreOptions): StdMetaStore {
+export function useStdMetaStore(options: StdMetaStoreOptions): StdMetaStoreApi {
   return defineStdMetaStore(options);
 }

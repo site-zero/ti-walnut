@@ -22,6 +22,7 @@ export async function createObjViewOptions(
   // 2. 普通文件对象
   if ('FILE' == obj.race) {
     viewTmpl = {
+      viewName: 'auto-STD-META',
       model: 'STD-META',
       modelOptions: {
         objPath: '->id:${id}',
@@ -37,6 +38,7 @@ export async function createObjViewOptions(
   // 3. 数据集目录
   else if ('thing_set' == obj.tp) {
     viewTmpl = {
+      viewName: 'auto-TH-STD-LIST',
       model: 'STD-LIST',
       modelOptions: {
         homePath: '->id:${id}',
@@ -55,6 +57,7 @@ export async function createObjViewOptions(
   // 4. 普通目录
   else {
     viewTmpl = {
+      viewName: 'auto-STD-LIST',
       model: 'STD-LIST',
       modelOptions: {
         homePath: '->id:${id}',
@@ -73,11 +76,12 @@ export async function createObjViewOptions(
 
 export function anyToHubViewOptions(input: any): HubViewOptions {
   if (_.isEmpty(input)) {
-    return { model: 'STD-LIST' };
+    return { viewName: 'AnyView', model: 'EMPTY' };
   }
   // 逐个设置键
   let re: HubViewOptions = {
-    model: input.model ?? 'STD-LIST',
+    viewName: input.viewName ?? 'AnyView',
+    model: input.model ?? 'EMPTY',
     modelOptions: input.modelOptions ?? {},
   };
 

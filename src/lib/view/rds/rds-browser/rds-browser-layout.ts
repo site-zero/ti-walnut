@@ -12,7 +12,7 @@ export function useRdsBrowserLayout(props: RdsBrowserProps): LayoutGridProps {
     },
     layout: {
       gridTemplateColumns: props.layoutQuickColumns,
-      gridTemplateRows: 'auto auto 1fr auto',
+      gridTemplateRows: props.layoutQuickRows ?? 'auto auto 1fr auto',
       gap: 'var(--bunya-grid-gap)',
     },
     blocks: [

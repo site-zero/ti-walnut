@@ -36,7 +36,8 @@
             { value: '=len', valuePiping: '$SIZE_TEXT' },
           ],
         },
-        { type: 'selection', icon: 'zmdi-mouse', align: 'flex-end' },
+        { type: 'view', align: 'flex-end', flex: '1 1 auto' },
+        { type: 'selection', icon: 'zmdi-mouse', flex: '0 0 auto' },
       ] as FootPart[],
   });
   //--------------------------------------------------

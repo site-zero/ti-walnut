@@ -4,6 +4,7 @@ import {
   ComboFilterProps,
   ComboFilterValue,
   Confirm,
+  DateTime,
   FormProps,
   KeepProps,
   PagerProps,
@@ -16,9 +17,13 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { computed } from 'vue';
-import { RdsListStore } from '../../../_store';
+import { RdsListStoreApi } from '../../../_store';
 import { SqlResult } from '../../../_types';
-import { KeepTarget, RdsBrowserProps } from './rds-browser-types';
+import {
+  KeepTarget,
+  RdsBrowserEmitter,
+  RdsBrowserProps,
+} from './rds-browser-types';
 //--------------------------------------------------
 /**
  * 获取本地状态保存的特性
@@ -44,14 +49,18 @@ export function getKeepName(
 /**
  * 视图主体逻辑入口
  *
- * @param Data  数据访问
+ * @param store  数据访问
  * @param props  控件属性
  * @returns 视图主体逻辑
  */
-export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
+export function useRdsBrowser(
+  store: RdsListStoreApi,
+  props: RdsBrowserProps,
+  emit: RdsBrowserEmitter
+) {
   //--------------------------------------------------
   const TableEmptyRoadblock = computed((): RoadblockProps => {
-    if (Data.ActionStatus.value == 'loading') {
+    if (store.ActionStatus.value == 'loading') {
       return {
         icon: 'fas-spinner fa-pulse',
         text: 'i18n:loading',
@@ -69,11 +78,11 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
 
   //--------------------------------------------------
   const StatusVars = computed(() => ({
-    changed: Data.changed.value,
-    hasChecked: Data.hasChecked.value,
-    hasCurrent: Data.hasCurrent.value,
-    reloading: Data.ActionStatus.value == 'loading',
-    saving: Data.ActionStatus.value == 'saving',
+    changed: store.changed.value,
+    hasChecked: store.hasChecked.value,
+    hasCurrent: store.hasCurrent.value,
+    reloading: store.ActionStatus.value == 'loading',
+    saving: store.ActionStatus.value == 'saving',
   }));
 
   //--------------------------------------------------
@@ -88,9 +97,9 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   //--------------------------------------------------
   // 数据
   //--------------------------------------------------
-  const TableCurrentId = computed(() => Data.currentId.value);
+  const TableCurrentId = computed(() => store.currentId.value);
   const TableCheckedIds = computed(() =>
-    Util.arrayToMap(Data.checkedIds.value)
+    Util.arrayToMap(store.checkedIds.value)
   );
 
   //--------------------------------------------------
@@ -101,8 +110,8 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       layout: 'oneline',
       keepMajor: getKeepName(props, 'Filter-Major'),
       value: {
-        filter: Data.query.filter,
-        sorter: Data.query.sorter,
+        filter: store.query.filter,
+        sorter: store.query.sorter,
       },
     } as ComboFilterProps) as ComboFilterProps;
   });
@@ -113,8 +122,8 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   const DataPagerConfig = computed(() => {
     return {
       mode: 'jumper',
-      ...(Data.query.pager ?? {}),
-      count: Data.listData.value.length,
+      ...(store.query.pager ?? {}),
+      count: store.listData.value.length,
     } as PagerProps;
   });
 
@@ -133,7 +142,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       } as TableProps,
       props.table,
       {
-        data: Data.listData.value,
+        data: store.listData.value,
       } as TableProps
     ) as TableProps;
   });
@@ -151,7 +160,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       } as FormProps,
       props.form,
       {
-        data: Data.getCurrentItem(),
+        data: store.getCurrentItem(),
       } as FormProps
     ) as FormProps;
   });
@@ -164,7 +173,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
     let key = props.getItemId;
     getId = (it: Vars) => it[key];
   } else {
-    getId = (it: Vars) => it.id;
+    getId = (it: Vars) => it.id ?? it.value;
   }
 
   //--------------------------------------------------
@@ -173,7 +182,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   function canRefreshSafely() {
     let msg = (props.messages ?? {}).warn_refresh;
     if (msg) {
-      if (Data.changed.value) {
+      if (store.changed.value) {
         Alert(msg, { type: 'warn' });
         return false;
       }
@@ -183,7 +192,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
 
   async function refresh() {
     if (canRefreshSafely()) {
-      await Data.reload();
+      await store.reload();
     }
   }
 
@@ -191,7 +200,7 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   // 响应事件
   //--------------------------------------------------
   function onTableRowSelect(payload: TableSelectEmitInfo) {
-    Data.onSelect(payload);
+    store.onSelect(payload);
   }
 
   function onFilterChange(payload: ComboFilterValue) {
@@ -200,11 +209,11 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       return;
     }
     // 更新 filter / sorter
-    Data.setQuery(payload);
-    Data.setPager({ pageNumber: 1 });
+    store.setQuery(payload);
+    store.setPager({ pageNumber: 1 });
 
     // 自动重新加载
-    Data.reload();
+    store.reload();
   }
 
   function onFilterReset() {
@@ -212,11 +221,11 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       return;
     }
     // 更新 filter / sorter
-    Data.setQuery(DefaultFilterQuery.value);
-    Data.setPager({ pageNumber: 1 });
+    store.setQuery(DefaultFilterQuery.value);
+    store.setPager({ pageNumber: 1 });
 
     // 自动重新加载
-    Data.reload();
+    store.reload();
   }
 
   function onPageNumberChange(pn: number) {
@@ -225,9 +234,9 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       return;
     }
     // 更新
-    Data.setPager({ pageNumber: pn });
+    store.setPager({ pageNumber: pn });
     // 自动重新加载
-    Data.reload();
+    store.reload();
   }
 
   function onPageSizeChange(pgsz: number) {
@@ -236,14 +245,14 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       return;
     }
     // 更新
-    Data.setPager({ pageNumber: 1, pageSize: pgsz });
+    store.setPager({ pageNumber: 1, pageSize: pgsz });
     // 自动重新加载
-    Data.reload();
+    store.reload();
   }
 
   function onCurrentMetaChange(payload: SqlResult) {
     console.log('onDetailChange', payload);
-    Data.updateCurrent(payload);
+    store.updateCurrent(payload);
   }
 
   async function onActionFire(barEvent: ActionBarEvent) {
@@ -252,7 +261,8 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
 
     // 自定义处理
     if (props.handleAction) {
-      let mark = (await props.handleAction(Data, name, payload)) ?? 'unhandled';
+      let mark =
+        (await props.handleAction(store, name, payload)) ?? 'unhandled';
       if (mark == 'handled') {
         return;
       }
@@ -265,17 +275,50 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
     // Create
     else if ('create' == name) {
       if (props.createNewItem) {
-        let it = props.createNewItem(Data);
-        let id = getId(it);
-        Data.addLocalItem(it);
-        if (!_.isNil(id)) {
-          Data.updateSelection(id);
+        // 事件
+        if (_.isString(props.createNewItem)) {
+          emit('create:item', store);
+          return;
+        }
+
+        let it: Vars | undefined = undefined;
+        // 普通对象，就是对象模板
+        if (_.isPlainObject(props.createNewItem)) {
+          let now = DateTime.format(new Date(), { fmt: 'yyyyMMdd HHmmss' });
+          let [date, time] = now.split(' ');
+          let ctx: Vars = {
+            date,
+            time,
+            size: store.query.pager?.totalCount ?? 0,
+            pager: store.query.pager,
+          };
+          it = Util.explainObj(ctx, props.createNewItem) as Vars;
+        }
+        // 函数调用
+        else if (_.isFunction(props.createNewItem)) {
+          // 异步调用
+          if (Util.isAsyncFunc(props.createNewItem)) {
+            it = await props.createNewItem(store);
+          }
+          // 同步方法
+          else {
+            it = props.createNewItem(store);
+          }
+        }
+
+        // 指定了新数据就创建
+        if (it) {
+          let id = getId(it);
+          store.addLocalItem(it);
+          if (!_.isNil(id)) {
+            store.updateSelection(id);
+          }
         }
       }
     }
     // Save
     else if ('save' == name) {
-      Data.saveChange();
+      store.saveChange();
     }
     // Drop
     else if ('reset' == name) {
@@ -283,14 +326,14 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
       if (msg) {
         Confirm(msg, { type: 'warn' }).then((yes) => {
           if (yes) {
-            Data.resetLocalChange();
+            store.resetLocalChange();
           }
         });
       }
     }
     // Remove
     else if ('remove' == name) {
-      Data.removeChecked();
+      store.removeChecked();
     }
     // warn unhandled action
     else {
@@ -301,6 +344,10 @@ export function useRdsBrowser(Data: RdsListStore, props: RdsBrowserProps) {
   // 输出特性
   //--------------------------------------------------
   return {
+    // 数据模型
+    store,
+
+    // 计算属性
     TableEmptyRoadblock,
     StatusVars,
 

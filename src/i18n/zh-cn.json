@@ -1,5 +1,9 @@
 {
   "history-record": "历史记录",
+  "rds-st": "状态",
+  "rds-st-0": "作废",
+  "rds-st-1": "生效",
+  "rds-st-2": "归档",
   "wn-obj-nm": "对象名",
   "wn-obj-title": "标题",
   "wn-obj-tp": "类型",

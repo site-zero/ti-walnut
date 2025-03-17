@@ -73,11 +73,14 @@ export function useHutFoot(
       icon: part.icon,
       text: part.text,
       suffix: part.suffix,
-      style: CssUtils.mergeStyles({ justifyContent: part.align }, part.style),
+      style: CssUtils.mergeStyles(
+        { justifyContent: part.align, flex: part.flex },
+        part.style
+      ),
       items: [],
     } as DisplayFootPart;
 
-    // 特殊处理
+    // 特殊处理：选区
     if ('selection' == displayPart.type) {
       let val = [_hub_view.global.data.selectedRows ?? 0].join('');
       displayPart.items.push({
@@ -85,6 +88,17 @@ export function useHutFoot(
         itemKey: `${displayPart.uniqKey}-item-0`,
         type: 'text',
         text: 'i18n:wn-hub-foot-selected',
+        value: val,
+        rawValue: val,
+      });
+    }
+    // 特殊处理：视图
+    else if ('view' == displayPart.type) {
+      let val = _hub_view.global.data.viewName ?? '---';
+      displayPart.items.push({
+        index: 0,
+        itemKey: `${displayPart.uniqKey}-item-0`,
+        type: 'text',
         value: val,
         rawValue: val,
       });

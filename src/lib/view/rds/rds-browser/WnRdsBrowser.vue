@@ -2,20 +2,19 @@
   //--------------------------------------------------
   import { TiLayoutGrid } from '@site0/tijs';
   import { computed, inject, ref, watch } from 'vue';
-  import {
-    RdsBrowserApi,
-    useRdsListStore,
-    WN_HUB_APP_INST,
-  } from '../../../../lib';
+  import { useRdsListStore, WN_HUB_APP_INST } from '../../../../lib';
   import { useRdsBrowserLayout } from './rds-browser-layout';
   import { useRdsBrowserSchema } from './rds-browser-schema';
-  import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
+  import { RdsBrowserEmitter, RdsBrowserProps } from './rds-browser-types';
   import { getKeepName, useRdsBrowser } from './use-rds-browser';
+  //--------------------------------------------------
+  const emit = defineEmits<RdsBrowserEmitter>();
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const props = withDefaults(defineProps<RdsBrowserProps>(), {
     layoutQuickColumns: '50% 1fr',
+    layoutQuickRows: 'auto auto 1fr auto',
     defaultKeepMode: 'local',
     autoReload: true,
   });
@@ -36,38 +35,24 @@
     return store;
   });
   //--------------------------------------------------
-  const _RD = computed(
-    (): RdsBrowserFeature => useRdsBrowser(_store.value, props)
-  );
-  //--------------------------------------------------
-  const api = computed(
-    (): RdsBrowserApi => ({
-      Data: _store.value,
-      rds: _RD.value,
-    })
-  );
+  const _api = computed(() => useRdsBrowser(_store.value, props, emit));
   //--------------------------------------------------
   if (props.onSetup) {
-    props.onSetup(api);
+    props.onSetup(_api);
   }
   //--------------------------------------------------
   const GUILayout = computed(() => {
     let layout = useRdsBrowserLayout(props);
     if (props.guiLayout) {
-      return props.guiLayout(layout, _store.value, _RD.value);
+      return props.guiLayout(layout, _api.value);
     }
     return layout;
   });
   //--------------------------------------------------
   const GUIScheme = computed(() => {
-    let schema = useRdsBrowserSchema(
-      props,
-      _store.value,
-      _RD.value,
-      _hub?.view
-    );
+    let schema = useRdsBrowserSchema(props, _api.value, _hub?.view);
     if (props.guiSchema) {
-      return props.guiSchema(schema, _store.value, _RD.value);
+      return props.guiSchema(schema, _api.value);
     }
     return schema;
   });

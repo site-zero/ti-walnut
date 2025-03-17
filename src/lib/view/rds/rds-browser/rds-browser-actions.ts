@@ -1,12 +1,10 @@
 import { ActionBarItem, ActionBarProps } from '@site0/tijs';
-import { RdsListStore } from '../../../_store';
-import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
 import _ from 'lodash';
+import { RdsBrowserApi, RdsBrowserProps } from './rds-browser-types';
 
 export function useRdsBrowserActions(
   props: RdsBrowserProps,
-  Data: RdsListStore,
-  _RD: RdsBrowserFeature
+  _rds: RdsBrowserApi
 ): ActionBarProps {
   // 内置默认的菜单条
   let items: ActionBarItem[] = [];
@@ -69,7 +67,7 @@ export function useRdsBrowserActions(
       style: {
         padding: 'var(--ti-gap-m)',
       },
-      vars: _RD.StatusVars.value,
+      vars: _rds.StatusVars.value,
       items,
     },
     props.actions
@@ -77,7 +75,7 @@ export function useRdsBrowserActions(
 
   // 完全定制的菜单条
   if (props.guiActionBar) {
-    return props.guiActionBar(actionBar, Data, _RD);
+    return props.guiActionBar(actionBar, _rds);
   }
 
   return actionBar;

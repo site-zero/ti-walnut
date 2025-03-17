@@ -45,6 +45,7 @@ export type HubModelOptions = {
  * 1. 数据模型
  */
 export type HubViewOptions = HubModelOptions & {
+  viewName: string;
   // 动作菜单的加载文件
   actions?: string | (() => ActionBarProps) | (() => Promise<ActionBarProps>);
   // 布局文件
@@ -62,6 +63,7 @@ export type HubViewOptions = HubModelOptions & {
  * 内置支持的四种数据模型
  */
 export type HubDataModelType =
+  | 'EMPTY'
   | 'STD-LIST'
   | 'STD-META'
   | 'RDS-LIST'

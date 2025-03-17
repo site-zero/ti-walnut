@@ -120,6 +120,8 @@ export function useHubViewApi(options: HubViewApiOptions) {
   ) {
     _hub_obj.value = hubObj;
     _options.value = options;
+    // 记录视图名称
+    _gb_sta.data.viewName = options.viewName;
     // 读取数据模型
     _model.value = useHubModel(_gb_sta, hubObj, options, objId);
     await _model.value.reload();

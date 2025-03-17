@@ -1,6 +1,7 @@
 import { GlobalStatusApi } from '../../_features';
 import { WnObj } from '../../_types';
 import { HubModel, HubModelOptions } from './hub-view-types';
+import { createEmptyHubModel } from './model/create-empty-hub-model';
 import { createRdsListHubModel } from './model/create-rds-list-hub-model';
 import { createRdsMetaHubModel } from './model/create-rds-meta-hub-model';
 import { createStdListHubModel } from './model/create-std-list-hub-model';
@@ -23,11 +24,15 @@ export function useHubModel(
   options: HubModelOptions,
   objId?: string
 ) {
-  let { model = 'STD-LIST', modelOptions = {} } = options;
+  let { model = 'EMPTY', modelOptions = {} } = options;
 
   let re: HubModel;
+  // 空模型
+  if ('EMPTY' == model) {
+    re = createEmptyHubModel();
+  }
   // 标准对象列表
-  if ('STD-LIST' == model) {
+  else if ('STD-LIST' == model) {
     re = createStdListHubModel(_gb_sta, hubObj, modelOptions, objId);
   }
   // 标准对象元数据

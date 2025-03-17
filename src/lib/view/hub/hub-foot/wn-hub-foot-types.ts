@@ -12,7 +12,7 @@ import {
  * current - 每个字段都是当前对象
  * selection - 本组就是显示选择项目数量
  */
-export type FootPartType = 'current' | 'selection';
+export type FootPartType = 'current' | 'selection' | 'view';
 
 export type FootPart = {
   type?: FootPartType;
@@ -20,6 +20,7 @@ export type FootPart = {
   text?: string;
   suffix?: string;
   align?: FlexAlignment;
+  flex?: string;
   style?: Vars;
   items?: FootPartItem[];
 };

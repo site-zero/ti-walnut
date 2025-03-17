@@ -15,7 +15,7 @@ import {
 
 const log = getLogger('wn.use-data-meta-store');
 
-export type RdsMetaStore = ReturnType<typeof defineRdsMetaStore>;
+export type RdsMetaStoreApi = ReturnType<typeof defineRdsMetaStore>;
 
 export type RdsMetaStoreOptions = LocalMetaEditOptions & {
   daoName?: string;
@@ -227,6 +227,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   };
 }
 
-export function useRdsMetaStore(options: RdsMetaStoreOptions): RdsMetaStore {
+export function useRdsMetaStore(options: RdsMetaStoreOptions): RdsMetaStoreApi {
   return defineRdsMetaStore(options);
 }

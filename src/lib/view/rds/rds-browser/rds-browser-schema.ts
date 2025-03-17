@@ -1,59 +1,58 @@
 import { LayoutSchema } from '@site0/tijs';
-import { HubView, RdsListStore } from '../../../_store';
+import { HubView } from '../../../_store';
 import { useRdsBrowserActions } from './rds-browser-actions';
-import { RdsBrowserFeature, RdsBrowserProps } from './rds-browser-types';
+import { RdsBrowserApi, RdsBrowserProps } from './rds-browser-types';
 
 export function useRdsBrowserSchema(
   props: RdsBrowserProps,
-  Data: RdsListStore,
-  _RD: RdsBrowserFeature,
+  _api: RdsBrowserApi,
   _hub_view?: HubView
 ): LayoutSchema {
   return {
     actions: {
       comType: 'TiActionBar',
-      comConf: useRdsBrowserActions(props, Data, _RD),
+      comConf: useRdsBrowserActions(props, _api),
       events: {
         fire: ({ data }) => {
-          _RD.onActionFire(data);
+          _api.onActionFire(data);
         },
       },
     },
     filter: {
       comType: 'TiComboFilter',
-      comConf: _RD.DataFilterConfig.value,
+      comConf: _api.DataFilterConfig.value,
       events: {
         change: ({ data }) => {
-          _RD.onFilterChange(data);
+          _api.onFilterChange(data);
         },
         search: () => {
-          _RD.refresh();
+          _api.refresh();
         },
         reset: () => {
-          _RD.onFilterReset();
+          _api.onFilterReset();
         },
       },
     },
     pager: {
       comType: 'TiPager',
-      comConf: _RD.DataPagerConfig.value,
+      comConf: _api.DataPagerConfig.value,
       events: {
         'change-page-number': ({ data }) => {
           console.log('change-page-number', data);
-          _RD.onPageNumberChange(data);
+          _api.onPageNumberChange(data);
         },
         'change-page-size': ({ data }) => {
           console.log('change-page-size', data);
-          _RD.onPageSizeChange(data);
+          _api.onPageSizeChange(data);
         },
       },
     },
     list: {
       comType: 'TiTable',
-      comConf: _RD.DataTableConfig.value,
+      comConf: _api.DataTableConfig.value,
       events: {
         select: ({ data }) => {
-          _RD.onTableRowSelect(data);
+          _api.onTableRowSelect(data);
           let { checked, current } = data;
           if (_hub_view) {
             _hub_view.global.data.selectedRows = checked.length;
@@ -64,10 +63,10 @@ export function useRdsBrowserSchema(
     },
     detail: {
       comType: 'TiForm',
-      comConf: _RD.DataFormConfig.value,
+      comConf: _api.DataFormConfig.value,
       events: {
         change: ({ data }) => {
-          _RD.onCurrentMetaChange(data);
+          _api.onCurrentMetaChange(data);
         },
       },
     },

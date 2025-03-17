@@ -34,7 +34,7 @@ import { getObjContentFinger, isObjContentEditable } from '../../../core/wn';
 import { useObjContentStore } from '../use-obj-content.store';
 import { auto_create_obj } from './support/auto-create-home';
 
-export type StdListStore = ReturnType<typeof defineStdListStore>;
+export type StdListStoreApi = ReturnType<typeof defineStdListStore>;
 
 export type StdListStoreOptions = LocalListEditOptions & {
   /**
@@ -959,6 +959,6 @@ function defineStdListStore(options: StdListStoreOptions) {
  */
 //const _stores = new Map<string, DataListStoreFeature>();
 
-export function useStdListStore(options: StdListStoreOptions): StdListStore {
+export function useStdListStore(options: StdListStoreOptions): StdListStoreApi {
   return defineStdListStore(options);
 }

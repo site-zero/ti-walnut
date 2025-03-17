@@ -1,5 +1,9 @@
 {
   "history-record": "History Records",
+  "rds-st": "Status",
+  "rds-st-0": "Deleted",
+  "rds-st-1": "Actived",
+  "rds-st-2": "Archived",
   "wn-obj-nm": "Name",
   "wn-obj-title": "Title",
   "wn-obj-tp": "Type",

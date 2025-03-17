@@ -54,7 +54,7 @@ const log = getLogger('wn.use-data-list-store');
 export type RedQueryPrefixSetup = Record<string, any> | RdsQueryPrefixAppender;
 export type RdsQueryPrefixAppender = (key: string) => string;
 
-export type RdsListStore = ReturnType<typeof defineRdsListStore>;
+export type RdsListStoreApi = ReturnType<typeof defineRdsListStore>;
 
 export type RdsListStoreOptions = LocalListEditOptions & {
   daoName?: string;
@@ -742,6 +742,6 @@ function defineRdsListStore(options: RdsListStoreOptions) {
  */
 //const _stores = new Map<string, DataListStoreFeature>();
 
-export function useRdsListStore(options: RdsListStoreOptions): RdsListStore {
+export function useRdsListStore(options: RdsListStoreOptions): RdsListStoreApi {
   return defineRdsListStore(options);
 }
