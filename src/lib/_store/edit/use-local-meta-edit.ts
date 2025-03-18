@@ -12,14 +12,12 @@ export type LocalMetaEditOptions = {
   isNew?: (meta: SqlResult) => boolean;
 };
 
-export type LocalMetaPatcher = (
-  local: SqlResult,
-  remote?: SqlResult
-) => Vars | undefined;
-export type LocalUpdateMetaPatcher = (
-  local: SqlResult,
-  remote: SqlResult
-) => Vars | undefined;
+export type LocalMetaPatcher =
+  | Vars
+  | ((local: SqlResult, remote?: SqlResult) => Vars | undefined);
+export type LocalUpdateMetaPatcher =
+  | Vars
+  | ((local: SqlResult, remote: SqlResult) => Vars | undefined);
 
 export type LocalMetaMakeDiffOptions = {
   defaultMeta?: LocalMetaPatcher;
@@ -132,7 +130,14 @@ export function useLocalMetaEdit(
     let remote = remoteMeta.value;
 
     if (options.defaultMeta) {
-      _.defaults(vars, options.defaultMeta(local, remote));
+      // 动态计算
+      if (_.isFunction(options.defaultMeta)) {
+        _.defaults(vars, options.defaultMeta(local, remote));
+      }
+      // 静态值
+      else {
+        _.defaults(vars, options.defaultMeta);
+      }
     }
 
     let sets = [] as SqlExecSetVar[];
@@ -144,7 +149,14 @@ export function useLocalMetaEdit(
       put = options.insertPut;
       // 创建时间， 对于 st/st_rsn 数据库里有默认值
       if (options.insertMeta) {
-        _.assign(vars, options.insertMeta(local, remote));
+        // 动态计算
+        if (_.isFunction(options.insertMeta)) {
+          _.assign(vars, options.insertMeta(local, remote));
+        }
+        // 静态值
+        else {
+          _.assign(vars, options.insertMeta);
+        }
       }
       // 自动生成 ID
       if (options.insertSet) {
@@ -156,7 +168,14 @@ export function useLocalMetaEdit(
     }
     // 已经存在的，那么要把 ID 设置一下
     else if (options.updateMeta) {
-      _.assign(vars, options.updateMeta(local, remote!));
+      // 动态计算
+      if (_.isFunction(options.updateMeta)) {
+        _.assign(vars, options.updateMeta(local, remote!));
+      }
+      // 静态值
+      else {
+        _.assign(vars, options.updateMeta);
+      }
     }
 
     let fb: SqlExecFetchBack | undefined = undefined;

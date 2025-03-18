@@ -23,7 +23,9 @@ import {
   KeepTarget,
   RdsBrowserEmitter,
   RdsBrowserProps,
+  RdsCreateNewItemContext,
 } from './rds-browser-types';
+import { Walnut } from '../../../../core/wn';
 //--------------------------------------------------
 /**
  * 获取本地状态保存的特性
@@ -275,34 +277,32 @@ export function useRdsBrowser(
     // Create
     else if ('create' == name) {
       if (props.createNewItem) {
+        // 准备上下文
+        let ctx: RdsCreateNewItemContext = { store };
+        if (props.genNewId) {
+          ctx.newId = await Walnut.exec(`val @gen '${props.genNewId}'`);
+        }
+
         // 事件
         if (_.isString(props.createNewItem)) {
-          emit('create:item', store);
+          emit('create:item', ctx);
           return;
         }
 
         let it: Vars | undefined = undefined;
         // 普通对象，就是对象模板
         if (_.isPlainObject(props.createNewItem)) {
-          let now = DateTime.format(new Date(), { fmt: 'yyyyMMdd HHmmss' });
-          let [date, time] = now.split(' ');
-          let ctx: Vars = {
-            date,
-            time,
-            size: store.query.pager?.totalCount ?? 0,
-            pager: store.query.pager,
-          };
           it = Util.explainObj(ctx, props.createNewItem) as Vars;
         }
         // 函数调用
         else if (_.isFunction(props.createNewItem)) {
           // 异步调用
           if (Util.isAsyncFunc(props.createNewItem)) {
-            it = await props.createNewItem(store);
+            it = await props.createNewItem(ctx);
           }
           // 同步方法
           else {
-            it = props.createNewItem(store);
+            it = props.createNewItem(ctx);
           }
         }
 
@@ -318,7 +318,7 @@ export function useRdsBrowser(
     }
     // Save
     else if ('save' == name) {
-      store.saveChange();
+      store.saveChange({ transLevel: 1 });
     }
     // Drop
     else if ('reset' == name) {

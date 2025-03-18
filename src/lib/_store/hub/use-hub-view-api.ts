@@ -1,5 +1,6 @@
 import {
   ActionBarEvent,
+  ActionBarProps,
   BlockEvent,
   isAsyncFunc,
   Util,
@@ -65,6 +66,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
   // 计算输出
   //--------------------------------------------
   const createGUIContext = () => {
+    console.log('createGUIContext');
     let gbs = {
       session: _.cloneDeep(session.data),
       G: _.cloneDeep(_gb_sta.data),
@@ -84,15 +86,17 @@ export function useHubViewApi(options: HubViewApiOptions) {
     return re;
   };
   const createGUILayout = (GUIContext: Vars, viewMode: GuiViewLayoutMode) => {
+    console.log('createGUILayout', GUIContext, viewMode);
     let layout = _state.layout.value[viewMode] ?? {};
     return Util.explainObj(GUIContext, layout);
   };
   const createGUISchema = (GUIContext: Vars) => {
+    console.log('createGUISchema', GUIContext);
     let schema = _state.schema.value ?? {};
     return Util.explainObj(GUIContext, schema);
   };
   const createGUIActions = (GUIContext: Vars) => {
-    return Util.explainObj(GUIContext, _state.actions.value);
+    return Util.explainObj(GUIContext, _state.actions.value) as ActionBarProps;
   };
   //--------------------------------------------
   function setLoading(loading: boolean) {
@@ -128,9 +132,8 @@ export function useHubViewApi(options: HubViewApiOptions) {
 
     // 预先加载所有方法
     await _reload_hub_methods(options, _state),
-
-    // 读取所有的资源文件
-    _view_loading.value = true;
+      // 读取所有的资源文件
+      (_view_loading.value = true);
     await Promise.all([
       _reload_hub_schema(options, _state),
       _reload_hub_actions(options, _state),

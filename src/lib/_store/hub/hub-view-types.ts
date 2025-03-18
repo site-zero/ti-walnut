@@ -150,7 +150,7 @@ export type HubView = {
   createGUIContext: () => Vars;
   createGUILayout: (GUIContext: Vars, viewMode: GuiViewLayoutMode) => Vars;
   createGUISchema: (GUIContext: Vars) => Vars;
-  createGUIActions: (GUIContext: Vars) => Vars;
+  createGUIActions: (GUIContext: Vars) => ActionBarProps;
   reload: (
     hubObj: WnObj,
     options: HubViewOptions,

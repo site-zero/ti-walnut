@@ -618,7 +618,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //               远程更新方法
   //---------------------------------------------
-  async function saveChange() {
+  async function saveChange({ transLevel = 0 } = {}) {
     // 获取改动信息
     let changes = makeChanges();
     log.debug('saveChange', changes);
@@ -629,7 +629,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //console.log('changes', changes);
     // 执行更新
     _action_status.value = 'saving';
-    await sqlx.exec(changes);
+    await sqlx.exec(changes, {
+      transLevel,
+    });
     _action_status.value = undefined;
 
     // 更新远程结果

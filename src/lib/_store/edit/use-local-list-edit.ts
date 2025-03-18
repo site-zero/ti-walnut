@@ -1,8 +1,8 @@
 import {
+  applyFieldChangeDiff,
   Match,
   TableRowChanagePayload,
   TableRowID,
-  applyFieldChangeDiff,
   Util,
   Vars,
 } from '@site0/tijs';
@@ -131,11 +131,11 @@ export function useLocalListEdit(
   function isChanged() {
     if (_local_list.value) {
       if (_local_list.value.length != remoteList.value?.length) {
-        console.log(
-          'length not equal',
-          _local_list.value.length,
-          remoteList.value?.length
-        );
+        // console.log(
+        //   'length not equal',
+        //   _local_list.value.length,
+        //   remoteList.value?.length
+        // );
         return true;
       }
       if (!_.isEqual(remoteList.value, _local_list.value)) {
@@ -145,9 +145,9 @@ export function useLocalListEdit(
           let diff = Util.getRecordDiff(remote, local, {
             checkRemoveFromOrgin: true,
           });
-          if (!_.isEqual(remote, local)) {
-            console.log(`Item ${i} [${getRowId(local, i)}] Not Equal`, diff);
-          }
+          // if (!_.isEqual(remote, local)) {
+          //   console.log(`Item ${i} [${getRowId(local, i)}] Not Equal`, diff);
+          // }
         }
         return true;
       }
@@ -505,10 +505,26 @@ export function useLocalListEdit(
 
           // 补上固定 Meta
           if (options.defaultMeta) {
-            _.defaults(diff, options.defaultMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.defaultMeta)) {
+              _.defaults(diff, options.defaultMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.defaults(diff, options.defaultMeta);
+            }
           }
+
+          // 指定固定更新数据
           if (options.updateMeta) {
-            _.assign(diff, options.updateMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.updateMeta)) {
+              _.assign(diff, options.updateMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.assign(diff, options.updateMeta);
+            }
           }
 
           // 补上 ID
@@ -523,10 +539,24 @@ export function useLocalListEdit(
         else {
           let newMeta = _.cloneDeep(local);
           if (options.defaultMeta) {
-            _.defaults(newMeta, options.defaultMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.defaultMeta)) {
+              _.defaults(newMeta, options.defaultMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.defaults(newMeta, options.defaultMeta);
+            }
           }
           if (options.insertMeta) {
-            _.assign(newMeta, options.insertMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.insertMeta)) {
+              _.assign(newMeta, options.insertMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.assign(newMeta, options.insertMeta);
+            }
           }
           insertList.push(newMeta);
         }
@@ -623,10 +653,24 @@ export function useLocalListEdit(
 
           // 补上固定 Meta
           if (options.defaultMeta) {
-            _.defaults(diff, options.defaultMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.defaultMeta)) {
+              _.defaults(diff, options.defaultMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.defaults(diff, options.defaultMeta);
+            }
           }
           if (options.updateMeta) {
-            _.assign(diff, options.updateMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.updateMeta)) {
+              _.assign(diff, options.updateMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.assign(diff, options.updateMeta);
+            }
           }
 
           // 补上 ID
@@ -640,10 +684,24 @@ export function useLocalListEdit(
         else {
           let newMeta = _.cloneDeep(local);
           if (options.defaultMeta) {
-            _.defaults(newMeta, options.defaultMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.defaultMeta)) {
+              _.defaults(newMeta, options.defaultMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.defaults(newMeta, options.defaultMeta);
+            }
           }
           if (options.insertMeta) {
-            _.assign(newMeta, options.insertMeta(local, remote));
+            // 动态计算
+            if (_.isFunction(options.insertMeta)) {
+              _.assign(newMeta, options.insertMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.assign(newMeta, options.insertMeta);
+            }
           }
           diffItem.delta = newMeta;
         }

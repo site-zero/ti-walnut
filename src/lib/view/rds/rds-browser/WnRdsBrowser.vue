@@ -28,7 +28,7 @@
       ...props.dataStore,
     });
     _store_at.value = Date.now();
-    //console.log('store!!!!!!!!!!!!!!', store);
+    console.log('store!!!!!!!!!!!!!!', store);
     // nextTick(() => {
     //   emit('store-ready', api.value);
     // });
@@ -60,7 +60,7 @@
   watch(
     () => [_store_at.value, props.autoReload],
     () => {
-      //console.log("watch RdsBrowser", _store_at.value, props.autoReload);
+      console.log("watch RdsBrowser", _store_at.value, props.autoReload);
       if (props.autoReload && _store_at.value > 0) {
         _store.value.reload();
       }

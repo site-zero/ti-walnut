@@ -14,11 +14,19 @@ import { RdsListStoreApi, RdsListStoreOptions } from '../../../_store';
 import { useRdsBrowser } from './use-rds-browser';
 
 export type RdsBrowserEmitter = {
-  (event: 'create:item', payload: RdsListStoreApi): void;
+  (event: 'create:item', ctx: RdsCreateNewItemContext): void;
 };
 
 export type RdsBrowserMsgKey = 'warn_refresh' | 'warn_drop_change';
 export type RdsBrowserActionHandleMark = 'handled' | 'unhandled';
+
+export type RdsCreateNewItemContext = {
+  store: RdsListStoreApi;
+  /**
+   * 如果声明了 genNewId，则会传递这个新的 ID
+   */
+  newId?: string;
+};
 
 export type KeepTarget =
   | 'Query'
@@ -64,7 +72,7 @@ export type RdsBrowserProps = {
 
   /**
    * 指定新数据的 ID 创建方法，支持下面的格式:
-   * 
+   *
    * - `uu32` => 'u8u5601vaejcbrk3p2k9iolrkb'
    * - `snowQ::10` => 'm8dd1ytjtehzard1t7'
    * - `snowQD::6` => '250317175109356skn81d'
@@ -91,8 +99,8 @@ export type RdsBrowserProps = {
     | null
     | Vars
     | true
-    | ((Data: RdsListStoreApi) => Vars)
-    | ((Data: RdsListStoreApi) => Promise<Vars>);
+    | ((ctx: RdsCreateNewItemContext) => Vars | undefined)
+    | ((ctx: RdsCreateNewItemContext) => Promise<Vars | undefined>);
 
   /**
    * 指定如何获取数据项的 ID
