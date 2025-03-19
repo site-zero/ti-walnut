@@ -6,6 +6,7 @@
     TiLoading,
     Vars,
   } from '@site0/tijs';
+  import _ from 'lodash';
   import { computed, inject, ref, watch } from 'vue';
   import { WN_HUB_APP_INST } from '../../../_store';
   import { useHubArenaReload } from './use-hub-arena-reload';
@@ -46,6 +47,21 @@
       _gui_context.value = ctx;
     },
     { immediate: true }
+  );
+  //--------------------------------------------------
+  // 上下文需要更加细致一点的监控，如果实在发生了变动，
+  // 才会更新，以便触发控件的更新
+  watch(
+    () => _hub!.view.createGUIContext(),
+    (newCtx) => {
+      // let diff = Util.getRecordDiff(_gui_context.value, newCtx);
+      // console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
+      // console.log('diff', diff);
+      if (_.isEqual(newCtx, _gui_context.value)) {
+        _gui_context.value = newCtx;
+      }
+    },
+    { deep: true }
   );
   //--------------------------------------------------
   function onBlock(event: BlockEvent) {

@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-  import { I18n } from '@site0/tijs';
+  import { I18n, Vars } from '@site0/tijs';
   import { reactive } from 'vue';
   import { SignInForm } from '../../../';
 
   let emit = defineEmits<(event: 'submit', info: SignInForm) => void>();
 
   const props = defineProps<{
+    style?: Vars;
     username?: string;
     password?: string;
     errCode?: string;
@@ -27,8 +28,8 @@
   }
 </script>
 <template>
-  <div class="wn-signup-panel as-signin">
-    <slot name="header"> </slot>
+  <div class="wn-signup-panel as-signin" :style="props.style">
+    <slot name="header"></slot>
     <main>
       <dl>
         <dt>用户名</dt>

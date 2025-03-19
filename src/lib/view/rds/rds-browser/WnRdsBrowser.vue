@@ -17,6 +17,10 @@
     layoutQuickRows: 'auto auto 1fr auto',
     defaultKeepMode: 'local',
     autoReload: true,
+    messages: () => ({
+      warn_refresh: 'i18n:warn-refresh',
+      warn_drop_change: 'i18n:warn-drop-change',
+    }),
   });
   //--------------------------------------------------
   const _store_at = ref(0);
@@ -60,7 +64,7 @@
   watch(
     () => [_store_at.value, props.autoReload],
     () => {
-      console.log("watch RdsBrowser", _store_at.value, props.autoReload);
+      console.log('watch RdsBrowser', _store_at.value, props.autoReload);
       if (props.autoReload && _store_at.value > 0) {
         _store.value.reload();
       }

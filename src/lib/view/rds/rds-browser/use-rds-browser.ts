@@ -259,7 +259,7 @@ export function useRdsBrowser(
 
   async function onActionFire(barEvent: ActionBarEvent) {
     let { name, payload } = barEvent;
-    // console.log('onActionFire', name, payload);
+    console.log('onActionFire', name, payload);
 
     // 自定义处理
     if (props.handleAction) {
@@ -329,6 +329,10 @@ export function useRdsBrowser(
             store.resetLocalChange();
           }
         });
+      }
+      // 直接干掉
+      else {
+        store.resetLocalChange();
       }
     }
     // Remove
