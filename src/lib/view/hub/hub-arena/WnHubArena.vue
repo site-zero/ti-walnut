@@ -30,21 +30,27 @@
     () => _hub!.view.createGUISchema(_gui_context.value) ?? {}
   );
   //--------------------------------------------------
+  function buildGUI(ctx?: Vars) {
+    if (!ctx) {
+      ctx = _hub!.view.createGUIContext();
+    }
+
+    // 创建主要操作菜单
+    let actions = _hub!.view.createGUIActions(ctx);
+    ctx.MainActions = actions;
+    _hub?.setMainActions(actions);
+
+    // 记录上下文
+    _gui_context.value = ctx;
+  }
+  //--------------------------------------------------
   watch(
     () => props.hubPath,
     async () => {
       await _arena_reload.value();
 
       // 创建上下文
-      let ctx = _hub!.view.createGUIContext();
-
-      // 创建主要操作菜单
-      let actions = _hub!.view.createGUIActions(ctx);
-      ctx.MainActions = actions;
-      _hub?.setMainActions(actions);
-
-      // 记录上下文
-      _gui_context.value = ctx;
+      buildGUI();
     },
     { immediate: true }
   );
@@ -57,8 +63,8 @@
       // let diff = Util.getRecordDiff(_gui_context.value, newCtx);
       // console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
       // console.log('diff', diff);
-      if (_.isEqual(newCtx, _gui_context.value)) {
-        _gui_context.value = newCtx;
+      if (!_.isEqual(newCtx, _gui_context.value)) {
+        buildGUI(newCtx);
       }
     },
     { deep: true }
