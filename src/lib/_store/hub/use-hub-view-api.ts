@@ -85,6 +85,9 @@ export function useHubViewApi(options: HubViewApiOptions) {
     }
     return re;
   };
+  const createWatchingObj = () => {
+    return _model.value?.createGUIContext() ?? {};
+  };
   const createGUILayout = (GUIContext: Vars, viewMode: GuiViewLayoutMode) => {
     // console.log('createGUILayout', GUIContext, viewMode);
     let layout = _state.layout.value[viewMode] ?? {};
@@ -283,6 +286,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     // methods
     setLoading,
     createGUIContext,
+    createWatchingObj,
     createGUILayout,
     createGUISchema,
     createGUIActions,

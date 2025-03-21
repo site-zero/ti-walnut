@@ -4,6 +4,7 @@
     BlockEvent,
     TiLayoutGrid,
     TiLoading,
+    Util,
     Vars,
   } from '@site0/tijs';
   import _ from 'lodash';
@@ -58,11 +59,11 @@
   // 上下文需要更加细致一点的监控，如果实在发生了变动，
   // 才会更新，以便触发控件的更新
   watch(
-    () => _hub!.view.createGUIContext(),
+    () => _hub!.view.createWatchingObj(),
     (newCtx) => {
-      // let diff = Util.getRecordDiff(_gui_context.value, newCtx);
-      // console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
-      // console.log('diff', diff);
+      let diff = Util.getRecordDiff(_gui_context.value, newCtx);
+      console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
+      console.log('diff', diff);
       if (!_.isEqual(newCtx, _gui_context.value)) {
         buildGUI(newCtx);
       }

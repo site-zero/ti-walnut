@@ -148,6 +148,7 @@ export type HubView = {
   // methods
   setLoading: (loading: boolean) => void;
   createGUIContext: () => Vars;
+  createWatchingObj: () => Vars;
   createGUILayout: (GUIContext: Vars, viewMode: GuiViewLayoutMode) => Vars;
   createGUISchema: (GUIContext: Vars) => Vars;
   createGUIActions: (GUIContext: Vars) => ActionBarProps;
