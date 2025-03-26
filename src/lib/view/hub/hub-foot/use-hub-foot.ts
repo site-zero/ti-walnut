@@ -8,6 +8,7 @@ import {
 } from '@site0/tijs';
 import _ from 'lodash';
 import { HubView } from '../../../_store/hub';
+import { FootValueContext, useHubFootTips } from './use-hub-foot-tips';
 import {
   FootPart,
   FootPartItem,
@@ -16,6 +17,10 @@ import {
   WnHubFootProps,
 } from './wn-hub-foot-types';
 
+/**
+ * @public
+ * 用于展示的底部部件条目类型，继承自 FootPartItem 并添加了索引、键、类型和原始值属性。
+ */
 export type DisplayFootPartItem = FootPartItem & {
   index: number;
   itemKey: string;
@@ -23,6 +28,10 @@ export type DisplayFootPartItem = FootPartItem & {
   rawValue: string;
 };
 
+/**
+ * @public
+ * 用于展示的底部部件类型，继承自 FootPart 并添加了索引、键和部件条目数组属性。
+ */
 export type DisplayFootPart = {
   index: number;
   uniqKey: string;
@@ -34,32 +43,73 @@ export type DisplayFootPart = {
   items: DisplayFootPartItem[];
 };
 
+/**
+ * @name useHutFoot
+ * @description 根据传入的属性构建并返回用于显示的底部部件数组。
+ *
+ * @param {WnHubFootProps} props 底部部件的属性，包含各个部件的配置信息。
+ * @param {HubView} _hub_view Hub视图的实例，提供全局数据和会话数据。
+ * @param {ComTipsApi} _tip_api 提示信息API，用于管理提示信息。
+ *
+ * @returns {DisplayFootPart[]} 用于显示的底部部件数组。
+ *
+ * @example
+ * ```typescript
+ * const footParts = useHutFoot(props, hubView, tipApi);
+ * ```
+ *
+ * @remarks
+ * 该函数主要负责将配置的底部部件转换为可直接用于渲染的格式。
+ * 它会遍历 `props.parts` 中的每个部件，并调用 `buildPart` 函数来构建单个部件的显示信息。
+ * 在构建过程中，会根据部件的类型进行特殊处理，例如选区和视图类型。
+ * 对于每个部件中的 `items`，会调用 `build_item` 函数来构建单个条目的显示信息，并进行值的解释和格式化。
+ */
 export function useHutFoot(
   props: WnHubFootProps,
   _hub_view: HubView,
   _tip_api: ComTipsApi
 ): DisplayFootPart[] {
   //-----------------------------------------------
-  let info = _hub_view.global.data.currentObj ?? {};
+  // 准备上下文，用来渲染值和提示信息
+  let ctx: FootValueContext = {
+    G: _hub_view.global.data ?? {},
+    session: _hub_view.session.data ?? {},
+  };
+  //-----------------------------------------------
   _tip_api.clear();
+  let makeTip = useHubFootTips(props);
   //-----------------------------------------------
   function build_item(
     item: FootPartItem,
     index: number,
     partKey: string
   ): DisplayFootPartItem {
+    // 准备返回值
     let re = {
       index,
       itemKey: `${partKey}-item-${index}`,
       ...item,
     } as DisplayFootPartItem;
+
+    // 获取返回值
     if (re.value) {
-      re.value = Util.explainObj(info, re.value);
+      re.value = Util.explainObj(ctx, re.value);
       re.rawValue = re.value;
     }
+
+    // 格式化显示值
     if (re.value) {
       const pipe = useValuePipe(item);
       re.value = pipe(re.value);
+    }
+
+    // 记入提示信息
+    let tip = makeTip(re.tip, ctx, re.value, re.rawValue);
+    if (tip) {
+      _tip_api.addTip({
+        selector: `[data-item-key="${re.itemKey}"]`,
+        ...tip,
+      });
     }
 
     return re;
@@ -69,7 +119,7 @@ export function useHutFoot(
     let displayPart = {
       index,
       uniqKey: `part-${index}`,
-      type: part.type || 'current',
+      type: part.type || 'default',
       icon: part.icon,
       text: part.text,
       suffix: part.suffix,
@@ -113,7 +163,7 @@ export function useHutFoot(
     }
 
     return displayPart;
-  }
+  } // buildPart
   //-----------------------------------------------
   // 准备构建返回值
   //-----------------------------------------------

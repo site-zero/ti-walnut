@@ -5,14 +5,16 @@ import {
   ValuePipeProps,
   Vars,
 } from '@site0/tijs';
+import { HubFootTipsProps } from './use-hub-foot-tips';
 
 /**
  * 分组类型
  *
- * current - 每个字段都是当前对象
- * selection - 本组就是显示选择项目数量
+ * - `default` - 根据全局信息以及会话信息渲染【默认】
+ * - `selection` - 本组就是显示选择项目数量
+ * - `view` - 本组就是显示视图信息
  */
-export type FootPartType = 'current' | 'selection' | 'view';
+export type FootPartType = 'default' | 'selection' | 'view';
 
 export type FootPart = {
   type?: FootPartType;
@@ -30,13 +32,24 @@ export type FootPartItemType = 'std-id' | 'text' | 'date' | 'datetime';
 export type FootPartItem = ValuePipeProps & {
   icon?: IconInput;
   text?: string;
-  tip?: TipBoxProps;
+  /**
+   * 指定一个提示框, 如果是一个对象，则表示提示信息配置模板，会被 explain
+   * 上下文就是整个 hub_view 的 global.data
+   *
+   * 如果是一个字符串，那么就表示更加动态的获取方式，
+   * 它会从 `tipMakers` 查找对应计算函数以便生成 tip 消息
+   * 
+   * 如果是字符串， 可以用这样的形式 `DT-UTC=Created On`
+   * 
+   * 这样， `tipMaker` 可以多接受到一个参数 `title=Created On
+   */
+  tip?: Partial<TipBoxProps> | string;
   suffix?: string;
   value?: string;
   style?: Vars;
 };
 
-export type WnHubFootProps = {
+export type WnHubFootProps = HubFootTipsProps & {
   align?: FlexAlignment;
   parts?: FootPart[];
 };
