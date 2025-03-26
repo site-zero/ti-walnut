@@ -68,6 +68,22 @@ export function useModelOptionGetter(input: Vars) {
     }
   }
 
+  function getVars(key: string): Vars | undefined {
+    let re = _.get(input, key);
+    if (_.isNil(re)) {
+      return;
+    }
+    if (_.isFunction(re)) {
+      return re() as Vars;
+    }
+    if (_.isString(re)) {
+      return JSON5.parse(re) as Vars;
+    }
+    if (_.isObject(re)) {
+      return _.cloneDeep(re) as Vars;
+    }
+  }
+
   /**
    * 获取 KeepInfo
    * @param key 键名
@@ -245,6 +261,7 @@ export function useModelOptionGetter(input: Vars) {
     getKeepInfo,
     getQueryFilter,
     getQuery,
+    getVars,
     getRdsQueryPrefixSetup,
     getSqlExecSetVarArrayGetter,
     getSqlExecFetchBackGetter,

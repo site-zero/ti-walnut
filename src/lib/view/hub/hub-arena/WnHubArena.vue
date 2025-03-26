@@ -61,9 +61,9 @@
   watch(
     () => _hub!.view.createWatchingObj(),
     (newCtx) => {
-      let diff = Util.getRecordDiff(_gui_context.value, newCtx);
-      console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
-      console.log('diff', diff);
+      // let diff = Util.getRecordDiff(_gui_context.value, newCtx);
+      // console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
+      // console.log('diff', diff);
       if (!_.isEqual(newCtx, _gui_context.value)) {
         buildGUI(newCtx);
       }

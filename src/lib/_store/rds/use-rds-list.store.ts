@@ -30,6 +30,7 @@ import {
   useLocalListEdit,
   useSqlx,
 } from '../../';
+import { Walnut } from '../../../core';
 
 const log = getLogger('wn.use-data-list-store');
 
@@ -70,6 +71,14 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   makeChange?: LocalListMakeChangeOptions;
   refreshWhenSave?: boolean;
   patchRemote?: (remote: SqlResult, index: number) => SqlResult;
+  /**
+   * 当执行 createNewItem 时，会调用这个函数来生成上下文变量
+   * 并交给 newItem 对象模板渲染
+   *
+   * 格式为 `{key: '<command>'}`
+   */
+  newItemVars?: Record<string, string>;
+  newItem?: Vars;
   /**
    * 可选全局状态接口，如果指定，则在 Select 等时机会自动更新状态
    */
@@ -560,7 +569,23 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return q;
   }
   //---------------------------------------------
-  //               远程查询方法
+  //               远程方法
+  //---------------------------------------------
+  async function createNewItem() {
+    // 准备上下文
+    let ctx = {} as Vars;
+    if (options.newItemVars) {
+      for (let [key, cmd] of Object.entries(options.newItemVars)) {
+        ctx[key] = _.trim(await Walnut.exec(cmd));
+      }
+    }
+
+    // 得到新对象
+    let newItem = Util.explainObj(ctx, options.newItem ?? {});
+
+    // 记入本地
+    _local.value.prependToList(newItem);
+  }
   //---------------------------------------------
   async function queryRemoteList(): Promise<void> {
     _action_status.value = 'loading';
@@ -729,6 +754,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //---------------------------------------------
     //                  远程方法
     //---------------------------------------------
+    createNewItem,
     countRemoteList,
     countRemote,
     queryRemoteList,

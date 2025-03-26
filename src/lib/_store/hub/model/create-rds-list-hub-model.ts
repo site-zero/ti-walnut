@@ -20,17 +20,21 @@ export function createRdsListHubModel(
   const _opt = useModelOptionGetter(options);
 
   const storeOptions: RdsListStoreOptions = {
-    globalStatus: _gb_sta,
+    // 基本信息
     daoName: _opt.getString('daoName'),
     keepQuery: _opt.getKeepInfo('keepQuery'),
     keepSelect: _opt.getKeepInfo('keepSelect'),
     fixedMatch: _opt.getQueryFilter('fixedMatch'),
     defaultFilter: _opt.getQueryFilter('defaultFilter'),
+
+    // 查询
     query: _opt.getQuery('query'),
     sqlQuery: _opt.getString('sqlQuery') ?? '-sqlQuery unset-',
     sqlCount: _opt.getString('sqlCount') ?? '-sqlCount unset-',
     queryPrefix: _opt.getRdsQueryPrefixSetup('queryPrefix'),
     countPrefix: _opt.getRdsQueryPrefixSetup('countPrefix'),
+
+    // 如何获取改动
     makeChange: {
       // LocalListMakeChangeOptions
       deleteSql: _opt.getString('makeChange.deleteSql'),
@@ -49,8 +53,17 @@ export function createRdsListHubModel(
       fetchBack: _opt.getSqlExecFetchBackGetter('makeChange.fetchBack'),
       noresult: _opt.getBoolean('makeChange.noresult'),
     },
+
+    // 补充选项
     refreshWhenSave: _opt.getBoolean('refreshWhenSave'),
     patchRemote: _opt.getFunction('patchRemote'),
+
+    // 创建
+    newItemVars: _opt.getVars('newItemVars'),
+    newItem: _opt.getVars('newItem'),
+
+    // 全局状态
+    globalStatus: _gb_sta,
   };
 
   const store = useRdsListStore(storeOptions);
