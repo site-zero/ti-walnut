@@ -296,6 +296,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     return _local.value.makeChanges(options.makeChange);
   }
+
+  function makeDifferents() {
+    return _local.value.makeDifferents();
+  }
   //---------------------------------------------
   //                计算属性
   //---------------------------------------------
@@ -759,6 +763,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     countRemote,
     queryRemoteList,
     makeChanges,
+    makeDifferents,
     saveChange,
     reload,
     refresh,

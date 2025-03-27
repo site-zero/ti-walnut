@@ -1,47 +1,14 @@
-import {
-  ComTipsApi,
-  CssUtils,
-  IconInput,
-  useValuePipe,
-  Util,
-  Vars,
-} from '@site0/tijs';
+import { ComTipsApi, CssUtils, useValuePipe, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { HubView } from '../../../_store/hub';
 import { FootValueContext, useHubFootTips } from './use-hub-foot-tips';
 import {
+  DisplayFootPart,
+  DisplayFootPartItem,
   FootPart,
   FootPartItem,
-  FootPartItemType,
-  FootPartType,
   WnHubFootProps,
 } from './wn-hub-foot-types';
-
-/**
- * @public
- * 用于展示的底部部件条目类型，继承自 FootPartItem 并添加了索引、键、类型和原始值属性。
- */
-export type DisplayFootPartItem = FootPartItem & {
-  index: number;
-  itemKey: string;
-  type: FootPartItemType;
-  rawValue: string;
-};
-
-/**
- * @public
- * 用于展示的底部部件类型，继承自 FootPart 并添加了索引、键和部件条目数组属性。
- */
-export type DisplayFootPart = {
-  index: number;
-  uniqKey: string;
-  type: FootPartType;
-  icon?: IconInput;
-  text?: string;
-  suffix?: string;
-  style?: Vars;
-  items: DisplayFootPartItem[];
-};
 
 /**
  * @name useHutFoot
@@ -88,7 +55,7 @@ export function useHutFoot(
     let re = {
       index,
       itemKey: `${partKey}-item-${index}`,
-      ...item,
+      ..._.omit(item, 'tip'),
     } as DisplayFootPartItem;
 
     // 获取返回值
@@ -104,7 +71,7 @@ export function useHutFoot(
     }
 
     // 记入提示信息
-    let tip = makeTip(re.tip, ctx, re.value, re.rawValue);
+    let tip = makeTip(item.tip, ctx, re.value, re.rawValue);
     if (tip) {
       _tip_api.addTip({
         selector: `[data-item-key="${re.itemKey}"]`,

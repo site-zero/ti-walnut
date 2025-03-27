@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { Be, Dom, I18n, TI_TIPS_API, TiIcon } from '@site0/tijs';
+  import _ from 'lodash';
   import {
     computed,
     inject,
@@ -8,8 +9,12 @@
     useTemplateRef,
   } from 'vue';
   import { WN_HUB_APP_INST } from '../../../_store';
-  import { DisplayFootPartItem, useHutFoot } from './use-hub-foot';
-  import { FootPart, WnHubFootProps } from './wn-hub-foot-types';
+  import { useHutFoot } from './use-hub-foot';
+  import {
+    DisplayFootPartItem,
+    FootPart,
+    WnHubFootProps,
+  } from './wn-hub-foot-types';
   //--------------------------------------------------
   const _app_tips = inject(TI_TIPS_API);
   const $el = useTemplateRef('el');
@@ -50,6 +55,11 @@
   });
   //--------------------------------------------------
   function onClickItem(it: DisplayFootPartItem, event: MouseEvent) {
+    // 指定了自定义事件
+    if (it.action) {
+      it.action(it);
+      return;
+    }
     // 复制裸值: Ctrl + 点击
     if (event.ctrlKey) {
       Be.Clipboard.write(it.rawValue);
@@ -79,13 +89,15 @@
       <div class="part-text" v-if="part.text">{{ I18n.text(part.text) }}</div>
       <template v-for="it in part.items" :key="it.itemKey">
         <dl
-          v-if="it.text || it.value || it.suffix || (it.icon && it.tip)"
+          v-if="
+            it.text || !_.isNil(it.value) || it.suffix || (it.icon && it.tip)
+          "
           :style="it.style"
           :data-item-key="it.itemKey"
           @click.left="onClickItem(it, $event)">
           <dt v-if="it.icon"><TiIcon :value="it.icon" /></dt>
           <dt v-if="it.text">{{ I18n.text(it.text) }}</dt>
-          <dd v-if="it.value">{{ it.value }}</dd>
+          <dd v-if="!_.isNil(it.value)">{{ it.value }}</dd>
           <dd v-if="it.suffix">{{ it.suffix }}</dd>
         </dl>
       </template>

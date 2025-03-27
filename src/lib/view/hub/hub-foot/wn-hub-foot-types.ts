@@ -38,18 +38,45 @@ export type FootPartItem = ValuePipeProps & {
    *
    * 如果是一个字符串，那么就表示更加动态的获取方式，
    * 它会从 `tipMakers` 查找对应计算函数以便生成 tip 消息
-   * 
+   *
    * 如果是字符串， 可以用这样的形式 `DT-UTC=Created On`
-   * 
+   *
    * 这样， `tipMaker` 可以多接受到一个参数 `title=Created On
    */
   tip?: Partial<TipBoxProps> | string;
   suffix?: string;
   value?: string;
   style?: Vars;
+  action?: (item: DisplayFootPartItem) => void;
 };
 
 export type WnHubFootProps = HubFootTipsProps & {
   align?: FlexAlignment;
   parts?: FootPart[];
+};
+
+/**
+ * @public
+ * 用于展示的底部部件条目类型，继承自 FootPartItem 并添加了索引、键、类型和原始值属性。
+ */
+export type DisplayFootPartItem = FootPartItem & {
+  index: number;
+  itemKey: string;
+  type: FootPartItemType;
+  rawValue: string;
+};
+
+/**
+ * @public
+ * 用于展示的底部部件类型，继承自 FootPart 并添加了索引、键和部件条目数组属性。
+ */
+export type DisplayFootPart = {
+  index: number;
+  uniqKey: string;
+  type: FootPartType;
+  icon?: IconInput;
+  text?: string;
+  suffix?: string;
+  style?: Vars;
+  items: DisplayFootPartItem[];
 };
