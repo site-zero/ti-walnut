@@ -53,15 +53,15 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalMetaEdit(_remote, options));
+  const _local = useLocalMetaEdit(_remote, options);
   //---------------------------------------------
   const MetaData = computed(() => {
-    return _local.value.localMeta.value || _remote.value || {};
+    return _local.localMeta.value || _remote.value || {};
   });
   //---------------------------------------------
   const MetaId = computed(() => MetaData.value.id);
   //---------------------------------------------
-  const changed = computed(() => _local.value.isChanged());
+  const changed = computed(() => _local.isChanged());
   const isNew = computed(() => isNewMeta());
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
@@ -91,11 +91,11 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   }
 
   function dropChange() {
-    _local.value.reset();
+    _local.reset();
   }
 
   function resetLocalChange() {
-    _local.value.reset();
+    _local.reset();
   }
   //---------------------------------------------
   //                 被内部重用的方法
@@ -126,14 +126,14 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     }
     // 获取改动信息
     let changes = [] as SqlExecInfo[];
-    changes.push(..._local.value.makeChange(options.makeChange));
+    changes.push(..._local.makeChange(options.makeChange));
 
     log.debug('makeChanges', changes);
     return changes;
   }
 
   function getDiffMeta() {
-    return _local.value.getDiffMeta();
+    return _local.getDiffMeta();
   }
 
   /*---------------------------------------------
@@ -161,7 +161,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
-    isChanged: () => _local.value.isChanged(),
+    isChanged: () => _local.isChanged(),
     getFilterField: (key: string, dft?: any) => {
       return _.get(_filter, key) ?? dft;
     },
@@ -182,11 +182,11 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     },
 
     updateMeta(meta: SqlResult) {
-      _local.value.updateMeta(meta);
+      _local.updateMeta(meta);
     },
 
     setMeta(meta: SqlResult) {
-      _local.value.setMeta(meta);
+      _local.setMeta(meta);
     },
 
     setRemoteMeta(meta: SqlResult) {

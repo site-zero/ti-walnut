@@ -61,7 +61,10 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
-  fixedMatch?: QueryFilter | (() => QueryFilter);
+  fixedMatch?:
+    | QueryFilter
+    | QueryFilter[]
+    | (() => QueryFilter | QueryFilter[]);
   defaultFilter?: QueryFilter | (() => QueryFilter);
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
@@ -96,7 +99,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //              固定查询条件
   //---------------------------------------------
-  function __create_fixed_match(): QueryFilter {
+  function __create_fixed_match(): QueryFilter | QueryFilter[] {
     if (_.isFunction(options.fixedMatch)) {
       return options.fixedMatch();
     }
@@ -243,13 +246,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalListEdit(_remote, options));
+  const _local = useLocalListEdit(_remote, options);
   //---------------------------------------------
-  const changed = computed(() => _local.value.isChanged());
+  const changed = computed(() => _local.isChanged());
   const isEmpty = computed(() => _.isEmpty(listData.value));
   const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
   const isLocalEmpty = computed(() =>
-    _.isEmpty(_local.value?.localList?.value)
+    _.isEmpty(_local?.localList?.value)
   );
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
@@ -279,7 +282,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   // 基础本地方法
   //---------------------------------------------
   function resetLocalChange() {
-    _local.value.reset();
+    _local.reset();
   }
 
   function clearRemoteList() {
@@ -294,17 +297,17 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (!options.makeChange) {
       return [];
     }
-    return _local.value.makeChanges(options.makeChange);
+    return _local.makeChanges(options.makeChange);
   }
 
   function makeDifferents() {
-    return _local.value.makeDifferents();
+    return _local.makeDifferents();
   }
   //---------------------------------------------
   //                计算属性
   //---------------------------------------------
   const listData = computed(() => {
-    return _local.value.localList.value || _remote.value || [];
+    return _local.localList.value || _remote.value || [];
   });
   const hasCurrent = computed(() => !_.isNil(_current_id.value));
   const hasChecked = computed(
@@ -312,28 +315,28 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   );
 
   function existsInRemote(id: TableRowID): boolean {
-    return _local.value.existsInRemote(id);
+    return _local.existsInRemote(id);
   }
 
   /**
    * 获取数据的 ID
    */
   function getItemId(it: SqlResult, index: number = -1): TableRowID {
-    return _local.value.getRowId(it, index);
+    return _local.getRowId(it, index);
   }
 
   function getItemById(id?: TableRowID) {
     if (_.isNil(id)) {
       return;
     }
-    let index = _local.value.getRowIndex(id);
+    let index = _local.getRowIndex(id);
     if (index >= 0) {
       return listData.value[index];
     }
   }
 
   function getItemIndex(id: string) {
-    return _local.value.getRowIndex(id);
+    return _local.getRowIndex(id);
   }
 
   function getItemByIndex(index: number) {
@@ -365,7 +368,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function findItemsById(ids: TableRowID[]): SqlResult[] {
-    let indexs = ids.map((id) => _local.value.getRowIndex(id));
+    let indexs = ids.map((id) => _local.getRowIndex(id));
     let re: SqlResult[] = [];
     for (let i of indexs) {
       if (i >= 0) {
@@ -413,7 +416,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     // 直接添加到结尾
     else {
-      _local.value.prependToList(item);
+      _local.prependToList(item);
     }
   }
 
@@ -425,14 +428,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     // 直接添加到结尾
     else {
-      _local.value.appendToList(item);
+      _local.appendToList(item);
     }
   }
 
   function updateCurrent(meta: SqlResult): SqlResult | undefined {
     if (hasCurrent.value) {
       let uf = { id: _current_id.value };
-      return _local.value.updateItem(meta, uf);
+      return _local.updateItem(meta, uf);
     }
   }
 
@@ -440,27 +443,27 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     meta: Vars,
     options: ListItemUpdateOptions
   ): SqlResult | undefined {
-    return _local.value.updateItem(meta, options);
+    return _local.updateItem(meta, options);
   }
 
   function updateItems(
     meta: SqlResult,
     forIds?: TableRowID | TableRowID[]
   ): SqlResult[] {
-    return _local.value.batchUpdate(meta, forIds);
+    return _local.batchUpdate(meta, forIds);
   }
 
   function updateChecked(meta: SqlResult): SqlResult[] {
-    return _local.value.batchUpdate(meta, _checked_ids.value);
+    return _local.batchUpdate(meta, _checked_ids.value);
   }
 
   function removeChecked(): SqlResult[] {
     if (hasChecked.value) {
       // 首先查找一下可能是否需要高亮下一个的 ID
-      let nextId = _local.value.getNextRowId(_checked_ids.value) as string;
+      let nextId = _local.getNextRowId(_checked_ids.value) as string;
 
       _action_status.value = 'deleting';
-      let re = _local.value.removeLocalItems(_checked_ids.value);
+      let re = _local.removeLocalItems(_checked_ids.value);
       _action_status.value = undefined;
 
       // 选择下一个对象
@@ -479,13 +482,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function clear() {
-    _local.value.clearItems();
+    _local.clearItems();
   }
 
   function removeItems(forIds?: TableRowID | TableRowID[]): SqlResult[] {
     if (!_.isNil(forIds)) {
       let ids = _.concat([], forIds);
-      return _local.value.removeLocalItems(ids);
+      return _local.removeLocalItems(ids);
     }
 
     return [];
@@ -559,14 +562,43 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function addLocalItem(meta: SqlResult) {
-    _local.value.appendToList(meta);
+    _local.appendToList(meta);
   }
 
   function __gen_query(): SqlQuery {
     let q = _.cloneDeep(query);
     q.filter = q.filter ?? {};
-    _.assign(q.filter, __create_fixed_match());
     q.filter = Util.filterRecordNilValueDeeply(q.filter);
+
+    // 融合两个条件
+    let fixed = __create_fixed_match();
+    let filter_is_array = _.isArray(q.filter);
+    let fixed_is_array = _.isArray(fixed);
+
+    // 都是数组，那么就联合 OR
+    if (filter_is_array && fixed_is_array) {
+      q.filter = _.concat(q.filter, fixed);
+    }
+    // 只有 q.filter 是数组，那么就逐个加入 fixed
+    else if (filter_is_array) {
+      for (let flt of q.filter as Vars[]) {
+        _.assign(flt, fixed as Vars);
+      }
+    }
+    // 只有 fixed 是数组，那么就逐个加入 q.filter 为默认值
+    else if (fixed_is_array) {
+      let filter = [];
+      for (let fx of fixed as Vars[]) {
+        filter.push(_.defaults(fx, q.filter as Vars));
+      }
+      q.filter = filter;
+    }
+    // 否则直接合并
+    else {
+      _.assign(q.filter, fixed as Vars);
+    }
+
+    // 
     if (_.isEmpty(q.filter)) {
       q.filter = __create_default_filter();
     }
@@ -588,7 +620,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     let newItem = Util.explainObj(ctx, options.newItem ?? {});
 
     // 记入本地
-    _local.value.prependToList(newItem);
+    _local.prependToList(newItem);
   }
   //---------------------------------------------
   async function queryRemoteList(): Promise<void> {
@@ -667,7 +699,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (options.refreshWhenSave) {
       queryRemoteList().then(() => {
         //强制取消本地改动
-        _local.value.reset();
+        _local.reset();
       });
     }
   }
@@ -702,7 +734,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
-    //isChanged: () => _local.value.isChanged(),
+    //isChanged: () => _local.isChanged(),
     existsInRemote,
     getItemId,
     getItemIndex,

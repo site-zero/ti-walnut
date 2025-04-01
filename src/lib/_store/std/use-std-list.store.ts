@@ -192,15 +192,15 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   const IndexDirObj = computed(() => _dir_index.value ?? _home_obj.value);
   //---------------------------------------------
-  const _local = computed(() => useLocalListEdit(_remote, _options));
+  const _local = useLocalListEdit(_remote, _options);
   //---------------------------------------------
   const changed = computed(
-    () => _local.value.isChanged() || _content.changed.value
+    () => _local.isChanged() || _content.changed.value
   );
   const isEmpty = computed(() => _.isEmpty(listData.value));
   const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
   const isLocalEmpty = computed(() =>
-    _.isEmpty(_local.value?.localList?.value)
+    _.isEmpty(_local?.localList?.value)
   );
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
@@ -231,7 +231,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   // 读写元数据
   //---------------------------------------------
   async function saveMeta() {
-    let diffs = _local.value.makeDifferents();
+    let diffs = _local.makeDifferents();
     _action_status.value = 'saving';
 
     for (let diff of diffs) {
@@ -345,7 +345,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   // 基础本地方法
   //---------------------------------------------
   function resetLocalChange() {
-    _local.value.reset();
+    _local.reset();
   }
 
   function clearRemoteList() {
@@ -381,7 +381,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   //                 被内部重用的方法
   //---------------------------------------------
   const listData = computed(() => {
-    return _local.value.localList.value || _remote.value || [];
+    return _local.localList.value || _remote.value || [];
   });
   const hasCurrent = computed(() => !_.isNil(CurrentItem.value));
   const hasChecked = computed(
@@ -392,21 +392,21 @@ function defineStdListStore(options: StdListStoreOptions) {
    * 获取数据的 ID
    */
   function getItemId(it: WnObj, index: number = -1): string {
-    return _local.value.getRowId(it, index) as string;
+    return _local.getRowId(it, index) as string;
   }
 
   function getItemById(id?: string) {
     if (_.isNil(id)) {
       return;
     }
-    let index = _local.value.getRowIndex(id);
+    let index = _local.getRowIndex(id);
     if (index >= 0) {
       return listData.value[index];
     }
   }
 
   function getItemIndex(id: string) {
-    return _local.value.getRowIndex(id);
+    return _local.getRowIndex(id);
   }
 
   function getItemByIndex(index: number) {
@@ -438,7 +438,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   }
 
   function findItemsById(ids: string[]): WnObj[] {
-    let indexs = ids.map((id) => _local.value.getRowIndex(id));
+    let indexs = ids.map((id) => _local.getRowIndex(id));
     let re: WnObj[] = [];
     for (let i of indexs) {
       if (i >= 0) {
@@ -482,7 +482,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
     // 直接添加到结尾
     else {
-      _local.value.prependToList(o);
+      _local.prependToList(o);
     }
   }
 
@@ -494,14 +494,14 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
     // 直接添加到结尾
     else {
-      _local.value.appendToList(o);
+      _local.appendToList(o);
     }
   }
 
   function updateCurrent(meta: WnObj): WnObj | undefined {
     if (hasCurrent.value) {
       let uf = { id: _current_id.value };
-      return _local.value.updateItem(meta, uf);
+      return _local.updateItem(meta, uf);
     }
   }
 
@@ -509,24 +509,24 @@ function defineStdListStore(options: StdListStoreOptions) {
     meta: Vars,
     options: ListItemUpdateOptions
   ): WnObj | undefined {
-    return _local.value.updateItem(meta, options);
+    return _local.updateItem(meta, options);
   }
 
   function updateItems(meta: WnObj, forIds?: string | string[]): WnObj[] {
-    return _local.value.batchUpdate(meta, forIds);
+    return _local.batchUpdate(meta, forIds);
   }
 
   function updateChecked(meta: WnObj): WnObj[] {
-    return _local.value.batchUpdate(meta, _checked_ids.value);
+    return _local.batchUpdate(meta, _checked_ids.value);
   }
 
   function removeChecked(): WnObj[] {
     if (hasChecked.value && !_.isEmpty(_checked_ids.value)) {
       // 首先查找一下可能是否需要高亮下一个的 ID
-      let nextId = _local.value.getNextRowId(_checked_ids.value) as string;
+      let nextId = _local.getNextRowId(_checked_ids.value) as string;
 
       _action_status.value = 'deleting';
-      let re = _local.value.removeLocalItems(_checked_ids.value);
+      let re = _local.removeLocalItems(_checked_ids.value);
       _action_status.value = undefined;
 
       // 选择下一个对象
@@ -545,13 +545,13 @@ function defineStdListStore(options: StdListStoreOptions) {
   }
 
   function clear() {
-    _local.value.clearItems();
+    _local.clearItems();
   }
 
   function removeItems(forIds?: string | string[]): WnObj[] {
     if (!_.isNil(forIds)) {
       let ids = _.concat([], forIds);
-      return _local.value.removeLocalItems(ids);
+      return _local.removeLocalItems(ids);
     }
 
     return [];
@@ -683,10 +683,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     let re = await _obj.create(meta);
     if (isWnObj(re)) {
       if ('append' == autoAppend) {
-        _local.value.appendToList(re);
+        _local.appendToList(re);
         _remote.value?.push(re);
       } else if ('prepend' == autoAppend) {
-        _local.value.prependToList(re);
+        _local.prependToList(re);
         _remote.value?.unshift(re);
       }
     }
@@ -901,7 +901,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     },
 
     addLocalItem(meta: WnObj) {
-      _local.value.appendToList(meta);
+      _local.appendToList(meta);
     },
 
     appendItem,

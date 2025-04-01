@@ -64,17 +64,15 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   //                 组合其他特性
   //---------------------------------------------
-  const _local = computed(() => useLocalMetaEdit(_remote, _options));
+  const _local = useLocalMetaEdit(_remote, _options);
   //---------------------------------------------
   const MetaData = computed(() => {
-    return _local.value.localMeta.value || _remote.value || {};
+    return _local.localMeta.value || _remote.value || {};
   });
   //---------------------------------------------
   const MetaId = computed(() => MetaData.value.id);
   //---------------------------------------------
-  const changed = computed(
-    () => _local.value.isChanged() || _content.changed.value
-  );
+  const changed = computed(() => _local.isChanged() || _content.changed.value);
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
@@ -100,7 +98,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     if (!MetaId.value) {
       await Alert('StdMeta without init data.id', { type: 'danger' });
     }
-    let diff = _local.value.getDiffMeta();
+    let diff = _local.getDiffMeta();
     if (_.isEmpty(diff)) {
       return;
     }
@@ -189,7 +187,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   // 基础本地方法
   //---------------------------------------------
   function resetLocalChange() {
-    _local.value.reset();
+    _local.reset();
   }
 
   function clearRemoteList() {
@@ -222,11 +220,11 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //                 被内部重用的方法
   //---------------------------------------------
   function updateMeta(meta: Vars) {
-    _local.value.updateMeta(meta);
+    _local.updateMeta(meta);
   }
 
   // function setMeta(meta: Vars) {
-  //   _local.value.setMeta(meta);
+  //   _local.setMeta(meta);
   // }
 
   // function setRemoteMeta(meta: Vars) {
@@ -234,7 +232,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   // }
 
   function clear() {
-    _local.value.reset();
+    _local.reset();
   }
 
   //---------------------------------------------
