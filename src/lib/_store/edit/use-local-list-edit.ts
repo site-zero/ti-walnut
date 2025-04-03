@@ -95,7 +95,7 @@ export function useLocalListEdit(
   remoteList: Ref<SqlResult[] | undefined>,
   options: LocalListEditOptions = {}
 ) {
-  console.log('useLocalListEdit', remoteList, options);
+  //console.log('useLocalListEdit', remoteList, options);
   let { getId = 'id' } = options;
   let _local_list = ref<SqlResult[] | undefined>();
   //---------------------------------------------
