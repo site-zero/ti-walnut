@@ -1,4 +1,4 @@
-import { ComTipsApi, CssUtils, useValuePipe, Util } from '@site0/tijs';
+import {  CssUtils, TipRegister, TipsApi, useValuePipe, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { HubView } from '../../../_store/hub';
 import { FootValueContext, useHubFootTips } from './use-hub-foot-tips';
@@ -34,7 +34,8 @@ import {
 export function useHutFoot(
   props: WnHubFootProps,
   _hub_view: HubView,
-  _tip_api: ComTipsApi
+  addTip: TipRegister,
+  _tip_ids:number[]
 ): DisplayFootPart[] {
   //-----------------------------------------------
   // 准备上下文，用来渲染值和提示信息
@@ -43,7 +44,6 @@ export function useHutFoot(
     session: _hub_view.session.data ?? {},
   };
   //-----------------------------------------------
-  _tip_api.clear();
   let makeTip = useHubFootTips(props);
   //-----------------------------------------------
   function build_item(

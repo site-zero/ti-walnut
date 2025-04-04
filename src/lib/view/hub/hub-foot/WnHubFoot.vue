@@ -1,13 +1,7 @@
 <script lang="ts" setup>
   import { Be, Dom, I18n, TI_TIPS_API, TiIcon } from '@site0/tijs';
   import _ from 'lodash';
-  import {
-    computed,
-    inject,
-    onMounted,
-    onUnmounted,
-    useTemplateRef,
-  } from 'vue';
+  import { computed, inject, onUnmounted, useTemplateRef } from 'vue';
   import { WN_HUB_APP_INST } from '../../../_store';
   import { useHutFoot } from './use-hub-foot';
   import {
@@ -16,13 +10,10 @@
     WnHubFootProps,
   } from './wn-hub-foot-types';
   //--------------------------------------------------
-  const _app_tips = inject(TI_TIPS_API);
+  const _tips = inject(TI_TIPS_API);
   const $el = useTemplateRef('el');
-  const _tips = _app_tips?.createComTips({
-    getScope: () => $el.value,
-    onMounted,
-    onUnmounted,
-  });
+  const addTip = _tips!.createRegister(onUnmounted);
+  const _tip_ids: number[] = [];
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
@@ -46,7 +37,9 @@
       ] as FootPart[],
   });
   //--------------------------------------------------
-  const _parts = computed(() => useHutFoot(props, _hub?.view!, _tips!));
+  const _parts = computed(() =>
+    useHutFoot(props, _hub!.view, addTip, _tip_ids)
+  );
   //--------------------------------------------------
   const TopStyle = computed(() => {
     return {
