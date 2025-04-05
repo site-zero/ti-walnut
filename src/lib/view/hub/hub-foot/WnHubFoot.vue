@@ -11,8 +11,13 @@
   } from './wn-hub-foot-types';
   //--------------------------------------------------
   const _tip_api = inject(TI_TIP_API_KEY);
-  const _tips = _tip_api!.createRegister(onUnmounted);
   const _tip_ids: number[] = [];
+  //--------------------------------------------------
+  onUnmounted(() => {
+    if (!_.isEmpty(_tip_ids)) {
+      _tip_api!.removeTip(..._tip_ids);
+    }
+  });
   //--------------------------------------------------
   const $el = useTemplateRef('el');
   const _hub = inject(WN_HUB_APP_INST);
@@ -37,7 +42,9 @@
       ] as FootPart[],
   });
   //--------------------------------------------------
-  const _parts = computed(() => useHutFoot(props, _hub!.view, _tips, _tip_ids));
+  const _parts = computed(() =>
+    useHutFoot(props, _hub!.view, _tip_api!, _tip_ids)
+  );
   //--------------------------------------------------
   const TopStyle = computed(() => {
     return {
@@ -46,6 +53,7 @@
   });
   //--------------------------------------------------
   function onClickItem(it: DisplayFootPartItem, event: MouseEvent) {
+    // console.log('onClickItem', it, event);
     // 指定了自定义事件
     if (it.action) {
       it.action(it);
@@ -85,7 +93,7 @@
           "
           :style="it.style"
           :data-item-key="it.itemKey"
-          :data-tip="`::${it.tipId}`"
+          :data-tip="it.tipId ? `::${it.tipId}` : null"
           @click.left="onClickItem(it, $event)">
           <dt v-if="it.icon"><TiIcon :value="it.icon" /></dt>
           <dt v-if="it.text">{{ I18n.text(it.text) }}</dt>

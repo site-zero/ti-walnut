@@ -1,4 +1,4 @@
-import { CssUtils, TipRegister, useValuePipe, Util } from '@site0/tijs';
+import { CssUtils, TipsApi, useValuePipe, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { HubView } from '../../../_store/hub';
 import { FootValueContext, useHubFootTips } from './use-hub-foot-tips';
@@ -34,7 +34,7 @@ import {
 export function useHutFoot(
   props: WnHubFootProps,
   _hub_view: HubView,
-  _tips: TipRegister,
+  _tip_api: TipsApi,
   _tip_ids: number[]
 ): DisplayFootPart[] {
   //-----------------------------------------------
@@ -46,7 +46,7 @@ export function useHutFoot(
   //-----------------------------------------------
   // 清空旧的 tip 记录
   if (_tip_ids.length > 0) {
-    _tips.removeTips(..._tip_ids);
+    _tip_api.removeTip(..._tip_ids);
     _tip_ids.splice(0, _tip_ids.length);
   }
   //-----------------------------------------------
@@ -78,8 +78,8 @@ export function useHutFoot(
 
     // 记入提示信息
     let tip = makeTip(item.tip, ctx, re.value, re.rawValue);
-    if (tip && tip.content) {
-      re.tipId = _tips.addTip(tip);
+    if (tip) {
+      re.tipId = _tip_api.addTip(tip);
       _tip_ids.push(re.tipId);
     }
 
