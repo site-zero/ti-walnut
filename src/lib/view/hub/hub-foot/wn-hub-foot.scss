@@ -6,6 +6,7 @@
   padding-top: var(--ti-gap-t);
   font-size: var(--ti-fontsz-t);
   border-top: 1px solid var(--ti-color-border-thin);
+  user-select: none;
   // Each part
   > section {
     flex: 1 1 auto;
