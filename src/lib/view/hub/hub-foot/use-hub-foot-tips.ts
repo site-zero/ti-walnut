@@ -21,7 +21,7 @@ export type FootTipMaker = (
   value: any,
   rawValue: any,
   title?: string
-) => undefined | Partial<TipBoxProps>;
+) => undefined | TipBoxProps;
 
 export type HubFootTipsProps = {
   /**

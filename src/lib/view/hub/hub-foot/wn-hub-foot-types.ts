@@ -64,6 +64,7 @@ export type DisplayFootPartItem = FootPartItem & {
   itemKey: string;
   type: FootPartItemType;
   rawValue: string;
+  tipId?: number
 };
 
 /**

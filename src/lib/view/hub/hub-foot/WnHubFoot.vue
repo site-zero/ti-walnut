@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { Be, Dom, I18n, TI_TIPS_API, TiIcon } from '@site0/tijs';
+  import { Be, Dom, I18n, TI_TIP_API_KEY, TiIcon } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, inject, onUnmounted, useTemplateRef } from 'vue';
   import { WN_HUB_APP_INST } from '../../../_store';
@@ -10,11 +10,11 @@
     WnHubFootProps,
   } from './wn-hub-foot-types';
   //--------------------------------------------------
-  const _tips = inject(TI_TIPS_API);
-  const $el = useTemplateRef('el');
-  const addTip = _tips!.createRegister(onUnmounted);
+  const _tip_api = inject(TI_TIP_API_KEY);
+  const _tips = _tip_api!.createRegister(onUnmounted);
   const _tip_ids: number[] = [];
   //--------------------------------------------------
+  const $el = useTemplateRef('el');
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const props = withDefaults(defineProps<WnHubFootProps>(), {
@@ -37,9 +37,7 @@
       ] as FootPart[],
   });
   //--------------------------------------------------
-  const _parts = computed(() =>
-    useHutFoot(props, _hub!.view, addTip, _tip_ids)
-  );
+  const _parts = computed(() => useHutFoot(props, _hub!.view, _tips, _tip_ids));
   //--------------------------------------------------
   const TopStyle = computed(() => {
     return {
@@ -87,6 +85,7 @@
           "
           :style="it.style"
           :data-item-key="it.itemKey"
+          :data-tip="`::${it.tipId}`"
           @click.left="onClickItem(it, $event)">
           <dt v-if="it.icon"><TiIcon :value="it.icon" /></dt>
           <dt v-if="it.text">{{ I18n.text(it.text) }}</dt>
