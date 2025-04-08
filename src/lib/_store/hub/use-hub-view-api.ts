@@ -67,7 +67,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
   //--------------------------------------------
   const createGUIContext = () => {
     // console.log('createGUIContext');
-    let gbs = {
+    let gbs: Vars = {
       session: _.cloneDeep(session.data),
       G: _.cloneDeep(_gb_sta.data),
       appPath: _gb_sta.parseAppPath(),

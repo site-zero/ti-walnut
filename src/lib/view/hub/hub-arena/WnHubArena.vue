@@ -2,9 +2,9 @@
   import {
     ActionBarEvent,
     BlockEvent,
+    getGUIExplainContext,
     TiLayoutGrid,
     TiLoading,
-    Util,
     Vars,
   } from '@site0/tijs';
   import _ from 'lodash';
@@ -17,18 +17,23 @@
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
+
   const _arena_reload = computed(() => useHubArenaReload(props, _hub!.view));
   const _gui_context = ref<Vars>({});
   //--------------------------------------------------
   const GUILayout = computed(() =>
     _hub!.view.createGUILayout(
-      _gui_context.value,
+      { ..._gui_context.value, Ti: getGUIExplainContext() },
       _hub!.view.measure.viewMode.value
     )
   );
   //--------------------------------------------------
   const GUISchema = computed(
-    () => _hub!.view.createGUISchema(_gui_context.value) ?? {}
+    () =>
+      _hub!.view.createGUISchema({
+        ..._gui_context.value,
+        Ti: getGUIExplainContext(),
+      }) ?? {}
   );
   //--------------------------------------------------
   function buildGUI(ctx?: Vars) {
@@ -37,7 +42,10 @@
     }
 
     // 创建主要操作菜单
-    let actions = _hub!.view.createGUIActions(ctx);
+    let actions = _hub!.view.createGUIActions({
+      ..._gui_context.value,
+      Ti: getGUIExplainContext(),
+    });
     ctx.MainActions = actions;
     _hub?.setMainActions(actions);
 
