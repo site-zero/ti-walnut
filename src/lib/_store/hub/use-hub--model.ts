@@ -1,11 +1,31 @@
 import { GlobalStatusApi } from '../../_features';
 import { WnObj } from '../../_types';
-import { HubModel, HubModelOptions } from './hub-view-types';
+import {
+  HubModel,
+  HubModelCreateSetup,
+  HubModelOptions,
+} from './hub-view-types';
 import { createEmptyHubModel } from './model/create-empty-hub-model';
 import { createRdsListHubModel } from './model/create-rds-list-hub-model';
 import { createRdsMetaHubModel } from './model/create-rds-meta-hub-model';
 import { createStdListHubModel } from './model/create-std-list-hub-model';
 import { createStdMetaHubModel } from './model/create-std-meta-hub-model';
+
+type HubModeMaker = (setup: HubModelCreateSetup) => HubModel;
+
+const HUB_MODELS = new Map<string, HubModeMaker>();
+HUB_MODELS.set('EMPTY', createEmptyHubModel);
+HUB_MODELS.set('STD-LIST', createStdListHubModel);
+HUB_MODELS.set('STD-META', createStdMetaHubModel);
+HUB_MODELS.set('RDS-LIST', createRdsListHubModel);
+HUB_MODELS.set('RDS-META', createRdsMetaHubModel);
+
+export function addHubModelMaker(
+  modelName: string,
+  maker: HubModeMaker
+) {
+  HUB_MODELS.set(modelName, maker);
+}
 
 /**
  * 加载视图抽象模型
@@ -25,32 +45,18 @@ export function useHubModel(
   objId?: string
 ) {
   let { model = 'EMPTY', modelOptions = {} } = options;
-
-  let re: HubModel;
-  // 空模型
-  if ('EMPTY' == model) {
-    re = createEmptyHubModel();
-  }
-  // 标准对象列表
-  else if ('STD-LIST' == model) {
-    re = createStdListHubModel(_gb_sta, hubObj, modelOptions, objId);
-  }
-  // 标准对象元数据
-  else if ('STD-META' == model) {
-    re = createStdMetaHubModel(hubObj, modelOptions);
-  }
-  // RDS 数据列表
-  else if ('RDS-LIST' == model) {
-    re = createRdsListHubModel(_gb_sta, modelOptions, objId);
-  }
-  // RDS 数据元数据
-  else if ('RDS-META' == model) {
-    re = createRdsMetaHubModel(modelOptions, objId);
-  }
-  // 其他不支持
-  else {
+  let setup: HubModelCreateSetup = {
+    global: _gb_sta,
+    hubObj,
+    modelOptions,
+    objId,
+  };
+  let maker = HUB_MODELS.get(model);
+  if (!maker) {
     throw `Unsupport HubModel [${model}]: ${JSON.stringify(options)}`;
   }
+
+  let re: HubModel = maker(setup);
 
   return re;
 }

@@ -1,6 +1,6 @@
-import { HubModel } from '../hub-view-types';
+import { HubModel, HubModelCreateSetup } from '../hub-view-types';
 
-export function createEmptyHubModel(): HubModel {
+export function createEmptyHubModel(_setup: HubModelCreateSetup): HubModel {
   return {
     modelType: 'EMPTY',
     store: null,

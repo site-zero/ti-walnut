@@ -7,6 +7,7 @@ import {
   SqlExecSetVar,
   SqlResult,
 } from '../../../lib';
+import { join_exec_set_vars, SqlInsertSet } from './join-exec-set-vars';
 
 export type LocalMetaEditOptions = {
   isNew?: (meta: SqlResult) => boolean;
@@ -28,7 +29,7 @@ export type LocalMetaMakeDiffOptions = {
 export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
   updateSql: string;
   insertSql: string;
-  insertSet?: () => SqlExecSetVar[] | undefined;
+  insertSet?: SqlInsertSet;
   insertPut?: string;
   updatePut?: string;
   fetchBack?: (local: SqlResult, remote?: SqlResult) => SqlExecFetchBack;
@@ -159,12 +160,7 @@ export function useLocalMetaEdit(
         }
       }
       // 自动生成 ID
-      if (options.insertSet) {
-        let insertSets = options.insertSet();
-        if (insertSets) {
-          sets.push(...insertSets);
-        }
-      }
+      join_exec_set_vars(sets, options.insertSet);
     }
     // 已经存在的，那么要把 ID 设置一下
     else if (options.updateMeta) {

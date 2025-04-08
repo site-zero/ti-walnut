@@ -1,20 +1,14 @@
-import { Icons, Vars } from '@site0/tijs';
+import { Icons } from '@site0/tijs';
 import _ from 'lodash';
-import { GlobalStatusApi } from '../../../_features';
-import { WnObj } from '../../../_types';
 import {
   StdListStoreOptions,
   useStdListStore,
 } from '../../std/use-std-list.store';
-import { HubModel } from '../hub-view-types';
+import { HubModel, HubModelCreateSetup } from '../hub-view-types';
 
-export function createStdListHubModel(
-  _gb_sta: GlobalStatusApi,
-  hubObj: WnObj,
-  options: Vars,
-  objId?: string
-): HubModel {
-  const storeOptions: StdListStoreOptions = _.assign({}, options, {
+export function createStdListHubModel(setup: HubModelCreateSetup): HubModel {
+  let { global: _gb_sta, hubObj, modelOptions, objId } = setup;
+  const storeOptions: StdListStoreOptions = _.assign({}, modelOptions, {
     homePath: hubObj,
     globalStatus: _gb_sta,
   });

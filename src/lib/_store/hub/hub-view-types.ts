@@ -30,12 +30,27 @@ export type HubModelOptions = {
    *
    * 这个模型终会提供一个 `createContext()` 的方法
    * 返回一个上下文对象，从而可以具体渲染 layout/schema/actions
+   *
+   * 默认支持下面五种模型:
+   *
+   * - EMPTY
+   * - STD-LIST
+   * - STD-META
+   * - RDS-LIST
+   * - RDS-META
    */
-  model: HubDataModelType;
+  model: string;
 
   // 传递模型的配置数据
   // 对应这个对象，不同视图可以有自己不同的理解
   modelOptions?: Vars;
+};
+
+export type HubModelCreateSetup = {
+  global: GlobalStatusApi;
+  hubObj: WnObj;
+  modelOptions?: Vars;
+  objId?: string;
 };
 
 /**
@@ -62,13 +77,6 @@ export type HubViewOptions = HubModelOptions & {
 /**
  * 内置支持的四种数据模型
  */
-export type HubDataModelType =
-  | 'EMPTY'
-  | 'STD-LIST'
-  | 'STD-META'
-  | 'RDS-LIST'
-  | 'RDS-META';
-
 export type HubViewBehaviors = {
   keepSelection?: KeepInfo;
   keepFilter?: KeepInfo;
@@ -100,7 +108,7 @@ export type HubViewState = {
 };
 
 export interface HubModel {
-  modelType: HubDataModelType;
+  modelType: string;
   store: any;
   createGUIContext: () => Vars;
   getActionBarVars: () => Vars;

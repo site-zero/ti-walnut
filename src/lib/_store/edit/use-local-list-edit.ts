@@ -15,6 +15,7 @@ import {
   SqlExecSetVar,
   SqlResult,
 } from '../../../lib';
+import { join_exec_set_vars } from './join-exec-set-vars';
 
 /**
  * 列表项更新选项
@@ -586,10 +587,12 @@ export function useLocalListEdit(
 
     // 对插入，生成配置
     if (!_.isEmpty(insertList)) {
-      let insertSets: SqlExecSetVar[] | undefined = undefined;
-      if (options.insertSet) {
-        insertSets = options.insertSet();
-      }
+
+      // 额外声明的服务生成变量
+      let sets = [] as SqlExecSetVar[];
+      join_exec_set_vars(sets, options.insertSet);
+
+      // 改动的记录
       changes.push({
         sql: options.insertSql,
         vars: insertList,
@@ -597,7 +600,7 @@ export function useLocalListEdit(
         reset: true,
         noresult: options.noresult,
         put: options.insertPut,
-        sets: insertSets,
+        sets,
       });
     }
 

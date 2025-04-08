@@ -1,23 +1,19 @@
-import { Vars } from '@site0/tijs';
+import _ from 'lodash';
 import {
-  GlobalStatusApi,
+  HubModelCreateSetup,
   RdsListStoreOptions,
   useRdsListStore,
 } from '../../../../..';
 import { HubModel } from '../hub-view-types';
 import { useModelOptionGetter } from './use-model-option-getter';
 
-export function createRdsListHubModel(
-  _gb_sta: GlobalStatusApi,
-  options: Vars,
-  objId?: string
-): HubModel {
-  // const storeOptions = _.assign(
-  //   { query: { filter: {} } },
-  //   options
-  // ) as RdsListStoreOptions;
+export function createRdsListHubModel(setup: HubModelCreateSetup): HubModel {
+  let { global: _gb_sta, modelOptions, objId } = setup;
+  if (_.isEmpty(modelOptions)) {
+    throw new Error('RDS-LIST modelOptions is empty!');
+  }
 
-  const _opt = useModelOptionGetter(options);
+  const _opt = useModelOptionGetter(modelOptions);
 
   const storeOptions: RdsListStoreOptions = {
     // 基本信息

@@ -68,7 +68,7 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   defaultFilter?: QueryFilter | (() => QueryFilter);
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
-  sqlCount: string;
+  sqlCount?: string;
   queryPrefix?: RedQueryPrefixSetup;
   countPrefix?: RedQueryPrefixSetup;
   makeChange?: LocalListMakeChangeOptions;
@@ -251,9 +251,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   const changed = computed(() => _local.isChanged());
   const isEmpty = computed(() => _.isEmpty(listData.value));
   const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
-  const isLocalEmpty = computed(() =>
-    _.isEmpty(_local?.localList?.value)
-  );
+  const isLocalEmpty = computed(() => _.isEmpty(_local?.localList?.value));
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
@@ -598,7 +596,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       _.assign(q.filter, fixed as Vars);
     }
 
-    // 
+    //
     if (_.isEmpty(q.filter)) {
       q.filter = __create_default_filter();
     }
@@ -657,6 +655,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
   //---------------------------------------------
   async function countRemote(filter: Vars | Vars[]): Promise<number> {
+    if (!options.sqlCount) {
+      return 0;
+    }
     let total = await sqlx.count(options.sqlCount, filter);
     return total;
   }

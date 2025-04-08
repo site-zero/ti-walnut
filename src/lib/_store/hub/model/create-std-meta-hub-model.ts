@@ -1,14 +1,14 @@
-import { Icons, Vars } from '@site0/tijs';
+import { Icons } from '@site0/tijs';
 import _ from 'lodash';
-import { WnObj } from '../../../_types';
 import {
   StdMetaStoreOptions,
   useStdMetaStore,
 } from '../../std/use-std-meta.store';
-import { HubModel } from '../hub-view-types';
+import { HubModel, HubModelCreateSetup } from '../hub-view-types';
 
-export function createStdMetaHubModel(hubObj: WnObj, options: Vars): HubModel {
-  const storeOptions: StdMetaStoreOptions = _.assign({}, options, {
+export function createStdMetaHubModel(setup: HubModelCreateSetup): HubModel {
+  let { global: _gb_sta, hubObj, modelOptions, objId } = setup;
+  const storeOptions: StdMetaStoreOptions = _.assign({}, modelOptions, {
     objPath: hubObj,
   });
 

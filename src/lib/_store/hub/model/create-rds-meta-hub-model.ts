@@ -1,12 +1,17 @@
-import { Util, Vars } from '@site0/tijs';
+import { Util } from '@site0/tijs';
 import _ from 'lodash';
-import { RdsMetaStoreOptions, useRdsMetaStore } from '../../../../..';
+import {
+  HubModelCreateSetup,
+  RdsMetaStoreOptions,
+  useRdsMetaStore,
+} from '../../../../..';
 import { HubModel } from '../hub-view-types';
 
-export function createRdsMetaHubModel(options: Vars, objId?: string): HubModel {
+export function createRdsMetaHubModel(setup: HubModelCreateSetup): HubModel {
+  let { global: _gb_sta, modelOptions, objId } = setup;
   const storeOptions = _.assign(
     { filter: {} },
-    Util.explainObj({ id: objId }, options)
+    Util.explainObj({ id: objId }, modelOptions)
   ) as RdsMetaStoreOptions;
 
   const store = useRdsMetaStore(storeOptions);
