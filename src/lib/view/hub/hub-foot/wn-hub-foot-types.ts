@@ -18,7 +18,7 @@ export type FootPartType = 'default' | 'selection' | 'view';
 
 export type FootPart = {
   type?: FootPartType;
-  icon?: IconInput;
+  icon?: IconInput | (() => IconInput);
   text?: string;
   suffix?: string;
   align?: FlexAlignment;
@@ -30,7 +30,7 @@ export type FootPart = {
 export type FootPartItemType = 'std-id' | 'text' | 'date' | 'datetime';
 
 export type FootPartItem = ValuePipeProps & {
-  icon?: IconInput;
+  icon?: IconInput | ((ctx: Vars) => IconInput);
   text?: string;
   /**
    * 指定一个提示框, 如果是一个对象，则表示提示信息配置模板，会被 explain
@@ -59,12 +59,13 @@ export type WnHubFootProps = HubFootTipsProps & {
  * @public
  * 用于展示的底部部件条目类型，继承自 FootPartItem 并添加了索引、键、类型和原始值属性。
  */
-export type DisplayFootPartItem = FootPartItem & {
+export type DisplayFootPartItem = Omit<FootPartItem, 'icon'> & {
+  icon?: IconInput;
   index: number;
   itemKey: string;
   type: FootPartItemType;
   rawValue: string;
-  tipId?: number
+  tipId?: number;
 };
 
 /**

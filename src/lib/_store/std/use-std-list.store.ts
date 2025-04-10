@@ -15,7 +15,7 @@ import {
   DataStoreLoadStatus,
   GlobalStatusApi,
   isWnObj,
-  ListItemUpdateOptions,
+  LocalListUpdateItemOptions,
   LocalListEditOptions,
   QueryFilter,
   QuerySorter,
@@ -194,14 +194,10 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   const _local = useLocalListEdit(_remote, _options);
   //---------------------------------------------
-  const changed = computed(
-    () => _local.isChanged() || _content.changed.value
-  );
+  const changed = computed(() => _local.isChanged() || _content.changed.value);
   const isEmpty = computed(() => _.isEmpty(listData.value));
   const isRemoteEmpty = computed(() => _.isEmpty(_remote.value));
-  const isLocalEmpty = computed(() =>
-    _.isEmpty(_local?.localList?.value)
-  );
+  const isLocalEmpty = computed(() => _.isEmpty(_local?.localList?.value));
   //---------------------------------------------
   const ActionStatus = computed(() => _action_status.value);
   //---------------------------------------------
@@ -232,30 +228,32 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   async function saveMeta() {
     let diffs = _local.makeDifferents();
-    _action_status.value = 'saving';
-
-    for (let diff of diffs) {
-      // 修改已经存在对象
-      if (diff.existsInRemote && diff.existsInLocal) {
-        let obj = await _obj.update(diff.delta);
-        if (obj) {
-          updateItem(obj, { id: obj.id });
+    if (diffs.length > 0) {
+      _action_status.value = 'saving';
+      for (let diff of diffs) {
+        // 修改已经存在对象
+        if (diff.existsInRemote && diff.existsInLocal) {
+          let obj = await _obj.update(diff.delta);
+          if (obj) {
+            updateItem(obj, { id: obj.id });
+          }
+        }
+        // 插入新对象
+        else if (diff.existsInLocal && !diff.existsInRemote) {
+          let obj = await _obj.create(diff.delta);
+          if (obj) {
+            prependItem(obj);
+          }
+        }
+        // 删除远程对象
+        else if (!diff.existsInLocal && diff.existsInRemote) {
+          await _obj.remove(diff.id as string);
         }
       }
-      // 插入新对象
-      else if (diff.existsInLocal && !diff.existsInRemote) {
-        let obj = await _obj.create(diff.delta);
-        if (obj) {
-          prependItem(obj);
-        }
-      }
-      // 删除远程对象
-      else if (!diff.existsInLocal && diff.existsInRemote) {
-        await _obj.remove(diff.id as string);
-      }
+      _action_status.value = undefined;
     }
     // 最后悄悄更新一下远程
-    queryRemoteList();
+    await queryRemoteList();
     _action_status.value = undefined;
   }
 
@@ -507,7 +505,7 @@ function defineStdListStore(options: StdListStoreOptions) {
 
   function updateItem(
     meta: Vars,
-    options: ListItemUpdateOptions
+    options: LocalListUpdateItemOptions
   ): WnObj | undefined {
     return _local.updateItem(meta, options);
   }

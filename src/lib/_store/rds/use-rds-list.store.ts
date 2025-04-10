@@ -16,7 +16,7 @@ import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   GlobalStatusApi,
-  ListItemUpdateOptions,
+  LocalListUpdateItemOptions,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
   QueryFilter,
@@ -439,7 +439,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   function updateItem(
     meta: Vars,
-    options: ListItemUpdateOptions
+    options: LocalListUpdateItemOptions
   ): SqlResult | undefined {
     return _local.updateItem(meta, options);
   }

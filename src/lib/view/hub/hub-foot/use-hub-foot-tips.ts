@@ -1,15 +1,9 @@
-import {
-  Alg,
-  DateTime,
-  ENV_KEYS,
-  getEnv,
-  HtmlSnippetProps,
-  I18n,
-  TipBoxProps,
-  Util,
-} from '@site0/tijs';
+import { TipBoxProps, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { GlobalStatus, UserSession } from '../../..';
+import { tip_maker_DT_UTC } from './tip-maker/tip-maker-DT-UTC';
+import { tip_maker_OBJ_MD } from './tip-maker/tip-maker-OBJ-MD';
+import { tip_maker_OBJ_TSMS } from './tip-maker/tip-maker-OBJ-TSMS';
 
 export type FootValueContext = {
   G: GlobalStatus;
@@ -44,101 +38,9 @@ export function useHubFootTips(props: HubFootTipsProps) {
 
   // 内置: 输入的值是一个 UTC 时间戳
   // 值类似  2024-12-13 12:07:32.268
-  _makers['DT-UTC'] = (
-    ctx: FootValueContext,
-    value: any,
-    rawValue: any,
-    title?: string
-  ) => {
-    if (!rawValue) {
-      return;
-    }
-    // 传入的是一个 UTC 时间戳, 先转换为日期对象
-    let d = new Date(rawValue + 'Z');
-    // 根据时区获取会话的时间
-    let utcTime = rawValue;
-    let localTime = '---';
-    let timezone = ctx.session.env.TIMEZONE ?? '---';
-    let m = /^(GMT|UTC)([+-]\d{1,2})$/.exec(timezone);
-    if (value && m) {
-      let format = getEnv(
-        ENV_KEYS.DFT_DATETIME_FORMAT,
-        'yyyy-MM-dd HH:mm:ss'
-      ) as string;
-      let offset = parseInt(m[2]);
-      localTime = DateTime.format(d, { fmt: format, timezone: offset });
-      utcTime = DateTime.format(d, { fmt: format, timezone: 'Z' });
-    }
-
-    // 准备获取字段名的函数
-    const TT = (key: string) => I18n.get('wn-hub-foot-dt-utc-' + key);
-
-    // 准备标题
-    let titleHtml = '';
-    if (title) {
-      titleHtml = `<caption>
-        <i class="fa-solid fa-calendar"></i>
-        &nbsp;&nbsp;
-        <span>${I18n.text(title)}</span>
-      </caption>`;
-    }
-
-    // 准备一个随机数用作 scope
-    let scope = Alg.genSnowQ(6);
-
-    return {
-      comType: 'TiHtmlSnippet',
-      comConf: {
-        content: `<article data-${scope}>
-        <table cell-spacing="0"">
-        ${titleHtml}
-        <tbody>
-            <tr><td nowrap>${TT('display')}</td><td>${value}</td></tr>
-            <tr><td nowrap>${TT('utc')}</td><td>${utcTime}</td></tr>
-            <tr><td nowrap>${TT('local')}</td><td>${localTime}</td></tr>
-            <tr><td nowrap>${TT('tz')}</td><td>${timezone}</td></tr>
-            <tr><td nowrap>${TT('db')}</td><td>${rawValue}</td></tr>
-            <tr><td nowrap>${TT('browser')}</td><td nowrap>${d}</td></tr>
-        </tbody></table></article>`,
-        styleSheet: [
-          {
-            selectors: [`article[data-${scope}] > table`],
-            rules: {
-              borderCollapse: 'collapse',
-            },
-          },
-          {
-            selectors: [`article[data-${scope}] > table > caption`],
-            rules: {
-              padding: '1em',
-              fontWeight: 'bold',
-            },
-          },
-          {
-            selectors: [`article[data-${scope}] > table td`],
-            rules: {
-              padding: '0.6em 1em',
-              whiteSpace: 'nowrap',
-            },
-          },
-          {
-            selectors: [`article[data-${scope}] > table td:first-child`],
-            rules: {
-              backgroundColor: 'var(--ti-color-body)',
-              color: 'var(--ti-color-body-f)',
-              textAlign: 'right',
-            },
-          },
-          {
-            selectors: [`article[data-${scope}] > table td`],
-            rules: {
-              border: '1px solid var(--ti-color-border-dark)',
-            },
-          },
-        ],
-      } as HtmlSnippetProps,
-    };
-  };
+  _makers['DT-UTC'] = tip_maker_DT_UTC;
+  _makers['OBJ-TSMS'] = tip_maker_OBJ_TSMS;
+  _makers['OBJ-MD'] = tip_maker_OBJ_MD;
 
   // 用户自定义的 tipMaker
   if (props.tipMakers) {

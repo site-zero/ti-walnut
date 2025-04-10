@@ -66,7 +66,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
   // 计算输出
   //--------------------------------------------
   const createGUIContext = () => {
-    // console.log('createGUIContext');
+    //console.log('createGUIContext');
     let gbs: Vars = {
       session: _.cloneDeep(session.data),
       G: _.cloneDeep(_gb_sta.data),
@@ -86,7 +86,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     return re;
   };
   const createWatchingObj = () => {
-    return _model.value?.createGUIContext() ?? {};
+    return _.cloneDeep(_model.value?.createGUIContext() ?? {});
   };
   const createGUILayout = (GUIContext: Vars, viewMode: GuiViewLayoutMode) => {
     // console.log('createGUILayout', GUIContext, viewMode);

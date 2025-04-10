@@ -61,8 +61,17 @@ export function useHutFoot(
     let re = {
       index,
       itemKey: `${partKey}-item-${index}`,
-      ..._.omit(item, 'tip'),
+      ..._.omit(item, 'tip', 'icon'),
     } as DisplayFootPartItem;
+
+    // 准备 Icon
+    if (_.isFunction(item.icon)) {
+      re.icon = item.icon(ctx);
+    }
+    // 直接指定了 icon
+    else if (item.icon) {
+      re.icon = item.icon;
+    }
 
     // 获取返回值
     if (re.value) {
@@ -91,7 +100,6 @@ export function useHutFoot(
       index,
       uniqKey: `part-${index}`,
       type: part.type || 'default',
-      icon: part.icon,
       text: part.text,
       suffix: part.suffix,
       style: CssUtils.mergeStyles(
@@ -100,6 +108,15 @@ export function useHutFoot(
       ),
       items: [],
     } as DisplayFootPart;
+
+    // 准备 Icon
+    if (_.isFunction(part.icon)) {
+      displayPart.icon = part.icon();
+    }
+    // 直接指定了 icon
+    else if (part.icon) {
+      displayPart.icon = part.icon;
+    }
 
     // 特殊处理：选区
     if ('selection' == displayPart.type) {

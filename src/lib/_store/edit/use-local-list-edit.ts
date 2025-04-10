@@ -20,7 +20,7 @@ import { join_exec_set_vars } from './join-exec-set-vars';
 /**
  * 列表项更新选项
  */
-export type ListItemUpdateOptions = {
+export type LocalListUpdateItemOptions = {
   /**
    * 采用下标更新（优先）
    */
@@ -242,7 +242,7 @@ export function useLocalListEdit(
   //---------------------------------------------
   function updateItem(
     meta: Vars,
-    options: ListItemUpdateOptions
+    options: LocalListUpdateItemOptions
   ): SqlResult | undefined {
     let { index, id, defaultMeta } = options;
     let i = -1;

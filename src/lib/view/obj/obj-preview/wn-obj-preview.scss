@@ -43,6 +43,7 @@
       background-color: var(--ti-color-bar);
       > article {
         max-width: 1000px;
+        min-height: 100%;
         margin: 0 auto;
         background-color: var(--ti-color-card);
         box-shadow: 4px 4px 12px var(--ti-color-mask-weak);

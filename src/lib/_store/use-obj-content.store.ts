@@ -2,7 +2,7 @@ import { ObjDataStatus } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef, ref, Ref } from 'vue';
 import { useWnObj } from '../_features/use-wn-obj';
-import { WnObjContentFinger, WnObj } from '../_types/wn-types';
+import { WnObj, WnObjContentFinger } from '../_types/wn-types';
 
 export type ObjContentStoreFeature = {
   //---------------------------------------------
@@ -133,6 +133,12 @@ export function useObjContentStore(): ObjContentStoreFeature {
     if (!_finger.value) {
       throw 'Before refreshContent, you should load finger at first';
     }
+    // 重置本地改动
+    if (resetLocal) {
+      dropLocalChange();
+    }
+    // 重置远程改动
+    _remote.value = undefined;
     // 准备目标
     let path = `id:${_finger.value.id}`;
     // 执行
@@ -143,10 +149,6 @@ export function useObjContentStore(): ObjContentStoreFeature {
     }
     _remote.value = re;
     _status.value = 'ready';
-
-    if (resetLocal) {
-      dropLocalChange();
-    }
 
     return re;
   }

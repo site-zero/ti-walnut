@@ -31,6 +31,7 @@
         @include font-fixed;
         padding: 0 0.5em;
         margin: 0em;
+        white-space: nowrap;
       }
       &:hover {
         color: var(--ti-color-box-f);

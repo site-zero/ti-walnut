@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { Be, Dom, I18n, TI_TIP_API_KEY, TiIcon } from '@site0/tijs';
+  import { Be, Dom, I18n, Icons, TI_TIP_API_KEY, TiIcon } from '@site0/tijs';
   import _ from 'lodash';
   import { computed, inject, onUnmounted, useTemplateRef } from 'vue';
   import { WN_HUB_APP_INST } from '../../../_store';
@@ -30,11 +30,46 @@
           type: 'info',
           icon: 'zmdi-cloud-outline',
           items: [
-            { value: '=id' },
-            { value: '=c', icon: 'far-user' },
-            { value: '=ct', icon: 'zmdi-time', valuePiping: '$TIME_TEXT' },
-            { value: '=sha1', icon: 'fas-fingerprint' },
-            { value: '=len', valuePiping: '$SIZE_TEXT' },
+            {
+              value: '=G.currentObj.id',
+              icon: 'fas-key',
+              valuePiping: '$ELLIPSIS',
+              pipeContext: { at: 'center', maxLen: 8 },
+              tip: {
+                content: '->ID: ${rawValue}',
+              },
+            },
+            { value: '=G.currentObj.c', icon: 'far-user' },
+            {
+              value: '=G.currentObj.ct',
+              icon: 'zmdi-time',
+              valuePiping: '$TIME_TEXT',
+              tip: 'DT-UTC=Created On',
+            },
+            {
+              value: '=G.currentObj.lm',
+              icon: 'zmdi-time-countdown',
+              valuePiping: '$TIME_TEXT',
+              tip: 'DT-UTC=Modified On',
+            },
+            {
+              value: '=G.currentObj.tp',
+              icon: (ctx) => {
+                return Icons.getIcon(ctx.G.currentObj || {});
+              },
+              tip: 'OBJ-TSMS',
+            },
+            {
+              value: '=G.currentObj.md',
+              icon: 'fas-shield-halved',
+              valuePiping: '$MOD_STR',
+              tip: 'OBJ-MD',
+            },
+            {
+              value: '=G.currentObj.len',
+              valuePiping: '$SIZE_TEXT',
+              tip: 'OBJ-TSMS',
+            },
           ],
         },
         { type: 'view', align: 'flex-end', flex: '1 1 auto' },
@@ -89,11 +124,14 @@
       <template v-for="it in part.items" :key="it.itemKey">
         <dl
           v-if="
-            it.text || !_.isNil(it.value) || it.suffix || (it.icon && it.tip)
+            it.text ||
+            !_.isNil(it.value) ||
+            it.suffix ||
+            (it.icon && !_.isNil(it.tipId))
           "
           :style="it.style"
           :data-item-key="it.itemKey"
-          :data-tip="it.tipId ? `::${it.tipId}` : null"
+          :data-tip="!_.isNil(it.tipId) ? `::${it.tipId}` : null"
           @click.left="onClickItem(it, $event)">
           <dt v-if="it.icon"><TiIcon :value="it.icon" /></dt>
           <dt v-if="it.text">{{ I18n.text(it.text) }}</dt>

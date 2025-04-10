@@ -5,6 +5,7 @@
     getGUIExplainContext,
     TiLayoutGrid,
     TiLoading,
+    Util,
     Vars,
   } from '@site0/tijs';
   import _ from 'lodash';
@@ -20,6 +21,7 @@
 
   const _arena_reload = computed(() => useHubArenaReload(props, _hub!.view));
   const _gui_context = ref<Vars>({});
+  const _last_watch = ref<Vars>({});
   //--------------------------------------------------
   const GUILayout = computed(() =>
     _hub!.view.createGUILayout(
@@ -36,10 +38,8 @@
       }) ?? {}
   );
   //--------------------------------------------------
-  function buildGUI(ctx?: Vars) {
-    if (!ctx) {
-      ctx = _hub!.view.createGUIContext();
-    }
+  function buildGUI() {
+    let ctx = _hub!.view.createGUIContext();
 
     // 创建主要操作菜单
     let actions = _hub!.view.createGUIActions({
@@ -69,11 +69,11 @@
   watch(
     () => _hub!.view.createWatchingObj(),
     (newCtx) => {
-      // let diff = Util.getRecordDiff(_gui_context.value, newCtx);
-      // console.log('newCtx', newCtx, _.isEqual(newCtx, _gui_context.value));
-      // console.log('diff', diff);
-      if (!_.isEqual(newCtx, _gui_context.value)) {
-        buildGUI(newCtx);
+      let diff = Util.getRecordDiffDeeply(_last_watch.value, newCtx);
+      //console.log('watch:createWatchingObj()', diff);
+      if (!_.isEmpty(diff)) {
+        _last_watch.value = newCtx;
+        buildGUI();
       }
     },
     { deep: true }

@@ -10,6 +10,17 @@ const en_us = {
   'dt-utc-local': 'Local',
   'dt-utc-tz': 'TimeZone',
   'dt-utc-browser': 'Browser',
+  'dt-utc-ams': 'In MS',
+  'obj-mime': 'MIME',
+  'obj-tp': 'Type',
+  'obj-sha1': 'SHA1',
+  'obj-len': 'Size',
+  'obj-md-val': 'Decimal',
+  'obj-md-oct': 'Octal',
+  'obj-md-mod': 'Code',
+  'obj-md-owner': 'Owner',
+  'obj-md-group': 'Group',
+  'obj-md-other': 'Other',
 };
 const zh_cn = {
   'selected': '已选',
@@ -19,6 +30,17 @@ const zh_cn = {
   'dt-utc-local': '本地',
   'dt-utc-tz': '会话时区',
   'dt-utc-browser': '浏览器',
+  'dt-utc-ams': '绝对毫秒',
+  'obj-mime': '内容类型',
+  'obj-tp': '对象类型',
+  'obj-sha1': 'SHA1',
+  'obj-len': '文件大小',
+  'obj-md-val': '十进制',
+  'obj-md-oct': '八进制',
+  'obj-md-mod': '码值',
+  'obj-md-owner': '所有者',
+  'obj-md-group': '群组',
+  'obj-md-other': '其他',
 };
 
 const COM_TYPE = 'WnHubFoot';
