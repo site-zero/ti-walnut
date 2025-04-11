@@ -50,8 +50,7 @@ article[data-${scope}] > table td {
     border: 1px solid var(--ti-color-border-dark);
 }
 article[data-${scope}] > table td:first-child {
-    background-color: var(--ti-color-body);
-    color: var(--ti-color-body-f);
+    color: var(--ti-color-bar-f);
     text-align: right;
 }
 article[data-${scope}] > table td:last-child {

@@ -7,6 +7,10 @@ import {
 } from '@site0/tijs';
 import { HubFootTipsProps } from './use-hub-foot-tips';
 
+export type WnHubFootEmitter = {
+  (event: string, item: DisplayFootPartItem): void;
+};
+
 /**
  * 分组类型
  *
@@ -25,6 +29,11 @@ export type FootPart = {
   flex?: string;
   style?: Vars;
   items?: FootPartItem[];
+  /**
+   * `string`： emit 消息
+   * `function`： 直接执行回调函数
+   */
+  action?: string | ((item: DisplayFootPartItem) => void);
 };
 
 export type FootPartItemType = 'std-id' | 'text' | 'date' | 'datetime';
@@ -47,7 +56,11 @@ export type FootPartItem = ValuePipeProps & {
   suffix?: string;
   value?: string;
   style?: Vars;
-  action?: (item: DisplayFootPartItem) => void;
+  /**
+   * `string`： emit 消息
+   * `function`： 直接执行回调函数
+   */
+  action?: string | ((item: DisplayFootPartItem) => void);
 };
 
 export type WnHubFootProps = HubFootTipsProps & {

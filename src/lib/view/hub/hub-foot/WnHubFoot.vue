@@ -7,8 +7,11 @@
   import {
     DisplayFootPartItem,
     FootPart,
+    WnHubFootEmitter,
     WnHubFootProps,
   } from './wn-hub-foot-types';
+  //--------------------------------------------------
+  const emit = defineEmits<WnHubFootEmitter>();
   //--------------------------------------------------
   const _tip_api = inject(TI_TIP_API_KEY);
   const _tip_ids: number[] = [];
@@ -72,7 +75,12 @@
             },
           ],
         },
-        { type: 'view', align: 'flex-end', flex: '1 1 auto' },
+        {
+          type: 'view',
+          align: 'flex-end',
+          flex: '1 1 auto',
+          action: 'show:hub:view',
+        },
         { type: 'selection', icon: 'zmdi-mouse', flex: '0 0 auto' },
       ] as FootPart[],
   });
@@ -88,9 +96,13 @@
   });
   //--------------------------------------------------
   function onClickItem(it: DisplayFootPartItem, event: MouseEvent) {
-    // console.log('onClickItem', it, event);
+    console.log('onClickItem', it, event);
     // 指定了自定义事件
-    if (it.action) {
+    if (_.isString(it.action)) {
+      emit(it.action, it);
+      return;
+    }
+    if (_.isFunction(it.action)) {
       it.action(it);
       return;
     }

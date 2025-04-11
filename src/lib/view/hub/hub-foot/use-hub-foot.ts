@@ -128,6 +128,7 @@ export function useHutFoot(
         text: 'i18n:wn-hub-foot-selected',
         value: val,
         rawValue: val,
+        action: part.action,
       });
     }
     // 特殊处理：视图
@@ -139,6 +140,7 @@ export function useHutFoot(
         type: 'text',
         value: val,
         rawValue: val,
+        action: part.action,
       });
     }
     // 通用处理
