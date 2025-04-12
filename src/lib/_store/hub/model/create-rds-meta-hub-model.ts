@@ -1,4 +1,4 @@
-import { Util } from '@site0/tijs';
+import { Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import {
   HubModelCreateSetup,
@@ -33,6 +33,14 @@ export function createRdsMetaHubModel(setup: HubModelCreateSetup): HubModel {
     await store.fetchRemoteMeta();
   }
 
+  function getChanges(): Vars[] {
+    let diff = store.getDiffMeta();
+    if (_.isEmpty(diff)) {
+      return [];
+    }
+    return [diff];
+  }
+
   return {
     modelType: 'RDS-META',
     store,
@@ -40,5 +48,6 @@ export function createRdsMetaHubModel(setup: HubModelCreateSetup): HubModel {
     getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
+    getChanges,
   };
 }

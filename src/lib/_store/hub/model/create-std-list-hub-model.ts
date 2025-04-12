@@ -1,4 +1,4 @@
-import { Icons } from '@site0/tijs';
+import { Icons, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import {
   StdListStoreOptions,
@@ -50,6 +50,13 @@ export function createStdListHubModel(setup: HubModelCreateSetup): HubModel {
     await store.refresh();
   }
 
+  function getChanges(): Vars[] {
+    let re: Vars[] = [];
+    re.push(...store.makeMetaDifferents());
+    re.push(...store.makeContentDifferents());
+    return re;
+  }
+
   return {
     modelType: 'STD-LIST',
     store,
@@ -57,5 +64,6 @@ export function createStdListHubModel(setup: HubModelCreateSetup): HubModel {
     getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
+    getChanges,
   };
 }

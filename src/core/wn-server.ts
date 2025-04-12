@@ -264,7 +264,7 @@ export class WalnutServer {
         TiStore.local.remove(TICKET_KEY);
         setEnv(ENV_KEYS.TIMEZONE, null);
       } else {
-        setEnv(ENV_KEYS.TIMEZONE, re.data.envs.TIMEZONE);
+        setEnv(ENV_KEYS.TIMEZONE, re.data.me.TIMEZONE);
       }
       return re;
     }
@@ -285,7 +285,7 @@ export class WalnutServer {
     if (re && re.ok && re.data) {
       this._ticket = re.data.ticket;
       TiStore.local.set(TICKET_KEY, this._ticket);
-      setEnv(ENV_KEYS.TIMEZONE, re.data.vars.TIMEZONE);
+      setEnv(ENV_KEYS.TIMEZONE, re.data.me.TIMEZONE);
     }
     return re;
   }

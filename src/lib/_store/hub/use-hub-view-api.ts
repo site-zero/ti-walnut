@@ -2,10 +2,13 @@ import {
   ActionBarEvent,
   ActionBarProps,
   BlockEvent,
+  CodeEditorProps,
   isAsyncFunc,
+  openAppModal,
   Util,
   Vars,
 } from '@site0/tijs';
+import JSON5 from 'json5';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { Router } from 'vue-router';
@@ -265,6 +268,28 @@ export function useHubViewApi(options: HubViewApiOptions) {
       );
     }
   }
+
+  async function showModelDiff() {
+    let changes = _model.value?.getChanges() ?? [];
+    console.log('show model diff', changes);
+
+    await openAppModal({
+      title: 'Different',
+      position: 'left',
+      type: 'primary',
+      width: '80%',
+      maxWidth: '640px',
+      height: '100%',
+      clickMaskToClose: true,
+      result: JSON5.stringify(changes, null, 2),
+      comType: 'TiCodeEditor',
+      comConf: {
+        format: 'JSON5',
+        readonly: true,
+      } as CodeEditorProps,
+    });
+  }
+
   //---------------------------------------------
   // 返回特性
   //---------------------------------------------
@@ -294,5 +319,6 @@ export function useHubViewApi(options: HubViewApiOptions) {
     invoke,
     onBlockEvent,
     onActionFire,
+    showModelDiff,
   };
 }

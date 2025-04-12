@@ -73,6 +73,11 @@ export type LocalListEditOptions = {
    * @returns 表行 ID
    */
   getId?: string | ((it: SqlResult, index: number) => TableRowID);
+
+  /**
+   * 当 `updateItem` 时，是否清除值为 `null` 的字段。
+   */
+  autoRemoveItemNilValue?: boolean;
 };
 
 export type LocalListMakeDiffOptions = LocalMetaMakeDiffOptions;
@@ -242,9 +247,9 @@ export function useLocalListEdit(
   //---------------------------------------------
   function updateItem(
     meta: Vars,
-    options: LocalListUpdateItemOptions
+    updateOptions: LocalListUpdateItemOptions
   ): SqlResult | undefined {
-    let { index, id, defaultMeta } = options;
+    let { index, id, defaultMeta } = updateOptions;
     let i = -1;
     if (!_.isNil(index)) {
       i = index;
@@ -260,7 +265,39 @@ export function useLocalListEdit(
         if (defaultMeta) {
           _.defaults(re, defaultMeta);
         }
+        if (options.autoRemoveItemNilValue) {
+          clearItemNilValue({ index: i });
+        }
         return re;
+      }
+    }
+  }
+  //---------------------------------------------
+  function clearItemNilValue(
+    options: LocalListUpdateItemOptions
+  ): SqlResult | undefined {
+    let { index, id, defaultMeta } = options;
+    let i = -1;
+    if (!_.isNil(index)) {
+      i = index;
+    } else if (!_.isNil(id)) {
+      i = getRowIndex(id);
+    }
+    // 采用 index 下标
+    if (i >= 0) {
+      initLocalList();
+      if (_local_list.value && i < _local_list.value.length) {
+        let li = _local_list.value[i];
+        let delKeys = [] as string[];
+        _.forEach(li, (v, k) => {
+          if (_.isNil(v)) {
+            delKeys.push(k);
+          }
+        });
+        for (let k of delKeys) {
+          delete li[k];
+        }
+        return li;
       }
     }
   }
@@ -587,7 +624,6 @@ export function useLocalListEdit(
 
     // 对插入，生成配置
     if (!_.isEmpty(insertList)) {
-
       // 额外声明的服务生成变量
       let sets = [] as SqlExecSetVar[];
       join_exec_set_vars(sets, options.insertSet);
@@ -762,6 +798,7 @@ export function useLocalListEdit(
     prependToList,
     prepend,
     updateItem,
+    clearItemNilValue,
     batchUpdate,
     batchUpdateBy,
     findAndUpdate,

@@ -1,3 +1,4 @@
+import { Vars } from '@site0/tijs';
 import _ from 'lodash';
 import {
   HubModelCreateSetup,
@@ -94,6 +95,10 @@ export function createRdsListHubModel(setup: HubModelCreateSetup): HubModel {
     await store.queryRemoteList();
   }
 
+  function getChanges(): Vars[] {
+    return store.makeDifferents();
+  }
+
   return {
     modelType: 'RDS-LIST',
     store,
@@ -101,5 +106,6 @@ export function createRdsListHubModel(setup: HubModelCreateSetup): HubModel {
     getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
+    getChanges,
   };
 }

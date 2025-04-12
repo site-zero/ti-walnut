@@ -16,9 +16,9 @@ import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   GlobalStatusApi,
-  LocalListUpdateItemOptions,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
+  LocalListUpdateItemOptions,
   QueryFilter,
   QuerySorter,
   RefreshOptions,
@@ -298,8 +298,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return _local.makeChanges(options.makeChange);
   }
 
-  function makeDifferents() {
-    return _local.makeDifferents();
+  function makeDifferents(): Vars[] {
+    let re: Vars[] = [];
+    let diffs = _local.makeDifferents();
+    for (let diff of diffs) {
+      re.push(diff.delta);
+    }
+    return re;
   }
   //---------------------------------------------
   //                计算属性

@@ -10,6 +10,7 @@ import {
 import _ from 'lodash';
 import { Ref } from 'vue';
 import { Router } from 'vue-router';
+import { DiffItem } from '../../../..';
 import { GlobalStatusApi } from '../../_features';
 import { GuiViewLayout, GuiViewLayoutMode, WnObj } from '../../_types';
 import { GuiViewMeasureApi } from '../use-gui-view-measure.store';
@@ -114,6 +115,7 @@ export interface HubModel {
   getActionBarVars: () => Vars;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
+  getChanges: () => Vars[];
 }
 
 export function isHubViewLayout(layout: any): layout is GuiViewLayout {
@@ -168,6 +170,7 @@ export type HubView = {
   invoke: (methodName: string, ...args: any[]) => Promise<any>;
   onBlockEvent: (event: BlockEvent) => Promise<any>;
   onActionFire: (event: ActionBarEvent) => Promise<any>;
+  showModelDiff: () => Promise<void>;
 };
 
 export type GuiViewMeasure = {

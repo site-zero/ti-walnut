@@ -1,4 +1,4 @@
-import { Icons } from '@site0/tijs';
+import { Icons, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import {
   StdMetaStoreOptions,
@@ -35,6 +35,13 @@ export function createStdMetaHubModel(setup: HubModelCreateSetup): HubModel {
     await store.refresh();
   }
 
+  function getChanges(): Vars[] {
+    let re: Vars[] = [];
+    re.push(store.makeMetaDifferent());
+    re.push(...store.makeContentDifferents());
+    return re;
+  }
+
   return {
     modelType: 'STD-META',
     store,
@@ -42,5 +49,6 @@ export function createStdMetaHubModel(setup: HubModelCreateSetup): HubModel {
     getActionBarVars: () => store.ActionBarVars.value,
     reload,
     refresh,
+    getChanges,
   };
 }

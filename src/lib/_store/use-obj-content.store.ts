@@ -1,40 +1,19 @@
-import { ObjDataStatus } from '@site0/tijs';
+import { ObjDataStatus, Vars } from '@site0/tijs';
+import { diffLines } from 'diff';
 import _ from 'lodash';
-import { computed, ComputedRef, ref, Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useWnObj } from '../_features/use-wn-obj';
 import { WnObj, WnObjContentFinger } from '../_types/wn-types';
 
-export type ObjContentStoreFeature = {
-  //---------------------------------------------
-  // 数据模型
-  _remote: Ref<string | undefined>;
-  _local: Ref<string | undefined>;
-  _finger: Ref<WnObjContentFinger | undefined>;
-  //---------------------------------------------
-  status: Ref<ObjDataStatus | undefined>;
-  //---------------------------------------------
-  // 计算属性
-  ContentText: ComputedRef<string>;
-  ContentType: ComputedRef<string>;
-  ContentMime: ComputedRef<string>;
-  changed: ComputedRef<boolean>;
-  //---------------------------------------------
-  // 本地方法
-  setContent: (content: string) => void;
-  dropLocalChange: () => void;
-  reset: () => void;
-  isSameFinger: (finger: WnObjContentFinger) => boolean;
-  //---------------------------------------------
-  // 远程方法
-  saveChange: (force?: boolean) => Promise<WnObj | undefined>;
-  loadContent: (
-    finger: WnObjContentFinger,
-    resetLocal?: boolean
-  ) => Promise<string>;
-  refreshContent: (resetLocal?: boolean) => Promise<string>;
+export type ObjContentDiff = {
+  finger: WnObjContentFinger;
+  remote: string;
+  local: string;
 };
 
-export function useObjContentStore(): ObjContentStoreFeature {
+export type ObjContentStoreFeature = ReturnType<typeof useObjContentStore>;
+
+export function useObjContentStore() {
   //---------------------------------------------
   // 准备数据访问模型
   //---------------------------------------------
@@ -55,6 +34,13 @@ export function useObjContentStore(): ObjContentStoreFeature {
       return _local.value != _remote.value;
     }
     return false;
+  }
+
+  function getChange(): Vars[] {
+    if (!isChanged()) {
+      return [];
+    }
+    return diffLines(_remote.value ?? '', _local.value ?? '');
   }
 
   //---------------------------------------------
@@ -99,7 +85,9 @@ export function useObjContentStore(): ObjContentStoreFeature {
   //---------------------------------------------
   //                远程方法
   //---------------------------------------------
-  async function saveChange(force = false): Promise<WnObj | undefined> {
+  async function saveChange({ force = false } = {}): Promise<
+    WnObj | undefined
+  > {
     // 防守一下
     if (!isChanged() && !force) {
       return;
@@ -175,6 +163,7 @@ export function useObjContentStore(): ObjContentStoreFeature {
     dropLocalChange,
     reset,
     isSameFinger,
+    getChange,
     //---------------------------------------------
     // 远程方法
     saveChange,

@@ -8,15 +8,15 @@ import {
   Util,
   Vars,
 } from '@site0/tijs';
-import _ from 'lodash';
+import _, { drop } from 'lodash';
 import { computed, ref } from 'vue';
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   GlobalStatusApi,
   isWnObj,
-  LocalListUpdateItemOptions,
   LocalListEditOptions,
+  LocalListUpdateItemOptions,
   QueryFilter,
   QuerySorter,
   RefreshOptions,
@@ -102,6 +102,9 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
   let _options: StdListStoreOptions = _.cloneDeep(options ?? { homePath: '~' });
+  if (_.isNil(_options.autoRemoveItemNilValue)) {
+    _options.autoRemoveItemNilValue = true;
+  }
   let _keep_query_by = ref(options?.keepQuery);
   let _keep_select_by = ref(options?.keepSelect);
   const _obj = useWnObj();
@@ -256,7 +259,31 @@ function defineStdListStore(options: StdListStoreOptions) {
     await queryRemoteList();
     _action_status.value = undefined;
   }
+  //---------------------------------------------
+  async function saveChange({ force = false } = {}) {
+    // 自动检测改动
+    if (!changed.value || force) {
+      return;
+    }
+    // 保存元数据
+    await saveMeta();
 
+    // 保存内容
+    await saveCurrentContent({ force });
+  }
+  //---------------------------------------------
+  function makeMetaDifferents() {
+    let re: Vars[] = [];
+    let diffs = _local.makeDifferents();
+    for (let diff of diffs) {
+      re.push(diff.delta);
+    }
+    return re;
+  }
+  //---------------------------------------------
+  function makeContentDifferents(): Vars[] {
+    return _content.getChange();
+  }
   //---------------------------------------------
   // 读写内容
   //---------------------------------------------
@@ -329,14 +356,24 @@ function defineStdListStore(options: StdListStoreOptions) {
    * @function
    * @returns {Promise<void>} 无返回值
    */
-  async function saveCurrentContent() {
+  async function saveCurrentContent({ force = false } = {}) {
     // 防空
     if (!CurrentItem.value) {
       return;
     }
     // 保存内容
     _action_status.value = 'saving';
-    await _content.saveChange();
+    let newObj = await _content.saveChange({ force });
+    if (newObj) {
+      let index = _local.getRowIndex(newObj.id);
+      if (index >= 0) {
+        _local.updateItem(newObj, { id: newObj.id });
+        let index = _local.getRowIndex(newObj.id);
+        if (index >= 0 && _remote.value) {
+          _remote.value[index] = newObj;
+        }
+      }
+    }
     _action_status.value = undefined;
   }
   //---------------------------------------------
@@ -670,23 +707,16 @@ function defineStdListStore(options: StdListStoreOptions) {
    * @returns {Promise<WnObj | undefined>} 返回创建的对象，如果创建失败则返回 undefined。
    * @throws 如果没有父 ID，则抛出错误。
    */
-  async function create(
-    meta: WnObj,
-    autoAppend: 'append' | 'prepend' | 'none' = 'prepend'
-  ): Promise<WnObj | undefined> {
+  async function create(meta: WnObj): Promise<WnObj | undefined> {
     meta.pid = _dir_index.value?.id;
     if (!meta.pid) {
       throw 'create need parent id';
     }
     let re = await _obj.create(meta);
     if (isWnObj(re)) {
-      if ('append' == autoAppend) {
-        _local.appendToList(re);
-        _remote.value?.push(re);
-      } else if ('prepend' == autoAppend) {
-        _local.prependToList(re);
-        _remote.value?.unshift(re);
-      }
+      await queryRemoteList();
+      resetLocalChange();
+      await selectItem(re.id);
     }
     return re;
   }
@@ -922,9 +952,12 @@ function defineStdListStore(options: StdListStoreOptions) {
     //---------------------------------------------
     // 读写内容
     //---------------------------------------------
+    saveChange,
     loadCurrentContent,
     setCurrentContent,
     saveCurrentContent,
+    makeMetaDifferents,
+    makeContentDifferents,
     //---------------------------------------------
     // 本地化存储状态
     //---------------------------------------------

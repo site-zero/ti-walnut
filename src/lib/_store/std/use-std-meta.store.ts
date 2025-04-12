@@ -110,7 +110,14 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     }
     _action_status.value = undefined;
   }
-
+  //---------------------------------------------
+  function makeMetaDifferent() {
+    return _local.getDiffMeta();
+  }
+  //---------------------------------------------
+  function makeContentDifferents(): Vars[] {
+    return _content.getChange();
+  }
   //---------------------------------------------
   // 读写内容
   //---------------------------------------------
@@ -344,6 +351,8 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     loadCurrentContent,
     setCurrentContent,
     saveCurrentContent,
+    makeMetaDifferent,
+    makeContentDifferents,
     //---------------------------------------------
     // 本地化存储状态
     //---------------------------------------------

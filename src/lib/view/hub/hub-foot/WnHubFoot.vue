@@ -96,7 +96,7 @@
   });
   //--------------------------------------------------
   function onClickItem(it: DisplayFootPartItem, event: MouseEvent) {
-    console.log('onClickItem', it, event);
+    // console.log('onClickItem', it, event);
     // 指定了自定义事件
     if (_.isString(it.action)) {
       emit(it.action, it);
