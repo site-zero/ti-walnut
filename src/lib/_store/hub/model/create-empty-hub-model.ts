@@ -8,5 +8,6 @@ export function createEmptyHubModel(_setup: HubModelCreateSetup): HubModel {
     getActionBarVars: () => ({}),
     reload: async () => {},
     refresh: async () => {},
+    getChanges: () => [],
   };
 }
