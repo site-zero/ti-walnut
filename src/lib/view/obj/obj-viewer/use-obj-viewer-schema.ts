@@ -63,6 +63,7 @@ export function useObjViewerSchema(
       comType: 'WnObjMeta',
       comConf: {
         value: props.meta,
+        fields: props.fields,
       } as WnObjMetaProps,
       events: {
         change: ({ data }) => api.onMetaChange(data),

@@ -13,4 +13,9 @@ export type WnObjTableProps = {
   currentId?: string;
   checkedIds?: string[];
   upload?: WnUploadFileOptions;
+
+  /**
+   * 指定一个全局 Bus 的键，监听这个事件用来触发 upload
+   */
+  busUploadKey?:string;
 };

@@ -1,4 +1,12 @@
-import { BlockProps, LayoutPanelProps, RoadblockProps, TabsAspect, Vars } from '@site0/tijs';
+import {
+  BlockProps,
+  ColumnRefer,
+  FieldRefer,
+  LayoutPanelProps,
+  RoadblockProps,
+  TabsAspect,
+  Vars,
+} from '@site0/tijs';
 import { WnUploadFileOptions } from '../../../../core';
 
 export type WnObjViewerEmitter = {
@@ -27,6 +35,11 @@ export type WnObjViewerProps = TabsAspect & {
 
   // 哪些 block 需要放入 Pannal 来显示
   panels?: WnObjViewerBlockName[];
+
+  /**
+   * 元数据的字段
+   */
+  fields?: FieldRefer[];
 
   /**
    * 弹出面板的默认属性，如果不设置回从右侧滑入，占 62% 宽度

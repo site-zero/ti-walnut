@@ -1,4 +1,4 @@
-import { ThumbProps, useDropping } from '@site0/tijs';
+import { Dom, ThumbProps, useDropping } from '@site0/tijs';
 import { Ref } from 'vue';
 import { Walnut, WnUploadFileOptions } from '../../../../core';
 import { WnObj } from '../../../_types';
@@ -20,6 +20,8 @@ export type ObjDropToUploadOptions = {
   uploadOptions: () => WnUploadFileOptions | undefined;
   emit: WnObjTableEmitter;
 };
+
+export type ObjDropToUploadApi = ReturnType<typeof useObjDropToUpload>;
 
 export function useObjDropToUpload(options: ObjDropToUploadOptions) {
   let { target, _drag_enter, _upload_files, uploadOptions, emit } = options;
@@ -73,8 +75,8 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
     let up_options = uploadOptions();
     if (!up_options || !up_options.target) {
       console.error('No upload options');
-      return
-    };
+      return;
+    }
 
     for (let i = 0; i < _upload_files.value.length; i++) {
       let item = _upload_files.value[i];
@@ -95,13 +97,21 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
       };
 
       // 执行上传
-      Walnut.uploadFile(item.file, uploading).then((re: any) => {
-        //console.log('Upload Done:', re.data);
-        // 上传完成
-        item.abort = null;
-        item.newObj = re.data;
-        _do_check_upload_finished();
-      });
+      Walnut.uploadFile(item.file, uploading)
+        .then((re: any) => {
+          //console.log('Upload Done:', re);
+          // 上传完成
+          item.abort = null;
+          item.newObj = re.data;
+        })
+        .catch((err: any) => {
+          console.error('Upload Error:', err);
+          // 上传失败
+          item.abort = null;
+        })
+        .finally(() => {
+          _do_check_upload_finished();
+        });
     }
   }
 
@@ -152,6 +162,31 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
     }, // drop: (files) => {
   });
 
-  // 启动 Dropping
-  dropping();
+  /**
+   * 主动创建一个 input 元素，然后模拟用户点击
+   */
+  async function doUploadFiles() {
+    // 创建一个临时元素
+    let $input = Dom.createElement({
+      tagName: 'input',
+      attrs: {
+        type: 'file',
+        multiple: true,
+      },
+    });
+    // 监听事件
+    $input.addEventListener('change', (evt: any) => {
+      let files = evt.target.files;
+      if (!files || files.length == 0) return;
+      _join_upload_items(files);
+      _do_upload();
+    });
+    // 模拟点击
+    $input.click();
+  }
+
+  return {
+    reset: dropping,
+    doUploadFiles,
+  };
 }

@@ -1,11 +1,21 @@
 <script lang="ts" setup>
-  import { TiTable, TiThumb } from '@site0/tijs';
-  import { computed, onMounted, ref, useTemplateRef } from 'vue';
+  import { BUS_KEY, TiTable, TiThumb } from '@site0/tijs';
+  import {
+    computed,
+    inject,
+    onMounted,
+    onUnmounted,
+    ref,
+    useTemplateRef,
+    watch,
+  } from 'vue';
   import { ObjUploadItem, useObjDropToUpload } from './use-obj-drop-to-upload';
   import { getObjTableColumns } from './use-obj-table-columns';
   import { WnObjTableEmitter, WnObjTableProps } from './wn-obj-table-types';
   //-------------------------------------------------------
-  let emit = defineEmits<WnObjTableEmitter>();
+  const bus = inject(BUS_KEY);
+  //-------------------------------------------------------
+  const emit = defineEmits<WnObjTableEmitter>();
   //-----------------------------------------------------
   const props = withDefaults(defineProps<WnObjTableProps>(), {
     columns: () => getObjTableColumns(),
@@ -15,6 +25,15 @@
   const _drag_enter = ref(false);
   const _upload_files = ref<ObjUploadItem[]>([]);
   //-----------------------------------------------------
+  const _upload_api = useObjDropToUpload({
+    _drag_enter,
+    _upload_files,
+    target: () =>
+      $el.value && props.upload ? ($el.value as HTMLElement) : null,
+    uploadOptions: () => props.upload,
+    emit,
+  });
+  //-----------------------------------------------------
   const TopClass = computed(() => {
     return {
       'drag-enter': _drag_enter.value || hasUploading.value,
@@ -23,15 +42,42 @@
   //-----------------------------------------------------
   const hasUploading = computed(() => _upload_files.value.length > 0);
   //-----------------------------------------------------
+  function doUpload() {
+    console.log('doUpload');
+    _upload_api.doUploadFiles();
+  }
+  //-----------------------------------------------------
+  let _watched_bus: string | undefined = undefined;
+  watch(
+    () => props.busUploadKey,
+    () => {
+      if (_watched_bus) {
+        bus?.off(doUpload, _watched_bus);
+      }
+      if (bus && props.busUploadKey) {
+        bus.on(props.busUploadKey, doUpload);
+        _watched_bus = props.busUploadKey;
+      }
+    },
+    { immediate: true }
+  );
+  //-----------------------------------------------------
+  watch(
+    () => props.upload,
+    () => {
+      _upload_api.reset();
+    }
+  );
+  //-----------------------------------------------------
   onMounted(() => {
     if (props.upload) {
-      useObjDropToUpload({
-        _drag_enter,
-        _upload_files,
-        target: () => ($el.value ? ($el.value as HTMLElement) : null),
-        uploadOptions: () => props.upload,
-        emit,
-      });
+      _upload_api.reset();
+    }
+  });
+  //-----------------------------------------------------
+  onUnmounted(() => {
+    if (_watched_bus) {
+      bus?.off(doUpload, _watched_bus);
     }
   });
   //-----------------------------------------------------

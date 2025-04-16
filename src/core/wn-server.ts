@@ -685,7 +685,11 @@ export class WalnutServer {
       tmpl = '${major}(${nb})${suffix}',
       progress,
       signal,
+      addMeta = {},
     } = options;
+
+    // 空值就没必要更新了
+    addMeta = Util.filterRecordNilValue(addMeta || {});
 
     // 构建请求投
     let init = this.getRequestInit(signal);
@@ -722,15 +726,32 @@ export class WalnutServer {
       });
     }
 
+    // 保留本对象指针
+    const wn = this;
+
     // 发送请求
     return new Promise((resolve, reject) => {
       // Done
       $req.onreadystatechange = () => {
         if (4 == $req.readyState) {
-          if (200 == $req.status) {
-            resolve($req.responseText);
+          let reo = JSON5.parse($req.responseText);
+          if (200 == $req.status && reo.ok) {
+            let obj = reo.data;
+            // 需要额外更新文件的元数据
+            if (addMeta && !_.isEmpty(addMeta) && obj && obj.id) {
+              wn.exec(`o 'id:${obj.id}' @update @json -cqn`, {
+                as: 'json',
+                input: JSON.stringify(addMeta),
+              })
+                .then((newObj) => {
+                  resolve(newObj);
+                })
+                .catch((err) => {
+                  reject(err);
+                });
+            }
           } else {
-            reject($req.responseText);
+            reject(reo);
           }
         }
       };
@@ -771,6 +792,7 @@ export type WnUploadFileOptions = {
   tmpl?: string;
   progress?: (info: WnUploadFileProgress) => void;
   signal?: AbortSignal;
+  addMeta?: Vars;
 };
 
 export const Walnut = new WalnutServer();
