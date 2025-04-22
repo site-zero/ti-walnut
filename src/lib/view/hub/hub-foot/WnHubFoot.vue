@@ -38,9 +38,10 @@
               icon: 'fas-key',
               valuePiping: '$ELLIPSIS',
               pipeContext: { at: 'center', maxLen: 8 },
-              tip: {
-                content: '->ID: ${rawValue}',
-              },
+              // tip: {
+              //   content: '->ID: ${rawValue}',
+              // },
+              tip: 'OBJ-INFO',
             },
             { value: '=G.currentObj.c', icon: 'far-user' },
             {

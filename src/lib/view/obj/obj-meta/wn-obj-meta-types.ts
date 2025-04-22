@@ -1,4 +1,4 @@
-import { FieldRefer, RoadblockProps, Vars } from '@site0/tijs';
+import { FieldRefer, FormProps, RoadblockProps, Vars } from '@site0/tijs';
 
 export type WnObjMetaProps = {
   value?: Vars;
@@ -9,4 +9,9 @@ export type WnObjMetaProps = {
 
   // 指定字段
   fields?: FieldRefer[];
+
+  /**
+   * 表单更多配置
+   */
+  formConf?: Omit<FormProps, 'fields'>;
 };

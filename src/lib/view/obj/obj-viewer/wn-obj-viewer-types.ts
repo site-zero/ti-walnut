@@ -2,6 +2,7 @@ import {
   BlockProps,
   ColumnRefer,
   FieldRefer,
+  FormProps,
   LayoutPanelProps,
   RoadblockProps,
   TabsAspect,
@@ -40,6 +41,11 @@ export type WnObjViewerProps = TabsAspect & {
    * 元数据的字段
    */
   fields?: FieldRefer[];
+
+  /**
+   * 元数据表单的配置信息
+   */
+  metaFormConf?: Omit<FormProps, 'fields'>;
 
   /**
    * 弹出面板的默认属性，如果不设置回从右侧滑入，占 62% 宽度

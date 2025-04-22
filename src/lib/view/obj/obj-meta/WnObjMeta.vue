@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { FieldRefer, FormProps, TiForm, Vars } from '@site0/tijs';
+  import _ from 'lodash';
   import { computed } from 'vue';
   import { WnObjMetaProps } from './wn-obj-meta-types';
   //-------------------------------------------------------
@@ -40,13 +41,16 @@
   });
   //-----------------------------------------------------
   const FormConfig = computed(() => {
-    return {
-      className: 'cover-parent',
-      emptyRoadblock: props.emptyRoadblock,
-      maxFieldNameWidth: 80,
-      layoutHint: '<300>',
-      bodyPartGap: 'm',
-    } as FormProps;
+    return _.assign(
+      {
+        className: 'cover-parent',
+        emptyRoadblock: props.emptyRoadblock,
+        maxFieldNameWidth: 80,
+        layoutHint: '<300>',
+        bodyPartGap: 'm',
+      } as FormProps,
+      props.formConf
+    );
   });
   //-----------------------------------------------------
 </script>

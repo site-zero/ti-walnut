@@ -64,6 +64,7 @@ export function useObjViewerSchema(
       comConf: {
         value: props.meta,
         fields: props.fields,
+        formConf: props.metaFormConf,
       } as WnObjMetaProps,
       events: {
         change: ({ data }) => api.onMetaChange(data),

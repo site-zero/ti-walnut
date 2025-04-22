@@ -4,6 +4,7 @@ import { GlobalStatus, UserSession } from '../../..';
 import { tip_maker_DT_UTC } from './tip-maker/tip-maker-DT-UTC';
 import { tip_maker_OBJ_MD } from './tip-maker/tip-maker-OBJ-MD';
 import { tip_maker_OBJ_TSMS } from './tip-maker/tip-maker-OBJ-TSMS';
+import { tip_maker_OBJ_INFO } from './tip-maker/tip-maker-OBJ-INFO';
 
 export type FootValueContext = {
   G: GlobalStatus;
@@ -41,6 +42,7 @@ export function useHubFootTips(props: HubFootTipsProps) {
   _makers['DT-UTC'] = tip_maker_DT_UTC;
   _makers['OBJ-TSMS'] = tip_maker_OBJ_TSMS;
   _makers['OBJ-MD'] = tip_maker_OBJ_MD;
+  _makers['OBJ-INFO'] = tip_maker_OBJ_INFO;
 
   // 用户自定义的 tipMaker
   if (props.tipMakers) {
