@@ -47,7 +47,7 @@ export function useRdsBrowserLayout(props: RdsBrowserProps): LayoutGridProps {
         grid: {
           gridColumnStart: '2',
           gridRowStart: '3',
-          gridRowEnd: '5',
+          gridRowEnd: 'span 3',
         },
         bar: {
           mode: 'column',
