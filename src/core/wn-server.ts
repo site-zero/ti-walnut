@@ -677,7 +677,10 @@ export class WalnutServer {
     return reo;
   }
 
-  async uploadFile(file: File, options: WnUploadFileOptions) {
+  async uploadFile(
+    file: File,
+    options: WnUploadFileOptions
+  ): Promise<AjaxResult> {
     let {
       target,
       uploadName = file.name,
@@ -730,11 +733,13 @@ export class WalnutServer {
     const wn = this;
 
     // 发送请求
-    return new Promise((resolve, reject) => {
+    return new Promise<AjaxResult>((resolve, reject) => {
       // Done
       $req.onreadystatechange = () => {
+        console.log('uploadFile : $req.readyState', $req.readyState);
         if (4 == $req.readyState) {
           let reo = JSON5.parse($req.responseText);
+          console.log('uploadFile : readyState == 4', reo);
           if (200 == $req.status && reo.ok) {
             let obj = reo.data;
             // 需要额外更新文件的元数据
@@ -744,13 +749,19 @@ export class WalnutServer {
                 input: JSON.stringify(addMeta),
               })
                 .then((newObj) => {
-                  resolve(newObj);
+                  resolve({ ok: true, data: newObj });
                 })
                 .catch((err) => {
                   reject(err);
                 });
             }
-          } else {
+            // 无需增加额外元数据，直接返回
+            else {
+              resolve(reo);
+            }
+          }
+          // 哎呀妈呀，出错了
+          else {
             reject(reo);
           }
         }

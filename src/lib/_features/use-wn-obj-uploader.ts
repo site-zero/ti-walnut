@@ -245,9 +245,8 @@ export function useWnObjUploader(
     // 执行上传
     try {
       _fail_message.value = undefined;
-      let re = await Walnut.uploadFile(file, options);
-      let reo = JSON5.parse(re as string);
-      console.log('Upload Result Object:', reo, re);
+      let reo = await Walnut.uploadFile(file, options);
+      console.log('Upload Result Object:', reo, reo);
       if (isAjaxResult(reo)) {
         if (reo.ok) {
           if (isWnObj(reo.data)) {
@@ -256,11 +255,12 @@ export function useWnObjUploader(
             let val = __to_obj_value(reo.data);
             emit('change', val);
           } else {
-            _fail_message.value = re as string;
+            let reAsStr = JSON5.stringify(reo.data, null, 2);
+            _fail_message.value = reAsStr;
             emit('fail', {
               ok: false,
               msg: 'e.web.obj.upload.InvalidResult',
-              data: re,
+              data: reAsStr,
             });
           }
         } else {
@@ -269,8 +269,8 @@ export function useWnObjUploader(
       }
       // 不管怎么样，就是错误了
       else {
-        _fail_message.value = re as string;
-        emit('fail', { ok: false, msg: 'e.web.obj.upload.Fail', data: re });
+        _fail_message.value = JSON5.stringify(reo, null, 2);
+        emit('fail', { ok: false, msg: 'e.web.obj.upload.Fail', data: reo });
       }
       // if (isWnObj(reo)) {
       //   _obj.value = reo;
