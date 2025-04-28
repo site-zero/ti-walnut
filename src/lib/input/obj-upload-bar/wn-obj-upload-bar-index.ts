@@ -14,7 +14,7 @@ const zh_cn = {
 };
 
 const WnObjUploadBarInfo: TiComInfo = {
-  race: TiComRace.TILE,
+  race: TiComRace.INPUT,
   name: COM_TYPE,
   text: 'i18n:wn-obj-upload-bar-com-name',
   i18n: {

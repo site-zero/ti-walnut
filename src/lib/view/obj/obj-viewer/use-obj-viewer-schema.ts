@@ -1,4 +1,11 @@
-import { BlockSchema, I18n, LayoutSchema, RoadblockProps } from '@site0/tijs';
+import {
+  BlockSchema,
+  I18n,
+  LayoutSchema,
+  RoadblockProps,
+  Util,
+} from '@site0/tijs';
+import _ from 'lodash';
 import { WnObjMetaProps, WnObjPreviewProps } from '../../..';
 import { getWnObjIcon } from '../../../../core';
 import { WnObjViewerApi } from './use-wn-obj-viewer';
@@ -8,11 +15,39 @@ export function useObjViewerSchema(
   props: WnObjViewerProps,
   api: WnObjViewerApi
 ): LayoutSchema {
-  let content: BlockSchema;
-
-  // 可编辑文本，就用代码编辑器
+  //----------------------------------------------------
+  // 定义布局块
+  //----------------------------------------------------
+  let _blocks: Record<string, BlockSchema> = {};
+  //----------------------------------------------------
+  // 默认元数据
+  //----------------------------------------------------
+  _blocks.meta = {
+    comType: 'WnObjMeta',
+    comConf: {
+      value: props.meta,
+      fields: props.fields,
+      formConf: props.metaFormConf,
+    } as WnObjMetaProps,
+    events: {
+      //change: ({ data }) => api.onMetaChange(data),
+      change: 'meta:change',
+    },
+  };
+  //----------------------------------------------------
+  // 默认预览
+  //----------------------------------------------------
+  _blocks.preview = {
+    comType: 'WnObjPreview',
+    comConf: {
+      value: props.meta,
+    } as WnObjPreviewProps,
+  };
+  //----------------------------------------------------
+  // 默认内容
+  //----------------------------------------------------
   if (api.canEditContent()) {
-    content = {
+    _blocks.content = {
       comType: 'TiCodeEditor',
       comConf: {
         type: props.meta?.tp,
@@ -32,7 +67,7 @@ export function useObjViewerSchema(
       props.meta ?? {}
     );
     let icon = getWnObjIcon(props.meta ?? {});
-    content = {
+    _blocks.content = {
       comType: 'TiRoadblock',
       comConf: {
         icon,
@@ -49,33 +84,39 @@ export function useObjViewerSchema(
   }
   // 显示空白占位
   else {
-    content = {
+    _blocks.content = {
       comType: 'TiRoadblock',
       comConf: props.emptyRoadblock,
     };
+  }
+  //----------------------------------------------------
+  // 加入自定义的布局块
+  //----------------------------------------------------
+  if (props.blocks) {
+    for (let key of _.keys(props.blocks)) {
+      let { comType, comConf, events } = props.blocks[key];
+      _blocks[key] = { comType, comConf, events };
+    }
+  }
+  //----------------------------------------------------
+  // 处理动态块
+  //----------------------------------------------------
+  if (props.dynamicBlocks) {
+    let ctx = {
+      meta: props.meta,
+      content: props.content,
+      ContentData: api.getContentData(),
+    };
+    for (let key of props.dynamicBlocks) {
+      let block = _blocks[key];
+      if (block) {
+        _blocks[key] = Util.explainObj(ctx, block) as BlockSchema;
+      }
+    }
   }
 
   //----------------------------------------------------
   // 返回界面块设置
   //----------------------------------------------------
-  return {
-    meta: {
-      comType: 'WnObjMeta',
-      comConf: {
-        value: props.meta,
-        fields: props.fields,
-        formConf: props.metaFormConf,
-      } as WnObjMetaProps,
-      events: {
-        change: ({ data }) => api.onMetaChange(data),
-      },
-    },
-    content,
-    preview: {
-      comType: 'WnObjPreview',
-      comConf: {
-        value: props.meta,
-      } as WnObjPreviewProps,
-    },
-  };
+  return _blocks;
 }

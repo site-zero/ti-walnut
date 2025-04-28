@@ -33,11 +33,11 @@
         objectFit: 'cover',
       } as ImageProps,
       props.preview,
-      Uploader.value.BarPreview.value
+      Uploader.value.Preview.value
     );
 
     // 文字显示
-    re.text = Uploader.value.BarText.value;
+    re.text = Uploader.value.Text.value;
 
     // 没有值就不显示删除按钮
     if (!Uploader.value.hasValue.value) {

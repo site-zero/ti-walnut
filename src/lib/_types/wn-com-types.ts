@@ -1,3 +1,4 @@
+import { ThumbProps } from '@site0/tijs';
 import { WnObj } from './wn-types';
 
 export type WnObjInput = string | WnObj;
@@ -15,3 +16,11 @@ export type WnObjInput = string | WnObj;
  * - `path`：一个 WnObj 对象的 path，类似'~/xxx/xxx'
  */
 export type WnObjInputType = 'obj' | 'id' | 'idPath' | 'path';
+
+export type ObjUploadItem = ThumbProps & {
+  index: number;
+  file: File;
+  progress: number;
+  abort: AbortController | null;
+  newObj?: WnObj;
+};

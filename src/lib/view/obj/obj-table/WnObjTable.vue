@@ -9,7 +9,8 @@
     useTemplateRef,
     watch,
   } from 'vue';
-  import { ObjUploadItem, useObjDropToUpload } from './use-obj-drop-to-upload';
+  import { ObjUploadItem } from '../../../_types';
+  import { useObjDropToUpload } from './use-obj-drop-to-upload';
   import { getObjTableColumns } from './use-obj-table-columns';
   import { WnObjTableEmitter, WnObjTableProps } from './wn-obj-table-types';
   //-------------------------------------------------------
@@ -31,7 +32,7 @@
     target: () =>
       $el.value && props.upload ? ($el.value as HTMLElement) : null,
     uploadOptions: () => props.upload,
-    emit,
+    callback: (objs) => emit('upload:done', objs),
   });
   //-----------------------------------------------------
   const TopClass = computed(() => {

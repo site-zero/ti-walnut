@@ -24,6 +24,7 @@
   "wn-obj-expi": "Expired At",
   "e-auth-account-noexists": "User Not Exists",
   "e-auth-login-invalid-passwd": "User Auth Error",
+  "e-upload-target-not-set": "Upload target not set!",
   "warn-refresh": "You have unsaved local changes. Refreshing will discard these unsaved changes. Are you sure you want to continue?",
   "warn-drop-change": "Removing local changes will discard all your unsaved changes. Are you sure you want to continue?"
 }

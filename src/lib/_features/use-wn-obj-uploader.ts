@@ -1,4 +1,4 @@
-import { I18n, Icons, ImageProps } from '@site0/tijs';
+import { Alert, I18n, Icons, ImageProps } from '@site0/tijs';
 import JSON5 from 'json5';
 import _ from 'lodash';
 import { computed, Ref, ref } from 'vue';
@@ -57,7 +57,7 @@ export function useWnObjUploader(
    *          如果 `_obj.value` 存在，则返回包含对象图标源的图像属性。
    *          否则，返回一个空的图像属性对象。
    */
-  const BarPreview = computed((): ImageProps => {
+  const Preview = computed((): ImageProps => {
     if (_file.value) {
       return { src: _file.value, objectFit: 'cover' };
     }
@@ -90,7 +90,7 @@ export function useWnObjUploader(
    *
    * @returns {string} 文件或对象的名称或标题，或空字符串。
    */
-  const BarText = computed(() => {
+  const Text = computed(() => {
     if (_file.value) {
       return _file.value.name;
     }
@@ -225,6 +225,12 @@ export function useWnObjUploader(
    */
   async function doUpload(file: File) {
     _file.value = file;
+
+    if (!props.upload || !props.upload.target) {
+      Alert('i18n:e-upload-target-not-set', { type: 'danger' });
+      return;
+    }
+
     // 取消上一次上传
     if (lastAbort) {
       lastAbort.abort();
@@ -329,8 +335,8 @@ export function useWnObjUploader(
     isUploading,
     isInvalid,
     hasValue,
-    BarPreview,
-    BarText,
+    Preview,
+    Text,
     Progress: computed(() => _progress.value),
     FailMessage: computed(() => _fail_message.value),
     loadObj,

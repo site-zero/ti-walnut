@@ -274,7 +274,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     console.log('show model diff', changes);
 
     await openAppModal({
-      title: 'Different',
+      title: `${_model.value?.modelType ?? 'Unknown'} : Different`,
       position: 'left',
       type: 'primary',
       width: '80%',

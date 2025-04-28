@@ -1,16 +1,7 @@
-import { Dom, ThumbProps, useDropping } from '@site0/tijs';
+import { Be, useDropping } from '@site0/tijs';
 import { Ref } from 'vue';
 import { Walnut, WnUploadFileOptions } from '../../../../core';
-import { WnObj } from '../../../_types';
-import { WnObjTableEmitter } from './wn-obj-table-types';
-
-export type ObjUploadItem = ThumbProps & {
-  index: number;
-  file: File;
-  progress: number;
-  abort: AbortController | null;
-  newObj?: WnObj;
-};
+import { ObjUploadItem, WnObj } from '../../../_types';
 
 export type ObjDropToUploadOptions = {
   _drag_enter: Ref<boolean>;
@@ -18,13 +9,13 @@ export type ObjDropToUploadOptions = {
   target: () => HTMLElement | null;
   // 需要采用动态上传参数，因为随着目录的变化，上传参数可能会变化
   uploadOptions: () => WnUploadFileOptions | undefined;
-  emit: WnObjTableEmitter;
+  callback: (objs: WnObj[]) => void;
 };
 
 export type ObjDropToUploadApi = ReturnType<typeof useObjDropToUpload>;
 
 export function useObjDropToUpload(options: ObjDropToUploadOptions) {
-  let { target, _drag_enter, _upload_files, uploadOptions, emit } = options;
+  let { target, _drag_enter, _upload_files, uploadOptions, callback } = options;
 
   /**
    * 检查上传是否完成。
@@ -54,7 +45,7 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
         }
       }
       _upload_files.value = [];
-      emit('upload:done', objs);
+      callback(objs);
     }
   }
 
@@ -120,7 +111,7 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
    *
    * @param files - 待加入上传队列的 FileList 对象。
    */
-  function _join_upload_items(files: FileList) {
+  function _join_upload_items(files: File[]) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       _upload_files.value.push({
@@ -157,7 +148,7 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
     },
     drop: (files) => {
       if (!files) return;
-      _join_upload_items(files);
+      _join_upload_items(Array.from(files));
       _do_upload();
     }, // drop: (files) => {
   });
@@ -166,23 +157,11 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
    * 主动创建一个 input 元素，然后模拟用户点击
    */
   async function doUploadFiles() {
-    // 创建一个临时元素
-    let $input = Dom.createElement({
-      tagName: 'input',
-      attrs: {
-        type: 'file',
-        multiple: true,
-      },
-    });
-    // 监听事件
-    $input.addEventListener('change', (evt: any) => {
-      let files = evt.target.files;
-      if (!files || files.length == 0) return;
+    let files = await Be.doUploadFiles();
+    if (files.length > 0) {
       _join_upload_items(files);
       _do_upload();
-    });
-    // 模拟点击
-    $input.click();
+    }
   }
 
   return {

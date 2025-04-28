@@ -1,0 +1,33 @@
+@use '@site0/tijs/sass/_all.scss' as *;
+
+.wn-slider-editor {
+  position: relative;
+  //-----------------------------------------------
+  //-----------------------------------------------
+  //-----------------------------------------------
+  > .uploading-box {
+    position: absolute;
+    inset: 3px;
+    z-index: $z-mask;
+    border: 2px dotted var(--ti-color-secondary);
+    pointer-events: none;
+    opacity: 0;
+    transition: 300ms;
+    background-color: var(--ti-color-highlight);
+    padding: var(--ti-gap-h);
+    > main {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: var(--ti-gap-h);
+    }
+  }
+  //-----------------------------------------------
+  &.drag-enter {
+    > .uploading-box {
+      inset: 0;
+      opacity: 1;
+      pointer-events: fill;
+    }
+  }
+  //-----------------------------------------------
+}

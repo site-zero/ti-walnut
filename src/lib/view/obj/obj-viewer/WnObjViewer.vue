@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { TabChangeEvent, TiLayoutTabs } from '@site0/tijs';
+  import { TiLayoutTabs, TiRoadblock } from '@site0/tijs';
   import { computed } from 'vue';
   import { useObjViewerLayout } from './use-obj-viewer-layout';
   import { useObjViewerSchema } from './use-obj-viewer-schema';
@@ -17,23 +17,30 @@
       icon: 'fas-arrow-left',
       text: 'i18n:nil-detail',
     }),
+    contentTab: 'content',
+    formatJsonIndent: 2,
   });
   //-----------------------------------------------------
   const api = useWnObjViewer(props, emit);
   //-----------------------------------------------------
+  const EmptyRoadblock = computed(() => {
+    return {
+      icon: 'fas-arrow-left',
+      text: 'i18n:nil-detail',
+    };
+  });
+  //-----------------------------------------------------
   const GUILayout = computed(() => useObjViewerLayout(props, api));
   const GUISchema = computed(() => useObjViewerSchema(props, api));
-  //-----------------------------------------------------
-  function onTabChange(event: TabChangeEvent) {
-    //console.log('onTabChange', event, 'content' == event.to.value);
-    emit('show-content', 'content' == event.to.value);
-  }
   //-----------------------------------------------------
 </script>
 <template>
   <TiLayoutTabs
+    v-if="props.meta"
     className="cover-parent"
     v-bind="GUILayout"
     :schema="GUISchema"
-    @tab-change="onTabChange" />
+    @tab-change="api.onTabChange"
+    @block="api.handleBlockEvent" />
+  <TiRoadblock v-else v-bind="EmptyRoadblock" />
 </template>
