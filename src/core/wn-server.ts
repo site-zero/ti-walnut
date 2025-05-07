@@ -5,6 +5,7 @@ import {
   init_ti_std_columns,
   init_ti_std_fields,
   installTiCoreI18n,
+  openAppModal,
   setDefaultLogLevel,
   setEnv,
   Str,
@@ -665,6 +666,24 @@ export class WalnutServer {
         await Promise.all(loading);
       }
     }
+  }
+
+  async showRuntimeInfo() {
+    let re = await this.exec('sys -runtime -nice');
+    await openAppModal({
+      title: 'Walnut Runtime Info',
+      type: 'info',
+      position: 'right',
+      width: '640px',
+      height: '100%',
+      clickMaskToClose: true,
+      textOk: null,
+      textCancel: null,
+      comType: 'TiHtmlSnippet',
+      comConf: {
+        content: `<pre>${re}</pre>`,
+      },
+    });
   }
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
