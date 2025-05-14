@@ -22,10 +22,12 @@ export type WnObjUploaderEmitter = {
   (event: 'fail', payload: AjaxResult): void;
 };
 
+export type WnObjUploadSetup = Omit<WnUploadFileOptions, 'progress' | 'signal'>;
+
 export type WnObjUploaderProps = {
   value?: WnObjInput;
   valueType?: WnObjInputType;
-  upload: Omit<WnUploadFileOptions, 'progress' | 'signal'>;
+  upload: WnObjUploadSetup;
   placeholder?: string;
 };
 
