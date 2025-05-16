@@ -8,7 +8,7 @@
   "quoteProps": "consistent",
   "bracketSameLine": true,
   "vueIndentScriptAndStyle": true,
-  "scriptIndent": "1",
+  "scriptIndent": false,
   "jsxSingleQuote": false,
   "trailingComma": "es5"
 }
