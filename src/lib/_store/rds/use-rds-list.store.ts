@@ -631,7 +631,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     // 准备查询条件
     let q = __gen_query();
     apply_query_prefix(q, _query_prefix_append.value);
-    //console.log('queryRemoteList', q);
+    // console.log('queryRemoteList', q);
     let list = await sqlx.query(options.sqlQuery, q);
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];
@@ -649,6 +649,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
   //---------------------------------------------
   async function countRemoteList() {
+    // 防空
+    if (!options.sqlCount) {
+      return;
+    }
     _action_status.value = 'loading';
     let q = __gen_query();
     apply_query_prefix(q, _count_prefix_append.value);

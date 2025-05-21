@@ -755,7 +755,7 @@ export class WalnutServer {
     return new Promise<AjaxResult>((resolve, reject) => {
       // Done
       $req.onreadystatechange = () => {
-        console.log('uploadFile : $req.readyState', $req.readyState);
+        //console.log('uploadFile : $req.readyState', $req.readyState);
         if (4 == $req.readyState) {
           let reo = JSON5.parse($req.responseText);
           console.log('uploadFile : readyState == 4', reo);

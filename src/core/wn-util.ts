@@ -1,5 +1,5 @@
-import { appendPath, Iconable, IconInput, Icons } from '@site0/tijs';
-import { WnObj, WnObjContentFinger } from '../lib/_types';
+import { appendPath, Iconable, IconInput, Icons } from "@site0/tijs";
+import { WnObj, WnObjContentFinger } from "../lib/_types";
 
 /**
  * 对命令行参数进行安全处理，移除所有单引号、双引号和分号，防止命令注入。
@@ -8,7 +8,7 @@ import { WnObj, WnObjContentFinger } from '../lib/_types';
  * @returns 移除单引号、双引号和分号后的安全字符串。
  */
 export function safeCmdArg(arg: string) {
-  return arg.replaceAll(/['";]/g, '');
+  return arg.replaceAll(/['";]/g, "");
 }
 
 /**
@@ -61,12 +61,25 @@ export function getObjContentFinger(obj: WnObj): WnObjContentFinger {
 }
 
 export function isObjContentEditable(obj: WnObj): boolean {
-  if ('DIR' === obj.race) {
+  if ("DIR" === obj.race) {
     return false;
   }
-  let { mime = '' } = obj ?? {};
+  let { mime = "" } = obj ?? {};
   return (
     /^text\//.test(mime) ||
     /^application\/(java|json5?|(x-)?javascript)/.test(mime)
   );
+}
+
+export type WnObjId = {
+  homeId?: string;
+  selfId: string;
+};
+
+export function parseObjId(id: string): WnObjId {
+  let m = /^([^:]+):([^:]+)$/.exec(id);
+  if (m) {
+    return { homeId: m[1], selfId: m[2] };
+  }
+  return { selfId: id };
 }

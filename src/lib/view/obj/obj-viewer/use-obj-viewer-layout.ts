@@ -3,26 +3,26 @@ import {
   LayoutBlock,
   RoadblockProps,
   TabsLayoutProps,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { WnObjViewerApi } from './use-wn-obj-viewer';
-import { WnObjViewerProps } from './wn-obj-viewer-types';
+} from "@site0/tijs";
+import _ from "lodash";
+import { WnObjViewerApi } from "./use-wn-obj-viewer";
+import { WnObjViewerProps } from "./wn-obj-viewer-types";
 
 const _BUILTIN_BLOCKS: Record<string, BlockProps> = {
   meta: {
-    icon: 'zmdi-info',
-    name: 'meta',
-    title: 'i18n:wn-obj-viewer-tab-title-meta',
+    icon: "zmdi-info",
+    name: "meta",
+    title: "i18n:wn-obj-viewer-tab-title-meta",
   },
   preview: {
-    icon: 'zmdi-eye',
-    name: 'preview',
-    title: 'i18n:wn-obj-viewer-tab-title-preview',
+    icon: "zmdi-eye",
+    name: "preview",
+    title: "i18n:wn-obj-viewer-tab-title-preview",
   },
   content: {
-    icon: 'fa-solid fa-pen-to-square',
-    name: 'content',
-    title: 'i18n:wn-obj-viewer-tab-title-edit',
+    icon: "fa-solid fa-pen-to-square",
+    name: "content",
+    title: "i18n:wn-obj-viewer-tab-title-edit",
   },
 };
 
@@ -32,11 +32,11 @@ export function useObjViewerLayout(
 ): TabsLayoutProps {
   // 获取内容块
   let blocks = [] as LayoutBlock[];
-  for (let tabName of props.tabs ?? ['meta', 'preview', 'content']) {
+  for (let tabName of props.tabs ?? ["meta", "preview", "content"]) {
     let tab: LayoutBlock | undefined = undefined;
     // 看看用户是否定义了块实现
     if (props.blocks) {
-      tab = _.omit(props.blocks[tabName], 'comType', 'comConf', 'dynamic');
+      tab = _.omit(props.blocks[tabName], "comType", "comConf", "dynamic");
     }
     // 采用内置块实现
     if (_.isEmpty(tab)) {
@@ -44,6 +44,10 @@ export function useObjViewerLayout(
     }
     // 加入标签页
     if (tab) {
+      tab = _.cloneDeep(tab);
+      if (!tab.name) {
+        tab.name = tabName;
+      }
       blocks.push(tab);
     }
     // 加入一个占位标签页
@@ -51,9 +55,9 @@ export function useObjViewerLayout(
       blocks.push({
         name: tabName,
         title: tabName,
-        comType: 'TiRoadblock',
+        comType: "TiRoadblock",
         comConf: {
-          icon: 'fas-person-digging',
+          icon: "fas-person-digging",
           text: `${tabName} in Building ... `,
         } as RoadblockProps,
       });
