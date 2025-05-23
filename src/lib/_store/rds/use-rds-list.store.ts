@@ -689,7 +689,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //               远程更新方法
   //---------------------------------------------
-  async function saveChange({ transLevel = 0 } = {}) {
+  async function saveChange({ transLevel = 1 } = {}) {
     // 获取改动信息
     let changes = makeChanges();
     log.debug('saveChange', changes);

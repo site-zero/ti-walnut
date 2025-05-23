@@ -25,7 +25,7 @@ export async function createObjViewOptions(
       viewName: 'auto-STD-META',
       model: 'STD-META',
       modelOptions: {
-        objPath: '->id:${id}',
+        objPath: '->id:${obj.id}',
       },
     };
     // File as View
@@ -41,7 +41,7 @@ export async function createObjViewOptions(
       viewName: 'auto-TH-STD-LIST',
       model: 'STD-LIST',
       modelOptions: {
-        homePath: '->id:${id}',
+        homePath: '->id:${obj.id}',
         indexPath: 'index',
         dataPath: 'data',
       },
@@ -60,7 +60,7 @@ export async function createObjViewOptions(
       viewName: 'auto-STD-LIST',
       model: 'STD-LIST',
       modelOptions: {
-        homePath: '->id:${id}',
+        homePath: '->id:${obj.id}',
       },
     };
     // 指定了 viewPath
@@ -71,7 +71,7 @@ export async function createObjViewOptions(
   }
 
   // 最后输出视图配置
-  return Util.explainObj(obj, viewTmpl);
+  return viewTmpl;
 }
 
 export function anyToHubViewOptions(input: any): HubViewOptions {

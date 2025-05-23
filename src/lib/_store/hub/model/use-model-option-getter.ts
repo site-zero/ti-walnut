@@ -1,19 +1,20 @@
-import { KeepInfo, Vars } from '@site0/tijs';
-import JSON5 from 'json5';
-import _ from 'lodash';
+import { KeepInfo, Vars } from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
 import {
   LocalMetaPatcher,
   LocalUpdateMetaPatcher,
   RedQueryPrefixSetup,
-} from '../../..';
+} from "../../..";
 import {
   isSqlExecFetchBack,
+  isSqlExecSetVar,
   QueryFilter,
   SqlExecFetchBack,
   SqlExecSetVar,
   SqlQuery,
   SqlResult,
-} from '../../../_types';
+} from "../../../_types";
 
 export function useModelOptionGetter(input: Vars) {
   /**
@@ -127,7 +128,7 @@ export function useModelOptionGetter(input: Vars) {
    */
   function getQuery(
     key: string,
-    dft: SqlQuery = { filter: { '1': 1 } }
+    dft: SqlQuery = { filter: { "1": 1 } }
   ): SqlQuery | (() => SqlQuery) {
     let re = _.get(input, key);
     if (_.isNil(re)) {
@@ -186,6 +187,10 @@ export function useModelOptionGetter(input: Vars) {
     if (_.isArray(re)) {
       return () => _.cloneDeep(re) as SqlExecSetVar[];
     }
+    if (isSqlExecSetVar(re)) {
+      return () => [_.cloneDeep(re) as SqlExecSetVar];
+    }
+    console.warn(`Unsupport SqlExecSetVarArray: ${JSON.stringify(re)}`);
   }
 
   /**

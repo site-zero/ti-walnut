@@ -1,6 +1,7 @@
-import { createObjViewOptions, Walnut } from '../../../../core';
-import { HubView } from '../../../../lib';
-import { WnHubArenaProps } from './wn-hub-arena-types';
+import { Util } from "@site0/tijs";
+import { createObjViewOptions, Walnut } from "../../../../core";
+import { HubView } from "../../../../lib";
+import { WnHubArenaProps } from "./wn-hub-arena-types";
 
 /**
  * 对于 Arena 区域，我们的主逻辑是采用 `@site0/ti-walnut#use-hub-view`
@@ -46,7 +47,7 @@ export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
     try {
       _hub_view.setLoading(true);
       if (!hubPath) {
-        hubPath = '%HOME%';
+        hubPath = "%HOME%";
       }
       let path = session.getObjPath(hubPath);
       let obj = await Walnut.fetchObj(path);
@@ -61,8 +62,19 @@ export function useHubArenaReload(props: WnHubArenaProps, _hub_view: HubView) {
       if (!viewOptions) {
         viewOptions = await createObjViewOptions(obj);
       }
+      let explainedViewOptions = Util.explainObj(
+        {
+          obj,
+          hubPath,
+          hashId,
+          path,
+          session: session.data,
+        },
+        viewOptions
+      );
+
       // 重新加载视图
-      await _hub_view.reload(obj, viewOptions, hashId);
+      await _hub_view.reload(obj, explainedViewOptions, hashId);
     } catch (err) {
       // 捕获错误
       console.error(err);
