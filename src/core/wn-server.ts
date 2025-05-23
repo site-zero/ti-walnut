@@ -1,15 +1,12 @@
 import {
-  addLogger,
   ENV_KEYS,
-  getLogLevel,
+  I18n,
   init_ti_std_columns,
   init_ti_std_fields,
   installTiCoreI18n,
   openAppModal,
-  setDefaultLogLevel,
   setEnv,
   Str,
-  tidyLogger,
   TiStore,
   Tmpl,
   updateInstalledComponentsLangs,
@@ -17,10 +14,10 @@ import {
   useObjFields,
   Util,
   Vars,
-} from '@site0/tijs';
-import JSON5 from 'json5';
-import _ from 'lodash';
-import { installWalnutI18n } from '../i18n';
+} from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
+import { installWalnutI18n } from "../i18n";
 import {
   AjaxResult,
   HubViewOptions,
@@ -34,16 +31,16 @@ import {
   WnFetchObjOptions,
   WnLoadOptions,
   WnObj,
-} from '../lib';
-import { installWalnutDicts } from './wn-dict';
-import { anyToHubViewOptions } from './wn-obj-views';
-import { wnRunCommand } from './wn-run-command';
+} from "../lib";
+import { installWalnutDicts } from "./wn-dict";
+import { anyToHubViewOptions } from "./wn-obj-views";
+import { wnRunCommand } from "./wn-run-command";
 
-const TICKET_KEY = 'Walnut-Ticket';
+const TICKET_KEY = "Walnut-Ticket";
 const debug = false;
 
 export type GetUrlForObjContentOptions = {
-  download?: 'auto' | 'force' | 'raw';
+  download?: "auto" | "force" | "raw";
   downName?: string;
   withTicket?: boolean;
 };
@@ -66,8 +63,8 @@ export class WalnutServer {
 
   constructor() {
     this._conf = {
-      protocal: 'http',
-      host: 'localhost',
+      protocal: "http",
+      host: "localhost",
       port: 8080,
       site: undefined,
       domain: undefined,
@@ -79,43 +76,10 @@ export class WalnutServer {
 
   async init(conf: ServerConfig) {
     this._conf = conf;
-    let lang = conf.lang ?? 'zh-cn';
+    let lang = conf.lang ?? "zh-cn";
     installTiCoreI18n(lang);
     installWalnutI18n(lang);
     updateInstalledComponentsLangs(lang);
-
-    //---------------------------------------------------
-    // TODO 我准备放弃 Ti.Log 这个模块了
-    if (conf.logLevel) {
-      setDefaultLogLevel(getLogLevel(conf.logLevel));
-    }
-    if (conf.logger) {
-      // Logger 的排序，越短的名字越应该排在后面，这样才会覆盖前者
-      // 长度相同的，需要先变成 kebab 然后再比较
-      let loggerKeys = _.keys(conf.logger)
-        .sort((a: string, b: string): number => {
-          if (a.length == b.length) {
-            let _a = _.kebabCase(a);
-            let _b = _.kebabCase(b);
-            if (a.length == b.length) {
-              return _a.localeCompare(_b);
-            }
-            return _b.length - _a.length;
-          }
-          return b.length - a.length;
-        })
-        .reverse();
-
-      if (debug) console.log('WnServer: loggerKeys=', loggerKeys);
-      for (let k of loggerKeys) {
-        let v = conf.logger[k];
-        let lv = getLogLevel(v);
-        if (debug) console.log('addLogger', k, lv);
-        addLogger(k, lv);
-      }
-      tidyLogger();
-    }
-    //---------------------------------------------------
 
     // 初始化字典
     if (conf.dicts) {
@@ -139,6 +103,11 @@ export class WalnutServer {
         init_ti_std_columns();
       }
     }
+
+    // 加载 i18n 资源
+    if (conf.i18n) {
+      await this.loadI18n("public");
+    }
   } // async init(conf: ServerConfig) {
 
   getConfig<T>(key: string, dft?: T): T {
@@ -154,7 +123,7 @@ export class WalnutServer {
     let __views = this._conf.views ?? {};
     let viewArms = __views[path];
     if (!viewArms) {
-      viewArms = __views['*'];
+      viewArms = __views["*"];
     }
 
     // 挑选路径模板
@@ -193,7 +162,7 @@ export class WalnutServer {
     // 对象本身就是一个视图对象
     if (
       isWnObj(hubObj) &&
-      (('hub_view' == hubObj.tp && 'FILE' == hubObj.race) ||
+      (("hub_view" == hubObj.tp && "FILE" == hubObj.race) ||
         /\.view.json5?$/.test(hubObj.nm))
     ) {
       view = `id:${hubObj.id}`;
@@ -227,15 +196,15 @@ export class WalnutServer {
   }
 
   getUrl(path: string) {
-    let sep = path.startsWith('/') ? '' : '/';
+    let sep = path.startsWith("/") ? "" : "/";
     let { protocal, host, port } = this._conf;
-    let ports = port == 80 ? '' : ':' + port;
+    let ports = port == 80 ? "" : ":" + port;
     return `${protocal}://${host}${ports}${sep}${path}`;
   }
 
   getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
     let uri = [`/o/content?str=id:${id}`];
-    let { download = 'auto', downName, withTicket } = options;
+    let { download = "auto", downName, withTicket } = options;
     if (download) {
       uri.push(`d=${download}`);
     }
@@ -245,20 +214,20 @@ export class WalnutServer {
     if (withTicket && this._ticket) {
       uri.push(`_wn_ticket_=${this._ticket}`);
     }
-    return this.getUrl(uri.join('&'));
+    return this.getUrl(uri.join("&"));
   }
 
   getRequestInit(signal?: AbortSignal, options: RequestInit = {}): RequestInit {
     let headers: HeadersInit = {};
     if (this._ticket) {
-      headers['X-Walnut-Ticket'] = this._ticket;
+      headers["X-Walnut-Ticket"] = this._ticket;
     }
     return { ...options, headers, signal };
   }
 
   async fetchMySession(): Promise<AjaxResult> {
     if (this._ticket) {
-      let re = await Walnut.fetchAjax('/a/me');
+      let re = await Walnut.fetchAjax("/a/me");
       //console.log('fetchMySession:', re);
       if (!re.ok) {
         this._ticket = undefined;
@@ -277,7 +246,7 @@ export class WalnutServer {
   }
 
   async signInToDomain(info: SignInForm): Promise<AjaxResult> {
-    let re = await this.postFormToGetAjax('/a/auth_login_by_domain_passwd', {
+    let re = await this.postFormToGetAjax("/a/auth_login_by_domain_passwd", {
       site: this._conf.site,
       name: info.username,
       passwd: info.password,
@@ -292,7 +261,7 @@ export class WalnutServer {
   }
 
   async signOut(): Promise<AjaxResult> {
-    let re = await this.fetchAjax('/a/sys_ajax_logout');
+    let re = await this.fetchAjax("/a/sys_ajax_logout");
     if (re.ok) {
       // Quiet parent Sesssion
       if (re.data && re.data.parent) {
@@ -307,7 +276,7 @@ export class WalnutServer {
     }
     // Handler error
     else {
-      console.error('Session SignOut Fail!!', re);
+      console.error("Session SignOut Fail!!", re);
       alert(JSON.stringify(re));
     }
     return re;
@@ -327,7 +296,7 @@ export class WalnutServer {
 
     try {
       let init = this.getRequestInit(signal, {
-        method: 'post',
+        method: "post",
         body,
         signal,
       });
@@ -335,7 +304,7 @@ export class WalnutServer {
       return await resp.text();
     } catch (err) {
       if (!quiet) {
-        console.error('postFormToGetText Fail:', err, path, form);
+        console.error("postFormToGetText Fail:", err, path, form);
       }
       return null;
     }
@@ -355,7 +324,7 @@ export class WalnutServer {
 
     try {
       let init = this.getRequestInit(signal, {
-        method: 'post',
+        method: "post",
         body,
         signal,
       });
@@ -363,7 +332,7 @@ export class WalnutServer {
       return await resp.json();
     } catch (err) {
       if (!quiet) {
-        console.error('postFormToGetJson Fail:', err, path, form);
+        console.error("postFormToGetJson Fail:", err, path, form);
       }
       return null;
     }
@@ -378,17 +347,20 @@ export class WalnutServer {
     return reo as AjaxResult;
   }
 
+  /**
+   * 异步加载指定对象路径的内容。
+   *
+   * 该方法会尝试从缓存中获取内容，如果缓存中不存在，则根据对象路径的类型（静态路径或 Walnut 动态路径）进行加载。
+   * 静态路径以 `load://` 开头，可直接通过 `fetch` 请求加载；动态路径需要用户登录后才能读取。
+   *
+   * @param objPath - 对象的路径，可以是静态路径或 Walnut 动态路径。
+   * @param options - 加载选项，包含是否使用缓存、是否静默处理错误等信息。
+   * @returns 如果成功加载内容，则返回内容字符串；否则返回 `null`。
+   */
   async loadContent(
     objPath: string,
     options: WnLoadOptions = {}
   ): Promise<string | null> {
-    // 静态路径
-    if (objPath.startsWith('load://')) {
-      let { quiet, signal } = options;
-      let loadPath = `/${objPath.substring(7)}`;
-      let resp = await fetch(loadPath, { signal });
-      return await resp.text();
-    }
     // 尝试缓存
     let cache: Map<string, any> | undefined = undefined;
     if (options.cache) {
@@ -399,13 +371,142 @@ export class WalnutServer {
       }
     }
 
-    // Walnut 的动态路径
-    let urlPath = this.cookPath(objPath);
-    let re = await this.fetchText(urlPath, _.omit(options, 'cache'));
-    if (cache) {
-      cache.set(objPath, re);
+    // 静态路径
+    if (objPath.startsWith("load://")) {
+      let { signal } = options;
+      let loadPath = `/${objPath.substring(7)}`;
+      let resp = await fetch(loadPath, { signal });
+      let re = await resp.text();
+      if (cache) {
+        cache.set(objPath, re);
+      }
+      return re;
     }
+
+    // Walnut 的动态路径，只有登录才能读取
+    if (this._ticket) {
+      let urlPath = this.cookPath(objPath);
+      let re = await this.fetchText(urlPath, _.omit(options, "cache"));
+      if (cache) {
+        cache.set(objPath, re);
+      }
+      return re;
+    }
+
+    // 啥都木有
+    return null;
+  }
+
+  /**
+   * 异步加载指定对象路径列表的内容，并将加载结果以字符串数组的形式返回。
+   *
+   * 该方法会遍历传入的对象路径列表，调用 `loadContent` 方法异步加载每个路径的内容。
+   * 加载成功的内容会被添加到结果数组中，最终返回该数组。
+   *
+   * @param objPath - 对象的路径，可以是单个路径字符串或路径字符串数组。
+   * @param options - 加载选项，包含是否使用缓存、是否静默处理错误等信息，会传递给 `loadContent` 方法。
+   * @returns 一个 Promise，解析为包含所有成功加载内容的字符串数组。
+   */
+  async loadContentAsList(
+    objPath: string | string[],
+    options: WnLoadOptions = {}
+  ): Promise<string[]> {
+    let re = [] as string[];
+    let paths = _.concat(objPath);
+    let loading: Promise<void>[] = [];
+    let that = this;
+    async function __load_path(path: string) {
+      if (path) {
+        let content = await that.loadContent(path, options);
+        if (content) {
+          re.push(content);
+        }
+      }
+    }
+    for (let path of paths) {
+      if (!path) {
+        continue;
+      }
+      loading.push(__load_path(path));
+    }
+    await Promise.all(loading);
     return re;
+  }
+
+  /**
+   * 异步加载公共内容。
+   *
+   * 该方法会过滤出以 `load://` 开头的对象路径，然后调用 `loadContentAsList` 方法异步加载这些路径的内容。
+   * 如果没有符合条件的路径，将返回一个空数组。
+   *
+   * @param objPath - 对象的路径，可以是单个路径字符串或路径字符串数组。
+   * @param options - 加载选项，包含是否使用缓存、是否静默处理错误等信息，会传递给 `loadContentAsList` 方法。
+   * @returns 一个 Promise，解析为包含所有成功加载的公共内容的字符串数组。
+   */
+  async loadPublicContents(
+    objPath: string | string[],
+    options: WnLoadOptions = {}
+  ) {
+    let paths = [] as string[];
+    for (let path of _.concat(objPath)) {
+      if (path.startsWith("load://")) {
+        paths.push(path);
+      }
+    }
+    if (_.isEmpty(paths)) {
+      return [];
+    }
+    return await this.loadContentAsList(paths, options);
+  }
+
+  /**
+   * 异步加载受保护的内容。
+   *
+   * 该方法会过滤出不以 `load://` 开头的对象路径，这些路径通常代表需要用户登录才能访问的 Walnut 动态路径。
+   * 然后调用 `loadContentAsList` 方法异步加载这些路径的内容。如果没有符合条件的路径，将返回一个空数组。
+   *
+   * @param objPath - 对象的路径，可以是单个路径字符串或路径字符串数组。
+   * @param options - 加载选项，包含是否使用缓存、是否静默处理错误等信息，会传递给 `loadContentAsList` 方法。
+   * @returns 一个 Promise，解析为包含所有成功加载的受保护内容的字符串数组。
+   */
+  async loadProtectedContents(
+    objPath: string | string[],
+    options: WnLoadOptions = {}
+  ) {
+    let paths = [] as string[];
+    for (let path of _.concat(objPath)) {
+      if (path.startsWith("load://")) {
+        continue;
+      }
+      paths.push(path);
+    }
+    if (_.isEmpty(paths)) {
+      return [];
+    }
+    return await this.loadContentAsList(paths, options);
+  }
+
+  async loadI18n(mode: "public" | "protected") {
+    let lang = this._conf.lang ?? "zh-cn";
+    let paths = this._conf.i18n?.[lang] || this._conf.i18n?.["zh-cn"];
+    // 防空
+    if (!paths || _.isEmpty(paths)) {
+      return;
+    }
+    // 收集结果
+    let results = [] as string[];
+    if (mode == "public") {
+      results = await this.loadPublicContents(paths);
+    } else {
+      results = await this.loadProtectedContents(paths);
+    }
+    // 安装
+    for (let result of results) {
+      if (result) {
+        let json = JSON5.parse(result);
+        I18n.putAll(json);
+      }
+    }
   }
 
   /**
@@ -440,12 +541,12 @@ export class WalnutServer {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (reader.result) {
-          const base64Data = reader.result.toString().split(',')[1];
+          const base64Data = reader.result.toString().split(",")[1];
           resolve(base64Data);
         } else if (quiet) {
-          resolve('');
+          resolve("");
         } else {
-          reject(new Error('Failed to convert blob to base64'));
+          reject(new Error("Failed to convert blob to base64"));
         }
       };
       reader.readAsDataURL(blob);
@@ -489,7 +590,7 @@ export class WalnutServer {
     // (function(ex){/* you can export your module */})(exports)
     let exports = {};
     try {
-      let installModule = new Function('outputs', text);
+      let installModule = new Function("outputs", text);
       installModule(exports);
       //console.log('loadJsModule', jsPath, text, exports);
       return exports;
@@ -512,10 +613,10 @@ export class WalnutServer {
     let { loadAxis, loadPath, signal } = options;
     let urlPath = `/o/fetch?str=${encodeURIComponent(objPath)}`;
     if (loadPath) {
-      urlPath += '&path=true';
+      urlPath += "&path=true";
     }
     if (loadAxis) {
-      urlPath += '&axis=true';
+      urlPath += "&axis=true";
     }
     let re: AjaxResult = await this.fetchAjax(urlPath, options);
     if (re.ok && isWnObj(re.data)) {
@@ -549,7 +650,7 @@ export class WalnutServer {
       return re;
     } catch (err) {
       if (!quiet) {
-        console.error('fetchText Fail:', err, urlPath);
+        console.error("fetchText Fail:", err, urlPath);
       }
       return null;
     }
@@ -577,7 +678,7 @@ export class WalnutServer {
       return JSON5.parse(text);
     } catch (err) {
       if (!quiet) {
-        console.error('fetchJson Fail:', err, urlPath);
+        console.error("fetchJson Fail:", err, urlPath);
       }
       return null;
     }
@@ -597,32 +698,32 @@ export class WalnutServer {
         data: reo,
       };
     }
-    return { ok: false, errCode: 'e.wn-server.fetchAjaxNil', data: reo };
+    return { ok: false, errCode: "e.wn-server.fetchAjaxNil", data: reo };
   }
 
   async fetchSidebar(): Promise<UserSidebar> {
     let sidebar = this._conf.sidebar;
-    if (debug) console.log('fetchSidebar:', sidebar);
+    if (debug) console.log("fetchSidebar:", sidebar);
     if (sidebar) {
       //  Load the  Static sidebar.
-      if (_.isString(sidebar) && sidebar.startsWith('load://')) {
+      if (_.isString(sidebar) && sidebar.startsWith("load://")) {
         let url = `/${sidebar.substring(7)}`;
-        if (debug) console.log('fetchSidebar:url=>', url);
+        if (debug) console.log("fetchSidebar:url=>", url);
         let resp = await fetch(url);
         let text = await resp.text();
         let json = JSON5.parse(text);
-        if (debug) console.log('sidebar is:', json);
+        if (debug) console.log("sidebar is:", json);
         return json;
       }
       //  load the side bar of Walnut
       else {
         let cmdText = `ti sidebar`;
         if (_.isString(sidebar)) {
-          cmdText += ' ' + sidebar;
+          cmdText += " " + sidebar;
         }
-        if (debug) console.log('fetchSidebar:cmd=>', cmdText);
-        let json = await this.exec(cmdText, { as: 'json' });
-        if (debug) console.log('sidebar is:', json);
+        if (debug) console.log("fetchSidebar:cmd=>", cmdText);
+        let json = await this.exec(cmdText, { as: "json" });
+        if (debug) console.log("sidebar is:", json);
         return json;
       }
     }
@@ -646,22 +747,30 @@ export class WalnutServer {
   }
 
   async loadMyDynmicUISettings() {
-    if (this._ticket && this._conf.ui) {
-      // 动态加载预定字段
-      let loading = [] as any[];
-      if (this._conf.ui.fields) {
-        let paths = _.concat(this._conf.ui.fields);
-        for (let ph of paths) {
-          loading.push(this.fetchUIFields(ph));
+    let loading = [] as Promise<void>[];
+    if (this._ticket) {
+      if (this._conf.ui) {
+        // 动态加载预定义字段
+        if (this._conf.ui.fields) {
+          let paths = _.concat(this._conf.ui.fields);
+          for (let ph of paths) {
+            loading.push(this.fetchUIFields(ph));
+          }
+        }
+        // 动态加载预定义表格列
+        if (this._conf.ui.columns) {
+          let paths = _.concat(this._conf.ui.columns);
+          for (let ph of paths) {
+            loading.push(this.fetchUIColumns(ph));
+          }
         }
       }
-      // 表格列
-      if (this._conf.ui.columns) {
-        let paths = _.concat(this._conf.ui.columns);
-        for (let ph of paths) {
-          loading.push(this.fetchUIColumns(ph));
-        }
+      // 动态加载保护多国语言
+      if (this._conf.i18n) {
+        loading.push(this.loadI18n("protected"));
       }
+
+      // 开始加载 ...
       if (loading.length > 0) {
         await Promise.all(loading);
       }
@@ -669,17 +778,17 @@ export class WalnutServer {
   }
 
   async showRuntimeInfo() {
-    let re = await this.exec('sys -runtime -nice');
+    let re = await this.exec("sys -runtime -nice");
     await openAppModal({
-      title: 'Walnut Runtime Info',
-      type: 'info',
-      position: 'right',
-      width: '640px',
-      height: '100%',
+      title: "Walnut Runtime Info",
+      type: "info",
+      position: "right",
+      width: "640px",
+      height: "100%",
       clickMaskToClose: true,
       textOk: null,
       textCancel: null,
-      comType: 'TiHtmlSnippet',
+      comType: "TiHtmlSnippet",
       comConf: {
         content: `<pre>${re}</pre>`,
       },
@@ -688,11 +797,11 @@ export class WalnutServer {
 
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
     // 执行命令
-    if (debug) console.log('exec>:', cmdText, options);
-    let url = this.getUrl('/a/run/wn.manager');
+    if (debug) console.log("exec>:", cmdText, options);
+    let url = this.getUrl("/a/run/wn.manager");
     let init = this.getRequestInit(options.signal);
     let reo = await wnRunCommand(url, init, cmdText, options);
-    if (debug) console.log('exec>:', reo);
+    if (debug) console.log("exec>:", reo);
     return reo;
   }
 
@@ -703,8 +812,8 @@ export class WalnutServer {
     let {
       target,
       uploadName = file.name,
-      mode = 'a',
-      tmpl = '${major}(${nb})${suffix}',
+      mode = "a",
+      tmpl = "${major}(${nb})${suffix}",
       progress,
       signal,
       addMeta = {},
@@ -730,7 +839,7 @@ export class WalnutServer {
     const queryString = new URLSearchParams(params).toString();
 
     // 构建上传的 URL，包含查询字符串
-    const url = `${this.getUrl('/o/save/stream')}?${queryString}`;
+    const url = `${this.getUrl("/o/save/stream")}?${queryString}`;
 
     // 构建请求对象
     let $req = new XMLHttpRequest();
@@ -738,7 +847,7 @@ export class WalnutServer {
 
     // 监控请求进度
     if (progress) {
-      $req.upload.addEventListener('progress', (ev) => {
+      $req.upload.addEventListener("progress", (ev) => {
         let info: WnUploadFileProgress = {
           percent: ev.loaded / ev.total,
           loaded: ev.loaded,
@@ -758,13 +867,13 @@ export class WalnutServer {
         //console.log('uploadFile : $req.readyState', $req.readyState);
         if (4 == $req.readyState) {
           let reo = JSON5.parse($req.responseText);
-          console.log('uploadFile : readyState == 4', reo);
+          console.log("uploadFile : readyState == 4", reo);
           if (200 == $req.status && reo.ok) {
             let obj = reo.data;
             // 需要额外更新文件的元数据
             if (addMeta && !_.isEmpty(addMeta) && obj && obj.id) {
               wn.exec(`o 'id:${obj.id}' @update @json -cqn`, {
-                as: 'json',
+                as: "json",
                 input: JSON.stringify(addMeta),
               })
                 .then((newObj) => {
@@ -787,7 +896,7 @@ export class WalnutServer {
       };
 
       // Open Connection
-      $req.open('POST', url, true);
+      $req.open("POST", url, true);
 
       // Set headers
       _.forOwn(init.headers, (val, key) => {
@@ -818,7 +927,7 @@ export type WnUploadFileProgress = {
 export type WnUploadFileOptions = {
   uploadName?: string;
   target: string;
-  mode?: 'a' | 'r' | 's';
+  mode?: "a" | "r" | "s";
   tmpl?: string;
   progress?: (info: WnUploadFileProgress) => void;
   signal?: AbortSignal;

@@ -4,9 +4,9 @@ import {
   SelectValueArm,
   SideBarItem,
   Vars,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { HubViewOptions } from '../_store';
+} from "@site0/tijs";
+import _ from "lodash";
+import { HubViewOptions } from "../_store";
 
 export type AjaxResult = {
   ok: boolean;
@@ -27,7 +27,7 @@ export type WnObj = Record<string, any>;
 export function isWnObj(obj: any): obj is WnObj {
   return (
     obj &&
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     _.isString(obj.id) &&
     _.isString(obj.pid) &&
     /^(DIR|FILE)$/.test(obj.race) &&
@@ -43,7 +43,7 @@ export type WnObjContentFinger = {
   tp: string;
 };
 
-export type WnRace = 'DIR' | 'FILE';
+export type WnRace = "DIR" | "FILE";
 
 export type WnObjQueryOptions = {
   /**
@@ -81,13 +81,26 @@ export interface ServerConfig {
   logo?: string;
   title?: string;
   version?: string;
-  protocal: 'http' | 'https';
+  protocal: "http" | "https";
   host: string;
   port: number;
   domain?: string;
   site?: string;
   lang?: I18nLang;
   ui?: ServerUISetup;
+  /**
+   * 指定了 i18n 资源文件的路径
+   * {zh_cn: ['load://resources/i18n/zh_cn.json', '~/.i18n/zh_cn.json']]}
+   * 每个资源文件，如果不是 'load://' 开头，必须登录以后才能读取
+   * 这样，那些被登录之才能看到的界面（也就是主要界面）的文字可以交给标准数据模型动态管理
+   * 当然为了考虑消息，你也可以不这么做，甚至将资源文件静态编译到代码里
+   *
+   * 如果语言没有匹配，则考虑降级重试，优先级为
+   * 1) en-us
+   * 2) en
+   * 3) zh-cn  // 最后总是用 zh-cn 来兜底
+   */
+  i18n?: Record<string, string | string[]>;
   sidebar?: boolean | string;
   logLevel?: string;
   logger?: Record<string, string>;
@@ -216,7 +229,7 @@ export interface SignInForm {
 
 export type WnExecOptions = {
   input?: string;
-  as?: 'json' | 'text';
+  as?: "json" | "text";
   signal?: AbortSignal;
 };
 

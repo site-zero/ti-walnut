@@ -18,7 +18,6 @@
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
-
   const _arena_reload = computed(() => useHubArenaReload(props, _hub!.view));
   const _gui_context = ref<Vars>({});
   const _last_watch = ref<Vars>({});
