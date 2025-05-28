@@ -5,17 +5,17 @@ import {
   TableRowID,
   Util,
   Vars,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { computed, Ref, ref } from 'vue';
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, Ref, ref } from "vue";
 import {
   LocalMetaMakeChangeOptions,
   LocalMetaMakeDiffOptions,
   SqlExecInfo,
   SqlExecSetVar,
   SqlResult,
-} from '../../../lib';
-import { join_exec_set_vars } from './join-exec-set-vars';
+} from "../../../lib";
+import { join_exec_set_vars } from "./join-exec-set-vars";
 
 /**
  * 列表项更新选项
@@ -102,7 +102,7 @@ export function useLocalListEdit(
   options: LocalListEditOptions = {}
 ) {
   //console.log('useLocalListEdit', remoteList, options);
-  let { getId = 'id' } = options;
+  let { getId = "id" } = options;
   let _local_list = ref<SqlResult[] | undefined>();
   //---------------------------------------------
   // 计算属性
@@ -152,11 +152,13 @@ export function useLocalListEdit(
           let diff = Util.getRecordDiff(remote, local, {
             checkRemoveFromOrgin: true,
           });
+          if (!_.isEmpty(diff)) {
+            return true;
+          }
           // if (!_.isEqual(remote, local)) {
           //   console.log(`Item ${i} [${getRowId(local, i)}] Not Equal`, diff);
           // }
         }
-        return true;
       }
     }
     return false;
@@ -229,7 +231,7 @@ export function useLocalListEdit(
   // 默认行为
   if (_.isUndefined(options.patchMetaUpdate)) {
     patchMetaUpdate = (diff: Vars, id: TableRowID, _remote: SqlResult) => {
-      diff['id'] = id;
+      diff["id"] = id;
     };
   }
   // 用户已指定

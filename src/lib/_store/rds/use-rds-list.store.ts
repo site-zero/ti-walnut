@@ -9,9 +9,9 @@ import {
   useKeep,
   Util,
   Vars,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { computed, reactive, ref } from 'vue';
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, reactive, ref } from "vue";
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
@@ -29,10 +29,10 @@ import {
   updatePagerTotal,
   useLocalListEdit,
   useSqlx,
-} from '../../';
-import { Walnut } from '../../../core';
+} from "../../";
+import { Walnut } from "../../../core";
 
-const log = getLogger('wn.use-data-list-store');
+const log = getLogger("wn.use-data-list-store");
 
 /**
  * 如果服务器的 SQL 是联合查询，通常查询的字段条件会有前缀
@@ -189,13 +189,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   ) {
     const use_appender = (_v: any, k: string) => {
       let not = false;
-      if (k.startsWith('!')) {
+      if (k.startsWith("!")) {
         not = true;
         k = k.substring(1).trim();
       }
       let newKey = appender(k);
       if (not) {
-        return '!' + newKey;
+        return "!" + newKey;
       }
       return newKey;
     };
@@ -257,8 +257,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   const ActionBarVars = computed(() => {
     return {
-      loading: _action_status.value == 'loading',
-      saving: _action_status.value == 'saving',
+      loading: _action_status.value == "loading",
+      saving: _action_status.value == "saving",
       changed: changed.value,
       empty: isEmpty.value,
       hasCurrent: hasCurrent.value,
@@ -268,12 +268,12 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(_remote.value)) {
-      return 'unloaded';
+      return "unloaded";
     }
     if (_remote.value.length == query.pager?.totalCount) {
-      return 'full';
+      return "full";
     }
-    return 'partial';
+    return "partial";
   });
 
   //---------------------------------------------
@@ -288,6 +288,11 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (query.pager) {
       updatePagerTotal(query.pager, 0);
     }
+  }
+
+  function resetLocalAndRemote() {
+    resetLocalChange();
+    clearRemoteList();
   }
 
   function makeChanges() {
@@ -465,7 +470,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       // 首先查找一下可能是否需要高亮下一个的 ID
       let nextId = _local.getNextRowId(_checked_ids.value) as string;
 
-      _action_status.value = 'deleting';
+      _action_status.value = "deleting";
       let re = _local.removeLocalItems(_checked_ids.value);
       _action_status.value = undefined;
 
@@ -627,7 +632,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
   //---------------------------------------------
   async function queryRemoteList(): Promise<void> {
-    _action_status.value = 'loading';
+    _action_status.value = "loading";
     // 准备查询条件
     let q = __gen_query();
     apply_query_prefix(q, _query_prefix_append.value);
@@ -653,7 +658,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (!options.sqlCount) {
       return;
     }
-    _action_status.value = 'loading';
+    _action_status.value = "loading";
     let q = __gen_query();
     apply_query_prefix(q, _count_prefix_append.value);
     let total = await countRemote(q.filter);
@@ -692,14 +697,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   async function saveChange({ transLevel = 1 } = {}) {
     // 获取改动信息
     let changes = makeChanges();
-    log.debug('saveChange', changes);
+    log.debug("saveChange", changes);
     // 保护一下
     if (changes.length == 0) {
       return;
     }
     //console.log('changes', changes);
     // 执行更新
-    _action_status.value = 'saving';
+    _action_status.value = "saving";
     await sqlx.exec(changes, {
       transLevel,
     });
@@ -761,6 +766,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
+    resetLocalAndRemote,
     resetLocalChange,
     clearRemoteList,
 
