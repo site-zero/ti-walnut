@@ -420,7 +420,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     // 如果存在就更新
     let id = getItemId(item);
     if (getItemById(id)) {
-      updateItem(item, { id });
+      updateItemBy(item, { id });
     }
     // 直接添加到结尾
     else {
@@ -432,7 +432,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     // 如果存在就更新
     let id = getItemId(item);
     if (getItemById(id)) {
-      updateItem(item, { id });
+      updateItemBy(item, { id });
     }
     // 直接添加到结尾
     else {
@@ -447,14 +447,56 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
-  function updateItem(
+  /**
+   * 更新项目列表
+   *
+   * 根据提供的元数据项获取其唯一 ID，并通过本地存储更新相应项目。
+   *
+   * @param meta - SQL 查询结果元数据数组
+   * @returns 返回成功更新的项目数组，如果输入为空则返回空数组
+   */
+  function updateItem(meta: SqlResult) {
+    if (_.isEmpty(meta)) {
+      return undefined;
+    }
+    let id = getItemId(meta);
+    if (_.isNil(id)) {
+      return undefined;
+    }
+    return _local.updateItem(meta, { id });
+  }
+
+  /**
+   * 更新项目列表
+   *
+   * 根据提供的元数据项获取其唯一 ID，并通过本地存储更新相应项目。
+   *
+   * @param meta - SQL 查询结果元数据数组
+   * @returns 返回成功更新的项目数组，如果输入为空则返回空数组
+   */
+  function updateItems(meta: SqlResult[]) {
+    if (_.isEmpty(meta)) {
+      return [];
+    }
+    let re: SqlResult[] = [];
+    for (let m of meta) {
+      let id = getItemId(m);
+      let item = _local.updateItem(m, { id });
+      if (item) {
+        re.push(item);
+      }
+    }
+    return re;
+  }
+
+  function updateItemBy(
     meta: Vars,
     options: LocalListUpdateItemOptions
   ): SqlResult | undefined {
     return _local.updateItem(meta, options);
   }
 
-  function updateItems(
+  function updateItemsBy(
     meta: SqlResult,
     forIds?: TableRowID | TableRowID[]
   ): SqlResult[] {
@@ -783,6 +825,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     updateCurrent,
     updateItem,
     updateItems,
+    updateItemBy,
+    updateItemsBy,
     updateChecked,
 
     removeChecked,

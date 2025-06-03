@@ -7,9 +7,9 @@ import {
   useKeep,
   Util,
   Vars,
-} from '@site0/tijs';
-import _, { drop } from 'lodash';
-import { computed, ref } from 'vue';
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, ref } from "vue";
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
@@ -29,10 +29,10 @@ import {
   WnObj,
   WnObjContentFinger,
   WnObjQueryOptions,
-} from '../../';
-import { getObjContentFinger, isObjContentEditable } from '../../../core/wn';
-import { useObjContentStore } from '../use-obj-content.store';
-import { auto_create_obj } from './support/auto-create-home';
+} from "../../";
+import { getObjContentFinger, isObjContentEditable } from "../../../core/wn";
+import { useObjContentStore } from "../use-obj-content.store";
+import { auto_create_obj } from "./support/auto-create-home";
 
 export type StdListStoreApi = ReturnType<typeof defineStdListStore>;
 
@@ -101,7 +101,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   //console.warn('defineStdListStore', options);
   //---------------------------------------------
   // 准备数据访问模型
-  let _options: StdListStoreOptions = _.cloneDeep(options ?? { homePath: '~' });
+  let _options: StdListStoreOptions = _.cloneDeep(options ?? { homePath: "~" });
   if (_.isNil(_options.autoRemoveItemNilValue)) {
     _options.autoRemoveItemNilValue = true;
   }
@@ -206,9 +206,9 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   const ActionBarVars = computed(() => {
     return {
-      loading: _action_status.value == 'loading',
-      saving: _action_status.value == 'saving',
-      deleting: _action_status.value == 'deleting',
+      loading: _action_status.value == "loading",
+      saving: _action_status.value == "saving",
+      deleting: _action_status.value == "deleting",
       changed: changed.value,
       empty: isEmpty.value,
       hasCurrent: hasCurrent.value,
@@ -218,12 +218,12 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(_remote.value)) {
-      return 'unloaded';
+      return "unloaded";
     }
     if (_remote.value.length == _query.value.pager?.totalCount) {
-      return 'full';
+      return "full";
     }
-    return 'partial';
+    return "partial";
   });
 
   //---------------------------------------------
@@ -232,13 +232,13 @@ function defineStdListStore(options: StdListStoreOptions) {
   async function saveMeta() {
     let diffs = _local.makeDifferents();
     if (diffs.length > 0) {
-      _action_status.value = 'saving';
+      _action_status.value = "saving";
       for (let diff of diffs) {
         // 修改已经存在对象
         if (diff.existsInRemote && diff.existsInLocal) {
           let obj = await _obj.update(diff.delta);
           if (obj) {
-            updateItem(obj, { id: obj.id });
+            updateItemBy(obj, { id: obj.id });
           }
         }
         // 插入新对象
@@ -326,7 +326,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
 
     // 读取内容
-    _action_status.value = 'loading';
+    _action_status.value = "loading";
     await _content.loadContent(finger);
     _action_status.value = undefined;
   }
@@ -362,7 +362,7 @@ function defineStdListStore(options: StdListStoreOptions) {
       return;
     }
     // 保存内容
-    _action_status.value = 'saving';
+    _action_status.value = "saving";
     let newObj = await _content.saveChange({ force });
     if (newObj) {
       let index = _local.getRowIndex(newObj.id);
@@ -513,7 +513,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     // 如果存在就更新
     let id = getItemId(o);
     if (getItemById(id)) {
-      updateItem(o, { id });
+      updateItemBy(o, { id });
     }
     // 直接添加到结尾
     else {
@@ -525,7 +525,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     // 如果存在就更新
     let id = getItemId(o);
     if (getItemById(id)) {
-      updateItem(o, { id });
+      updateItemBy(o, { id });
     }
     // 直接添加到结尾
     else {
@@ -540,14 +540,56 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
   }
 
-  function updateItem(
+  /**
+   * 更新项目列表
+   *
+   * 根据提供的元数据项获取其唯一 ID，并通过本地存储更新相应项目。
+   *
+   * @param meta - SQL 查询结果元数据数组
+   * @returns 返回成功更新的项目数组，如果输入为空则返回空数组
+   */
+  function updateItem(meta: Vars) {
+    if (_.isEmpty(meta)) {
+      return undefined;
+    }
+    let id = getItemId(meta);
+    if (_.isNil(id)) {
+      return undefined;
+    }
+    return _local.updateItem(meta, { id });
+  }
+
+  /**
+   * 更新项目列表
+   *
+   * 根据提供的元数据项获取其唯一 ID，并通过本地存储更新相应项目。
+   *
+   * @param meta - SQL 查询结果元数据数组
+   * @returns 返回成功更新的项目数组，如果输入为空则返回空数组
+   */
+  function updateItems(meta: Vars[]) {
+    if (_.isEmpty(meta)) {
+      return [];
+    }
+    let re: Vars[] = [];
+    for (let m of meta) {
+      let id = getItemId(m);
+      let item = _local.updateItem(m, { id });
+      if (item) {
+        re.push(item);
+      }
+    }
+    return re;
+  }
+
+  function updateItemBy(
     meta: Vars,
     options: LocalListUpdateItemOptions
   ): WnObj | undefined {
     return _local.updateItem(meta, options);
   }
 
-  function updateItems(meta: WnObj, forIds?: string | string[]): WnObj[] {
+  function updateItemsBy(meta: WnObj, forIds?: string | string[]): WnObj[] {
     return _local.batchUpdate(meta, forIds);
   }
 
@@ -560,7 +602,7 @@ function defineStdListStore(options: StdListStoreOptions) {
       // 首先查找一下可能是否需要高亮下一个的 ID
       let nextId = _local.getNextRowId(_checked_ids.value) as string;
 
-      _action_status.value = 'deleting';
+      _action_status.value = "deleting";
       let re = _local.removeLocalItems(_checked_ids.value);
       _action_status.value = undefined;
 
@@ -660,7 +702,7 @@ function defineStdListStore(options: StdListStoreOptions) {
    * 7. 将 `_action_status` 重置为 `undefined`。
    */
   async function queryRemoteList(setup: WnObjQueryOptions = {}): Promise<void> {
-    _action_status.value = 'loading';
+    _action_status.value = "loading";
     // 准备查询条件
     let q = __gen_query();
     //console.log('queryRemoteList', q);
@@ -710,7 +752,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   async function create(meta: WnObj): Promise<WnObj | undefined> {
     meta.pid = _dir_index.value?.id;
     if (!meta.pid) {
-      throw 'create need parent id';
+      throw "create need parent id";
     }
     let re = await _obj.create(meta);
     if (isWnObj(re)) {
@@ -839,7 +881,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
     // 报错
     else {
-      await Alert(`目录不存在：${path}`, { type: 'warn' });
+      await Alert(`目录不存在：${path}`, { type: "warn" });
     }
   }
 
@@ -938,6 +980,8 @@ function defineStdListStore(options: StdListStoreOptions) {
     updateCurrent,
     updateItem,
     updateItems,
+    updateItemBy,
+    updateItemsBy,
     updateChecked,
 
     removeChecked,
