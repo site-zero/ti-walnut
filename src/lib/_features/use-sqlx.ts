@@ -193,7 +193,7 @@ export function defineSqlx(daoName?: string) {
     cmds.push('-cqn');
 
     // 开启事务
-    let tl = options?.transLevel ?? 0;
+    let tl = options?.transLevel ?? 1;
     if (tl > 0) {
       cmds.push('@trans');
       // 快速判断给定的事物级别是否是1248其中的一个
