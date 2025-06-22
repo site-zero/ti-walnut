@@ -1,12 +1,12 @@
-import { isAsyncFunc } from '@site0/tijs';
-import _ from 'lodash';
-import { genWnPath, safeCmdArg, Walnut } from '../../../core';
-import { GuiViewLayout } from '../../_types';
+import { isAsyncFunc } from "@site0/tijs";
+import _ from "lodash";
+import { genWnPath, safeCmdArg, Walnut } from "../../../core";
+import { GuiViewLayout } from "../../_types";
 import {
   HubViewOptions,
   HubViewState,
   isHubViewLayout,
-} from './hub-view-types';
+} from "./hub-view-types";
 
 async function __load<T>(
   homePath: string | undefined,
@@ -23,6 +23,10 @@ async function __load<T>(
     // 普通方法
     let ats = input();
     return ats as T;
+  }
+  // 本身就是对象，那么就克隆出来
+  if (_.isObject(input)) {
+    return _.cloneDeep(input) as T;
   }
   // 直接从对象路径加载
   if (_.isString(input)) {
