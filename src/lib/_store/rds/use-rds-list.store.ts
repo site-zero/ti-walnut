@@ -343,7 +343,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
-  function getItemIndex(id: string) {
+  function getItemIndex(id: TableRowID) {
     return _local.getRowIndex(id);
   }
 
