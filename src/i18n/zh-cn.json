@@ -24,6 +24,7 @@
   "wn-obj-expi": "过期时间",
   "e-auth-account-noexists": "账户不存在",
   "e-auth-login-invalid-passwd": "账户密码错误",
+  "e.cmd.sqlx.exec.Failed": "SQL 执行失败",
   "e-upload-target-not-set": "上传目标未设置!",
   "warn-refresh": "你还有本地修改未被保存，刷新将会丢失这些未保存的改动，你确定要继续吗？",
   "warn-drop-change": "移除本地修改将会丢失你所有未保存的改动，你确定要继续吗？"

@@ -1,5 +1,6 @@
-import { getLogger, Util, Vars } from '@site0/tijs';
-import _ from 'lodash';
+import { getLogger, Util, Vars } from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
 import {
   getQueryLimit,
   QueryFilter,
@@ -8,10 +9,10 @@ import {
   SqlExecResult,
   SqlQuery,
   SqlResult,
-} from '..';
-import { Walnut } from '../../core';
+} from "..";
+import { Walnut } from "../../core";
 
-const log = getLogger('wn.use-sqlx');
+const log = getLogger("wn.use-sqlx");
 
 export type SqlXApi = ReturnType<typeof defineSqlx>;
 
@@ -24,7 +25,7 @@ const _SQLX = new Map<string, SqlXApi>();
  * @returns SQLX 的 API
  */
 export function useSqlx(daoName?: string): SqlXApi {
-  let xkey = daoName ?? '__sqlx_default__';
+  let xkey = daoName ?? "__sqlx_default__";
   let api = _SQLX.get(xkey);
   if (!api) {
     api = defineSqlx(daoName);
@@ -72,13 +73,13 @@ export function defineSqlx(daoName?: string) {
       if (daoName) {
         cmds.push(daoName);
       }
-      cmds.push('-cqn @vars');
+      cmds.push("-cqn @vars");
       cmds.push(`@query ${sql} -p`);
-      let cmdText = cmds.join(' ');
+      let cmdText = cmds.join(" ");
       log.debug(cmdText, q);
 
       // 执行查询
-      let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+      let list = await Walnut.exec(cmdText, { input: qstr, as: "json" });
 
       // 错误
       if (!_.isArray(list)) {
@@ -109,7 +110,7 @@ export function defineSqlx(daoName?: string) {
       ...getQueryLimit(query),
     } as Vars;
     if (query.columns) {
-      q.columns = _.concat(query.columns).join(',');
+      q.columns = _.concat(query.columns).join(",");
     }
 
     return await __query(sql, q);
@@ -138,7 +139,7 @@ export function defineSqlx(daoName?: string) {
   async function count(
     sql: string,
     filter: QueryFilter,
-    countKey: string = 'total'
+    countKey: string = "total"
   ): Promise<number> {
     try {
       let qobj = Util.filterRecordNilValueDeeply(filter);
@@ -149,13 +150,13 @@ export function defineSqlx(daoName?: string) {
       if (daoName) {
         cmds.push(daoName);
       }
-      cmds.push('-cqn @vars');
+      cmds.push("-cqn @vars");
       cmds.push(`@query ${sql} -p`);
-      let cmdText = cmds.join(' ');
+      let cmdText = cmds.join(" ");
       log.debug(cmdText, filter);
 
       // 执行查询
-      let list = await Walnut.exec(cmdText, { input: qstr, as: 'json' });
+      let list = await Walnut.exec(cmdText, { input: qstr, as: "json" });
 
       // 错误
       if (!_.isArray(list)) {
@@ -190,12 +191,12 @@ export function defineSqlx(daoName?: string) {
     if (daoName) {
       cmds.push(daoName);
     }
-    cmds.push('-cqn');
+    cmds.push("-cqn");
 
     // 开启事务
     let tl = options?.transLevel ?? 1;
     if (tl > 0) {
-      cmds.push('@trans');
+      cmds.push("@trans");
       // 快速判断给定的事物级别是否是1248其中的一个
       if ((tl & 15) === tl) {
         cmds.push(`-level ${tl}`);
@@ -211,15 +212,15 @@ export function defineSqlx(daoName?: string) {
       //............. @vars
       cmds.push(`@vars '=I${i}'`);
       if (opt.reset) {
-        cmds.push('-reset');
+        cmds.push("-reset");
       }
       if (opt.explain) {
-        cmds.push('-explain');
+        cmds.push("-explain");
       }
       if (_.isArray(opt.vars)) {
-        cmds.push('-as list');
+        cmds.push("-as list");
       } else {
-        cmds.push('-as map');
+        cmds.push("-as map");
       }
       if (opt.put) {
         cmds.push(`-put '${opt.put}'`);
@@ -235,9 +236,9 @@ export function defineSqlx(daoName?: string) {
         for (let se of opt.sets) {
           cmds.push(`@set ${se.name} '${se.value}'`);
           if (_.isArray(opt.vars)) {
-            cmds.push('-to list');
+            cmds.push("-to list");
           } else {
-            cmds.push('-to map');
+            cmds.push("-to map");
           }
           if (se.savepipe) {
             cmds.push(`-savepipe '${se.savepipe}'`);
@@ -246,14 +247,14 @@ export function defineSqlx(daoName?: string) {
             cmds.push(`-alias '${se.alias}'`);
           }
           if (se.when) {
-            cmds.push(`-when '${JSON.stringify(se.when).replace("'", '')}'`);
+            cmds.push(`-when '${JSON.stringify(se.when).replace("'", "")}'`);
           }
         }
       }
       //............. @exec
       cmds.push(`@exec ${opt.sql}`);
       if (opt.noresult) {
-        cmds.push('-noresult');
+        cmds.push("-noresult");
       }
       // 如果需要输出结果，则看看是否需要回查
       else if (opt.fetchBack && opt.fetchBack.by) {
@@ -269,26 +270,38 @@ export function defineSqlx(daoName?: string) {
     }
 
     // 准备发送命令
-    let cmdText = cmds.join(' ');
+    let cmdText = cmds.join(" ");
     log.debug(cmdText);
 
     // 执行查询
     let input = JSON.stringify(inputs);
     try {
-      let reo = await Walnut.exec(cmdText, { input, as: 'json' });
+      let re = await Walnut.exec(cmdText, { input, as: "text" });
+
+      // 看看是否是逻辑错误
+      let m = /^(e\.[^ :]+)(\s*:\s*(.+))$/.exec(_.trim(re));
+      if (m) {
+        let err = new Error(re);
+        err.name = m[1];
+        err.message = m[3];
+        throw err;
+      }
+
+      // 解析
+      let result = JSON5.parse(re);
 
       // 错误
-      if (!_.isPlainObject(reo) && !_.isArray(reo)) {
+      if (!_.isPlainObject(result) && !_.isArray(result)) {
         return;
       }
 
       // 处理结果
-      if (reo) {
-        return reo as SqlExecResult;
+      if (result) {
+        return result as SqlExecResult;
       }
-    } catch (err) {
-      console.error(`use-sqlx: ${cmdText}`, err, inputs);
-      throw err;
+    } catch (e) {
+      console.error(`use-sqlx: ${cmdText}`, e, inputs);
+      throw e;
     }
   }
 

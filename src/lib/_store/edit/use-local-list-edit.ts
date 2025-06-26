@@ -506,7 +506,7 @@ export function useLocalListEdit(
    *   updateMeta: (local, remote) => ({ updatedAt: new Date() }),
    *   insertMeta: (local, remote) => ({ createdBy: 'user' }),
    *   insertSet: () => [{ key: 'value' }],
-   *   noresult: true,
+   *   noresult: false,
    *   insertPut: true,
    *   updatePut: true,
    * });
@@ -618,7 +618,7 @@ export function useLocalListEdit(
             vars: remote,
             explain: false,
             reset: true,
-            noresult: true,
+            noresult: false,
           });
         }
       }
