@@ -1,4 +1,5 @@
 import {
+  Alert,
   ENV_KEYS,
   I18n,
   init_ti_std_columns,
@@ -733,6 +734,13 @@ export class WalnutServer {
   async fetchUIFields(path: string) {
     const _ofs = useObjFields();
     let json = await this.loadJson(path);
+    // 获取失败
+    if (false === json.ok) {
+      await Alert(`Fail to fetchUIFields: ${path}`);
+      console.error(`Fail to fetchUIFields: ${path}`, json);
+      return;
+    }
+    // 逐个注册
     _.forEach(json, (fld, key) => {
       _ofs.setField(key, fld);
     });
@@ -741,6 +749,13 @@ export class WalnutServer {
   async fetchUIColumns(path: string) {
     const _cols = useObjColumns();
     let json = await this.loadJson(path);
+    // 获取失败
+    if (false === json.ok) {
+      await Alert(`Fail to fetchUIColumns: ${path}`);
+      console.error(`Fail to fetchUIColumns: ${path}`, json);
+      return;
+    }
+    // 逐个注册
     _.forEach(json, (col, key) => {
       _cols.addColumn(key, col);
     });
