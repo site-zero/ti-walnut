@@ -30,7 +30,7 @@
 <template>
   <div class="wn-signup-panel as-signin" :style="props.style">
     <slot name="header"></slot>
-    <main>
+    <form>
       <dl>
         <dt>用户名</dt>
         <dd>
@@ -51,12 +51,12 @@
         </dd>
       </dl>
       <dl>
-        <button @click="onClickSubmit">立即登录</button>
+        <button @click.prevent="onClickSubmit">立即登录</button>
       </dl>
       <dl v-if="errCode">
         <div class="as-error">{{ I18n.get(props.errCode!) }}</div>
       </dl>
-    </main>
+    </form>
     <slot name="footer"> </slot>
   </div>
 </template>

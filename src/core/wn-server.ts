@@ -40,6 +40,12 @@ import { wnRunCommand } from "./wn-run-command";
 const TICKET_KEY = "Walnut-Ticket";
 const debug = false;
 
+export function setTicketToLocalStore(ticket?: string | null) {
+  if (ticket) {
+    TiStore.local.set(TICKET_KEY, ticket);
+  }
+}
+
 export type GetUrlForObjContentOptions = {
   download?: "auto" | "force" | "raw";
   downName?: string;
@@ -71,7 +77,10 @@ export class WalnutServer {
       domain: undefined,
       sidebar: false,
     };
-    this._ticket = TiStore.local.getString(TICKET_KEY, undefined);
+    // 如果 body 里指定了，那么就获取 session 会话
+    this._ticket =
+      document.body.getAttribute("session-ticket") ||
+      TiStore.local.getString(TICKET_KEY, undefined);
     this._cache = new Map<string, any>();
   }
 
@@ -227,9 +236,10 @@ export class WalnutServer {
   }
 
   async fetchMySession(): Promise<AjaxResult> {
+    console.log(`fetchMySession: ticket=[${this._ticket}]`);
     if (this._ticket) {
       let re = await Walnut.fetchAjax("/a/me");
-      //console.log('fetchMySession:', re);
+      console.log("fetchMySession:", re);
       if (!re.ok) {
         this._ticket = undefined;
         TiStore.local.remove(TICKET_KEY);
@@ -247,12 +257,20 @@ export class WalnutServer {
   }
 
   async signInToDomain(info: SignInForm): Promise<AjaxResult> {
-    let re = await this.postFormToGetAjax("/a/auth_login_by_domain_passwd", {
+    // 对于没有指定站点的配置，那么自然只能采用系统账号登录
+    let postUrl = this._conf.site
+      ? "/a/auth_login_by_domain_passwd"
+      : "/a/sys_login_by_passwd";
+
+    // 提交请求
+    let re = await this.postFormToGetAjax(postUrl, {
       site: this._conf.site,
       name: info.username,
       passwd: info.password,
       ajax: true,
     });
+
+    // 处理返回
     if (re && re.ok && re.data) {
       this._ticket = re.data.ticket;
       TiStore.local.set(TICKET_KEY, this._ticket);
@@ -330,7 +348,8 @@ export class WalnutServer {
         signal,
       });
       let resp = await fetch(url, init);
-      return await resp.json();
+      let text = await resp.text();
+      return JSON5.parse(text);
     } catch (err) {
       if (!quiet) {
         console.error("postFormToGetJson Fail:", err, path, form);

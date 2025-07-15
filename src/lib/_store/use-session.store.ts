@@ -74,8 +74,6 @@ export type UserInfo = {
   role?: string[];
   nickname?: string;
   gender?: Gender;
-  jobs?: string[];
-  depts?: string[];
   roleInOp?: WnRole;
   roleInDomain?: WnRole;
   sysAccount?: boolean;
@@ -104,8 +102,6 @@ function _translate_session_result(data: any) {
     role: Str.splitIgnoreBlank(me.role),
     gender: toGender(me.sex),
     nickname: me.nickname,
-    jobs: me.jobs,
-    depts: me.depts,
     roleInOp: me.roleInOp,
     roleInDomain: me.roleInDomain,
     sysAccount: me.sysAccount ? true : false,
@@ -117,6 +113,8 @@ function _translate_session_result(data: any) {
   SE.theme = env['THEME'];
   SE.lang = env['LANG'];
 }
+
+export type SessionStore = ReturnType<typeof useSessionStore>;
 
 /**
  * 创建并返回会话管理的 store。
