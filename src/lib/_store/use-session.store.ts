@@ -1,7 +1,8 @@
-import { Gender, Str, Tmpl, Util, Vars, toGender } from '@site0/tijs';
-import { computed, reactive, ref } from 'vue';
-import { SignInForm, useGlobalStatus } from '..';
-import { Walnut } from '../../core';
+import { Alert, Gender, Str, Tmpl, Util, Vars, toGender } from "@site0/tijs";
+import _ from "lodash";
+import { computed, reactive, ref } from "vue";
+import { SignInForm, useGlobalStatus } from "..";
+import { Walnut } from "../../core";
 
 /*
 Read data from response:
@@ -10,13 +11,14 @@ Read data from response:
   "data": {
     "id": "65hv47vrliha7qs0g8947j9mee",
     "ticket": "sa68cb0t2giofp6pgs54q14dj8",
-    "pse_id": "pd902mprqehbupepbl35r8gugg",
+    "parentTicket": "pd902mprqehbupepbl35r8gugg",
+    "childTicket": null,
     "uid": "3vuek5r1vug1hrg3ui70uaiknp",
     "unm": "demo",
     "me": {
       "id": "3vuek5r1vug1hrg3ui70uaiknp",
-      "nm": "demo",
-      "grp": "walnut",
+      "loginName": "demo",
+      "mainGroup": "walnut",
       "role": "user,robot,shenhe",
       "jobs": ["CH_NNLC"],
       "depts": ["HC", "CH", "CH_W", "CH_NN"],
@@ -54,19 +56,23 @@ Read data from response:
 */
 export type UserSession = {
   ticket: string | undefined;
+  parentTicket: string | undefined;
+  childTicket: string | undefined;
   me: UserInfo | undefined;
   env: Vars;
+  mainGroup: string | undefined;
   loginAt: Date | undefined;
   expireAt: Date | undefined;
   homePath: string | undefined;
   theme: string | undefined;
   lang: string | undefined;
+  timezone?: string;
   errCode: string | undefined;
 };
 
 export type UserSessionApi = ReturnType<typeof useSessionStore>;
 
-export type WnRole = 'MEMBER' | 'ADMIN' | 'GUEST';
+export type WnRole = "MEMBER" | "ADMIN" | "GUEST";
 
 export type UserInfo = {
   loginName?: string;
@@ -78,6 +84,7 @@ export type UserInfo = {
   roleInDomain?: WnRole;
   sysAccount?: boolean;
   avatar?: string;
+  meta?: Vars;
 };
 
 const SE = reactive({
@@ -90,6 +97,7 @@ const SE = reactive({
   theme: undefined,
   lang: undefined,
   errCode: undefined,
+  timezone: "GMT+8",
 }) as UserSession;
 
 function _translate_session_result(data: any) {
@@ -97,21 +105,24 @@ function _translate_session_result(data: any) {
   let me = data.me || {};
   SE.ticket = data.ticket;
   SE.me = {
-    loginName: data.unm || me.name,
-    mainGroup: data.grp || me.groupName,
+    loginName: data.unm || me.name || me.loginName,
+    mainGroup: data.grp || me.groupName || me.mainGroup,
     role: Str.splitIgnoreBlank(me.role),
     gender: toGender(me.sex),
     nickname: me.nickname,
     roleInOp: me.roleInOp,
     roleInDomain: me.roleInDomain,
     sysAccount: me.sysAccount ? true : false,
+    meta: me.meta || {},
   };
   SE.env = env;
+  SE.mainGroup = data.grp || me.groupName || me.mainGroup;
   SE.loginAt = new Date(data.me.login || 0);
   SE.expireAt = new Date(data.expi || 0);
-  SE.homePath = env['HOME'];
-  SE.theme = env['THEME'];
-  SE.lang = env['LANG'];
+  SE.homePath = env["HOME"];
+  SE.theme = env["THEME"];
+  SE.lang = env["LANG"];
+  SE.timezone = env["TIMEZONE"] || _.get(me.meta, "TIMEZONE");
 }
 
 export type SessionStore = ReturnType<typeof useSessionStore>;
@@ -143,7 +154,7 @@ export function useSessionStore() {
   async function signIn(info: SignInForm, afterOk: () => Promise<void>) {
     const _gl_sta = useGlobalStatus();
     try {
-      _gl_sta.data.processing = '正在执行登录';
+      _gl_sta.data.processing = "正在执行登录";
       let re = await Walnut.signInToDomain(info);
       // Sign-in successfully
       if (re.ok) {
@@ -221,6 +232,32 @@ export function useSessionStore() {
     }
   }
 
+  async function switchSession(
+    newTicket: string,
+    exit: boolean,
+    oldTicket?: string
+  ) {
+    let query = {} as Vars;
+    query.seid = newTicket;
+    if (exit) {
+      query.exit = true;
+    }
+    if (oldTicket) {
+      query.old_seid = oldTicket;
+    }
+    let re = await Walnut.fetchAjax("/u/ajax/chse", { query });
+    if (re.ok) {
+      _translate_session_result(re.data);
+      Walnut.saveTicketToLocal(SE.ticket, SE.timezone);
+    }
+    // 处理错误
+    else {
+      await Alert(`Fail to switchSession: ${JSON.stringify(re)}`, {
+        type: "warn",
+      });
+    }
+  }
+
   /**
    * 根据用户路径生成实际的对象路径。
    *
@@ -243,7 +280,7 @@ export function useSessionStore() {
     let path: string | undefined = undefined;
 
     // 获取路径规则
-    let __paths: Vars = Walnut.getConfig('objPath', {});
+    let __paths: Vars = Walnut.getConfig("objPath", {});
 
     // hubPath 的值类似  `setting/a/b/c` 我们需要用下面的逻辑
     // 来路由这个路径到真正的 Walnut 对象路径
@@ -260,16 +297,16 @@ export function useSessionStore() {
     let pathArms = __paths[hubPath];
     // Handle partial path matching: try progressively shorter paths
     if (!pathArms) {
-      const segments = hubPath.split('/');
+      const segments = hubPath.split("/");
 
       // 尝试逐步缩短路径来匹配
       for (let i = segments.length - 1; i > 0; i--) {
-        let partialPath = segments.slice(0, i).join('/');
+        let partialPath = segments.slice(0, i).join("/");
         pathArms = __paths[partialPath];
 
         if (pathArms) {
           // 构造剩余路径并加入上下文，以便渲染
-          aCtx.remain = segments.slice(i).join('/') || '';
+          aCtx.remain = segments.slice(i).join("/") || "";
           break;
         }
       }
@@ -277,7 +314,7 @@ export function useSessionStore() {
 
     // 还是木有？！最后尝试一下通配符
     if (!pathArms) {
-      pathArms = __paths['*'];
+      pathArms = __paths["*"];
     }
 
     // 挑选路径模板
@@ -346,6 +383,7 @@ export function useSessionStore() {
     signIn,
     signOut,
     resetSession,
+    switchSession,
     reload,
   };
 }

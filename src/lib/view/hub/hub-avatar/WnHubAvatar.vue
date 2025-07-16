@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-  import { IconInput, TiIcon } from '@site0/tijs';
-  import { computed } from 'vue';
-  import { useSessionStore } from '../../../../lib';
+  import { IconInput, TiIcon } from "@site0/tijs";
+  import { computed } from "vue";
+  import { UserInfo, useSessionStore } from "../../../../lib";
   //--------------------------------------------------
   // let emit = defineEmits<{
   //   (event: 'logout'): void;
@@ -9,21 +9,21 @@
   //--------------------------------------------------
   const session = useSessionStore();
   //--------------------------------------------------
-  const Me = computed(() => {
+  const Me = computed((): UserInfo => {
     return session.data.me ?? {};
   });
   //--------------------------------------------------
   const MyName = computed(() => {
-    return Me.value.nickname || Me.value.loginName || '-???-';
+    return Me.value.nickname || Me.value.loginName || "-???-";
   });
   //--------------------------------------------------
   const MyIcon = computed(() => {
     let re: IconInput =
       {
-        UNKNOWN: 'zmdi-account',
-        MALE: 'fab-twitter',
-        FEMALE: 'fab-facebook',
-      }[Me.value.gender || 'UNKNOWN'] || 'zmdi-account';
+        UNKNOWN: "zmdi-account",
+        MALE: "fab-twitter",
+        FEMALE: "fab-facebook",
+      }[Me.value.gender || "UNKNOWN"] || "zmdi-account";
     return re;
   });
   //--------------------------------------------------
@@ -35,7 +35,7 @@
   </div>
 </template>
 <style lang="scss" scoped>
-  @use '@site0/tijs/sass/_all.scss' as *;
+  @use "@site0/tijs/sass/_all.scss" as *;
   .wn-hub-avatar {
     display: grid;
     grid-template-columns: auto 1fr;

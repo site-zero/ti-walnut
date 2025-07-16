@@ -205,11 +205,29 @@ export class WalnutServer {
     return anyToHubViewOptions(view);
   }
 
-  getUrl(path: string) {
+  getUrl(path: string, params?: Vars) {
     let sep = path.startsWith("/") ? "" : "/";
     let { protocal, host, port } = this._conf;
     let ports = port == 80 ? "" : ":" + port;
-    return `${protocal}://${host}${ports}${sep}${path}`;
+    let server_path = `${protocal}://${host}${ports}${sep}${path}`;
+
+    const qs = new URLSearchParams();
+    _.forEach(params, (v, k) => {
+      qs.append(k, v);
+    });
+    let queryString = qs.toString();
+
+    // let qs = [] as string[];
+    // if (params) {
+    //   _.forEach(params, (v, k) => {
+    //     qs.push(`${k}=${encodeURIComponent(v)}`);
+    //   });
+    // }
+    // let queryString = "";
+    // if (qs.length > 0) {
+    //   queryString = "?" + qs.join("&");
+    // }
+    return [server_path, queryString].filter(Boolean).join("?");
   }
 
   getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
@@ -272,11 +290,24 @@ export class WalnutServer {
 
     // 处理返回
     if (re && re.ok && re.data) {
-      this._ticket = re.data.ticket;
-      TiStore.local.set(TICKET_KEY, this._ticket);
-      setEnv(ENV_KEYS.TIMEZONE, re.data.me.TIMEZONE);
+      this.saveTicketToLocal(re.data.ticket, re.data.me.TIMEZONE);
     }
     return re;
+  }
+
+  saveTicketToLocal(ticket: string | null | undefined, tz?: string) {
+    this._ticket = ticket || undefined;
+    // 移除
+    if (!ticket) {
+      TiStore.local.remove(TICKET_KEY);
+    }
+    // 设置
+    else {
+      TiStore.local.set(TICKET_KEY, ticket);
+    }
+
+    // 设置时区
+    setEnv(ENV_KEYS.TIMEZONE, tz || null);
   }
 
   async signOut(): Promise<AjaxResult> {
@@ -307,7 +338,7 @@ export class WalnutServer {
     options: WnLoadOptions = {}
   ): Promise<string | null> {
     let { quiet, signal } = options;
-    let url = this.getUrl(path);
+    let url = this.getUrl(path, options.query);
     const body = new URLSearchParams();
     _.forEach(form, (v, k) => {
       body.append(k, v);
@@ -335,7 +366,7 @@ export class WalnutServer {
     options: WnLoadOptions = {}
   ): Promise<any> {
     let { quiet, signal } = options;
-    let url = this.getUrl(path);
+    let url = this.getUrl(path, options.query);
     const body = new URLSearchParams();
     _.forEach(form, (v, k) => {
       body.append(k, v);
@@ -659,7 +690,7 @@ export class WalnutServer {
       }
     }
     let { quiet, signal } = options;
-    let url = this.getUrl(urlPath);
+    let url = this.getUrl(urlPath, options.query);
     let init = this.getRequestInit(signal);
     try {
       let resp = await fetch(url, init);
@@ -688,7 +719,7 @@ export class WalnutServer {
     }
     let { quiet, signal } = options;
     try {
-      let url = this.getUrl(urlPath);
+      let url = this.getUrl(urlPath, options.query);
       let init = this.getRequestInit(signal);
       let resp = await fetch(url, init);
       let text = await resp.text();
@@ -832,7 +863,7 @@ export class WalnutServer {
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
     // 执行命令
     if (debug) console.log("exec>:", cmdText, options);
-    let url = this.getUrl("/a/run/wn.manager");
+    let url = this.getUrl("/a/run/wn.term");
     let init = this.getRequestInit(options.signal);
     let reo = await wnRunCommand(url, init, cmdText, options);
     if (debug) console.log("exec>:", reo);

@@ -42,6 +42,7 @@ export type GlobalStatus = {
   viewName?: string;
   appPath?: string;
   appLoading: boolean | string;
+  quietPath?: string;
 
   /**
    * 默认为 true， false 表示隐藏侧边栏

@@ -231,6 +231,17 @@ export type WnExecOptions = {
   input?: string;
   as?: "json" | "text";
   signal?: AbortSignal;
+  /**
+   * 发送这个分隔符，服务器会在后面吧 Session 的环境变量
+   * 更新一份出来，这样一个请求即完成了命令也更新了环境变量
+   */
+  mos?: string;
+  /**
+   * 命令输出的时候，服务器是否应该尽量强制输出缓冲里的信息
+   * 以便让客户端尽快得到内容。
+   * 如果我们运行一个长耗时的命令，这个选项或许是调用者期望的
+   */
+  forceFlushBuffer?: boolean;
 };
 
 export type WnLoadOptions = {
@@ -247,6 +258,11 @@ export type WnLoadOptions = {
    * 如果是 Map<string, any> 那么会使用这个 Map 作为缓存
    */
   cache?: boolean | Map<string, any>;
+
+  /**
+   * 路径上带的 Query String
+   */
+  query?: Vars;
 };
 
 export type WnFetchObjOptions = WnLoadOptions & {
