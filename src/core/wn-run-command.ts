@@ -1,4 +1,4 @@
-import { Alert } from "@site0/tijs";
+import { Alert, AlertError } from "@site0/tijs";
 import JSON5 from "json5";
 import { SessionStore, useSessionStore, WnExecOptions } from "../lib";
 
@@ -35,7 +35,7 @@ export async function wnRunCommand(
         return JSON5.parse(str);
       } catch (errParse) {
         console.error("run-command re-fail to parse json: ", str, errParse);
-        await alert_error(cmdText, "Fail To Parse JSON", errParse);
+        await AlertError("Fail To Parse JSON", cmdText, errParse);
       }
     }
     // 那么默认就是返回文本咯
@@ -50,7 +50,7 @@ export async function wnRunCommand(
     }
     // 要警告一下
     console.error("run-command fail: ", reason);
-    await alert_error(cmdText, "Fail To Process", reason);
+    await AlertError("Fail To Process", cmdText, reason);
     throw reason;
   }
 }
@@ -114,21 +114,4 @@ async function processMOC(input: string) {
     const session = useSessionStore();
     fn(session, body);
   }
-}
-
-async function alert_error(cmdText: string, title: string, reason: any) {
-  let html = [`<h3>${title}</h3>`];
-  html.push("<pre>", cmdText, "</pre>");
-  html.push('<pre style="white-space:pre-wrap; width:100%;">');
-  html.push(reason);
-  html.push("</pre>");
-  await Alert(html.join(""), {
-    type: "warn",
-    width: "80%",
-    height: "80%",
-    minWidth: "480px",
-    minHeight: "320px",
-    contentType: "html",
-  });
-  throw reason;
 }

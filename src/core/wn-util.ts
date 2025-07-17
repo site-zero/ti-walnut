@@ -83,3 +83,20 @@ export function parseObjId(id: string): WnObjId {
   }
   return { selfId: id };
 }
+
+/**
+ * 对于输入的路径，如果用的是单引号包裹，譬如 `'/path/to'`
+ * 或者双引号包裹譬如 `"~/path/to"`，则会去掉包裹的引号。
+ *
+ * @param path 输入的路径
+ * @returns 整理后的字符串
+ */
+export function unwrapObjPath(path: string): string {
+  if (
+    (path.startsWith("'") && path.endsWith("'")) ||
+    (path.startsWith('"') && path.endsWith('"'))
+  ) {
+    return path.slice(1, -1);
+  }
+  return path;
+}

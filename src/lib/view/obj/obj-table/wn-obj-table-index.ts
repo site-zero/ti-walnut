@@ -15,4 +15,5 @@ const WnObjTableInfo: TiComInfo = {
 };
 
 export * from './wn-obj-table-types';
+export * from './use-obj-drop-to-upload';
 export { WnObjTable, WnObjTableInfo };

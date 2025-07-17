@@ -103,11 +103,16 @@ const SE = reactive({
 function _translate_session_result(data: any) {
   let env = data.envs || {};
   let me = data.me || {};
+  // 角色，老版本可能是半角分隔字符串，新版本可能是数组
+  let myRole = me.role;
+  if (_.isString(myRole)) {
+    myRole = Str.splitIgnoreBlank(myRole);
+  }
   SE.ticket = data.ticket;
   SE.me = {
     loginName: data.unm || me.name || me.loginName,
     mainGroup: data.grp || me.groupName || me.mainGroup,
-    role: Str.splitIgnoreBlank(me.role),
+    role: myRole,
     gender: toGender(me.sex),
     nickname: me.nickname,
     roleInOp: me.roleInOp,

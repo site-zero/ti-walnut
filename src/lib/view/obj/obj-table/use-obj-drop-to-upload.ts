@@ -1,4 +1,4 @@
-import { Be, useDropping } from '@site0/tijs';
+import { AlertError, Be, useDropping } from '@site0/tijs';
 import { Ref } from 'vue';
 import { Walnut, WnUploadFileOptions } from '../../../../core';
 import { ObjUploadItem, WnObj } from '../../../_types';
@@ -96,7 +96,7 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
           item.newObj = re.data;
         })
         .catch((err: any) => {
-          console.error('Upload Error:', err);
+          AlertError("Fail To Upload", null, err);
           // 上传失败
           item.abort = null;
         })
