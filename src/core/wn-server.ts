@@ -932,7 +932,7 @@ export class WalnutServer {
         //console.log('uploadFile : $req.readyState', $req.readyState);
         if (4 == $req.readyState) {
           let reo = JSON5.parse($req.responseText);
-          console.log("uploadFile : readyState == 4", reo);
+          //console.log("uploadFile : readyState == 4", reo);
           if (200 == $req.status && reo.ok) {
             let obj = reo.data;
             // 需要额外更新文件的元数据
