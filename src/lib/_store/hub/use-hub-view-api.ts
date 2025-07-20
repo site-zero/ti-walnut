@@ -7,24 +7,24 @@ import {
   openAppModal,
   Util,
   Vars,
-} from '@site0/tijs';
-import JSON5 from 'json5';
-import _ from 'lodash';
-import { computed, ref } from 'vue';
-import { Router } from 'vue-router';
-import { GlobalStatusApi } from '../../_features';
-import { GuiViewLayoutMode, WnObj } from '../../_types';
-import { GuiViewMeasureApi } from '../use-gui-view-measure.store';
-import { UserSessionApi } from '../use-session.store';
-import { HubModel, HubViewOptions, HubViewState } from './hub-view-types';
-import { useHubModel } from './use-hub--model';
+} from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
+import { computed, ref } from "vue";
+import { Router } from "vue-router";
+import { GlobalStatusApi } from "../../_features";
+import { GuiViewLayoutMode, WnObj } from "../../_types";
+import { GuiViewMeasureApi } from "../use-gui-view-measure.store";
+import { UserSessionApi } from "../use-session.store";
+import { HubModel, HubViewOptions, HubViewState } from "./hub-view-types";
+import { useHubModel } from "./use-hub--model";
 import {
   _reload_hub_actions,
   _reload_hub_layout,
   _reload_hub_methods,
   _reload_hub_schema,
-} from './use-hub--reload';
-import { HubNav, useHubNav } from './use-hub-nav';
+} from "./use-hub--reload";
+import { HubNav, useHubNav } from "./use-hub-nav";
 
 type InvokeError = {
   methodNotFound: boolean;
@@ -174,7 +174,10 @@ export function useHubViewApi(options: HubViewApiOptions) {
     } as InvokeThat;
 
     // 定义内部调用方法
-    that.invoke = async (methodName: string, ...args: any[]): Promise<any> => {
+    that.invoke = async (
+      methodName: string,
+      ...thatArgs: any[]
+    ): Promise<any> => {
       // 获取自定义方法
       let fn = that.methods[methodName];
 
@@ -186,9 +189,9 @@ export function useHubViewApi(options: HubViewApiOptions) {
       // 嗯，找到了一个方法，调用一下 ...
       if (fn) {
         if (isAsyncFunc(fn)) {
-          return await fn.apply(that, args);
+          return await fn.apply(that, thatArgs);
         }
-        return fn.apply(that, args);
+        return fn.apply(that, thatArgs);
       }
       // 未找到定义，抛个异常
       else {
@@ -223,7 +226,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     }
     // 没办法了，看看有没有一个通用的调用函数
     try {
-      return await invoke('handleBlockEvents', event);
+      return await invoke("handleBlockEvents", event);
     } catch (err: any) {
       // 用户未能成功处理这个事件，那么打印一个警告，给出详细提示
       console.error(err);
@@ -256,7 +259,7 @@ export function useHubViewApi(options: HubViewApiOptions) {
     }
     // 没办法了，看看有没有一个通用的调用函数
     try {
-      return await invoke('handleActionFire', event);
+      return await invoke("handleActionFire", event);
     } catch (err: any) {
       // 用户未能成功处理这个事件，那么打印一个警告，给出详细提示
       console.error(err);
@@ -271,20 +274,20 @@ export function useHubViewApi(options: HubViewApiOptions) {
 
   async function showModelDiff() {
     let changes = _model.value?.getChanges() ?? [];
-    console.log('show model diff', changes);
+    console.log("show model diff", changes);
 
     await openAppModal({
-      title: `${_model.value?.modelType ?? 'Unknown'} : Different`,
-      position: 'left',
-      type: 'primary',
-      width: '80%',
-      maxWidth: '640px',
-      height: '100%',
+      title: `${_model.value?.modelType ?? "Unknown"} : Different`,
+      position: "left",
+      type: "primary",
+      width: "80%",
+      maxWidth: "640px",
+      height: "100%",
       clickMaskToClose: true,
       result: JSON5.stringify(changes, null, 2),
-      comType: 'TiCodeEditor',
+      comType: "TiCodeEditor",
       comConf: {
-        format: 'JSON5',
+        format: "JSON5",
         readonly: true,
       } as CodeEditorProps,
     });
