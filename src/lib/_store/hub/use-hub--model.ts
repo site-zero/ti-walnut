@@ -1,29 +1,28 @@
-import { GlobalStatusApi } from '../../_features';
-import { WnObj } from '../../_types';
+import { GlobalStatusApi } from "../../_features";
+import { WnObj } from "../../_types";
 import {
   HubModel,
   HubModelCreateSetup,
   HubModelOptions,
-} from './hub-view-types';
-import { createEmptyHubModel } from './model/create-empty-hub-model';
-import { createRdsListHubModel } from './model/create-rds-list-hub-model';
-import { createRdsMetaHubModel } from './model/create-rds-meta-hub-model';
-import { createStdListHubModel } from './model/create-std-list-hub-model';
-import { createStdMetaHubModel } from './model/create-std-meta-hub-model';
+} from "./hub-view-types";
+import { createAuthHubModel } from "./model/create-auth-model";
+import { createEmptyHubModel } from "./model/create-empty-hub-model";
+import { createRdsListHubModel } from "./model/create-rds-list-hub-model";
+import { createRdsMetaHubModel } from "./model/create-rds-meta-hub-model";
+import { createStdListHubModel } from "./model/create-std-list-hub-model";
+import { createStdMetaHubModel } from "./model/create-std-meta-hub-model";
 
 type HubModeMaker = (setup: HubModelCreateSetup) => HubModel;
 
 const HUB_MODELS = new Map<string, HubModeMaker>();
-HUB_MODELS.set('EMPTY', createEmptyHubModel);
-HUB_MODELS.set('STD-LIST', createStdListHubModel);
-HUB_MODELS.set('STD-META', createStdMetaHubModel);
-HUB_MODELS.set('RDS-LIST', createRdsListHubModel);
-HUB_MODELS.set('RDS-META', createRdsMetaHubModel);
+HUB_MODELS.set("EMPTY", createEmptyHubModel);
+HUB_MODELS.set("STD-LIST", createStdListHubModel);
+HUB_MODELS.set("STD-META", createStdMetaHubModel);
+HUB_MODELS.set("RDS-LIST", createRdsListHubModel);
+HUB_MODELS.set("RDS-META", createRdsMetaHubModel);
+HUB_MODELS.set("AUTH", createAuthHubModel);
 
-export function addHubModelMaker(
-  modelName: string,
-  maker: HubModeMaker
-) {
+export function addHubModelMaker(modelName: string, maker: HubModeMaker) {
   HUB_MODELS.set(modelName, maker);
 }
 
@@ -44,7 +43,7 @@ export function useHubModel(
   options: HubModelOptions,
   objId?: string
 ) {
-  let { model = 'EMPTY', modelOptions = {} } = options;
+  let { model = "EMPTY", modelOptions = {} } = options;
   let setup: HubModelCreateSetup = {
     global: _gb_sta,
     hubObj,
@@ -57,6 +56,5 @@ export function useHubModel(
   }
 
   let re: HubModel = maker(setup);
-
   return re;
 }

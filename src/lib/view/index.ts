@@ -8,7 +8,6 @@ import { WnHubSideNavInfo } from './hub/hub-sidenav/wn-hub-side-nav-index';
 import { WnHubSkyInfo } from './hub/hub-sky/wn-hub-sky-index';
 
 // Obj
-import { WnDirBrowserInfo } from './obj/dir-browser/wn-dir-browser-index';
 import { WnObjListInfo } from './obj/obj-list/wn-obj-list-index';
 import { WnObjMetaInfo } from './obj/obj-meta/wn-obj-meta-index';
 import { WnObjTableInfo } from './obj/obj-table/wn-obj-table-index';
@@ -33,7 +32,6 @@ export default {
 
   // Obj
   WnObjViewer: WnObjViewerInfo,
-  WnDirBrowser: WnDirBrowserInfo,
   WnObjList: WnObjListInfo,
   WnObjTable: WnObjTableInfo,
   WnObjMeta: WnObjMetaInfo,
@@ -56,7 +54,6 @@ export * from './hub/hub-sidenav/wn-hub-side-nav-index';
 export * from './hub/hub-sky/wn-hub-sky-index';
 
 // Obj
-export * from './obj/dir-browser/wn-dir-browser-index';
 export * from './obj/obj-list/wn-obj-list-index';
 export * from './obj/obj-meta/wn-obj-meta-index';
 export * from './obj/obj-table/wn-obj-table-index';

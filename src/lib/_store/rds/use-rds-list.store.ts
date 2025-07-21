@@ -11,7 +11,7 @@ import {
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
-import { computed, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
@@ -94,8 +94,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   let sqlx = useSqlx(options.daoName);
   //---------------------------------------------
   // 本地保存
-  let _keep_query = useKeep(options.keepQuery);
-  let _keep_select = useKeep(options.keepSelect);
+  let _keep_query = computed(() => useKeep(options.keepQuery));
+  let _keep_select = computed(() => useKeep(options.keepSelect));
   //---------------------------------------------
   //              固定查询条件
   //---------------------------------------------
@@ -133,7 +133,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       _.assign(re, options.query);
     }
     // 最后处理一下本地数据
-    let local = _keep_query.loadObj();
+    let local = _keep_query.value.loadObj();
     if (local?.filter) {
       re.filter = local?.filter;
     }
@@ -211,37 +211,37 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   const _remote = ref<SqlResult[]>();
   const _action_status = ref<DataStoreActionStatus>();
-  const query = reactive(__create_data_query());
-  const _current_id = ref<TableRowID>();
-  const _checked_ids = ref<TableRowID[]>([]);
+  const _query = ref(__create_data_query());
+  const _current_id = ref<string>();
+  const _checked_ids = ref<string[]>([]);
   //---------------------------------------------
-  let selection = _keep_select.loadObj() ?? {};
+  let selection = _keep_select.value.loadObj() ?? {};
   _current_id.value = selection.currentId;
   _checked_ids.value = selection.checkedIds || [];
   //---------------------------------------------
   function __save_local_query() {
-    _keep_query.save({
-      filter: query.filter,
-      sorter: query.sorter,
+    _keep_query.value.save({
+      filter: _query.value.filter,
+      sorter: _query.value.sorter,
       pager: {
-        pageSize: query.pager?.pageSize,
+        pageSize: _query.value.pager?.pageSize,
       },
     });
   }
   //---------------------------------------------
   function __reset_local_query() {
-    _keep_query.remove();
+    _keep_query.value.remove();
   }
   //---------------------------------------------
   function __save_local_select() {
-    _keep_select.save({
+    _keep_select.value.save({
       currentId: _current_id.value,
       checkedIds: _checked_ids.value,
     });
   }
   //---------------------------------------------
   function __reset_local_select() {
-    _keep_select.remove();
+    _keep_select.value.remove();
   }
   //---------------------------------------------
   //                 组合其他特性
@@ -270,7 +270,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (_.isUndefined(_remote.value)) {
       return "unloaded";
     }
-    if (_remote.value.length == query.pager?.totalCount) {
+    if (_remote.value.length == _query.value.pager?.totalCount) {
       return "full";
     }
     return "partial";
@@ -285,8 +285,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   function clearRemoteList() {
     _remote.value = undefined;
-    if (query.pager) {
-      updatePagerTotal(query.pager, 0);
+    if (_query.value.pager) {
+      updatePagerTotal(_query.value.pager, 0);
     }
   }
 
@@ -322,18 +322,18 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     () => _checked_ids.value && _checked_ids.value.length > 0
   );
 
-  function existsInRemote(id: TableRowID): boolean {
+  function existsInRemote(id: string): boolean {
     return _local.existsInRemote(id);
   }
 
   /**
    * 获取数据的 ID
    */
-  function getItemId(it: SqlResult, index: number = -1): TableRowID {
-    return _local.getRowId(it, index);
+  function getItemId(it: SqlResult, index: number = -1): string {
+    return _local.getRowId(it, index) as string;
   }
 
-  function getItemById(id?: TableRowID) {
+  function getItemById(id?: string) {
     if (_.isNil(id)) {
       return;
     }
@@ -343,7 +343,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
-  function getItemIndex(id: TableRowID) {
+  function getItemIndex(id: string) {
     return _local.getRowIndex(id);
   }
 
@@ -375,7 +375,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return findItemsById(_checked_ids.value);
   }
 
-  function findItemsById(ids: TableRowID[]): SqlResult[] {
+  function findItemsById(ids: string[]): SqlResult[] {
     let indexs = ids.map((id) => _local.getRowIndex(id));
     let re: SqlResult[] = [];
     for (let i of indexs) {
@@ -413,7 +413,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function getFilterField(key: string, dft?: any) {
-    return _.get(query.filter, key) ?? dft;
+    return _.get(_query.value.filter, key) ?? dft;
   }
 
   function prependItem(item: SqlResult) {
@@ -498,7 +498,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   function updateItemsBy(
     meta: SqlResult,
-    forIds?: TableRowID | TableRowID[]
+    forIds?: string | string[]
   ): SqlResult[] {
     return _local.batchUpdate(meta, forIds);
   }
@@ -535,7 +535,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _local.clearItems();
   }
 
-  function removeItems(forIds?: TableRowID | TableRowID[]): SqlResult[] {
+  function removeItems(forIds?: string | string[]): SqlResult[] {
     if (!_.isNil(forIds)) {
       let ids = _.concat([], forIds);
       return _local.removeLocalItems(ids);
@@ -560,10 +560,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     __save_local_select();
   }
 
-  function updateSelection(
-    currentId?: TableRowID | null,
-    checkedIds?: TableRowID[]
-  ) {
+  async function updateSelection(currentId?: string | null, checkedIds?: string[]) {
     if (_.isEmpty(checkedIds) && !_.isNil(currentId)) {
       checkedIds = [currentId];
     }
@@ -586,28 +583,28 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   const CurrentItem = computed(() => getCurrentItem());
 
   function setQuery(q: ComboFilterValue) {
-    _.assign(query, q);
+    _.assign(_query, q);
     __save_local_query();
   }
 
   function setFilter(filter: QueryFilter) {
-    query.filter = _.cloneDeep(filter);
+    _query.value.filter = _.cloneDeep(filter);
     __save_local_query();
   }
 
   function setSorter(sorter: QuerySorter) {
-    query.sorter = _.cloneDeep(sorter);
+    _query.value.sorter = _.cloneDeep(sorter);
     __save_local_query();
   }
 
   function setPager(page: Partial<SqlPagerInput>) {
-    if (!query.pager) {
-      query.pager = {
+    if (!_query.value.pager) {
+      _query.value.pager = {
         pageNumber: 1,
         pageSize: 20,
       };
     }
-    updatePager(query.pager, page);
+    updatePager(_query.value.pager, page);
     __save_local_query();
   }
 
@@ -616,7 +613,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function __gen_query(): SqlQuery {
-    let q = _.cloneDeep(query);
+    let q = _.cloneDeep(_query.value);
     q.filter = q.filter ?? {};
     q.filter = Util.filterRecordNilValueDeeply(q.filter);
 
@@ -704,8 +701,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     let q = __gen_query();
     apply_query_prefix(q, _count_prefix_append.value);
     let total = await countRemote(q.filter);
-    if (query.pager) {
-      updatePagerTotal(query.pager, total);
+    if (_query.value.pager) {
+      updatePagerTotal(_query.value.pager, total);
     }
     _action_status.value = undefined;
   }
@@ -736,7 +733,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //               远程更新方法
   //---------------------------------------------
-  async function saveChange({ transLevel = 1 } = {}) {
+  async function saveChange(options: Vars = {}) {
+    const { transLevel = 1 } = options;
     // 获取改动信息
     let changes = makeChanges();
     log.debug("saveChange", changes);
@@ -772,10 +770,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _remote,
     currentId: _current_id,
     checkedIds: _checked_ids,
-    query,
     //---------------------------------------------
     //                  计算属性
     //---------------------------------------------
+    query: computed(() => _query.value),
     remoteList: computed(() => _remote.value),
     ActionStatus,
     ActionBarVars,

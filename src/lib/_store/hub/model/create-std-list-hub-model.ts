@@ -52,7 +52,7 @@ export function createStdListHubModel(setup: HubModelCreateSetup): HubModel {
 
   function getChanges(): Vars[] {
     let re: Vars[] = [];
-    re.push(...store.makeMetaDifferents());
+    re.push(...store.makeDifferents());
     re.push(...store.makeContentDifferents());
     return re;
   }

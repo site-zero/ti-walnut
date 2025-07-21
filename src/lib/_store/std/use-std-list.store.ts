@@ -260,7 +260,8 @@ function defineStdListStore(options: StdListStoreOptions) {
     _action_status.value = undefined;
   }
   //---------------------------------------------
-  async function saveChange({ force = false } = {}) {
+  async function saveChange(options: Vars = {}) {
+    const { force = false } = options;
     // 自动检测改动
     if (!changed.value || force) {
       return;
@@ -272,7 +273,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     await saveCurrentContent({ force });
   }
   //---------------------------------------------
-  function makeMetaDifferents() {
+  function makeDifferents() {
     let re: Vars[] = [];
     let diffs = _local.makeDifferents();
     for (let diff of diffs) {
@@ -422,6 +423,10 @@ function defineStdListStore(options: StdListStoreOptions) {
   const hasChecked = computed(
     () => _checked_ids.value && _checked_ids.value.length > 0
   );
+
+  function existsInRemote(id: string): boolean {
+    return _local.existsInRemote(id);
+  }
 
   /**
    * 获取数据的 ID
@@ -924,6 +929,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
+    existsInRemote,
     getItemId,
     getItemIndex,
     getItemById,
@@ -1000,7 +1006,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     loadCurrentContent,
     setCurrentContent,
     saveCurrentContent,
-    makeMetaDifferents,
+    makeDifferents,
     makeContentDifferents,
     //---------------------------------------------
     // 本地化存储状态

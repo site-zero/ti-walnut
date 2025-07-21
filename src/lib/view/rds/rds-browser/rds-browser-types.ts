@@ -108,7 +108,7 @@ export type RdsBrowserProps = {
    * - `string` 表示直接使用数据项的属性值
    * - `function` 直接提供一个函数从数据项取值
    */
-  getItemId?: string | ((it: Vars) => TableRowID | undefined);
+  getItemId?: string | ((it: Vars) => string | undefined);
 
   //--------------------------------------------------
   // 定制界面

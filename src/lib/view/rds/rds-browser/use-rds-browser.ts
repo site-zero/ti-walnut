@@ -4,28 +4,26 @@ import {
   ComboFilterProps,
   ComboFilterValue,
   Confirm,
-  DateTime,
   FormProps,
   KeepProps,
   PagerProps,
   RoadblockProps,
   TableProps,
-  TableRowID,
   TableSelectEmitInfo,
   Util,
   Vars,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { computed } from 'vue';
-import { RdsListStoreApi } from '../../../_store';
-import { SqlResult } from '../../../_types';
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed } from "vue";
+import { Walnut } from "../../../../core/wn";
+import { RdsListStoreApi } from "../../../_store";
+import { SqlResult } from "../../../_types";
 import {
   KeepTarget,
   RdsBrowserEmitter,
   RdsBrowserProps,
   RdsCreateNewItemContext,
-} from './rds-browser-types';
-import { Walnut } from '../../../../core/wn';
+} from "./rds-browser-types";
 //--------------------------------------------------
 /**
  * 获取本地状态保存的特性
@@ -35,11 +33,11 @@ export function getKeepName(
   key: KeepTarget
 ): KeepProps | undefined {
   if (props.keepName) {
-    let keepAt = ['WnRdsBrowser', props.keepName, key].join('-');
+    let keepAt = ["WnRdsBrowser", props.keepName, key].join("-");
     let keepMode =
-      _.get(props.keepModes, key) ?? props.defaultKeepMode ?? 'local';
+      _.get(props.keepModes, key) ?? props.defaultKeepMode ?? "local";
     // 保存模式
-    if (!keepMode || 'no-keep' == keepMode) {
+    if (!keepMode || "no-keep" == keepMode) {
       return;
     }
     return {
@@ -62,19 +60,19 @@ export function useRdsBrowser(
 ) {
   //--------------------------------------------------
   const TableEmptyRoadblock = computed((): RoadblockProps => {
-    if (store.ActionStatus.value == 'loading') {
+    if (store.ActionStatus.value == "loading") {
       return {
-        icon: 'fas-spinner fa-pulse',
-        text: 'i18n:loading',
+        icon: "fas-spinner fa-pulse",
+        text: "i18n:loading",
       };
     }
     return {
-      text: 'i18n:empty-data',
-      mode: 'auto',
-      layout: 'A',
-      size: 'normal',
-      opacity: 'shadowy',
-      icon: 'zmdi-apps',
+      text: "i18n:empty-data",
+      mode: "auto",
+      layout: "A",
+      size: "normal",
+      opacity: "shadowy",
+      icon: "zmdi-apps",
     };
   });
 
@@ -83,8 +81,8 @@ export function useRdsBrowser(
     changed: store.changed.value,
     hasChecked: store.hasChecked.value,
     hasCurrent: store.hasCurrent.value,
-    reloading: store.ActionStatus.value == 'loading',
-    saving: store.ActionStatus.value == 'saving',
+    reloading: store.ActionStatus.value == "loading",
+    saving: store.ActionStatus.value == "saving",
   }));
 
   //--------------------------------------------------
@@ -109,11 +107,11 @@ export function useRdsBrowser(
   //--------------------------------------------------
   const DataFilterConfig = computed(() => {
     return _.defaults({}, props.filter, {
-      layout: 'oneline',
-      keepMajor: getKeepName(props, 'Filter-Major'),
+      layout: "oneline",
+      keepMajor: getKeepName(props, "Filter-Major"),
       value: {
-        filter: store.query.filter,
-        sorter: store.query.sorter,
+        filter: store.query.value.filter,
+        sorter: store.query.value.sorter,
       },
     } as ComboFilterProps) as ComboFilterProps;
   });
@@ -123,8 +121,8 @@ export function useRdsBrowser(
   //--------------------------------------------------
   const DataPagerConfig = computed(() => {
     return {
-      mode: 'jumper',
-      ...(store.query.pager ?? {}),
+      mode: "jumper",
+      ...(store.query.value.pager ?? {}),
       count: store.listData.value.length,
     } as PagerProps;
   });
@@ -135,8 +133,8 @@ export function useRdsBrowser(
   const DataTableConfig = computed(() => {
     return _.assign(
       {
-        className: 'cover-parent',
-        keepColumns: getKeepName(props, 'Table-Columns'),
+        className: "cover-parent",
+        keepColumns: getKeepName(props, "Table-Columns"),
         multi: true,
         emptyRoadblock: TableEmptyRoadblock.value,
         currentId: TableCurrentId.value,
@@ -157,8 +155,8 @@ export function useRdsBrowser(
       {
         maxFieldNameWidth: 100,
         layoutHint: [[6, 1500], [5, 1250], [4, 1000], [3, 750], [2, 500], 1],
-        defaultComType: 'TiInput',
-        emptyRoadblock: { text: 'i18n:nil-item', icon: 'zmdi-arrow-left' },
+        defaultComType: "TiInput",
+        emptyRoadblock: { text: "i18n:nil-item", icon: "zmdi-arrow-left" },
       } as FormProps,
       props.form,
       {
@@ -168,7 +166,7 @@ export function useRdsBrowser(
   });
 
   //--------------------------------------------------
-  let getId: (it: Vars) => TableRowID | undefined;
+  let getId: (it: Vars) => string | undefined;
   if (_.isFunction(props.getItemId)) {
     getId = props.getItemId;
   } else if (_.isString(props.getItemId)) {
@@ -185,7 +183,7 @@ export function useRdsBrowser(
     let msg = (props.messages ?? {}).warn_refresh;
     if (msg) {
       if (store.changed.value) {
-        Alert(msg, { type: 'warn' });
+        Alert(msg, { type: "warn" });
         return false;
       }
     }
@@ -253,29 +251,29 @@ export function useRdsBrowser(
   }
 
   function onCurrentMetaChange(payload: SqlResult) {
-    console.log('onDetailChange', payload);
+    console.log("onDetailChange", payload);
     store.updateCurrent(payload);
   }
 
   async function onActionFire(barEvent: ActionBarEvent) {
     let { name, payload } = barEvent;
-    console.log('onActionFire', name, payload);
+    console.log("onActionFire", name, payload);
 
     // 自定义处理
     if (props.handleAction) {
       let mark =
-        (await props.handleAction(store, name, payload)) ?? 'unhandled';
-      if (mark == 'handled') {
+        (await props.handleAction(store, name, payload)) ?? "unhandled";
+      if (mark == "handled") {
         return;
       }
     }
 
     // Reload
-    if ('reload' == name) {
+    if ("reload" == name) {
       refresh();
     }
     // Create
-    else if ('create' == name) {
+    else if ("create" == name) {
       if (props.createNewItem) {
         // 准备上下文
         let ctx: RdsCreateNewItemContext = { store };
@@ -285,7 +283,7 @@ export function useRdsBrowser(
 
         // 事件
         if (_.isString(props.createNewItem)) {
-          emit('create:item', ctx);
+          emit("create:item", ctx);
           return;
         }
 
@@ -317,14 +315,14 @@ export function useRdsBrowser(
       }
     }
     // Save
-    else if ('save' == name) {
+    else if ("save" == name) {
       store.saveChange({ transLevel: 1 });
     }
     // Drop
-    else if ('reset' == name) {
+    else if ("reset" == name) {
       let msg = (props.messages ?? {}).warn_drop_change;
       if (msg) {
-        Confirm(msg, { type: 'warn' }).then((yes) => {
+        Confirm(msg, { type: "warn" }).then((yes) => {
           if (yes) {
             store.resetLocalChange();
           }
@@ -336,12 +334,12 @@ export function useRdsBrowser(
       }
     }
     // Remove
-    else if ('remove' == name) {
+    else if ("remove" == name) {
       store.removeChecked();
     }
     // warn unhandled action
     else {
-      console.warn('Unhandled action:', name, payload);
+      console.warn("Unhandled action:", name, payload);
     }
   }
   //--------------------------------------------------
