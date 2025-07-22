@@ -105,19 +105,19 @@ function defineObjMetaStore(options: ObjMetaStoreOptions): ObjMetaStoreFeature {
   //---------------------------------------------
   function updateMeta(meta: Vars) {
     if (!_local.value) {
-      _local.value = _.cloneDeep(_remote.value ?? {});
+      _local.value = Util.jsonClone(_remote.value ?? {});
     }
     _.assign(_local.value, meta);
   }
 
   function setMeta(meta: WnObj) {
-    _local.value = _.cloneDeep(meta);
+    _local.value = Util.jsonClone(meta);
   }
 
   function initMeta(meta?: WnObj) {
     _local.value = undefined;
     if (meta) {
-      _remote.value = _.cloneDeep(meta);
+      _remote.value = Util.jsonClone(meta);
     } else {
       _remote.value = undefined;
     }

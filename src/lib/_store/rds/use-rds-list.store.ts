@@ -3,7 +3,6 @@ import {
   getLogger,
   KeepInfo,
   Match,
-  TableRowID,
   TableSelectEmitInfo,
   TiMatch,
   useKeep,
@@ -104,7 +103,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       return options.fixedMatch();
     }
     if (options.fixedMatch) {
-      return _.cloneDeep(options.fixedMatch);
+      return Util.jsonClone(options.fixedMatch);
     }
     return {};
   }
@@ -113,7 +112,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       return options.defaultFilter();
     }
     if (options.defaultFilter) {
-      return _.cloneDeep(options.defaultFilter);
+      return Util.jsonClone(options.defaultFilter);
     }
     return {};
   }
@@ -440,6 +439,24 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
+  function prependItems(items: SqlResult[] = []) {
+    if (!items) {
+      return;
+    }
+    for (let item of items.reverse()) {
+      prependItem(item);
+    }
+  }
+
+  function appendItems(items: SqlResult[] = []) {
+    if (!items) {
+      return;
+    }
+    for (let item of items) {
+      appendItem(item);
+    }
+  }
+
   function updateCurrent(meta: SqlResult): SqlResult | undefined {
     if (hasCurrent.value) {
       let uf = { id: _current_id.value };
@@ -560,7 +577,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     __save_local_select();
   }
 
-  async function updateSelection(currentId?: string | null, checkedIds?: string[]) {
+  async function updateSelection(
+    currentId?: string | null,
+    checkedIds?: string[]
+  ) {
     if (_.isEmpty(checkedIds) && !_.isNil(currentId)) {
       checkedIds = [currentId];
     }
@@ -588,12 +608,12 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function setFilter(filter: QueryFilter) {
-    _query.value.filter = _.cloneDeep(filter);
+    _query.value.filter = Util.jsonClone(filter);
     __save_local_query();
   }
 
   function setSorter(sorter: QuerySorter) {
-    _query.value.sorter = _.cloneDeep(sorter);
+    _query.value.sorter = Util.jsonClone(sorter);
     __save_local_query();
   }
 
@@ -613,7 +633,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function __gen_query(): SqlQuery {
-    let q = _.cloneDeep(_query.value);
+    let q = Util.jsonClone(_query.value);
     q.filter = q.filter ?? {};
     q.filter = Util.filterRecordNilValueDeeply(q.filter);
 
@@ -680,7 +700,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (options.patchRemote) {
       let list2 = [] as SqlResult[];
       for (let i = 0; i < list.length; i++) {
-        let li = _.cloneDeep(list[i]);
+        let li = list[i];
         let li2 = options.patchRemote(li, i);
         if (li2) {
           list2.push(li2);
@@ -733,8 +753,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   //               远程更新方法
   //---------------------------------------------
-  async function saveChange(options: Vars = {}) {
-    const { transLevel = 1 } = options;
+  async function saveChange(setup: Vars = {}) {
+    const { transLevel = 1 } = setup;
     // 获取改动信息
     let changes = makeChanges();
     log.debug("saveChange", changes);
@@ -819,6 +839,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     appendItem,
     prependItem,
+    appendItems,
+    prependItems,
 
     updateCurrent,
     updateItem,

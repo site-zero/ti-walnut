@@ -3,6 +3,7 @@ import {
   LayoutBlock,
   RoadblockProps,
   TabsLayoutProps,
+  Util,
 } from "@site0/tijs";
 import _ from "lodash";
 import { WnObjViewerApi } from "./use-wn-obj-viewer";
@@ -44,7 +45,7 @@ export function useObjViewerLayout(
     }
     // 加入标签页
     if (tab) {
-      tab = _.cloneDeep(tab);
+      tab = Util.jsonClone(tab);
       if (!tab.name) {
         tab.name = tabName;
       }

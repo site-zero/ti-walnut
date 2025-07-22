@@ -1,15 +1,11 @@
-import { Icons, Vars } from "@site0/tijs";
+import { Vars } from "@site0/tijs";
 import _ from "lodash";
-import {
-  StdListStoreOptions,
-  useStdListStore,
-} from "../../std/use-std-list.store";
-import { HubModel, HubModelCreateSetup } from "../hub-view-types";
-import { AuthStoreOptions, useAuthStore } from "../../auth/use-auth.store";
 import { RefreshOptions } from "../../..";
+import { AuthStoreOptions, useAuthStore } from "../../auth/use-auth.store";
+import { HubModel, HubModelCreateSetup } from "../hub-view-types";
 
 export function createAuthHubModel(setup: HubModelCreateSetup): HubModel {
-  let { global: _gb_sta, hubObj, modelOptions, objId } = setup;
+  let { global: _gb_sta, modelOptions, objId } = setup;
   const storeOptions = _.assign({}, modelOptions, {
     globalStatus: _gb_sta,
   }) as AuthStoreOptions;
@@ -20,18 +16,18 @@ export function createAuthHubModel(setup: HubModelCreateSetup): HubModel {
     let re: Vars = {
       currentId: _s.Main.value?.currentId.value,
       checkedIds: _s.Main.value?.checkedIds.value,
-      query: _s.Main.value?.query,
+      query: _s.Main.value?.query.value,
       ActionStatus: _s.Main.value?.ActionStatus.value,
-      ActionBarVars: _s.Main.value?.ActionBarVars.value,
+      ActionBarVars: _s.ActionBarVars.value,
       LoadStatus: _s.Main.value?.LoadStatus.value,
-      listData: _s.Main.value?.listData.value,
+      listData: _s.listData.value,
       hasCurrent: _s.Main.value?.hasCurrent.value,
       hasChecked: _s.Main.value?.hasChecked.value,
       changed: _s.changed.value,
       isEmpty: _s.Main.value?.isEmpty.value,
       isRemoteEmpty: _s.Main.value?.isRemoteEmpty.value,
       isLocalEmpty: _s.Main.value?.isLocalEmpty.value,
-      CurrentItem: _s.Main.value?.CurrentItem.value,
+      CurrentItem: _s.CurrentItem.value,
     };
     return re;
   };

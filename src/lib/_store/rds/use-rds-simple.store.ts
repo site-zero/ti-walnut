@@ -62,7 +62,7 @@ export function defineRdsSimpleStore(options: RdsStoreDefination) {
       return options.fixedMatch();
     }
     if (options.fixedMatch) {
-      return _.cloneDeep(options.fixedMatch);
+      return Util.jsonClone(options.fixedMatch);
     }
     return {};
   }
@@ -71,7 +71,7 @@ export function defineRdsSimpleStore(options: RdsStoreDefination) {
       return options.defaultFilter();
     }
     if (options.defaultFilter) {
-      return _.cloneDeep(options.defaultFilter);
+      return Util.jsonClone(options.defaultFilter);
     }
     return {};
   }
@@ -388,7 +388,7 @@ export function defineRdsSimpleStore(options: RdsStoreDefination) {
   // 查询方法
   //---------------------------------------------
   function __gen_query(): SqlQuery {
-    let q = _.cloneDeep(query);
+    let q = Util.jsonClone(query);
     q.filter = q.filter ?? {};
     _.assign(q.filter, __create_fixed_match());
     q.filter = Util.filterRecordNilValueDeeply(q.filter);

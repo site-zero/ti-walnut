@@ -177,7 +177,7 @@ export function useWnSliderEditorApi(
         }
       }
 
-      let data = _.cloneDeep(SliderData.value);
+      let data = Util.jsonClone(SliderData.value);
       if (!data.medias) {
         data.medias = [];
       }
@@ -190,7 +190,7 @@ export function useWnSliderEditorApi(
   }
   //----------------------------------------------------
   function updateSliderData(delta: Vars) {
-    let data = _.cloneDeep(SliderData.value);
+    let data = Util.jsonClone(SliderData.value);
     _.assign(data, delta);
     notifyChange(data);
   }
@@ -204,7 +204,7 @@ export function useWnSliderEditorApi(
     }
 
     // 合并对象
-    let data = _.cloneDeep(SliderData.value);
+    let data = Util.jsonClone(SliderData.value);
     if (!data.medias) {
       data.medias = [];
     }
@@ -222,7 +222,7 @@ export function useWnSliderEditorApi(
   }
   //----------------------------------------------------
   function removeCheckedMedias() {
-    let data = _.cloneDeep(SliderData.value);
+    let data = Util.jsonClone(SliderData.value);
     if (!data.medias) {
       data.medias = [];
     }
@@ -236,7 +236,7 @@ export function useWnSliderEditorApi(
   }
   //----------------------------------------------------
   function moveCheckedTo(dir: MoveDirection) {
-    let data = _.cloneDeep(SliderData.value);
+    let data = Util.jsonClone(SliderData.value);
     if (!_.isEmpty(data.medias)) {
       data.medias = Util.moveChecked(
         data.medias ?? [],

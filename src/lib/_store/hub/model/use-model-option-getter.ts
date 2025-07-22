@@ -1,4 +1,4 @@
-import { KeepInfo, Vars } from "@site0/tijs";
+import { KeepInfo, Vars, Util } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
 import {
@@ -81,7 +81,7 @@ export function useModelOptionGetter(input: Vars) {
       return JSON5.parse(re) as Vars;
     }
     if (_.isObject(re)) {
-      return _.cloneDeep(re) as Vars;
+      return Util.jsonClone(re) as Vars;
     }
   }
 
@@ -185,10 +185,10 @@ export function useModelOptionGetter(input: Vars) {
       return () => JSON5.parse(re) as SqlExecSetVar[];
     }
     if (_.isArray(re)) {
-      return () => _.cloneDeep(re) as SqlExecSetVar[];
+      return () => Util.jsonClone(re) as SqlExecSetVar[];
     }
     if (isSqlExecSetVar(re)) {
-      return () => [_.cloneDeep(re) as SqlExecSetVar];
+      return () => [Util.jsonClone(re) as SqlExecSetVar];
     }
     console.warn(`Unsupport SqlExecSetVarArray: ${JSON.stringify(re)}`);
   }
@@ -209,7 +209,7 @@ export function useModelOptionGetter(input: Vars) {
       return () => JSON5.parse(re) as SqlExecFetchBack;
     }
     if (isSqlExecFetchBack(re)) {
-      return () => _.cloneDeep(re) as SqlExecFetchBack;
+      return () => Util.jsonClone(re) as SqlExecFetchBack;
     }
   }
 
@@ -227,7 +227,7 @@ export function useModelOptionGetter(input: Vars) {
       return () => JSON5.parse(re) as Vars;
     }
     if (_.isObject(re)) {
-      return () => _.cloneDeep(re) as Vars;
+      return () => Util.jsonClone(re) as Vars;
     }
     if (_.isFunction(re)) {
       return re;
@@ -250,7 +250,7 @@ export function useModelOptionGetter(input: Vars) {
       return () => JSON5.parse(re) as Vars;
     }
     if (_.isObject(re)) {
-      return () => _.cloneDeep(re) as Vars;
+      return () => Util.jsonClone(re) as Vars;
     }
     if (_.isFunction(re)) {
       return re;

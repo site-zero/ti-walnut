@@ -241,7 +241,7 @@ export function useLocalListEdit(
   //---------------------------------------------
   function initLocalList() {
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
       return true;
     }
     return false;
@@ -309,7 +309,7 @@ export function useLocalListEdit(
   ): SqlResult | undefined {
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     // 确定要修改的行和字段
@@ -325,7 +325,7 @@ export function useLocalListEdit(
   function appendToList(newItem: SqlResult) {
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     _local_list.value.push(newItem);
@@ -334,7 +334,7 @@ export function useLocalListEdit(
   function append(...newItems: SqlResult[]) {
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     _local_list.value.push(...newItems);
@@ -343,7 +343,7 @@ export function useLocalListEdit(
   function prependToList(newItem: SqlResult) {
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     _local_list.value.unshift(newItem);
@@ -352,7 +352,7 @@ export function useLocalListEdit(
   function prepend(...newItems: SqlResult[]) {
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     _local_list.value.unshift(...newItems);
@@ -364,7 +364,7 @@ export function useLocalListEdit(
   ): SqlResult[] {
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      _local_list.value = Util.jsonClone(remoteList.value || []);
     }
     //console.log('batchUpdate', forIds, meta);
 
@@ -450,7 +450,12 @@ export function useLocalListEdit(
 
     // 自动生成 localList
     if (!_local_list.value) {
-      _local_list.value = _.cloneDeep(remoteList.value || []);
+      if (!remoteList.value) {
+        _local_list.value = [];
+      } else {
+        let json = JSON.stringify(remoteList.value);
+        _local_list.value = JSON.parse(json) as SqlResult[];
+      }
     }
 
     // Remove Local list
@@ -578,7 +583,7 @@ export function useLocalListEdit(
         }
         // 必然是新记录，需要插入
         else {
-          let newMeta = _.cloneDeep(local);
+          let newMeta = Util.jsonClone(local);
           if (options.defaultMeta) {
             // 动态计算
             if (_.isFunction(options.defaultMeta)) {
@@ -681,8 +686,8 @@ export function useLocalListEdit(
           id,
           existsInRemote: remote ? true : false,
           existsInLocal: true,
-          local: _.cloneDeep(local),
-          remote: _.cloneDeep(remote),
+          local: Util.jsonClone(local),
+          remote: Util.jsonClone(remote),
         } as DiffItem;
         // 已经存在，必然是要更新记录
         if (remote) {
@@ -724,7 +729,7 @@ export function useLocalListEdit(
         }
         // 必然是新记录，需要插入
         else {
-          let newMeta = _.cloneDeep(local);
+          let newMeta = Util.jsonClone(local);
           if (options.defaultMeta) {
             // 动态计算
             if (_.isFunction(options.defaultMeta)) {
@@ -766,7 +771,7 @@ export function useLocalListEdit(
             existsInLocal: false,
             local: {},
             delta: {},
-            remote: _.cloneDeep(remote),
+            remote: Util.jsonClone(remote),
           });
         }
       }

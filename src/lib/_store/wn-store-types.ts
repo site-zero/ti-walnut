@@ -46,25 +46,44 @@ export type UserRoleMapping = {
   /**
    * 特殊权限
    */
-  privileges: string[];
+  privileges?: string[];
 };
 
-export function toUserRoleType(
+export function toUserRoleName(
   type: string,
   dft: UserRoleType = "GUEST"
 ): UserRoleType {
   if (/^(ADMIN|MEMBER|GUEST|BLOCK)$/.test(type)) {
+    return type as UserRoleType;
   }
   return dft;
 }
 
-export function toUserRoleTypeValue(input: any, dft: number=0): number {
+export function toUserRoleValue(input: any, dft: number = 0): number {
   if (input == 0 || input == 1 || input == 10 || input == -1) {
     return input;
   }
   return dft;
 }
 
-export function getUserRoleTypeValue(type: UserRoleType): number {
+export function getUserRoleValue(type: UserRoleType): number {
   return UserRoleTypes[type] || 0;
+}
+
+export function getUserRoleName(
+  role: number,
+  dft: UserRoleType = "GUEST"
+): UserRoleType {
+  switch (role) {
+    case 0:
+      return "GUEST";
+    case 1:
+      return "ADMIN";
+    case 10:
+      return "MEMBER";
+    case -1:
+      return "BLOCK";
+    default:
+      return dft;
+  }
 }

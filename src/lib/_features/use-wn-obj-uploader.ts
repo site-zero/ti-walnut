@@ -1,28 +1,28 @@
-import { Alert, I18n, Icons, ImageProps } from '@site0/tijs';
-import JSON5 from 'json5';
-import _ from 'lodash';
-import { computed, Ref, ref } from 'vue';
+import { Alert, I18n, Icons, ImageProps, Util } from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
+import { computed, Ref, ref } from "vue";
 import {
   AjaxResult,
   getWnObjIcon,
   isAjaxResult,
   Walnut,
   WnUploadFileOptions,
-} from '../../..';
+} from "../../..";
 import {
   isWnObj,
   useWnObj,
   WnObj,
   WnObjInput,
   WnObjInputType,
-} from '../../lib';
+} from "../../lib";
 
 export type WnObjUploaderEmitter = {
-  (event: 'change', payload: WnObjInput | null): void;
-  (event: 'fail', payload: AjaxResult): void;
+  (event: "change", payload: WnObjInput | null): void;
+  (event: "fail", payload: AjaxResult): void;
 };
 
-export type WnObjUploadSetup = Omit<WnUploadFileOptions, 'progress' | 'signal'>;
+export type WnObjUploadSetup = Omit<WnUploadFileOptions, "progress" | "signal">;
 
 export type WnObjUploaderProps = {
   value?: WnObjInput;
@@ -51,7 +51,7 @@ export function useWnObjUploader(
    * @computed
    * @returns {string} 返回 `props.valueType` 或默认值 `'idPath'`。
    */
-  const ValueType = computed(() => props.valueType ?? 'idPath');
+  const ValueType = computed(() => props.valueType ?? "idPath");
   /**
    * 计算属性 BarPreview，用于根据文件或对象的值生成图像属性。
    *
@@ -61,7 +61,7 @@ export function useWnObjUploader(
    */
   const Preview = computed((): ImageProps => {
     if (_file.value) {
-      return { src: _file.value, objectFit: 'cover' };
+      return { src: _file.value, objectFit: "cover" };
     }
 
     if (_obj.value) {
@@ -101,7 +101,7 @@ export function useWnObjUploader(
       return _obj.value.title || _obj.value.nm;
     }
 
-    return I18n.text(props.placeholder || 'i18n:wn-obj-upload-bar-placeholder');
+    return I18n.text(props.placeholder || "i18n:wn-obj-upload-bar-placeholder");
   });
 
   function __set_obj(obj: WnObjInput | undefined) {
@@ -116,16 +116,16 @@ export function useWnObjUploader(
   }
 
   function __to_obj_value(obj: WnObj): WnObjInput {
-    if (ValueType.value === 'obj') {
-      return _.cloneDeep(obj);
+    if (ValueType.value === "obj") {
+      return Util.jsonClone(obj);
     }
-    if (ValueType.value === 'id') {
+    if (ValueType.value === "id") {
       return obj.id;
     }
-    if (ValueType.value === 'idPath') {
+    if (ValueType.value === "idPath") {
       return `id:${obj.id}`;
     }
-    if (ValueType.value === 'path') {
+    if (ValueType.value === "path") {
       if (obj.ph) {
         return obj.ph;
       }
@@ -164,13 +164,13 @@ export function useWnObjUploader(
     }
 
     // 获取类型
-    if (isWnObj(input) && _input_type === 'obj') {
-      _obj.value = _.cloneDeep(input);
+    if (isWnObj(input) && _input_type === "obj") {
+      _obj.value = Util.jsonClone(input);
     }
     // 需要考虑异步加载
     else if (_.isString(input)) {
       // ID
-      if (_input_type === 'id') {
+      if (_input_type === "id") {
         // 使用缓存
         let obj = _cache.get(input);
         if (!obj) {
@@ -179,7 +179,7 @@ export function useWnObjUploader(
         __set_obj(obj);
       }
       // id:xxxx
-      else if (_input_type === 'idPath') {
+      else if (_input_type === "idPath") {
         let objId = input.substring(3).trim();
         let obj = _cache.get(objId);
         if (!obj) {
@@ -188,13 +188,13 @@ export function useWnObjUploader(
         __set_obj(obj);
       }
       // /path/to/obj
-      else if (_input_type === 'path') {
+      else if (_input_type === "path") {
         const obj = await objs.fetch(input);
         __set_obj(obj);
       }
       // 错误
       else {
-        console.error('Unknown WnObjInputType:', _input_type);
+        console.error("Unknown WnObjInputType:", _input_type);
         _obj.value = undefined;
       }
     }
@@ -229,7 +229,7 @@ export function useWnObjUploader(
     _file.value = file;
 
     if (!props.upload || !props.upload.target) {
-      Alert('i18n:e-upload-target-not-set', { type: 'danger' });
+      Alert("i18n:e-upload-target-not-set", { type: "danger" });
       return;
     }
 
@@ -254,20 +254,20 @@ export function useWnObjUploader(
     try {
       _fail_message.value = undefined;
       let reo = await Walnut.uploadFile(file, options);
-      console.log('Upload Result Object:', reo, reo);
+      console.log("Upload Result Object:", reo, reo);
       if (isAjaxResult(reo)) {
         if (reo.ok) {
           if (isWnObj(reo.data)) {
             __set_obj(reo.data);
 
             let val = __to_obj_value(reo.data);
-            emit('change', val);
+            emit("change", val);
           } else {
             let reAsStr = JSON5.stringify(reo.data, null, 2);
             _fail_message.value = reAsStr;
-            emit('fail', {
+            emit("fail", {
               ok: false,
-              msg: 'e.web.obj.upload.InvalidResult',
+              msg: "e.web.obj.upload.InvalidResult",
               data: reAsStr,
             });
           }
@@ -278,7 +278,7 @@ export function useWnObjUploader(
       // 不管怎么样，就是错误了
       else {
         _fail_message.value = JSON5.stringify(reo, null, 2);
-        emit('fail', { ok: false, msg: 'e.web.obj.upload.Fail', data: reo });
+        emit("fail", { ok: false, msg: "e.web.obj.upload.Fail", data: reo });
       }
       // if (isWnObj(reo)) {
       //   _obj.value = reo;
@@ -287,7 +287,7 @@ export function useWnObjUploader(
 
       // }
     } catch (e) {
-      console.error('Upload Result Fail:', e);
+      console.error("Upload Result Fail:", e);
     }
 
     // 上传完成后
@@ -314,7 +314,7 @@ export function useWnObjUploader(
         _obj.value = undefined;
         _base64_data.value = undefined;
         _fail_message.value = undefined;
-        emit('change', null);
+        emit("change", null);
       }, 200);
     }
   }

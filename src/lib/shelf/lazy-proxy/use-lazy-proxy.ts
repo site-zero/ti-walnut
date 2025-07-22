@@ -62,7 +62,7 @@ export function useLazyProxy(props: WnLazyProxyProps) {
       let ctx = _.assign({}, props.vars, _com_conf_update.value);
       re = Util.explainObj(ctx, props.comConf ?? {});
     } else {
-      re = _.cloneDeep(props.comConf) ?? {};
+      re = Util.jsonClone(props.comConf) ?? {};
     }
     // 自动补充值
     if (props.autoValue && !_.isUndefined(props.value)) {

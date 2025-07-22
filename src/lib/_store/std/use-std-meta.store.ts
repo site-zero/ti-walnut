@@ -1,4 +1,4 @@
-import { Alert, Vars } from '@site0/tijs';
+import { Alert, Vars, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import {
@@ -48,7 +48,7 @@ export type StdMetaStoreOptions = LocalMetaEditOptions & {
 function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
-  let _options: StdMetaStoreOptions = _.cloneDeep(options ?? { objPath: '~' });
+  let _options: StdMetaStoreOptions = Util.jsonClone(options ?? { objPath: '~' });
   const _obj = useWnObj();
   //---------------------------------------------
   /**
@@ -202,7 +202,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   }
 
   function setOptions(opt: StdMetaStoreOptions) {
-    _options = _.cloneDeep(opt);
+    _options = Util.jsonClone(opt);
   }
 
   function assignOptions(opt: Partial<StdMetaStoreOptions>) {
@@ -235,7 +235,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   // }
 
   // function setRemoteMeta(meta: Vars) {
-  //   _remote.value = _.cloneDeep(meta);
+  //   _remote.value = Util.jsonClone(meta);
   // }
 
   function clear() {
@@ -297,7 +297,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
       }
       // 直接赋值
       else {
-        _remote.value = _.cloneDeep(_options.objPath);
+        _remote.value = Util.jsonClone(_options.objPath);
       }
     }
     // 一定重新加载

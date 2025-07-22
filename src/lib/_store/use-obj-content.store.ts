@@ -1,4 +1,4 @@
-import { ObjDataStatus, Vars } from '@site0/tijs';
+import { ObjDataStatus, Vars, Util } from '@site0/tijs';
 import { diffLines } from 'diff';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
@@ -100,7 +100,7 @@ export function useObjContentStore() {
     let path = `id:${_finger.value.id}`;
     // 执行
     _status.value = 'saving';
-    let str = _.cloneDeep(_local.value ?? '');
+    let str = Util.jsonClone(_local.value ?? '');
     let re = await _obj.writeText(path, str);
     _remote.value = str;
     _local.value = undefined;

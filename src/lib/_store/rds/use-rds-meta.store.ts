@@ -1,6 +1,6 @@
-import { getLogger, Vars } from '@site0/tijs';
-import _ from 'lodash';
-import { computed, ref } from 'vue';
+import { getLogger, Util, Vars } from "@site0/tijs";
+import _ from "lodash";
+import { computed, ref } from "vue";
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
@@ -11,9 +11,9 @@ import {
   SqlResult,
   useLocalMetaEdit,
   useSqlx,
-} from '../../';
+} from "../../";
 
-const log = getLogger('wn.use-data-meta-store');
+const log = getLogger("wn.use-data-meta-store");
 
 export type RdsMetaStoreApi = ReturnType<typeof defineRdsMetaStore>;
 
@@ -68,17 +68,17 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   const ActionBarVars = computed(() => {
     return {
-      loading: _action_status.value == 'loading',
-      saving: _action_status.value == 'saving',
+      loading: _action_status.value == "loading",
+      saving: _action_status.value == "saving",
       changed: changed.value,
     } as Vars;
   });
   //---------------------------------------------
-  const LoadStatus = computed((): Omit<DataStoreLoadStatus, 'partial'> => {
+  const LoadStatus = computed((): Omit<DataStoreLoadStatus, "partial"> => {
     if (hasRemoteMeta.value) {
-      return 'full';
+      return "full";
     }
-    return 'unloaded';
+    return "unloaded";
   });
   //---------------------------------------------
   function reset() {
@@ -109,7 +109,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
 
   async function fetchRemoteMeta(): Promise<void> {
     //console.log('I am fetch remote', _filter.value);
-    _action_status.value = 'loading';
+    _action_status.value = "loading";
     let re = await sqlx.fetch(options.sqlFetch, _filter.value);
     if (re && options.patchRemote) {
       re = options.patchRemote(re);
@@ -121,14 +121,14 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   function makeChanges(): SqlExecInfo[] {
     // 保护一下
     if (!options.makeChange) {
-      log.warn('without options.makeChange');
+      log.warn("without options.makeChange");
       return [];
     }
     // 获取改动信息
     let changes = [] as SqlExecInfo[];
     changes.push(..._local.makeChange(options.makeChange));
 
-    log.debug('makeChanges', changes);
+    log.debug("makeChanges", changes);
     return changes;
   }
 
@@ -190,7 +190,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     },
 
     setRemoteMeta(meta: SqlResult) {
-      _remote.value = _.cloneDeep(meta);
+      _remote.value = Util.jsonClone(meta);
     },
 
     makeChanges,
@@ -210,7 +210,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
       }
 
       // 最后执行更新
-      log.debug('saveChange', changes);
+      log.debug("saveChange", changes);
       await sqlx.exec(changes);
 
       // 更新远程结果

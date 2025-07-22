@@ -1,4 +1,4 @@
-import { Match, SideBarItem, TiMatch } from '@site0/tijs';
+import { Match, SideBarItem, TiMatch, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { Walnut } from '../../core';
@@ -27,7 +27,7 @@ export function useSidebar() {
       for (let i = 0; i < items.length; i++) {
         let it = items[i];
         if (am.test(it)) {
-          return _.cloneDeep(it);
+          return Util.jsonClone(it);
         }
         if (it.items && it.items.length > 0) {
           let subIt = __get_item_by(it.items, am);

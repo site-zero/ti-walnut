@@ -110,8 +110,8 @@ function _translate_session_result(data: any) {
   }
   SE.ticket = data.ticket;
   SE.me = {
-    loginName: data.unm || me.name || me.loginName,
-    mainGroup: data.grp || me.groupName || me.mainGroup,
+    loginName: data.unm || me.name || me.loginName || me.nm,
+    mainGroup: data.grp || me.groupName || me.mainGroup || me.grp,
     role: myRole,
     gender: toGender(me.sex),
     nickname: me.nickname,
@@ -121,7 +121,7 @@ function _translate_session_result(data: any) {
     meta: me.meta || {},
   };
   SE.env = env;
-  SE.mainGroup = data.grp || me.groupName || me.mainGroup;
+  SE.mainGroup = data.grp || me.groupName || me.mainGroup || me.grp ;
   SE.loginAt = new Date(data.me.login || 0);
   SE.expireAt = new Date(data.expi || 0);
   SE.homePath = env["HOME"];

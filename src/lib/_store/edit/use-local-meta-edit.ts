@@ -90,7 +90,7 @@ export function useLocalMetaEdit(
   function updateMeta(change: SqlResult) {
     // 自动生成 localMeta
     if (!localMeta.value) {
-      localMeta.value = _.cloneDeep(remoteMeta.value || {});
+      localMeta.value = Util.jsonClone(remoteMeta.value || {});
     }
 
     // 更新一下
@@ -104,9 +104,9 @@ export function useLocalMetaEdit(
   function getDiffMeta(): Vars {
     if (isNewMeta()) {
       if (localMeta.value) {
-        return _.cloneDeep(localMeta.value);
+        return Util.jsonClone(localMeta.value);
       }
-      return _.cloneDeep(remoteMeta.value || {});
+      return Util.jsonClone(remoteMeta.value || {});
     }
     if (localMeta.value) {
       return Util.getRecordDiff(remoteMeta.value ?? {}, localMeta.value, {

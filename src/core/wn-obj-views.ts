@@ -93,7 +93,7 @@ export function anyToHubViewOptions(input: any): HubViewOptions {
       return val;
     }
     if (_.isPlainObject(val)) {
-      return () => _.cloneDeep(val);
+      return () => Util.jsonClone(val);
     }
   };
 

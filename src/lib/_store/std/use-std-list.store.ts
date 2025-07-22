@@ -101,7 +101,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   //console.warn('defineStdListStore', options);
   //---------------------------------------------
   // 准备数据访问模型
-  let _options: StdListStoreOptions = _.cloneDeep(options ?? { homePath: "~" });
+  let _options: StdListStoreOptions = Util.jsonClone(options ?? { homePath: "~" });
   if (_.isNil(_options.autoRemoveItemNilValue)) {
     _options.autoRemoveItemNilValue = true;
   }
@@ -127,7 +127,7 @@ function defineStdListStore(options: StdListStoreOptions) {
       return _options.fixedMatch();
     }
     if (_options.fixedMatch) {
-      return _.cloneDeep(_options.fixedMatch);
+      return Util.jsonClone(_options.fixedMatch);
     }
     return {};
   }
@@ -256,7 +256,9 @@ function defineStdListStore(options: StdListStoreOptions) {
       _action_status.value = undefined;
     }
     // 最后悄悄更新一下远程
-    await queryRemoteList();
+    if (options.refreshWhenSave) {
+      await queryRemoteList();
+    }
     _action_status.value = undefined;
   }
   //---------------------------------------------
@@ -392,7 +394,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   }
 
   function setOptions(opt: StdListStoreOptions) {
-    _options = _.cloneDeep(opt);
+    _options = Util.jsonClone(opt);
   }
 
   function assignOptions(opt: Partial<StdListStoreOptions>) {
@@ -535,6 +537,24 @@ function defineStdListStore(options: StdListStoreOptions) {
     // 直接添加到结尾
     else {
       _local.appendToList(o);
+    }
+  }
+
+  function prependItems(objs: WnObj[] = []) {
+    if (!objs) {
+      return;
+    }
+    for (let item of objs.reverse()) {
+      prependItem(item);
+    }
+  }
+
+  function appendItems(objs: WnObj[] = []) {
+    if (!objs) {
+      return;
+    }
+    for (let item of objs) {
+      appendItem(item);
     }
   }
 
@@ -684,7 +704,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   const CurrentItem = computed(() => getCurrentItem());
 
   function __gen_query(): SqlQuery {
-    let q = _.cloneDeep(_query.value);
+    let q = Util.jsonClone(_query.value);
     q.filter = q.filter ?? {};
     _.assign(q.filter, __create_fixed_match());
     return q;
@@ -727,7 +747,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     if (_options.patchRemote) {
       let list2 = [] as WnObj[];
       for (let i = 0; i < list.length; i++) {
-        let li = _.cloneDeep(list[i]);
+        let li = Util.jsonClone(list[i]);
         let li2 = _options.patchRemote(li, i);
         if (li2) {
           list2.push(li2);
@@ -956,12 +976,12 @@ function defineStdListStore(options: StdListStoreOptions) {
     },
 
     setFilter(filter: QueryFilter) {
-      _query.value.filter = _.cloneDeep(filter);
+      _query.value.filter = Util.jsonClone(filter);
       __save_local_query();
     },
 
     setSorter(sorter: QuerySorter) {
-      _query.value.sorter = _.cloneDeep(sorter);
+      _query.value.sorter = Util.jsonClone(sorter);
       __save_local_query();
     },
 
@@ -982,6 +1002,8 @@ function defineStdListStore(options: StdListStoreOptions) {
 
     appendItem,
     prependItem,
+    appendItems,
+    prependItems,
 
     updateCurrent,
     updateItem,

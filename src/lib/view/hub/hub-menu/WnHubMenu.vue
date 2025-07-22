@@ -4,26 +4,27 @@
     ActionBarItem,
     ActionBarProps,
     TiActionBar,
-  } from '@site0/tijs';
-  import _ from 'lodash';
-  import { computed, inject } from 'vue';
-  import { WN_HUB_APP_INST } from '../../../../lib';
-  import { menuExists } from './find-menu-item';
+    Util,
+  } from "@site0/tijs";
+  import _ from "lodash";
+  import { computed, inject } from "vue";
+  import { WN_HUB_APP_INST } from "../../../../lib";
+  import { menuExists } from "./find-menu-item";
   //--------------------------------------------------
   let emit = defineEmits<{
-    (event: 'logout'): void;
+    (event: "logout"): void;
   }>();
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const ActionItems = computed(() => {
-    let re: ActionBarProps = _.cloneDeep(_hub?.MainActions.value) ?? {};
+    let re: ActionBarProps = Util.jsonClone(_hub?.MainActions.value) ?? {};
 
     const logout = {
-      name: 'logout',
-      text: 'i18n:logout',
-      icon: 'fas-arrow-right-from-bracket',
-      action: 'logout',
+      name: "logout",
+      text: "i18n:logout",
+      icon: "fas-arrow-right-from-bracket",
+      action: "logout",
     };
 
     // 根本就是空的菜单，直接设置一个菜单项即可
@@ -32,7 +33,7 @@
     }
     // 尝试将 logout 插入到菜单里
     else {
-      let finding = [{ name: 'logout' }, { action: 'logout' }];
+      let finding = [{ name: "logout" }, { action: "logout" }];
       // 寻找 action，或者 name 为 logout 的菜单项
       // 如果还没有，顶级菜单结尾，添加一个
       if (!menuExists(re.items ?? [], finding)) {
@@ -51,7 +52,7 @@
           // 缩入一个统一的顶级图标里
           re.items = [
             {
-              icon: 'fas-bars',
+              icon: "fas-bars",
               items: newItems,
             },
           ];
@@ -63,8 +64,8 @@
   //--------------------------------------------------
   function onActionFire(event: ActionBarEvent) {
     let { name: eventName, payload } = event;
-    if ('logout' === eventName) {
-      emit('logout');
+    if ("logout" === eventName) {
+      emit("logout");
     }
     // 交给视图处理其他的事件
     else {
@@ -81,9 +82,9 @@
     @fire="onActionFire" />
 </template>
 <style lang="scss">
-  @use '@site0/tijs/sass/_all.scss' as *;
+  @use "@site0/tijs/sass/_all.scss" as *;
   .wn-hub-menu {
-    .bar-item-info.is-enabled[aspect='top'] {
+    .bar-item-info.is-enabled[aspect="top"] {
       background-color: transparent;
       color: var(--ti-color-box);
       &:hover {

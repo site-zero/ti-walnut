@@ -69,7 +69,7 @@ export function createRdsListHubModel(setup: HubModelCreateSetup): HubModel {
     return {
       currentId: _s.currentId.value,
       checkedIds: _s.checkedIds.value,
-      query: _s.query,
+      query: _s.query.value,
       ActionStatus: _s.ActionStatus.value,
       ActionBarVars: _s.ActionBarVars.value,
       LoadStatus: _s.LoadStatus.value,
