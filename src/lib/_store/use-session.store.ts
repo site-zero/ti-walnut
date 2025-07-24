@@ -214,6 +214,7 @@ export function useSessionStore() {
     SE.homePath = undefined;
     SE.theme = undefined;
     SE.lang = undefined;
+    document.body.removeAttribute("session-ticket");
   }
 
   /**
