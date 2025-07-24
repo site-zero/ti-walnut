@@ -10,7 +10,7 @@
     padding: 1em;
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(8px);
-    color: var(--ti-color-box-f);
+    color: #000;
     // box-shadow:
     //   -1px -1px var(--ti-color-light),
     //   1px 1px var(--ti-color-mask-weak),
@@ -27,6 +27,9 @@
       padding: 0;
       margin: 0;
       text-align: left;
+      font-weight: bold;
+      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2),
+        2px 2px 2px rgba(0, 0, 0, 0.2);
     }
     dd {
       padding: SZ(2) 0;
@@ -38,6 +41,15 @@
         padding: 0.618em;
         border: 1px solid var(--ti-color-border-dark);
         border-radius: var(--ti-measure-r-s);
+        background-color: rgba(255, 255, 255, 0.4);
+        color: #222;
+        border: 0;
+        box-shadow: 1px 1px 0 rgba(255, 255, 255, 1),
+          -1px -1px 0 rgba(0, 0, 0, 0.4), 0 0 7px rgba(255, 255, 255, 0.3);
+        &:focus {
+          background-color: rgba(255, 255, 255, 0.8);
+          color: #000;
+        }
       }
     }
     .as-error {
@@ -50,13 +62,14 @@
       background: rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(8px);
       color: #000;
+      font-weight: bold;
       box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
-      1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 7px rgba(255, 255, 255, 0.3);
+        1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 7px rgba(255, 255, 255, 0.3);
       &:hover {
-        background-color: var(--ti-color-primary);
-        color: var(--ti-color-primary-r);
+        background-color: #222;
+        color: #fff;
         box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
-      1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 0, 0.8);
+          1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 255, 0, 0.2);
       }
     }
   }

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-  import { I18n, Vars } from '@site0/tijs';
-  import { reactive } from 'vue';
-  import { SignInForm } from '../../../';
+  import { Alert, I18n, Vars } from "@site0/tijs";
+  import { reactive } from "vue";
+  import { SignInForm } from "../../../";
 
-  let emit = defineEmits<(event: 'submit', info: SignInForm) => void>();
+  let emit = defineEmits<(event: "submit", info: SignInForm) => void>();
 
   const props = defineProps<{
     style?: Vars;
@@ -20,11 +20,12 @@
   function onClickSubmit() {
     let { username, password } = info;
     if (!username || !password) {
-      alert('用户名和密码不能为空');
+      // alert('用户名和密码不能为空');
+      Alert("i18n:wn-signin-e-unm-pwd-empty", { type: "warn" });
       return;
     }
     // notify to login
-    emit('submit', { ...info } as SignInForm);
+    emit("submit", { ...info } as SignInForm);
   }
 </script>
 <template>
@@ -32,26 +33,28 @@
     <slot name="header"></slot>
     <form>
       <dl>
-        <dt>Name</dt>
+        <dt>{{ I18n.get("wn-signin-form-name") }}</dt>
         <dd>
           <input
             name="username"
-            placeholder="请输入登录账户名"
+            :placeholder="I18n.get('wn-signin-placeholder-name')"
             v-model.trim="info.username" />
         </dd>
       </dl>
       <dl>
-        <dt>Password</dt>
+        <dt>{{ I18n.get("wn-signin-form-pass") }}</dt>
         <dd>
           <input
             name="password"
             type="password"
-            placeholder="请输入登录密码"
+            :placeholder="I18n.get('wn-signin-placeholder-pass')"
             v-model.trim="info.password" />
         </dd>
       </dl>
       <dl>
-        <button @click.prevent="onClickSubmit">立即登录</button>
+        <button @click.prevent="onClickSubmit">
+          {{ I18n.get("wn-signin-form-submit") }}
+        </button>
       </dl>
       <dl v-if="errCode">
         <div class="as-error">{{ I18n.get(props.errCode!) }}</div>
@@ -61,5 +64,5 @@
   </div>
 </template>
 <style lang="scss" scoped>
-  @use './wn-sign-in.scss';
+  @use "./wn-sign-in.scss";
 </style>

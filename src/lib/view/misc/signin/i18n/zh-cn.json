@@ -1,3 +1,9 @@
 {
-  "com-name": "用户登录面板"
+  "com-name": "用户登录面板",
+  "wn-signin-e-unm-pwd-empty": "用户名和密码不能为空",
+  "wn-signin-form-name": "登录名",
+  "wn-signin-form-pass": "密码",
+  "wn-signin-form-submit": "登录",
+  "wn-signin-placeholder-name": "您的登录名",
+  "wn-signin-placeholder-pass": "您的密码"
 }

@@ -1,3 +1,9 @@
 {
-  "com-name": "User Signin Panel"
+  "com-name": "User Signin Panel",
+  "wn-signin-e-unm-pwd-empty": "Username and password cannot be empty",
+  "wn-signin-form-name": "Name",
+  "wn-signin-form-pass": "Password",
+  "wn-signin-form-submit": "Signin",
+  "wn-signin-placeholder-name": "Your Login Name",
+  "wn-signin-placeholder-pass": "Your Password"
 }
