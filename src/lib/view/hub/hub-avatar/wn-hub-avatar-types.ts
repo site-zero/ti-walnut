@@ -1,1 +1,3 @@
-export type WnHubAvatarProps = {};
+export type WnHubAvatarProps = {
+  loginSitePath?: string;
+};

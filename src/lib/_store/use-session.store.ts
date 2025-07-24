@@ -60,7 +60,10 @@ export type UserSession = {
   childTicket: string | undefined;
   me: UserInfo | undefined;
   env: Vars;
+  loginName: string | undefined;
+  userId: string | undefined;
   mainGroup: string | undefined;
+  mainRole: string | undefined;
   loginAt: Date | undefined;
   expireAt: Date | undefined;
   homePath: string | undefined;
@@ -94,6 +97,10 @@ const SE = reactive({
   loginAt: undefined,
   expireAt: undefined,
   homePath: undefined,
+  loginName: undefined,
+  userId: undefined,
+  mainGroup: undefined,
+  mainRole: undefined,
   theme: undefined,
   lang: undefined,
   errCode: undefined,
@@ -121,7 +128,10 @@ function _translate_session_result(data: any) {
     meta: me.meta || {},
   };
   SE.env = env;
-  SE.mainGroup = data.grp || me.groupName || me.mainGroup || me.grp ;
+  SE.mainGroup = data.grp || me.groupName || me.mainGroup || me.grp;
+  SE.mainRole = data.mainRole;
+  SE.userId = data.userId;
+  SE.loginName = data.loginName;
   SE.loginAt = new Date(data.me.login || 0);
   SE.expireAt = new Date(data.expi || 0);
   SE.homePath = env["HOME"];

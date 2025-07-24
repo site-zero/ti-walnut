@@ -32,7 +32,7 @@
     <slot name="header"></slot>
     <form>
       <dl>
-        <dt>用户名</dt>
+        <dt>Name</dt>
         <dd>
           <input
             name="username"
@@ -41,7 +41,7 @@
         </dd>
       </dl>
       <dl>
-        <dt>密码</dt>
+        <dt>Password</dt>
         <dd>
           <input
             name="password"

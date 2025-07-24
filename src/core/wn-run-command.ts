@@ -1,4 +1,4 @@
-import { Alert, AlertError } from "@site0/tijs";
+import { AlertError } from "@site0/tijs";
 import JSON5 from "json5";
 import { SessionStore, useSessionStore, WnExecOptions } from "../lib";
 

@@ -1,4 +1,4 @@
-@use '@site0/tijs/sass/_all.scss' as *;
+@use "@site0/tijs/sass/_all.scss" as *;
 
 .wn-signup-panel {
   width: 100%;
@@ -8,12 +8,15 @@
     max-width: 20em;
     margin: 0 auto;
     padding: 1em;
-    background-color: var(--ti-color-box);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
     color: var(--ti-color-box-f);
-    box-shadow:
-      -1px -1px var(--ti-color-light),
-      1px 1px var(--ti-color-mask-weak),
-      6px 6px 15px var(--ti-color-mask-thin);
+    // box-shadow:
+    //   -1px -1px var(--ti-color-light),
+    //   1px 1px var(--ti-color-mask-weak),
+    //   6px 6px 15px var(--ti-color-mask-thin);
+    box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
+      1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 7px rgba(255, 255, 255, 0.3);
     border-radius: var(--ti-measure-r-m);
   }
   dl {
@@ -44,6 +47,17 @@
     }
     button {
       padding: 0.618em 2em;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      color: #000;
+      box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
+      1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 7px rgba(255, 255, 255, 0.3);
+      &:hover {
+        background-color: var(--ti-color-primary);
+        color: var(--ti-color-primary-r);
+        box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
+      1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 0, 0.8);
+      }
     }
   }
 }

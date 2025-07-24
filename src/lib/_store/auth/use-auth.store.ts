@@ -5,7 +5,9 @@ import {
   GlobalStatusApi,
   RdsListStoreOptions,
   RefreshOptions,
+  SessionStore,
   StdListStoreOptions,
+  useGlobalStatus,
   useRdsListStore,
   useSessionStore,
   useStdListStore,
@@ -20,16 +22,22 @@ import {
   append_current_user_role_mappings_as,
   clear_current_user_role_mappings,
   gen_user_role_mapping,
-  get_current_user_role_grps,
-  get_current_user_roles,
+  get_domain_role,
+  get_domain_role_value,
+  get_user_role_grps,
+  get_user_roles,
   to_user_role_grps,
 } from "./auth-user-roles";
+import { useAuthResetPasswd } from "./use-auth-reset-passwd";
 
 type StoreType = "std" | "rds";
 
 export type AuthStoreOptions = {
   // 全局状态
   globalStatus?: GlobalStatusApi;
+
+  // 本用户权鉴模型对应的是哪个站点
+  sitePath?: string;
 
   /**
    * 界面 reload  的时候，可能会通过 url hash 指定一个对象 ID
@@ -61,6 +69,8 @@ export type _auth_inner_api = {
   _roles: StoreListApi;
   _user_role_mappings: StoreListApi;
   UserRoles: ComputedRef<Map<String, UserRoleMapping[]>>;
+  session: SessionStore;
+  _gb_state: GlobalStatusApi;
 };
 
 export function useAuthStore(options: AuthStoreOptions) {
@@ -80,6 +90,9 @@ export function useAuthStore(options: AuthStoreOptions) {
   } = options;
   //---------------------------------------------
   const session = useSessionStore();
+  if (!globalStatus) {
+    globalStatus = useGlobalStatus();
+  }
   //---------------------------------------------
   // 准备数据访问模型
   //---------------------------------------------
@@ -126,11 +139,14 @@ export function useAuthStore(options: AuthStoreOptions) {
     _roles,
     _user_role_mappings,
     UserRoles,
+    session,
+    _gb_state: globalStatus,
   };
+  //---------------------------------------------
+  const resetCheckedUserPassword = useAuthResetPasswd(_api, options);
   //---------------------------------------------
   // 计算属性
   //---------------------------------------------
-
   const changed = computed(() => {
     return (
       _users.changed.value ||
@@ -155,21 +171,17 @@ export function useAuthStore(options: AuthStoreOptions) {
   });
   //---------------------------------------------
   const CurrentUserRoles = computed(() => {
-    return get_current_user_roles(_api);
+    return get_user_roles(_api);
   });
   //---------------------------------------------
   const CurrentUserRoleGrps = computed(() => {
-    return to_user_role_grps(CurrentUserRoles.value);
+    return to_user_role_grps(CurrentUserRoles.value).filter(
+      (grp) => grp != session.data.mainGroup
+    );
   });
   //---------------------------------------------
   const CurrentUserDomainRole = computed(() => {
-    let mainGroup = session.data.mainGroup;
-    console.log("mainGroup", mainGroup);
-    for (let ur of CurrentUserRoles.value) {
-      if (ur.grp == mainGroup) {
-        return ur;
-      }
-    }
+    return get_domain_role(_api);
   });
   //---------------------------------------------
   const CurrentUserDomainRoleValue = computed(() => {
@@ -201,9 +213,11 @@ export function useAuthStore(options: AuthStoreOptions) {
       for (let li of list) {
         reList.push({
           ...li,
-          roles: get_current_user_role_grps(_api, li.id),
+          roles: get_user_role_grps(_api, li.id, session.data.mainGroup),
+          domainRoleValue: get_domain_role_value(_api, li.id),
         });
       }
+      return reList;
     }
     return list;
   });
@@ -221,11 +235,11 @@ export function useAuthStore(options: AuthStoreOptions) {
       // 修改了 roles 的话，需要更新关联关系
       if (delta.roles) {
         let new_role_grps = Str.splitIgnoreBlank(delta.roles);
-        console.log("delta.roles = ", new_role_grps);
+        //console.log("delta.roles = ", new_role_grps);
         delete delta.roles;
 
         // 清除映射
-        clear_current_user_role_mappings(_api);
+        clear_current_user_role_mappings(_api, session.data.mainGroup);
 
         // 添加新值
         append_current_user_role_mappings_as(_api, new_role_grps);
@@ -253,7 +267,7 @@ export function useAuthStore(options: AuthStoreOptions) {
         // 否则就插入
         else {
           _user_role_mappings.appendItem({
-            ...gen_user_role_mapping(uid, unm, grp, delta.domainRoleValue),
+            ...gen_user_role_mapping(uid, unm, grp, roleValue),
           });
         }
       }
@@ -333,6 +347,8 @@ export function useAuthStore(options: AuthStoreOptions) {
     // 编辑方法
     getChanges,
     updateCurrent,
+    // 便利方法
+    resetCheckedUserPassword,
     // 远程方法
     saveChange,
     reload,

@@ -11,6 +11,33 @@ import {
 import { _auth_inner_api } from "./use-auth.store";
 
 /**
+ * 获取指定用户在当前主分组下的角色映射。
+ * 如果未提供用户 ID，则默认使用当前用户的 ID。
+ * @param api - 认证内部 API 实例
+ * @param uid - 用户 ID，可选，默认为当前用户 ID
+ * @returns 返回该用户在当前主分组下的角色映射，如果未找到则返回 undefined
+ */
+export function get_domain_role(api: _auth_inner_api, uid?: string) {
+  const { _users, session } = api;
+  uid = uid || _users.currentId.value;
+  let mainGroup = session.data.mainGroup;
+  // 防空
+  if (!uid || !mainGroup) {
+    return;
+  }
+  let urMappings = get_user_roles(api, uid);
+  for (let ur of urMappings) {
+    if (ur.grp == mainGroup) {
+      return ur;
+    }
+  }
+}
+
+export function get_domain_role_value(api: _auth_inner_api, uid?: string) {
+  return get_domain_role(api, uid)?.role;
+}
+
+/**
  * 为当前用户追加指定分组的角色映射
  * @param api - 认证内部 API 实例
  * @param grps - 分组名称数组
@@ -52,7 +79,10 @@ export function append_current_user_role_mappings_as(
  * 清除当前用户的角色映射
  * @param api - 认证内部 API 实例
  */
-export function clear_current_user_role_mappings(api: _auth_inner_api) {
+export function clear_current_user_role_mappings(
+  api: _auth_inner_api,
+  expectGroups?: string[] | string
+) {
   const { _users, _user_role_mappings } = api;
   let uid = _users.currentId.value;
   let unm = _users.CurrentItem.value?.nm;
@@ -61,8 +91,13 @@ export function clear_current_user_role_mappings(api: _auth_inner_api) {
     return;
   }
 
+  // 准备排除的组
+  let ex_grps = _.isEmpty(expectGroups) ? [] : _.concat([], expectGroups);
+
   // 找到全部当前用户的映射
-  let usrRoles = _user_role_mappings.findItemsBy((it) => it.uid === uid);
+  let usrRoles = _user_role_mappings.findItemsBy((it) => {
+    return it.uid === uid && ex_grps.indexOf(it.grp) < 0;
+  });
 
   // 从映射里删除
   let u_r_ids = usrRoles.map((ur) => ur.id);
@@ -74,7 +109,7 @@ export function clear_current_user_role_mappings(api: _auth_inner_api) {
  * @param api - 认证内部 API 实例
  * @returns 当前用户的角色映射列表
  */
-export function get_current_user_roles(
+export function get_user_roles(
   api: _auth_inner_api,
   uid?: string
 ): UserRoleMapping[] {
@@ -93,12 +128,18 @@ export function get_current_user_roles(
  * @param uid - 用户 ID，可选，默认为当前用户 ID
  * @returns 分组名称数组
  */
-export function get_current_user_role_grps(
+export function get_user_role_grps(
   api: _auth_inner_api,
-  uid?: string
+  uid?: string,
+  expectGroups?: string[] | string
 ): string[] {
-  let urMappings = get_current_user_roles(api, uid);
-  return to_user_role_grps(urMappings);
+  // 准备排除的组
+  let ex_grps = _.isEmpty(expectGroups) ? [] : _.concat([], expectGroups);
+
+  let urMappings = get_user_roles(api, uid);
+  return to_user_role_grps(urMappings).filter(
+    (grp) => ex_grps.indexOf(grp) < 0
+  );
 }
 
 /**
@@ -176,5 +217,3 @@ export function gen_user_role_mapping(
     privileges,
   };
 }
-
-
