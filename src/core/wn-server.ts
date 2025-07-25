@@ -209,7 +209,12 @@ export class WalnutServer {
     let sep = path.startsWith("/") ? "" : "/";
     let { protocal, host, port } = this._conf;
     let ports = port == 80 ? "" : ":" + port;
-    let server_path = `${protocal}://${host}${ports}${sep}${path}`;
+    let server_path: string;
+    if (host) {
+      server_path = `${protocal}://${host}${ports}${sep}${path}`;
+    } else {
+      server_path = `${sep}${path}`;
+    }
 
     const qs = new URLSearchParams();
     _.forEach(params, (v, k) => {
