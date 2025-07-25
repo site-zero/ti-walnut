@@ -305,13 +305,12 @@ export class WalnutServer {
     // 移除
     if (!ticket) {
       TiStore.local.remove(TICKET_KEY);
-      document.body.removeAttribute("session-ticket");
+      //document.body.removeAttribute("session-ticket");
     }
     // 设置
     else {
       TiStore.local.set(TICKET_KEY, ticket);
-      document.body.setAttribute("session-ticket", ticket);
-      //document.cookie = `SEID=${ticket}; path=/`;
+      //document.body.setAttribute("session-ticket", ticket);
     }
 
     // 设置时区
