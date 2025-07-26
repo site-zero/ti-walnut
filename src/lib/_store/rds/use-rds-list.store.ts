@@ -603,7 +603,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   const CurrentItem = computed(() => getCurrentItem());
 
   function setQuery(q: ComboFilterValue) {
-    _.assign(_query, q);
+    _.assign(_query.value, q);
     __save_local_query();
   }
 
