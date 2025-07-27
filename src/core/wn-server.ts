@@ -870,8 +870,25 @@ export class WalnutServer {
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
     // 执行命令
     if (debug) console.log("exec>:", cmdText, options);
-    let url = this.getUrl("/a/run/wn.term");
+
+    /**
+     * 如果设置了 beacon 模式， 很多时候，执行命令是需要跨域的
+     * 因此一定需要带上这个参数，以便把会话票据加入到 query string 里
+     * 否则服务器从 session 里会取得不了会话票据
+     */
+    let url: string;
+    if (options.beacon && this._ticket) {
+      url = this.getUrl("/a/beacon_run/wn.term", {
+        _wn_ticket_: this._ticket,
+      });
+    } else {
+      url = this.getUrl("/a/run/wn.term");
+    }
+
+    // 准备请求细节
     let init = this.getRequestInit(options.signal);
+
+    // 执行
     let reo = await wnRunCommand(url, init, cmdText, options);
     if (debug) console.log("exec>:", reo);
     return reo;

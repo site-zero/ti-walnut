@@ -1,4 +1,4 @@
-import { AlertError } from "@site0/tijs";
+import { AlertError, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import { SessionStore, useSessionStore, WnExecOptions } from "../lib";
 
@@ -8,6 +8,26 @@ export async function wnRunCommand(
   cmdText: string,
   options: WnExecOptions = {}
 ): Promise<any> {
+  //
+  // Beacon 发送模式
+  //
+  if (options.beacon) {
+    let body = {
+      mos: options.mos || null,
+      cmd: cmdText,
+      ffb: false,
+      in: options.input,
+    } as Vars;
+    navigator.sendBeacon(url, JSON5.stringify(body));
+    return;
+  }
+
+  //
+  // 普通发送模式
+  //
+  const bearAbort = options.bearAbort ?? true;
+
+  // 准备参数
   init.method = "post";
   init.body = new URLSearchParams();
   init.body.append("mos", options.mos ?? "");
@@ -43,9 +63,12 @@ export async function wnRunCommand(
       return str;
     }
   } catch (reason) {
-    // 被异常中断
-    // 仅仅是 abort
-    if ((reason as any).abort) {
+    // 仅仅是 abort 那么很正常
+    let err = reason as any;
+    if (err.abort || err.name == "AbortError") {
+      if (bearAbort) {
+        return;
+      }
       throw reason;
     }
     // 要警告一下

@@ -231,6 +231,18 @@ export type WnExecOptions = {
   input?: string;
   as?: "json" | "text";
   signal?: AbortSignal;
+
+  /**
+   * 开启这个选项，将不采用 fetch 接口向服务器发起数据，
+   * 而是采用 `navigator.sendBeacon()` 发送。
+   * 通常在页面关闭的 `unload` 或者 `beforeunload` 时想执行
+   * 一个命令，需要开启这个选项，以便确保请求能到达服务器
+   */
+  beacon?: boolean;
+  /**
+   * 明确指定为 `false` 遇到 abort 到值的运行异常则会抛出
+   */
+  bearAbort?: boolean;
   /**
    * 发送这个分隔符，服务器会在后面吧 Session 的环境变量
    * 更新一份出来，这样一个请求即完成了命令也更新了环境变量
