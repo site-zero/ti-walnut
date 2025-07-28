@@ -85,7 +85,7 @@ article[data-${scope}] > table td:last-child {
 }
 </style>
 <article data-${scope}>
-<table cell-spacing="0"">
+<table cell-spacing="0">
 ${titleHtml}
 <tbody>
     <tr><td nowrap>${TT('display')}</td><td>${value}</td></tr>

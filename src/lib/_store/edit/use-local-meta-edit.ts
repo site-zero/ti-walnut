@@ -1,30 +1,27 @@
-import { Util, Vars } from '@site0/tijs';
-import _ from 'lodash';
-import { Ref, ref } from 'vue';
+import {
+  MakeDiffOptions,
+  MetaPatcher,
+  UpdateMetaPatcher,
+  Util,
+  Vars,
+} from "@site0/tijs";
+import _ from "lodash";
+import { Ref, ref } from "vue";
 import {
   SqlExecFetchBack,
   SqlExecInfo,
   SqlExecSetVar,
   SqlResult,
-} from '../../../lib';
-import { join_exec_set_vars, SqlInsertSet } from './join-exec-set-vars';
+} from "../../../lib";
+import { join_exec_set_vars, SqlInsertSet } from "./join-exec-set-vars";
 
 export type LocalMetaEditOptions = {
   isNew?: (meta: SqlResult) => boolean;
 };
 
-export type LocalMetaPatcher =
-  | Vars
-  | ((local: SqlResult, remote?: SqlResult) => Vars | undefined);
-export type LocalUpdateMetaPatcher =
-  | Vars
-  | ((local: SqlResult, remote: SqlResult) => Vars | undefined);
-
-export type LocalMetaMakeDiffOptions = {
-  defaultMeta?: LocalMetaPatcher;
-  insertMeta?: LocalMetaPatcher;
-  updateMeta?: LocalUpdateMetaPatcher;
-};
+export type LocalMetaPatcher = MetaPatcher;
+export type LocalUpdateMetaPatcher = UpdateMetaPatcher;
+export type LocalMetaMakeDiffOptions = MakeDiffOptions;
 
 export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
   updateSql: string;
@@ -42,7 +39,7 @@ export function useLocalMetaEdit(
   remoteMeta: Ref<SqlResult | undefined>,
   options: LocalMetaEditOptions = {}
 ) {
-  let { isNew = (meta: SqlResult) => 'new' == meta.id || _.isNil(meta.id) } =
+  let { isNew = (meta: SqlResult) => "new" == meta.id || _.isNil(meta.id) } =
     options;
   /*---------------------------------------------
                     

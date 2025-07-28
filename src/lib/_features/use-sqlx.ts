@@ -194,13 +194,37 @@ export function defineSqlx(daoName?: string) {
     cmds.push("-cqn");
 
     // 开启事务
-    let tl = options?.transLevel ?? 1;
-    if (tl > 0) {
+    let transLevel = options?.transLevel ?? 1;
+    if (transLevel > 0) {
       cmds.push("@trans");
       // 快速判断给定的事物级别是否是1248其中的一个
-      if ((tl & 15) === tl) {
-        cmds.push(`-level ${tl}`);
+      if ((transLevel & 15) === transLevel) {
+        cmds.push(`-level ${transLevel}`);
       }
+    }
+
+    // 处理数据校验
+    let {
+      versionUpdateVars: verVars,
+      versionCheckBy: verCheckBy,
+      versionKey: verKey,
+      versionCurrent: ver0,
+      versionAfter: ver1,
+    } = options;
+    if (verCheckBy) {
+      // 检查数据完整性
+      if (_.isEmpty(verVars) || !verKey || _.isNil(ver0) || _.isNil(ver0)) {
+        let err_msg = `use-sqlx: versionCheck lack params: ${JSON.stringify(
+          { verVars, verCheckBy, verKey, ver0, ver1 },
+          null,
+          4
+        )}`;
+        alert(err_msg);
+        throw err_msg;
+      }
+      // 拼装子命令
+      cmds.push(`@vars '${JSON.stringify(verVars)}' -as map`);
+      cmds.push(`@dvcheck ${verCheckBy} ${verKey} '${ver0}:${ver1}'`);
     }
 
     // 逐个处理执行对象
@@ -300,7 +324,10 @@ export function defineSqlx(daoName?: string) {
         return result as SqlExecResult;
       }
     } catch (e) {
-      console.error(`use-sqlx: ${cmdText}`, e, inputs);
+      let { logError = true } = options;
+      if (logError) {
+        console.error(`use-sqlx: ${cmdText}`, e, inputs);
+      }
       throw e;
     }
   }

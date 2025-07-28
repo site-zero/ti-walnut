@@ -1,5 +1,6 @@
 import {
   applyFieldChangeDiff,
+  DiffItem,
   Match,
   TableRowChanagePayload,
   TableRowID,
@@ -34,16 +35,6 @@ export type LocalListUpdateItemOptions = {
    * 指定一组默认值
    */
   defaultMeta?: Vars;
-};
-
-export type DiffItem = {
-  index: number;
-  id: TableRowID;
-  existsInRemote: boolean;
-  existsInLocal: boolean;
-  local: SqlResult;
-  delta: SqlResult;
-  remote: SqlResult;
 };
 
 /**
@@ -122,15 +113,7 @@ export function useLocalListEdit(
    * 对远程列表编制索引
    */
   const _remote_map = computed(() => {
-    let re = new Map<TableRowID, SqlResult>();
-    if (remoteList.value) {
-      for (let i = 0; i < remoteList.value.length; i++) {
-        let remote = remoteList.value[i];
-        let id = getRowId(remote, i);
-        re.set(id, remote);
-      }
-    }
-    return re;
+    return Util.buildMapFromList(getRowId, remoteList.value ?? []);
   });
   //---------------------------------------------
   // 计算属性方法
@@ -663,121 +646,14 @@ export function useLocalListEdit(
   }
   //---------------------------------------------
   function makeDifferents(options: LocalListMakeDiffOptions = {}): DiffItem[] {
-    let re: DiffItem[] = [];
-
-    // 如果没有做过任何修改 ...
-    if (!_local_list.value) {
-      return re;
-    }
-
-    // 对远程列表编制索引
-    let remoteMap = _remote_map.value;
-
-    // 循环本地列表，顺便编制一个本地列表的ID 索引
-    let localMap = new Map<TableRowID, SqlResult>();
-    if (_local_list.value) {
-      for (let i = 0; i < _local_list.value.length; i++) {
-        let local = _local_list.value[i];
-        let id = getRowId(local, i);
-        localMap.set(id, local);
-        let remote = remoteMap.get(id);
-        let diffItem = {
-          index: i,
-          id,
-          existsInRemote: remote ? true : false,
-          existsInLocal: true,
-          local: Util.jsonClone(local),
-          remote: Util.jsonClone(remote),
-        } as DiffItem;
-        // 已经存在，必然是要更新记录
-        if (remote) {
-          let diff = Util.getRecordDiff(remote, local, {
-            checkRemoveFromOrgin: true,
-          });
-          if (_.isEmpty(diff)) {
-            continue;
-          }
-
-          // 补上固定 Meta
-          if (options.defaultMeta) {
-            // 动态计算
-            if (_.isFunction(options.defaultMeta)) {
-              _.defaults(diff, options.defaultMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.defaults(diff, options.defaultMeta);
-            }
-          }
-          if (options.updateMeta) {
-            // 动态计算
-            if (_.isFunction(options.updateMeta)) {
-              _.assign(diff, options.updateMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.assign(diff, options.updateMeta);
-            }
-          }
-
-          // 补上 ID
-          if (patchMetaUpdate) {
-            patchMetaUpdate(diff, id, remote);
-          }
-
-          diffItem.delta = diff;
-        }
-        // 必然是新记录，需要插入
-        else {
-          let newMeta = Util.jsonClone(local);
-          if (options.defaultMeta) {
-            // 动态计算
-            if (_.isFunction(options.defaultMeta)) {
-              _.defaults(newMeta, options.defaultMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.defaults(newMeta, options.defaultMeta);
-            }
-          }
-          if (options.insertMeta) {
-            // 动态计算
-            if (_.isFunction(options.insertMeta)) {
-              _.assign(newMeta, options.insertMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.assign(newMeta, options.insertMeta);
-            }
-          }
-          diffItem.delta = newMeta;
-        }
-        // 记入返回列表
-        re.push(diffItem);
-      } // for (let i = 0; i < _local_list.value.length; i++) {
-    }
-
-    // 循环一下，看看哪些需要从远程删除
-    if (remoteList.value) {
-      for (let i = 0; i < remoteList.value.length; i++) {
-        let remote = remoteList.value[i];
-        let id = getRowId(remote, i);
-        let local = localMap.get(id);
-        if (!local) {
-          re.push({
-            index: -1,
-            id,
-            existsInRemote: true,
-            existsInLocal: false,
-            local: {},
-            delta: {},
-            remote: Util.jsonClone(remote),
-          });
-        }
-      }
-    }
-
-    return re;
+    return Util.makeDifferents({
+      localList: _local_list.value,
+      remoteList: remoteList.value,
+      remoteMap: _remote_map.value,
+      getId: getRowId,
+      options,
+      patchMetaUpdate,
+    });
   }
   //---------------------------------------------
   // 输出特性

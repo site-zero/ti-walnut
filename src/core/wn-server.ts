@@ -120,6 +120,10 @@ export class WalnutServer {
     }
   } // async init(conf: ServerConfig) {
 
+  hasTicket() {
+    return this._ticket ? true : false;
+  }
+
   getConfig<T>(key: string, dft?: T): T {
     let re = _.get(this._conf, key);
     return re ?? dft;
@@ -799,7 +803,7 @@ export class WalnutServer {
     }
     // 逐个注册
     _.forEach(json, (fld, key) => {
-      _ofs.setField(key, fld);
+      _ofs.setFieldIfNoExists(key, fld);
     });
   }
 
@@ -814,7 +818,7 @@ export class WalnutServer {
     }
     // 逐个注册
     _.forEach(json, (col, key) => {
-      _cols.addColumn(key, col);
+      _cols.addColumnIfNoExists(key, col);
     });
   }
 

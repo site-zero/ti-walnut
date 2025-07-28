@@ -6,15 +6,14 @@ import {
   LayoutProps,
   LayoutSchema,
   Vars,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { Ref } from 'vue';
-import { Router } from 'vue-router';
-import { DiffItem } from '../../../..';
-import { GlobalStatusApi } from '../../_features';
-import { GuiViewLayout, GuiViewLayoutMode, WnObj } from '../../_types';
-import { GuiViewMeasureApi } from '../use-gui-view-measure.store';
-import { UserSessionApi } from '../use-session.store';
+} from "@site0/tijs";
+import _ from "lodash";
+import { Ref } from "vue";
+import { Router } from "vue-router";
+import { GlobalStatusApi } from "../../_features";
+import { GuiViewLayout, GuiViewLayoutMode, WnObj } from "../../_types";
+import { GuiViewMeasureApi } from "../use-gui-view-measure.store";
+import { UserSessionApi } from "../use-session.store";
 
 export type HubModelOptions = {
   /**

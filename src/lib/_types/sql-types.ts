@@ -1,5 +1,5 @@
-import { Vars } from '@site0/tijs';
-import _ from 'lodash';
+import { Vars } from "@site0/tijs";
+import _ from "lodash";
 
 export type QueryFilter = Vars;
 export type QuerySorter = Record<string, number>;
@@ -86,13 +86,13 @@ export function isSqlExecFetchBack(input: any): input is SqlExecFetchBack {
   for (let key of _.keys(input)) {
     let val = input[key];
     // 语句名称
-    if ('by' == key) {
+    if ("by" == key) {
       if (!_.isString(val)) {
         return false;
       }
     }
     // 上下文变量
-    else if ('vars' == key) {
+    else if ("vars" == key) {
       if (!_.isObject(val)) {
         return false;
       }
@@ -188,7 +188,15 @@ export function isSqlExecSetVar(input: any): input is SqlExecSetVar {
   return true;
 }
 
-export type SqlExecOptions = {
+export type SqlDataVersionCheck = {
+  versionUpdateVars?: Vars;
+  versionCheckBy?: string;
+  versionKey?: string;
+  versionCurrent?: string | number;
+  versionAfter?: string | number;
+};
+
+export type SqlExecOptions = SqlDataVersionCheck & {
   /**
    * 事务级别:
    *
@@ -207,4 +215,10 @@ export type SqlExecOptions = {
    * | 8 | TRANSACTION_SERIALIZABLE        | -  | -   | -  |
    */
   transLevel?: number;
+
+  /**
+   * 如果执行错误，则在抛出前，先在控制台打印错误
+   * 默认为 true，显示指定 false 关闭这个特性
+   */
+  logError?:boolean;
 };
