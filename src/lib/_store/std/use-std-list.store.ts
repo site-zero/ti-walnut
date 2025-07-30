@@ -235,21 +235,21 @@ function defineStdListStore(options: StdListStoreOptions) {
       _action_status.value = "saving";
       for (let diff of diffs) {
         // 修改已经存在对象
-        if (diff.existsInRemote && diff.existsInLocal) {
+        if (diff.existsInTarget && diff.existsInMine) {
           let obj = await _obj.update(diff.delta);
           if (obj) {
             updateItemBy(obj, { id: obj.id });
           }
         }
         // 插入新对象
-        else if (diff.existsInLocal && !diff.existsInRemote) {
+        else if (diff.existsInMine && !diff.existsInTarget) {
           let obj = await _obj.create(diff.delta);
           if (obj) {
             prependItem(obj);
           }
         }
         // 删除远程对象
-        else if (!diff.existsInLocal && diff.existsInRemote) {
+        else if (!diff.existsInMine && diff.existsInTarget) {
           await _obj.remove(diff.id as string);
         }
       }

@@ -294,6 +294,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     clearRemoteList();
   }
 
+  /**
+   * 根据配置生成数据变更对象数组
+   *
+   * 如果未配置 `makeChange` 选项，则返回空数组。
+   * 否则调用 `_local.makeChanges` 方法生成变更对象数组。
+   *
+   * @returns 返回数据变更对象数组，未配置变更选项时返回空数组
+   */
   function makeChanges() {
     // 保护一下
     if (!options.makeChange) {
@@ -302,6 +310,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return _local.makeChanges(options.makeChange);
   }
 
+  /**
+   * 生成数据差异对象数组
+   *
+   * 该函数调用 `_local.makeDifferents()` 方法获取差异数据，
+   * 然后从每个差异对象中提取 `delta` 属性，最终返回这些 `delta` 组成的数组。
+   *
+   * @returns 返回包含数据差异对象的数组
+   */
   function makeDifferents(): Vars[] {
     let re: Vars[] = [];
     let diffs = _local.makeDifferents();
@@ -309,6 +325,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       re.push(diff.delta);
     }
     return re;
+  }
+
+  async function makeConflict() {
+    
+    // 首先从服务器拉取数据，然后我们就有了三个数据版本
+    let server = await loadRemoteList();
+
+    // 
   }
   //---------------------------------------------
   //                计算属性
@@ -689,8 +713,17 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     // 记入本地
     _local.prependToList(newItem);
   }
-  //---------------------------------------------
-  async function queryRemoteList(): Promise<void> {
+
+  /**
+   * 异步加载远程列表数据
+   * 
+   * 该方法会将操作状态设置为加载中，准备查询条件并应用查询前缀，
+   * 然后调用 SQL 执行查询操作。如果配置了数据修补函数，会对查询结果进行修补，
+   * 最后返回查询到的远程列表数据。
+   * 
+   * @returns {Promise<SqlResult[]>} 包含远程列表数据的 Promise
+   */
+  async function loadRemoteList(): Promise<SqlResult[]> {
     _action_status.value = "loading";
     // 准备查询条件
     let q = __gen_query();
@@ -708,8 +741,21 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       }
       list = list2;
     }
-    _remote.value = list ?? [];
     _action_status.value = undefined;
+    return list;
+  }
+
+  /**
+   * 异步查询远程列表数据
+   *
+   * 该方法会将操作状态设置为加载中，准备查询条件并应用查询前缀，
+   * 然后调用 SQL 执行查询操作。如果配置了数据修补函数，会对查询结果进行修补，
+   * 最后将查询结果赋值给远程数据引用，并将操作状态重置。
+   *
+   * @returns {Promise<void>} 无返回值
+   */
+  async function queryRemoteList(): Promise<void> {
+    _remote.value = await loadRemoteList();
   }
   //---------------------------------------------
   async function countRemoteList() {

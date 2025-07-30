@@ -646,12 +646,11 @@ export function useLocalListEdit(
   }
   //---------------------------------------------
   function makeDifferents(options: LocalListMakeDiffOptions = {}): DiffItem[] {
-    return Util.makeDifferents({
-      localList: _local_list.value,
-      remoteList: remoteList.value,
+    const getId = (it: Vars) => getRowId(it, -1);
+    return Util.buildDifferentListItems(_local_list.value, remoteList.value, {
+      ...options,
       remoteMap: _remote_map.value,
-      getId: getRowId,
-      options,
+      getId,
       patchMetaUpdate,
     });
   }
