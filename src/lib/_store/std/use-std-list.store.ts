@@ -1,6 +1,9 @@
 import {
   Alert,
+  buildConflictList,
+  buildDifferentListItems,
   ComboFilterValue,
+  ConflictItem,
   KeepInfo,
   Match,
   TableSelectEmitInfo,
@@ -20,6 +23,7 @@ import {
   QueryFilter,
   QuerySorter,
   RefreshOptions,
+  SqlPager,
   SqlPagerInput,
   SqlQuery,
   updatePager,
@@ -101,7 +105,9 @@ function defineStdListStore(options: StdListStoreOptions) {
   //console.warn('defineStdListStore', options);
   //---------------------------------------------
   // 准备数据访问模型
-  let _options: StdListStoreOptions = Util.jsonClone(options ?? { homePath: "~" });
+  let _options: StdListStoreOptions = Util.jsonClone(
+    options ?? { homePath: "~" }
+  );
   if (_.isNil(_options.autoRemoveItemNilValue)) {
     _options.autoRemoveItemNilValue = true;
   }
@@ -275,7 +281,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     await saveCurrentContent({ force });
   }
   //---------------------------------------------
-  function makeDifferents() {
+  function makeDifferents(): Vars[] {
     let re: Vars[] = [];
     let diffs = _local.makeDifferents();
     for (let diff of diffs) {
@@ -286,6 +292,28 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   function makeContentDifferents(): Vars[] {
     return _content.getChange();
+  }
+  /**
+   * 异步计算数据冲突项
+   *
+   * 该方法会从服务器拉取最新数据，然后与本地数据和当前远程数据进行比对，
+   * 计算出存在冲突的数据项。
+   *
+   * @returns {Promise<ConflictItem[]>} 包含冲突项的 Promise
+   */
+  async function makeConflict(): Promise<ConflictItem[]> {
+    // 首先从服务器拉取数据，然后我们就有了三个数据版本
+    let server = await loadRemoteList();
+    let local = _local.localList.value;
+    let remote = _remote.value;
+
+    // 比对差异
+    let myDiff = buildDifferentListItems(local, remote);
+    let taDiff = buildDifferentListItems(server, remote);
+
+    // 算冲突
+    let conflicts = buildConflictList(myDiff, taDiff);
+    return conflicts;
   }
   //---------------------------------------------
   // 读写内容
@@ -710,6 +738,46 @@ function defineStdListStore(options: StdListStoreOptions) {
     return q;
   }
 
+  async function loadRemoteList(
+    setup: WnObjQueryOptions = {}
+  ): Promise<[WnObj[], SqlPager]> {
+    _action_status.value = "loading";
+    try {
+      // 准备查询条件
+      let q = __gen_query();
+      //console.log('queryRemoteList', q);
+      let oDir = IndexDirObj.value;
+
+      // 防空，如果未找到主目录对象，就直接清空数据
+      if (!oDir) {
+        _remote.value = [];
+        if (_query.value.pager) {
+          updatePager(_query.value.pager, { pageNumber: 0, totalCount: 0 });
+        }
+        return [[], { pageNumber: -1, pageSize: 0 }];
+      }
+      let [list, pager] = await _obj.query(oDir, q, setup);
+
+      // 后续处理
+      if (_options.patchRemote) {
+        let list2 = [] as WnObj[];
+        for (let i = 0; i < list.length; i++) {
+          let li = Util.jsonClone(list[i]);
+          let li2 = _options.patchRemote(li, i);
+          if (li2) {
+            list2.push(li2);
+          }
+        }
+        list = list2;
+      }
+
+      // 更新结果集
+      return [list, pager];
+    } finally {
+      _action_status.value = undefined;
+    }
+  }
+
   /**
    * 异步查询远程列表并更新状态。
    *
@@ -727,34 +795,7 @@ function defineStdListStore(options: StdListStoreOptions) {
    * 7. 将 `_action_status` 重置为 `undefined`。
    */
   async function queryRemoteList(setup: WnObjQueryOptions = {}): Promise<void> {
-    _action_status.value = "loading";
-    // 准备查询条件
-    let q = __gen_query();
-    //console.log('queryRemoteList', q);
-    let oDir = IndexDirObj.value;
-
-    // 防空，如果未找到主目录对象，就直接清空数据
-    if (!oDir) {
-      _remote.value = [];
-      if (_query.value.pager) {
-        updatePager(_query.value.pager, { pageNumber: 0, totalCount: 0 });
-      }
-      return;
-    }
-    let [list, pager] = await _obj.query(oDir, q, setup);
-
-    // 后续处理
-    if (_options.patchRemote) {
-      let list2 = [] as WnObj[];
-      for (let i = 0; i < list.length; i++) {
-        let li = Util.jsonClone(list[i]);
-        let li2 = _options.patchRemote(li, i);
-        if (li2) {
-          list2.push(li2);
-        }
-      }
-      list = list2;
-    }
+    let [list, pager] = await loadRemoteList(setup);
 
     // 更新结果集
     _remote.value = list ?? [];
@@ -763,8 +804,6 @@ function defineStdListStore(options: StdListStoreOptions) {
     if (_query.value.pager) {
       updatePager(_query.value.pager, pager);
     }
-
-    _action_status.value = undefined;
   }
 
   /**
@@ -1030,6 +1069,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     saveCurrentContent,
     makeDifferents,
     makeContentDifferents,
+    makeConflict,
     //---------------------------------------------
     // 本地化存储状态
     //---------------------------------------------

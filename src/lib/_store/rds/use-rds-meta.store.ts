@@ -1,4 +1,11 @@
-import { getLogger, Util, Vars } from "@site0/tijs";
+import {
+  buildConflict,
+  buildDifferentItem,
+  ConflictItem,
+  getLogger,
+  Util,
+  Vars,
+} from "@site0/tijs";
 import _ from "lodash";
 import { computed, ref } from "vue";
 import {
@@ -107,15 +114,22 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     return _.isEmpty(_remote.value);
   }
 
-  async function fetchRemoteMeta(): Promise<void> {
+  async function loadRemoteMeta(): Promise<SqlResult | undefined> {
     //console.log('I am fetch remote', _filter.value);
     _action_status.value = "loading";
-    let re = await sqlx.fetch(options.sqlFetch, _filter.value);
-    if (re && options.patchRemote) {
-      re = options.patchRemote(re);
+    try {
+      let re = await sqlx.fetch(options.sqlFetch, _filter.value);
+      if (re && options.patchRemote) {
+        re = options.patchRemote(re);
+      }
+      return re;
+    } finally {
+      _action_status.value = undefined;
     }
-    _remote.value = re;
-    _action_status.value = undefined;
+  }
+
+  async function fetchRemoteMeta(): Promise<void> {
+    _remote.value = await loadRemoteMeta();
   }
 
   function makeChanges(): SqlExecInfo[] {
@@ -134,6 +148,21 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
 
   function getDiffMeta() {
     return _local.getDiffMeta();
+  }
+
+  async function makeConflict(): Promise<ConflictItem | undefined> {
+    // 首先从服务器拉取数据，然后我们就有了三个数据版本
+    let server = await loadRemoteMeta();
+    let local = _local.localMeta.value;
+    let remote = _remote.value;
+
+    // 比对差异
+    let myDiff = buildDifferentItem(local, remote);
+    let taDiff = buildDifferentItem(server, remote);
+
+    // 算冲突
+    let conflict = buildConflict(myDiff, taDiff);
+    return conflict;
   }
 
   /*---------------------------------------------
@@ -195,6 +224,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
 
     makeChanges,
     getDiffMeta,
+    makeConflict,
     //---------------------------------------------
     //                  远程方法
     //---------------------------------------------

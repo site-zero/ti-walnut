@@ -1,5 +1,8 @@
 import {
+  buildConflictList,
+  buildDifferentListItems,
   ComboFilterValue,
+  ConflictItem,
   getLogger,
   KeepInfo,
   Match,
@@ -327,12 +330,27 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return re;
   }
 
-  async function makeConflict() {
-    
+  /**
+   * 异步计算数据冲突项
+   *
+   * 该方法会从服务器拉取最新数据，然后与本地数据和当前远程数据进行比对，
+   * 计算出存在冲突的数据项。
+   *
+   * @returns {Promise<ConflictItem[]>} 包含冲突项的 Promise
+   */
+  async function makeConflict(): Promise<ConflictItem[]> {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteList();
+    let local = _local.localList.value;
+    let remote = _remote.value;
 
-    // 
+    // 比对差异
+    let myDiff = buildDifferentListItems(local, remote);
+    let taDiff = buildDifferentListItems(server, remote);
+
+    // 算冲突
+    let conflicts = buildConflictList(myDiff, taDiff);
+    return conflicts;
   }
   //---------------------------------------------
   //                计算属性
@@ -716,33 +734,36 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
   /**
    * 异步加载远程列表数据
-   * 
+   *
    * 该方法会将操作状态设置为加载中，准备查询条件并应用查询前缀，
    * 然后调用 SQL 执行查询操作。如果配置了数据修补函数，会对查询结果进行修补，
    * 最后返回查询到的远程列表数据。
-   * 
+   *
    * @returns {Promise<SqlResult[]>} 包含远程列表数据的 Promise
    */
   async function loadRemoteList(): Promise<SqlResult[]> {
     _action_status.value = "loading";
-    // 准备查询条件
-    let q = __gen_query();
-    apply_query_prefix(q, _query_prefix_append.value);
-    // console.log('queryRemoteList', q);
-    let list = await sqlx.query(options.sqlQuery, q);
-    if (options.patchRemote) {
-      let list2 = [] as SqlResult[];
-      for (let i = 0; i < list.length; i++) {
-        let li = list[i];
-        let li2 = options.patchRemote(li, i);
-        if (li2) {
-          list2.push(li2);
+    try {
+      // 准备查询条件
+      let q = __gen_query();
+      apply_query_prefix(q, _query_prefix_append.value);
+      // console.log('queryRemoteList', q);
+      let list = await sqlx.query(options.sqlQuery, q);
+      if (options.patchRemote) {
+        let list2 = [] as SqlResult[];
+        for (let i = 0; i < list.length; i++) {
+          let li = list[i];
+          let li2 = options.patchRemote(li, i);
+          if (li2) {
+            list2.push(li2);
+          }
         }
+        list = list2;
       }
-      list = list2;
+      return list;
+    } finally {
+      _action_status.value = undefined;
     }
-    _action_status.value = undefined;
-    return list;
   }
 
   /**
@@ -922,6 +943,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     queryRemoteList,
     makeChanges,
     makeDifferents,
+    makeConflict,
     saveChange,
     reload,
     refresh,
