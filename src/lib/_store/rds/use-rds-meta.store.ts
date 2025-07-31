@@ -1,9 +1,7 @@
 import {
   buildConflict,
   buildDifferentItem,
-  ConflictItem,
   getLogger,
-  Util,
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
@@ -13,6 +11,7 @@ import {
   DataStoreLoadStatus,
   LocalMetaEditOptions,
   LocalMetaMakeChangeOptions,
+  MetaStoreConflicts,
   QueryFilter,
   SqlExecInfo,
   SqlResult,
@@ -97,6 +96,10 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     _remote.value = undefined;
   }
 
+  function setRemoteMeta(meta: SqlResult) {
+    _remote.value = meta;
+  }
+
   function dropChange() {
     _local.reset();
   }
@@ -104,6 +107,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   function resetLocalChange() {
     _local.reset();
   }
+
   //---------------------------------------------
   //                 被内部重用的方法
   //---------------------------------------------
@@ -150,7 +154,10 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     return _local.getDiffMeta();
   }
 
-  async function makeConflict(): Promise<ConflictItem | undefined> {
+  //---------------------------------------------
+  // 冲突
+  //---------------------------------------------
+  async function makeConflict(): Promise<MetaStoreConflicts> {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteMeta();
     let local = _local.localMeta.value;
@@ -162,7 +169,14 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
 
     // 算冲突
     let conflict = buildConflict(myDiff, taDiff);
-    return conflict;
+    return {
+      server,
+      local,
+      remote,
+      localDiff: myDiff,
+      remoteDiff: taDiff,
+      conflict,
+    };
   }
 
   /*---------------------------------------------
@@ -197,8 +211,8 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
-    resetLocalChange,
     clearRemoteMeta,
+    setRemoteMeta,
     reset,
     dropChange,
 
@@ -216,10 +230,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
 
     setMeta(meta: SqlResult) {
       _local.setMeta(meta);
-    },
-
-    setRemoteMeta(meta: SqlResult) {
-      _remote.value = Util.jsonClone(meta);
     },
 
     makeChanges,

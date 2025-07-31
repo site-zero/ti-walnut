@@ -3,7 +3,6 @@ import {
   buildConflictList,
   buildDifferentListItems,
   ComboFilterValue,
-  ConflictItem,
   KeepInfo,
   Match,
   TableSelectEmitInfo,
@@ -18,6 +17,7 @@ import {
   DataStoreLoadStatus,
   GlobalStatusApi,
   isWnObj,
+  ListStoreConflicts,
   LocalListEditOptions,
   LocalListUpdateItemOptions,
   QueryFilter,
@@ -293,15 +293,18 @@ function defineStdListStore(options: StdListStoreOptions) {
   function makeContentDifferents(): Vars[] {
     return _content.getChange();
   }
+  //---------------------------------------------
+  // 冲突
+  //---------------------------------------------
   /**
    * 异步计算数据冲突项
    *
    * 该方法会从服务器拉取最新数据，然后与本地数据和当前远程数据进行比对，
    * 计算出存在冲突的数据项。
    *
-   * @returns {Promise<ConflictItem[]>} 包含冲突项的 Promise
+   * @returns 冲突详情
    */
-  async function makeConflict(): Promise<ConflictItem[]> {
+  async function makeConflict(): Promise<ListStoreConflicts> {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteList();
     let local = _local.localList.value;
@@ -311,9 +314,16 @@ function defineStdListStore(options: StdListStoreOptions) {
     let myDiff = buildDifferentListItems(local, remote);
     let taDiff = buildDifferentListItems(server, remote);
 
-    // 算冲突
+    // 计算冲突
     let conflicts = buildConflictList(myDiff, taDiff);
-    return conflicts;
+    return {
+      server,
+      local,
+      remote,
+      localDiff: myDiff,
+      remoteDiff: taDiff,
+      conflicts,
+    };
   }
   //---------------------------------------------
   // 读写内容
@@ -410,7 +420,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   //---------------------------------------------
   // 基础本地方法
   //---------------------------------------------
-  function resetLocalChange() {
+  function dropChange() {
     _local.reset();
   }
 
@@ -419,6 +429,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     if (_query.value.pager) {
       updatePagerTotal(_query.value.pager, 0);
     }
+  }
+
+  function setRemoteList(list: WnObj[]) {
+    _remote.value = list;
   }
 
   function setOptions(opt: StdListStoreOptions) {
@@ -821,7 +835,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     let re = await _obj.create(meta);
     if (isWnObj(re)) {
       await queryRemoteList();
-      resetLocalChange();
+      dropChange();
       await selectItem(re.id);
     }
     return re;
@@ -916,7 +930,7 @@ function defineStdListStore(options: StdListStoreOptions) {
    * @returns {Promise<void>} 返回一个 Promise 对象，表示异步操作的完成。
    */
   async function reload() {
-    resetLocalChange();
+    dropChange();
     await reloadHome();
     //remoteList.value = undefined;
     await queryRemoteList();
@@ -927,7 +941,7 @@ function defineStdListStore(options: StdListStoreOptions) {
    */
   async function refresh(options: RefreshOptions = {}) {
     if (options.reset) {
-      resetLocalChange();
+      dropChange();
     }
     await queryRemoteList();
 
@@ -1006,8 +1020,9 @@ function defineStdListStore(options: StdListStoreOptions) {
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
-    resetLocalChange,
+    dropChange,
     clearRemoteList,
+    setRemoteList,
 
     setQuery(q: ComboFilterValue) {
       _.assign(_query.value, q);

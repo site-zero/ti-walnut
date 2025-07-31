@@ -1,19 +1,26 @@
-import { Alert, Vars, Util } from '@site0/tijs';
-import _ from 'lodash';
-import { computed, ref } from 'vue';
+import {
+  Alert,
+  buildConflict,
+  buildDifferentItem,
+  Util,
+  Vars,
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, ref } from "vue";
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   isWnObj,
   LocalMetaEditOptions,
+  MetaStoreConflicts,
   RefreshOptions,
   useLocalMetaEdit,
   useWnObj,
   WnObj,
   WnObjContentFinger,
-} from '../../';
-import { getObjContentFinger } from '../../../core';
-import { useObjContentStore } from '../use-obj-content.store';
+} from "../../";
+import { getObjContentFinger } from "../../../core";
+import { useObjContentStore } from "../use-obj-content.store";
 
 export type StdMetaStoreApi = ReturnType<typeof defineStdMetaStore>;
 
@@ -48,7 +55,9 @@ export type StdMetaStoreOptions = LocalMetaEditOptions & {
 function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   // 准备数据访问模型
-  let _options: StdMetaStoreOptions = Util.jsonClone(options ?? { objPath: '~' });
+  let _options: StdMetaStoreOptions = Util.jsonClone(
+    options ?? { objPath: "~" }
+  );
   const _obj = useWnObj();
   //---------------------------------------------
   /**
@@ -78,17 +87,17 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   const ActionBarVars = computed(() => {
     return {
-      loading: _action_status.value == 'loading',
-      saving: _action_status.value == 'saving',
+      loading: _action_status.value == "loading",
+      saving: _action_status.value == "saving",
       changed: changed.value,
     } as Vars;
   });
   //---------------------------------------------
   const LoadStatus = computed((): DataStoreLoadStatus => {
     if (_.isUndefined(_remote.value)) {
-      return 'unloaded';
+      return "unloaded";
     }
-    return 'full';
+    return "full";
   });
 
   //---------------------------------------------
@@ -96,14 +105,14 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   async function saveMeta() {
     if (!MetaId.value) {
-      await Alert('StdMeta without init data.id', { type: 'danger' });
+      await Alert("StdMeta without init data.id", { type: "danger" });
     }
     let diff = _local.getDiffMeta();
     if (_.isEmpty(diff)) {
       return;
     }
     diff.id = MetaId.value;
-    _action_status.value = 'saving';
+    _action_status.value = "saving";
     let re = await _obj.update(diff);
     if (re) {
       _remote.value = re;
@@ -117,6 +126,30 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   function makeContentDifferents(): Vars[] {
     return _content.getChange();
+  }
+  //---------------------------------------------
+  // 冲突
+  //---------------------------------------------
+  async function makeConflict(): Promise<MetaStoreConflicts> {
+    // 首先从服务器拉取数据，然后我们就有了三个数据版本
+    let server = await loadRemoteMeta();
+    let local = _local.localMeta.value;
+    let remote = _remote.value;
+
+    // 比对差异
+    let myDiff = buildDifferentItem(local, remote);
+    let taDiff = buildDifferentItem(server, remote);
+
+    // 算冲突
+    let conflict = buildConflict(myDiff, taDiff);
+    return {
+      server,
+      local,
+      remote,
+      localDiff: myDiff,
+      remoteDiff: taDiff,
+      conflict,
+    };
   }
   //---------------------------------------------
   // 读写内容
@@ -150,7 +183,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     }
 
     // 读取内容
-    _action_status.value = 'loading';
+    _action_status.value = "loading";
     await _content.loadContent(finger);
     _action_status.value = undefined;
   }
@@ -186,7 +219,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
       return;
     }
     // 保存内容
-    _action_status.value = 'saving';
+    _action_status.value = "saving";
     await _content.saveChange();
     _action_status.value = undefined;
   }
@@ -197,8 +230,12 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     _local.reset();
   }
 
-  function clearRemoteList() {
+  function clearRemoteMeta() {
     _remote.value = undefined;
+  }
+
+  function setRemoteMeta(meta: WnObj) {
+    _remote.value = meta;
   }
 
   function setOptions(opt: StdMetaStoreOptions) {
@@ -238,7 +275,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //   _remote.value = Util.jsonClone(meta);
   // }
 
-  function clear() {
+  function dropChange() {
     _local.reset();
   }
 
@@ -252,6 +289,55 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
 
     // 读取数据
     await reload();
+  }
+
+  //---------------------------------------------
+  async function loadRemoteMeta(): Promise<WnObj | undefined> {
+    let serverMeta: WnObj | undefined = undefined;
+    // 传入就是一个对象
+    if (isWnObj(_options.objPath)) {
+      let obj = _options.objPath;
+      if (obj.id) {
+        serverMeta = await _obj.fetch(`id:${obj.id}`);
+      }
+      // 警告
+      else {
+        let msg = `refresh force need obj.id: ${JSON.stringify(obj)}`;
+        await Alert(msg, { type: "danger" });
+        throw msg;
+      }
+    }
+    // 一定重新加载
+    else if (_.isString(_options.objPath)) {
+      serverMeta = await _obj.fetch(_options.objPath);
+    }
+
+    return serverMeta;
+  }
+
+  /**
+   * 刷新远程列表数据。
+   *
+   * 该异步函数调用 `queryRemoteList` 函数以刷新远程列表数据。
+   *
+   * @async
+   * @function
+   * @returns {Promise<void>} 返回一个 Promise 对象，表示刷新操作的完成。
+   */
+  async function refresh(options: RefreshOptions = {}) {
+    // 传入就是一个对象
+    if (options.reset || _.isString(_options.objPath)) {
+      _remote.value = await loadRemoteMeta();
+    }
+    // 直接赋值
+    else {
+      _remote.value = Util.jsonClone(_options.objPath);
+    }
+
+    // 自动重新加载内容
+    if (_remote.value && _auto_load_content.value) {
+      await loadCurrentContent();
+    }
   }
 
   /**
@@ -268,51 +354,6 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   async function reload() {
     resetLocalChange();
     await refresh();
-  }
-
-  /**
-   * 刷新远程列表数据。
-   *
-   * 该异步函数调用 `queryRemoteList` 函数以刷新远程列表数据。
-   *
-   * @async
-   * @function
-   * @returns {Promise<void>} 返回一个 Promise 对象，表示刷新操作的完成。
-   */
-  async function refresh(options: RefreshOptions = {}) {
-    // 传入就是一个对象
-    if (isWnObj(_options.objPath)) {
-      if (options.reset) {
-        let id = _options.objPath.id;
-        if (id) {
-          _remote.value = await _obj.fetch(`id:${id}`);
-        }
-        // 警告
-        else {
-          await Alert(
-            `refresh force need obj.id: ${JSON.stringify(_options.objPath)}`,
-            { type: 'danger' }
-          );
-        }
-      }
-      // 直接赋值
-      else {
-        _remote.value = Util.jsonClone(_options.objPath);
-      }
-    }
-    // 一定重新加载
-    else if (_.isString(_options.objPath)) {
-      _remote.value = await _obj.fetch(_options.objPath);
-    }
-    // 加载不出啥
-    else {
-      _remote.value = undefined;
-    }
-
-    // 自动重新加载内容
-    if (_remote.value && _auto_load_content.value) {
-      await loadCurrentContent();
-    }
   }
 
   /*---------------------------------------------
@@ -343,8 +384,9 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     //                  本地方法
     //---------------------------------------------
     resetLocalChange,
-    clearRemoteList,
-    clear,
+    clearRemoteMeta,
+    setRemoteMeta,
+    dropChange,
     updateMeta,
     //---------------------------------------------
     saveMeta,
@@ -353,6 +395,10 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     saveCurrentContent,
     makeMetaDifferent,
     makeContentDifferents,
+    //---------------------------------------------
+    // 冲突
+    //---------------------------------------------
+    makeConflict,
     //---------------------------------------------
     // 本地化存储状态
     //---------------------------------------------

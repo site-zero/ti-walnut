@@ -2,7 +2,6 @@ import {
   buildConflictList,
   buildDifferentListItems,
   ComboFilterValue,
-  ConflictItem,
   getLogger,
   KeepInfo,
   Match,
@@ -18,6 +17,7 @@ import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   GlobalStatusApi,
+  ListStoreConflicts,
   LocalListEditOptions,
   LocalListMakeChangeOptions,
   LocalListUpdateItemOptions,
@@ -281,7 +281,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   // 基础本地方法
   //---------------------------------------------
-  function resetLocalChange() {
+  function dropChange() {
     _local.reset();
   }
 
@@ -292,8 +292,12 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
+  function setRemoteList(list: SqlResult[]) {
+    _remote.value = list;
+  }
+
   function resetLocalAndRemote() {
-    resetLocalChange();
+    dropChange();
     clearRemoteList();
   }
 
@@ -329,16 +333,18 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     return re;
   }
-
+  //---------------------------------------------
+  // 冲突
+  //---------------------------------------------
   /**
    * 异步计算数据冲突项
    *
    * 该方法会从服务器拉取最新数据，然后与本地数据和当前远程数据进行比对，
    * 计算出存在冲突的数据项。
    *
-   * @returns {Promise<ConflictItem[]>} 包含冲突项的 Promise
+   * @returns 冲突详情
    */
-  async function makeConflict(): Promise<ConflictItem[]> {
+  async function makeConflict(): Promise<ListStoreConflicts> {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteList();
     let local = _local.localList.value;
@@ -348,9 +354,16 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     let myDiff = buildDifferentListItems(local, remote);
     let taDiff = buildDifferentListItems(server, remote);
 
-    // 算冲突
+    // 计算冲突
     let conflicts = buildConflictList(myDiff, taDiff);
-    return conflicts;
+    return {
+      server,
+      local,
+      remote,
+      localDiff: myDiff,
+      remoteDiff: taDiff,
+      conflicts,
+    };
   }
   //---------------------------------------------
   //                计算属性
@@ -803,7 +816,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
   //---------------------------------------------
   async function reload() {
-    resetLocalChange();
+    dropChange();
     //remoteList.value = undefined;
     await Promise.all([queryRemoteList(), countRemoteList()]);
   }
@@ -813,7 +826,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
    */
   async function refresh(options: RefreshOptions = {}) {
     if (options.reset) {
-      resetLocalChange();
+      dropChange();
     }
     await Promise.all([queryRemoteList(), countRemoteList()]);
   }
@@ -894,8 +907,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //                  本地方法
     //---------------------------------------------
     resetLocalAndRemote,
-    resetLocalChange,
+    dropChange,
     clearRemoteList,
+    setRemoteList,
 
     setQuery,
     setFilter,

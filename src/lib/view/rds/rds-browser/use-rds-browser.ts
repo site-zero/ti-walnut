@@ -324,13 +324,13 @@ export function useRdsBrowser(
       if (msg) {
         Confirm(msg, { type: "warn" }).then((yes) => {
           if (yes) {
-            store.resetLocalChange();
+            store.dropChange();
           }
         });
       }
       // 直接干掉
       else {
-        store.resetLocalChange();
+        store.dropChange();
       }
     }
     // Remove

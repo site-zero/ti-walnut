@@ -302,9 +302,9 @@ export function useAuthStore(options: AuthStoreOptions) {
         _user_role_mappings.saveChange({ force }),
       ]);
       // 清除本地修改
-      _users.resetLocalChange();
-      _roles.resetLocalChange();
-      _user_role_mappings.resetLocalChange();
+      _users.dropChange();
+      _roles.dropChange();
+      _user_role_mappings.dropChange();
     } catch (err) {
       AlertError("Fail to SaveChange", "AuthStore.saveChange", err);
       console.error(err);
