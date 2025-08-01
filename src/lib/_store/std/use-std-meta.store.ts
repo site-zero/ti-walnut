@@ -130,9 +130,21 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   // 冲突
   //---------------------------------------------
-  async function makeConflict(): Promise<MetaStoreConflicts> {
+  async function makeConflict(): Promise<MetaStoreConflicts | undefined> {
+    // 本地没修改
+    if (_.isNil(_local.localMeta.value)) {
+      return;
+    }
+
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteMeta();
+
+    // 比对差异
+    return createConflictBy(server);
+  }
+
+  function createConflictBy(server?: WnObj | undefined): MetaStoreConflicts {
+    // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let local = _local.localMeta.value;
     let remote = _remote.value;
 

@@ -344,7 +344,11 @@ function defineRdsListStore(options: RdsListStoreOptions) {
    *
    * @returns 冲突详情
    */
-  async function makeConflict(): Promise<ListStoreConflicts> {
+  async function makeConflict(): Promise<ListStoreConflicts | undefined> {
+    // 本地没修改
+    if (_.isNil(_local.localList.value)) {
+      return;
+    }
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteList();
     let local = _local.localList.value;
