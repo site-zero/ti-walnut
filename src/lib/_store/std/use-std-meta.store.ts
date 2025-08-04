@@ -1,6 +1,8 @@
 import {
   Alert,
+  apply_conflict,
   buildConflict,
+  BuildConflictItemOptions,
   buildDifferentItem,
   Util,
   Vars,
@@ -130,20 +132,20 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   // 冲突
   //---------------------------------------------
-  async function makeConflict(): Promise<MetaStoreConflicts | undefined> {
-    // 本地没修改
-    if (_.isNil(_local.localMeta.value)) {
-      return;
-    }
-
+  async function makeConflict(
+    options: BuildConflictItemOptions = {}
+  ): Promise<MetaStoreConflicts | undefined> {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteMeta();
 
     // 比对差异
-    return createConflictBy(server);
+    return createConflictBy(server, options);
   }
 
-  function createConflictBy(server?: WnObj | undefined): MetaStoreConflicts {
+  function createConflictBy(
+    server: WnObj | undefined,
+    options: BuildConflictItemOptions
+  ): MetaStoreConflicts {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let local = _local.localMeta.value;
     let remote = _remote.value;
@@ -153,7 +155,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     let taDiff = buildDifferentItem(server, remote);
 
     // 算冲突
-    let conflict = buildConflict(myDiff, taDiff);
+    let conflict = buildConflict(myDiff, taDiff, options);
     return {
       server,
       local,
@@ -162,6 +164,16 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
       remoteDiff: taDiff,
       conflict,
     };
+  }
+
+  /**
+   * 解决冲突，首先将 server 数据覆盖 remote
+   * 然后除了冲突的字段， local 的字段全部用 server 字段替换
+   */
+  function applyConflicts(cf: MetaStoreConflicts) {
+    let { server, localDiff } = cf;
+    _remote.value = server;
+    apply_conflict(_local.localMeta, server, localDiff);
   }
   //---------------------------------------------
   // 读写内容
@@ -411,6 +423,8 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     // 冲突
     //---------------------------------------------
     makeConflict,
+    createConflictBy,
+    applyConflicts,
     //---------------------------------------------
     // 本地化存储状态
     //---------------------------------------------

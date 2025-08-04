@@ -8,7 +8,8 @@ export type WnConflictSectionInfo = {
 
 export type WnConflictItemInfo = {
   id: string;
-  title: string;
+  text: string;
+  href?: string;
   myDiffType: DiffItemType;
   taDiffType: DiffItemType;
   fields: WnConflictFieldInfo[];

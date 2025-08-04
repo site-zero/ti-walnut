@@ -1,5 +1,72 @@
-@use '@site0/tijs/sass/_all.scss' as *;
+@use "@site0/tijs/sass/_all.scss" as *;
 
 .wn-conflict-view {
-  // 这里放置控件的样式
+  @include flex-align-v-nowrap;
+  height: 100%; width: 100%;
+  //-----------------------------------------------------
+  > .as-empty {
+    padding: 3em;
+    font-size: var(--ti-fontsz-m);
+  }
+  //-----------------------------------------------------
+  > main {
+    flex: 1 1 auto;
+    overflow: auto;
+    height: 100px;
+    section {
+      > h3 {
+        margin: 0;
+        padding: 0.5em;
+        border-bottom: 1px dashed var(--ti-color-secondary);
+      }
+    }
+  }
+  //-----------------------------------------------------
+  .conflict-item-con {
+    @include flex-align($ai: stretch, $ac: stretch);
+    padding: 1em;
+  }
+  //-----------------------------------------------------
+  .conflict-item {
+    padding: 0;
+    border: 1px dashed var(--ti-color-secondary);
+    border-radius: var(--ti-measure-r-s);
+    //---------------------------------------------------
+    h4 {
+      @include flex-align-nowrap;
+      gap: 5px;
+      margin: 0;
+      padding: 0.2em 0.5em;
+      border-bottom: 1px dashed var(--ti-color-secondary);
+      em {
+        @include flex-center;
+        font-style: normal;
+        display: block;
+        width: 1.5em;
+        height: 1.5em;
+        line-height: 1.5em;
+        text-align: center;
+        font-size: 10px;
+        font-weight: normal;
+        background-color: var(--ti-color-secondary);
+        color: var(--ti-color-secondary-r);
+        border-radius: 50%;
+      }
+    }
+    //---------------------------------------------------
+    table {
+      margin: 6px;
+      border-collapse: collapse;
+      td,
+      th {
+        padding: 0.2em 0.4em;
+        border: 1px solid var(--ti-color-border-thin);
+      }
+      th {
+        background-color: var(--ti-color-border-shallow);
+      }
+    }
+    //---------------------------------------------------
+  } // .conflict-item
+  //-----------------------------------------------------
 }

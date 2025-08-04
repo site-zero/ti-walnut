@@ -1,4 +1,4 @@
-import { CommonProps, ConflictItem } from "@site0/tijs";
+import { CommonProps, ConflictItem, ConflictItemValue } from "@site0/tijs";
 
 // export type WnConflictViewEmitter = {
 //   (event: "change", payload: any): void;
@@ -17,13 +17,6 @@ export type WnConflictViewProps = CommonProps & {
   sectionTitle?: Record<string, string> | ((key: string) => string);
 
   /**
-   * 如何获取冲突项标题，如果未定义则采用冲突项的 ID
-   * @param key 冲突表的键
-   * @param item 冲突项
-   */
-  getItemTitle?: (key: string, item: ConflictItem) => string;
-
-  /**
    * 如何获取冲突项的字段标题，如果未定义则采用字段的键
    *
    * @param key 冲突表的键
@@ -33,6 +26,6 @@ export type WnConflictViewProps = CommonProps & {
   getItemFieldTitle?: (
     key: string,
     fieldKey: string,
-    item: ConflictItem
+    item: ConflictItemValue
   ) => string;
 };

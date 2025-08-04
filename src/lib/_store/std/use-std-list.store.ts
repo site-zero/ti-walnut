@@ -1,6 +1,8 @@
 import {
   Alert,
+  apply_conflict_list,
   buildConflictList,
+  BuildConflictListOptions,
   buildDifferentListItems,
   ComboFilterValue,
   KeepInfo,
@@ -304,11 +306,9 @@ function defineStdListStore(options: StdListStoreOptions) {
    *
    * @returns 冲突详情
    */
-  async function makeConflict(): Promise<ListStoreConflicts | undefined> {
-    // 本地没修改
-    if (_.isNil(_local.localList.value)) {
-      return;
-    }
+  async function makeConflict(
+    options: BuildConflictListOptions
+  ): Promise<ListStoreConflicts | undefined> {
     // 首先从服务器拉取数据，然后我们就有了三个数据版本
     let server = await loadRemoteList();
     let local = _local.localList.value;
@@ -319,7 +319,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     let taDiff = buildDifferentListItems(server, remote);
 
     // 计算冲突
-    let conflicts = buildConflictList(myDiff, taDiff);
+    let conflicts = buildConflictList(myDiff, taDiff, {
+      getId: getItemId,
+      ...options,
+    });
     return {
       server,
       local,
@@ -328,6 +331,16 @@ function defineStdListStore(options: StdListStoreOptions) {
       remoteDiff: taDiff,
       conflicts,
     };
+  }
+
+  /**
+   * 解决冲突，首先将 server 数据覆盖 remote
+   * 然后除了冲突的字段， local 的字段全部用 server 字段替换
+   */
+  function applyConflicts(cf: ListStoreConflicts) {
+    let { server, localDiff } = cf;
+    _remote.value = server;
+    apply_conflict_list(_local.localList, server, localDiff);
   }
   //---------------------------------------------
   // 读写内容
@@ -1089,6 +1102,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     makeDifferents,
     makeContentDifferents,
     makeConflict,
+    applyConflicts,
     //---------------------------------------------
     // 本地化存储状态
     //---------------------------------------------
