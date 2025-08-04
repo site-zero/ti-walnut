@@ -195,7 +195,7 @@ export function useAuthStore(options: AuthStoreOptions) {
       if (!data) {
         return;
       }
-      data.roles = CurrentUserRoleGrps.value.join(",");
+      data.roles = CurrentUserRoleGrps.value.join(",").trim() || null;
       data.domainRoleValue = CurrentUserDomainRoleValue.value;
       return data;
     }
@@ -233,7 +233,7 @@ export function useAuthStore(options: AuthStoreOptions) {
     if ("user" == mainObjType) {
       //..................................
       // 修改了 roles 的话，需要更新关联关系
-      if (delta.roles) {
+      if (!_.isUndefined(delta.roles)) {
         let new_role_grps = Str.splitIgnoreBlank(delta.roles);
         //console.log("delta.roles = ", new_role_grps);
         delete delta.roles;
