@@ -264,7 +264,8 @@ export function useSessionStore() {
     let re = await Walnut.fetchAjax("/u/ajax/chse", { query });
     if (re.ok) {
       _translate_session_result(re.data);
-      Walnut.saveTicketToLocal(SE.ticket, SE.timezone);
+      Walnut.saveTicketToLocal(SE.ticket, SE.me?.meta?.TIMEZONE);
+
     }
     // 处理错误
     else {

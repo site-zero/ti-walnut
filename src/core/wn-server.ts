@@ -272,7 +272,7 @@ export class WalnutServer {
         TiStore.local.remove(TICKET_KEY);
         setEnv(ENV_KEYS.TIMEZONE, null);
       } else {
-        setEnv(ENV_KEYS.TIMEZONE, re.data.me.TIMEZONE);
+        setEnv(ENV_KEYS.TIMEZONE, re.data.me?.meta?.TIMEZONE);
       }
       return re;
     }
@@ -299,7 +299,8 @@ export class WalnutServer {
 
     // 处理返回
     if (re && re.ok && re.data) {
-      this.saveTicketToLocal(re.data.ticket, re.data.me.TIMEZONE);
+      this.saveTicketToLocal(re.data.ticket, re.data.me?.meta?.TIMEZONE);
+
     }
     return re;
   }
