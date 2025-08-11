@@ -7,6 +7,7 @@ import {
   installTiCoreI18n,
   openAppModal,
   setEnv,
+  SideBarItem,
   Str,
   TiStore,
   Tmpl,
@@ -21,11 +22,13 @@ import _ from "lodash";
 import { installWalnutI18n } from "../i18n";
 import {
   AjaxResult,
+  GlobalStatusApi,
   HubViewOptions,
   isAjaxResult,
   isWnObj,
   ServerConfig,
   SignInForm,
+  useGlobalStatus,
   UserSidebar,
   WnDictSetup,
   WnExecOptions,
@@ -53,6 +56,8 @@ export type GetUrlForObjContentOptions = {
 };
 
 export class WalnutServer {
+  private _gb_sta: GlobalStatusApi;
+
   /**
    * 记录远端服务器属性
    */
@@ -69,6 +74,7 @@ export class WalnutServer {
   private _cache: Map<string, any>;
 
   constructor() {
+    this._gb_sta = useGlobalStatus();
     this._conf = {
       protocal: "http",
       host: "localhost",
@@ -209,6 +215,11 @@ export class WalnutServer {
     return anyToHubViewOptions(view);
   }
 
+  getAppStaticPath(path: string) {
+    let { serverBase = "/" } = this._gb_sta.data;
+    return Util.appendPath(serverBase, path);
+  }
+
   getUrl(path: string, params?: Vars) {
     let sep = path.startsWith("/") ? "" : "/";
     let { protocal, host, port } = this._conf;
@@ -300,7 +311,6 @@ export class WalnutServer {
     // 处理返回
     if (re && re.ok && re.data) {
       this.saveTicketToLocal(re.data.ticket, re.data.me?.meta?.TIMEZONE);
-
     }
     return re;
   }
@@ -437,7 +447,7 @@ export class WalnutServer {
     // 静态路径
     if (objPath.startsWith("load://")) {
       let { signal } = options;
-      let loadPath = `/${objPath.substring(7)}`;
+      let loadPath = this.getAppStaticPath(objPath.substring(7));
       let resp = await fetch(loadPath, { signal });
       let re = await resp.text();
       if (cache) {
@@ -765,32 +775,55 @@ export class WalnutServer {
   }
 
   async fetchSidebar(): Promise<UserSidebar> {
-    let sidebar = this._conf.sidebar;
-    if (debug) console.log("fetchSidebar:", sidebar);
-    if (sidebar) {
+    let sidebar_conf_path = this._conf.sidebar;
+    if (debug) console.log("fetchSidebar:", sidebar_conf_path);
+    let re: UserSidebar = { sidebar: [] };
+    if (sidebar_conf_path) {
       //  Load the  Static sidebar.
-      if (_.isString(sidebar) && sidebar.startsWith("load://")) {
-        let url = `/${sidebar.substring(7)}`;
-        if (debug) console.log("fetchSidebar:url=>", url);
-        let resp = await fetch(url);
+      if (
+        _.isString(sidebar_conf_path) &&
+        sidebar_conf_path.startsWith("load://")
+      ) {
+        let sidebarPath = this.getAppStaticPath(sidebar_conf_path.substring(7));
+        if (debug) console.log("fetchSidebar:url=>", sidebarPath);
+        let resp = await fetch(sidebarPath);
         let text = await resp.text();
         let json = JSON5.parse(text);
         if (debug) console.log("sidebar is:", json);
-        return json;
+        re = json as UserSidebar;
       }
       //  load the side bar of Walnut
       else {
         let cmdText = `ti sidebar`;
-        if (_.isString(sidebar)) {
-          cmdText += " " + sidebar;
+        if (_.isString(sidebar_conf_path)) {
+          cmdText += " " + sidebar_conf_path;
         }
         if (debug) console.log("fetchSidebar:cmd=>", cmdText);
         let json = await this.exec(cmdText, { as: "json" });
         if (debug) console.log("sidebar is:", json);
-        return json;
+        re = json as UserSidebar;
       }
     }
-    return { sidebar: [] };
+
+    // 确保每个菜单项目的链接是正确的
+    let { appBase = "/" } = this._gb_sta.data;
+    const _tidy_href_of_bar_item = (sbItem: SideBarItem) => {
+      if (sbItem.href) {
+        if (!sbItem.href.startsWith(appBase)) {
+          sbItem.href = Util.appendPath(appBase, sbItem.href);
+        }
+      }
+      if (sbItem.items) {
+        for (let subItem of sbItem.items) {
+          _tidy_href_of_bar_item(subItem);
+        }
+      }
+    };
+    for (let sbItem of re.sidebar) {
+      _tidy_href_of_bar_item(sbItem);
+    }
+
+    return re;
   }
 
   async fetchUIFields(path: string) {

@@ -1,5 +1,5 @@
-import { ProcessProps, TableSelectEmitInfo, Vars } from '@site0/tijs';
-import { reactive } from 'vue';
+import { ProcessProps, TableSelectEmitInfo, Vars } from "@site0/tijs";
+import { reactive } from "vue";
 
 /**
  * 描述了一个应用路径的解析后信息。
@@ -39,10 +39,13 @@ export type GlobalStatus = {
   appLogo?: string;
   appTitle?: string;
   appVersion?: string;
-  viewName?: string;
+  appName?: string;
+  appBase?: string;
   appPath?: string;
   appLoading: boolean | string;
   quietPath?: string;
+  viewName?: string;
+  serverBase?: string;
 
   /**
    * 默认为 true， false 表示隐藏侧边栏
@@ -72,7 +75,7 @@ export type GlobalStatusApi = ReturnType<typeof defineGlobalStatus>;
 function defineGlobalStatus() {
   let _data = reactive({
     // 应用整体状态
-    viewName: 'unknown',
+    viewName: "unknown",
     appPath: undefined,
     appLoading: false,
     loading: false,
@@ -128,7 +131,7 @@ function defineGlobalStatus() {
       return { depth: 0 };
     }
     // Split the path by '/' and remove empty segments
-    const parts = _data.appPath.split('/').filter(Boolean);
+    const parts = _data.appPath.split("/").filter(Boolean);
     const depth = parts.length;
 
     // Handle root path case (when path is '/' or '')
@@ -138,9 +141,9 @@ function defineGlobalStatus() {
 
     // Extract components
     const entryName = parts[depth - 1]; // Last segment
-    const base = depth === 1 ? '/' : '/' + parts.slice(0, depth - 1).join('/'); // All but last segment
+    const base = depth === 1 ? "/" : "/" + parts.slice(0, depth - 1).join("/"); // All but last segment
     const top = parts[0]; // First segment
-    const remain = depth === 1 ? '' : '/' + parts.slice(1).join('/'); // All after first segment
+    const remain = depth === 1 ? "" : "/" + parts.slice(1).join("/"); // All after first segment
 
     // Return the complete AppPathInfo object
     return {
@@ -150,6 +153,23 @@ function defineGlobalStatus() {
       top,
       remain,
     };
+  }
+
+  function setAppPath(hubPath: string) {
+    // 确保 hubPath(`http://xxxx/{appBase}/{hubPath}`) 是以 `/` 开头的
+    // 这样比较容易和 appBase 进行比较
+    // 在开发环境下，通常 appBase = '/'
+    // 在发布环境下，通常 appBase = '/a/load/wn.hub'
+    if (!hubPath.startsWith("/")) {
+      hubPath = "/" + hubPath;
+    }
+
+    // 去掉 appBase
+    let { appBase = "/" } = _data;
+    if (hubPath.startsWith(appBase)) {
+      hubPath = hubPath.substring(appBase.length);
+    }
+    _data.appPath = hubPath;
   }
 
   function onListSelect(selection: TableSelectEmitInfo) {
@@ -166,6 +186,7 @@ function defineGlobalStatus() {
   return {
     data: _data,
     parseAppPath,
+    setAppPath,
     resetData,
     onListSelect,
   };
@@ -173,7 +194,7 @@ function defineGlobalStatus() {
 
 const _G_status_instance = new Map<string, GlobalStatusApi>();
 
-export function useGlobalStatus(name: string = '_APP') {
+export function useGlobalStatus(name: string = "_APP") {
   let re = _G_status_instance.get(name);
   if (!re) {
     re = defineGlobalStatus();
