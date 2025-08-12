@@ -203,6 +203,11 @@ export function defineSqlx(daoName?: string) {
       }
     }
 
+    // 管线上下文
+    if (options.pipeContext) {
+      cmds.push(`@pipe '${JSON.stringify(options.pipeContext)}'`);
+    }
+
     // 处理数据校验
     let {
       versionUpdateVars: verVars,

@@ -220,5 +220,13 @@ export type SqlExecOptions = SqlDataVersionCheck & {
    * 如果执行错误，则在抛出前，先在控制台打印错误
    * 默认为 true，显示指定 false 关闭这个特性
    */
-  logError?:boolean;
+  logError?: boolean;
+
+  /**
+   * 指定运行时的管线上下文变量
+   * 在记录历史数据等场景特别有用，因为需要给历史记录处理流程
+   * 输入诸如 scene 等额外信息，甚至可能包括用户浏览器本地信息
+   * 以便追踪数据操作历史
+   */
+  pipeContext?: Vars;
 };
