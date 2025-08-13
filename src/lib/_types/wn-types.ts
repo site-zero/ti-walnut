@@ -77,16 +77,17 @@ type ServerUISetup = {
   columns?: string | string[];
 };
 
+export type DomainConfig = {};
+
 export interface ServerConfig {
   logo?: string;
   title?: string;
-  version?: string;
   protocal: "http" | "https";
   host: string;
   port: number;
+  lang?: I18nLang;
   domain?: string;
   site?: string;
-  lang?: I18nLang;
   ui?: ServerUISetup;
   /**
    * 指定了 i18n 资源文件的路径

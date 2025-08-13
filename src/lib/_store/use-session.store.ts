@@ -265,7 +265,6 @@ export function useSessionStore() {
     if (re.ok) {
       _translate_session_result(re.data);
       Walnut.saveTicketToLocal(SE.ticket, SE.me?.meta?.TIMEZONE);
-
     }
     // 处理错误
     else {
@@ -350,7 +349,7 @@ export function useSessionStore() {
     if (/^~\//.test(hubPath)) {
       return hubPath;
     }
-    return `~/${hubPath}`;
+    return Util.appendPath("~", hubPath);
   }
 
   /**

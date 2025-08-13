@@ -154,6 +154,9 @@ export type HubView = {
   schema: Vars;
   methods: Record<string, Function>;
 
+  // Utility
+  getQuitPath: () => string | undefined;
+
   // methods
   setLoading: (loading: boolean) => void;
   createGUIContext: () => Vars;

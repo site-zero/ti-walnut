@@ -1,6 +1,6 @@
-import { Be, Util } from '@site0/tijs';
-import { Router } from 'vue-router';
-import { GlobalStatusApi } from '../../_features';
+import { Be, Util } from "@site0/tijs";
+import { Router } from "vue-router";
+import { GlobalStatusApi } from "../../_features";
 
 export type HubNav = ReturnType<typeof useHubNav>;
 
@@ -8,12 +8,11 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
   //---------------------------------------------
   function set_hash(hash?: string | null) {
     if (hash && !/^#/.test(hash)) {
-      hash = '#' + hash;
+      hash = "#" + hash;
     }
-    let newPath = _gl_sta.data.appPath + (hash || '');
-    if (!newPath.startsWith('/')) {
-      newPath = '/' + newPath;
-    }
+    let newPath = _gl_sta.data.appPath + (hash || "");
+    // 变成URL绝对path
+    newPath = _gl_sta.getPathOfApp(newPath);
     _router.push(newPath);
   }
   //---------------------------------------------
@@ -21,13 +20,10 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
     let newPath = _gl_sta.data.appPath
       ? Util.appendPath(_gl_sta.data.appPath, dirName)
       : dirName;
-    // 确保路径以开头没有斜杠
-    if (newPath.startsWith('/')) {
-      newPath = newPath.substring(1);
-    }
-    // 使用 router 导航到新路径
-    _gl_sta.data.appPath = newPath;
-    _router.push(`/${newPath}`);
+    // 变成URL绝对path
+    newPath = _gl_sta.getPathOfApp(newPath);
+    _gl_sta.setAppPath(newPath);
+    _router.push(newPath);
   }
   //---------------------------------------------
   /**
@@ -38,15 +34,15 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
     // 如果全局路径为空，则直接返回
     if (!_gl_sta.data.appPath) return;
     // 按斜杠分割路径，并过滤掉空字符串
-    const segments = _gl_sta.data.appPath.split('/').filter(Boolean);
+    const segments = _gl_sta.data.appPath.split("/").filter(Boolean);
     // 如果路径只有一个段，说明已经在根目录，无需导航
     if (segments.length <= 1) return;
     // 移除最后一个段，导航到上一级目录
     segments.pop();
-    // 重新构建路径，并确保路径以斜杠开头
-    const newPath = `/${segments.join('/')}`;
+    // 变成URL绝对path
+    let newPath = _gl_sta.getPathOfApp(`/${segments.join("/")}`);
     // 使用 router 导航到新路径
-    _gl_sta.data.appPath = newPath;
+    _gl_sta.setAppPath(newPath);
     _router.push(newPath);
   }
 
@@ -56,8 +52,8 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
    */
   function nav_open(objName: string) {
     let basePath = _gl_sta.data.appPath
-      ? Util.appendPath('/open', _gl_sta.data.appPath)
-      : '/open';
+      ? Util.appendPath("/open", _gl_sta.data.appPath)
+      : "/open";
     let newPath = Util.appendPath(basePath, objName);
     // 使用 router 导航到新路径
     Be.OpenUrl(newPath);

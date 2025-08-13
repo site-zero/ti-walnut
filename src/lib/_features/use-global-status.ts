@@ -1,4 +1,4 @@
-import { ProcessProps, TableSelectEmitInfo, Vars } from "@site0/tijs";
+import { ProcessProps, TableSelectEmitInfo, Util, Vars } from "@site0/tijs";
 import { reactive } from "vue";
 
 /**
@@ -43,9 +43,15 @@ export type GlobalStatus = {
   appBase?: string;
   appPath?: string;
   appLoading: boolean | string;
-  quietPath?: string;
+  quitPath?: string;
   viewName?: string;
   serverBase?: string;
+  configName?: string;
+
+  //..........................................
+  // 关键信息
+  domain?: string;
+  loginSite?: string;
 
   /**
    * 默认为 true， false 表示隐藏侧边栏
@@ -75,8 +81,11 @@ export type GlobalStatusApi = ReturnType<typeof defineGlobalStatus>;
 function defineGlobalStatus() {
   let _data = reactive({
     // 应用整体状态
-    viewName: "unknown",
+    serverBase: "/",
+    configName: "server.config.json",
     appPath: undefined,
+    viewName: "unknown",
+
     appLoading: false,
     loading: false,
     saving: false,
@@ -172,6 +181,14 @@ function defineGlobalStatus() {
     _data.appPath = hubPath;
   }
 
+  function getPathOfApp(path: string) {
+    let base = _data.appBase ?? "/";
+    if (!path.startsWith(base)) {
+      path = Util.appendPath(base, path);
+    }
+    return path;
+  }
+
   function onListSelect(selection: TableSelectEmitInfo) {
     let { checkedIds, current } = selection;
     _data.selectedCols = 0;
@@ -186,6 +203,7 @@ function defineGlobalStatus() {
   return {
     data: _data,
     parseAppPath,
+    getPathOfApp,
     setAppPath,
     resetData,
     onListSelect,

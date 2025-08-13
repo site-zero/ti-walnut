@@ -1,13 +1,13 @@
-import { ActionBarProps } from '@site0/tijs';
-import { computed, InjectionKey, ref } from 'vue';
-import { Router } from 'vue-router';
-import { GlobalStatusApi } from '../../_features';
-import { HubView } from '../../_store';
+import { ActionBarProps } from "@site0/tijs";
+import { computed, InjectionKey, ref } from "vue";
+import { Router } from "vue-router";
+import { GlobalStatusApi } from "../../_features";
+import { HubView } from "../../_store";
 
 export type WnHubApp = ReturnType<typeof useWnHubApp>;
 
 export const WN_HUB_APP_INST: InjectionKey<WnHubApp> =
-  Symbol('WN_HUB_APP_INST');
+  Symbol("WN_HUB_APP_INST");
 
 export function useWnHubApp(_hub_view: HubView) {
   const _gb_st: GlobalStatusApi = _hub_view.global;
@@ -20,12 +20,12 @@ export function useWnHubApp(_hub_view: HubView) {
   }
   //--------------------------------------------------
   function open(href: string) {
+    _gb_st.setAppPath(href);
     router.push(href);
-    _gb_st.data.appPath = href;
   }
   //--------------------------------------------------
   function setAppPath(appPath: string) {
-    _gb_st.data.appPath = appPath;
+    _gb_st.setAppPath(appPath);
   }
   //--------------------------------------------------
   return {

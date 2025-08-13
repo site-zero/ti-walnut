@@ -66,6 +66,12 @@ export function useHubViewApi(options: HubViewApiOptions) {
     methods: {},
   };
   //---------------------------------------------
+  // 帮助方法
+  //--------------------------------------------
+  function getQuitPath() {
+    return _gb_sta.data.quitPath;
+  }
+  //---------------------------------------------
   // 计算输出
   //--------------------------------------------
   const createGUIContext = () => {
@@ -310,6 +316,9 @@ export function useHubViewApi(options: HubViewApiOptions) {
 
     // HubViewState
     ..._state,
+
+    // Utility
+    getQuitPath,
 
     // methods
     setLoading,

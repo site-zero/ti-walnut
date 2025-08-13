@@ -56,7 +56,7 @@ export type GetUrlForObjContentOptions = {
 };
 
 export class WalnutServer {
-  private _gb_sta: GlobalStatusApi;
+  private _gl_sta: GlobalStatusApi;
 
   /**
    * 记录远端服务器属性
@@ -74,13 +74,12 @@ export class WalnutServer {
   private _cache: Map<string, any>;
 
   constructor() {
-    this._gb_sta = useGlobalStatus();
+    this._gl_sta = useGlobalStatus();
     this._conf = {
       protocal: "http",
       host: "localhost",
       port: 8080,
       site: undefined,
-      domain: undefined,
       sidebar: false,
     };
     // 如果 body 里指定了，那么就获取 session 会话
@@ -88,6 +87,72 @@ export class WalnutServer {
       document.body.getAttribute("session-ticket") ||
       TiStore.local.getString(TICKET_KEY, undefined);
     this._cache = new Map<string, any>();
+  }
+
+  setupFromDocument(doc: Document, appVersion: string, appTitle: string) {
+    // 一切从 body 属性读取
+    const $body = doc.body;
+    // 读取服务器配置
+    const configName =
+      $body.getAttribute("server-config") || "server.config.json";
+    const serverBase = $body.getAttribute("server-base") || "/";
+
+    // 如果从 app 加载，则会增加一个 appPath 属性，
+    // 这样 exit 命令时，会退到一个指定路径
+    const appName = $body.getAttribute("app-name");
+    const appBase = $body.getAttribute("app-base");
+    const quitPath = $body.getAttribute("quit-path");
+    const domain = $body.getAttribute("domain");
+    const loginSite = $body.getAttribute("login-site");
+
+    // 更新本地存储的会话票据
+    const ticket = $body.getAttribute("session-ticket");
+    setTicketToLocalStore(ticket);
+
+    // 初始化全局状态
+    this._gl_sta.data.appVersion = appVersion ?? "0.0.0";
+    this._gl_sta.data.appTitle = appTitle ?? "A Walnut Application";
+    this._gl_sta.data.appName = appName || undefined;
+    this._gl_sta.data.appBase = appBase || "/";
+    this._gl_sta.data.quitPath = quitPath || undefined;
+    this._gl_sta.data.serverBase = serverBase;
+    this._gl_sta.data.configName = configName;
+    this._gl_sta.data.domain = domain || undefined;
+    this._gl_sta.data.loginSite = loginSite || undefined;
+  }
+
+  async prepare() {
+    let { serverBase, configName, domain, loginSite } = this._gl_sta.data;
+
+    // 准备服务配置文件路径
+    let configPath = [serverBase, configName].join("/");
+    if (configPath.startsWith("//")) {
+      configPath = configPath.substring(1).trim();
+    }
+
+    // 读取配置文件
+    let resp = await fetch(configPath);
+    let config = (await resp.json()) as ServerConfig;
+
+    // 设置默认值
+    _.defaults(config, {
+      lang: "zh-cn",
+    });
+
+    // 确保 config 里面有正确的 domain
+    config.domain = domain || undefined;
+    config.site = loginSite || undefined;
+
+    // 根据配置文件，设置全局状态管理
+    if (config.logo) {
+      this._gl_sta.data.appLogo = config.logo;
+    }
+    if (config.title) {
+      this._gl_sta.data.appTitle = config.title;
+    }
+
+    // 初始化服务器
+    await this.init(config);
   }
 
   async init(conf: ServerConfig) {
@@ -216,7 +281,7 @@ export class WalnutServer {
   }
 
   getAppStaticPath(path: string) {
-    let { serverBase = "/" } = this._gb_sta.data;
+    let { serverBase = "/" } = this._gl_sta.data;
     return Util.appendPath(serverBase, path);
   }
 
@@ -806,7 +871,7 @@ export class WalnutServer {
     }
 
     // 确保每个菜单项目的链接是正确的
-    let { appBase = "/" } = this._gb_sta.data;
+    let { appBase = "/" } = this._gl_sta.data;
     const _tidy_href_of_bar_item = (sbItem: SideBarItem) => {
       if (sbItem.href) {
         if (!sbItem.href.startsWith(appBase)) {
@@ -916,11 +981,11 @@ export class WalnutServer {
      */
     let url: string;
     if (options.beacon && this._ticket) {
-      url = this.getUrl("/a/beacon_run/wn.term", {
+      url = this.getUrl("/a/beacon_run/wn-term", {
         _wn_ticket_: this._ticket,
       });
     } else {
-      url = this.getUrl("/a/run/wn.term");
+      url = this.getUrl("/a/run/wn-term");
     }
 
     // 准备请求细节
