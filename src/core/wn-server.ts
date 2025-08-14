@@ -152,7 +152,7 @@ export class WalnutServer {
     }
 
     // 初始化服务器
-    await this.init(config);
+    return await this.init(config);
   }
 
   async init(conf: ServerConfig) {
@@ -189,6 +189,8 @@ export class WalnutServer {
     if (conf.i18n) {
       await this.loadI18n("public");
     }
+
+    return conf;
   } // async init(conf: ServerConfig) {
 
   hasTicket() {
