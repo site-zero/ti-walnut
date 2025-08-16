@@ -22,6 +22,7 @@ import _ from "lodash";
 import { installWalnutI18n } from "../i18n";
 import {
   AjaxResult,
+  DomainConfig,
   GlobalStatusApi,
   HubViewOptions,
   isAjaxResult,
@@ -80,7 +81,7 @@ export class WalnutServer {
       host: "localhost",
       port: 8080,
       site: undefined,
-      sidebar: false,
+      sidebar: "cat ~/.domain/sidebar.json",
     };
     // 如果 body 里指定了，那么就获取 session 会话
     this._ticket =
@@ -89,7 +90,7 @@ export class WalnutServer {
     this._cache = new Map<string, any>();
   }
 
-  setupFromDocument(doc: Document, appVersion: string, appTitle: string) {
+  loadSettingFromDocument(doc: Document, appVersion: string, appTitle: string) {
     // 一切从 body 属性读取
     const $body = doc.body;
     // 读取服务器配置
@@ -157,10 +158,25 @@ export class WalnutServer {
 
   async init(conf: ServerConfig) {
     this._conf = conf;
-    let lang = conf.lang ?? "zh-cn";
-    installTiCoreI18n(lang);
-    installWalnutI18n(lang);
-    updateInstalledComponentsLangs(lang);
+
+    // 加载 i18n 资源
+    if (conf.i18n) {
+      await this.loadI18n("public");
+    }
+
+    this.setupConfig(conf);
+
+    return conf;
+  } // async init(conf: ServerConfig) {
+
+  async setupConfig(conf: DomainConfig) {
+    // 初始化语言
+    let lang = conf.lang;
+    if (lang) {
+      installTiCoreI18n(lang);
+      installWalnutI18n(lang);
+      updateInstalledComponentsLangs(lang);
+    }
 
     // 初始化字典
     if (conf.dicts) {
@@ -189,9 +205,7 @@ export class WalnutServer {
     if (conf.i18n) {
       await this.loadI18n("public");
     }
-
-    return conf;
-  } // async init(conf: ServerConfig) {
+  }
 
   hasTicket() {
     return this._ticket ? true : false;
@@ -842,16 +856,13 @@ export class WalnutServer {
   }
 
   async fetchSidebar(): Promise<UserSidebar> {
-    let sidebar_conf_path = this._conf.sidebar;
-    if (debug) console.log("fetchSidebar:", sidebar_conf_path);
+    let sidebar = this._conf.sidebar;
+    if (debug) console.log("fetchSidebar:", sidebar);
     let re: UserSidebar = { sidebar: [] };
-    if (sidebar_conf_path) {
+    if (sidebar) {
       //  Load the  Static sidebar.
-      if (
-        _.isString(sidebar_conf_path) &&
-        sidebar_conf_path.startsWith("load://")
-      ) {
-        let sidebarPath = this.getAppStaticPath(sidebar_conf_path.substring(7));
+      if (sidebar.startsWith("load://")) {
+        let sidebarPath = this.getAppStaticPath(sidebar.substring(7));
         if (debug) console.log("fetchSidebar:url=>", sidebarPath);
         let resp = await fetch(sidebarPath);
         let text = await resp.text();
@@ -861,10 +872,7 @@ export class WalnutServer {
       }
       //  load the side bar of Walnut
       else {
-        let cmdText = `ti sidebar`;
-        if (_.isString(sidebar_conf_path)) {
-          cmdText += " " + sidebar_conf_path;
-        }
+        let cmdText = sidebar || "cat ~/.domain/sidebar.json";
         if (debug) console.log("fetchSidebar:cmd=>", cmdText);
         let json = await this.exec(cmdText, { as: "json" });
         if (debug) console.log("sidebar is:", json);

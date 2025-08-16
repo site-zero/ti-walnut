@@ -77,17 +77,8 @@ type ServerUISetup = {
   columns?: string | string[];
 };
 
-export type DomainConfig = {};
-
-export interface ServerConfig {
-  logo?: string;
-  title?: string;
-  protocal: "http" | "https";
-  host: string;
-  port: number;
+export type DomainConfig = {
   lang?: I18nLang;
-  domain?: string;
-  site?: string;
   ui?: ServerUISetup;
   /**
    * 指定了 i18n 资源文件的路径
@@ -102,9 +93,7 @@ export interface ServerConfig {
    * 3) zh-cn  // 最后总是用 zh-cn 来兜底
    */
   i18n?: Record<string, string | string[]>;
-  sidebar?: boolean | string;
-  logLevel?: string;
-  logger?: Record<string, string>;
+  sidebar?: string;
   dicts?: string | Record<string, WnDictSetup>;
 
   /**
@@ -195,7 +184,22 @@ export interface ServerConfig {
    * 应该抛错
    */
   views?: Record<string, SelectValueArm<string | HubViewOptions, Vars>>;
-}
+};
+
+export type ServerConfig = DomainConfig & {
+  logo?: string;
+  title?: string;
+  protocal: "http" | "https";
+  host: string;
+  port: number;
+  domain?: string;
+  site?: string;
+  // 指定受保护的设置，在一个应用需要跨越多个域使用的时候，
+  // 我们需要每个域指定的 lang|ui|i18n|sidebar|dists|objPath|views
+  // 都是不同，因此，我们可以指定 setup:"~/domain/setup.json"
+  // 在登录后，即可获取相应配置
+  setup?: string;
+};
 
 export type WnDictSetup = {
   /**
