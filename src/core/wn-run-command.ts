@@ -112,7 +112,7 @@ async function processMOC(input: string) {
   let head = input.substring(0, pos).trim();
   let body = input.substring(pos + 1).trim();
 
-  console.log(`processMOC: head=[${head}]`, "\nbody\n", body);
+  //console.log(`processMOC: head=[${head}]`, "\nbody\n", body);
   const fnSet: Record<
     string,
     (session: SessionStore, body: string) => Promise<void>
