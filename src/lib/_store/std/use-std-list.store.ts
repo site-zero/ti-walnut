@@ -575,6 +575,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     return re;
   }
 
+  function getNextId(): string | undefined {
+    return _local.getNextRowId(_checked_ids.value) as string;
+  }
+
   function prependItem(o: WnObj) {
     // 如果存在就更新
     let id = getItemId(o);
@@ -1031,6 +1035,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     findItemsById,
     findItemsByMatch,
     findItemsBy,
+    getNextId,
     getFilterField: (key: string, dft?: any) => {
       return _.get(_query.value.filter, key) ?? dft;
     },

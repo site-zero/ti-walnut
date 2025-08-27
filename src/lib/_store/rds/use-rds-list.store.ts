@@ -483,6 +483,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return re;
   }
 
+  function getNextId(): string | undefined {
+    return _local.getNextRowId(_checked_ids.value) as string;
+  }
+
   function getFilterField(key: string, dft?: any) {
     return _.get(_query.value.filter, key) ?? dft;
   }
@@ -924,6 +928,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     findItemsByMatch,
     findItemsBy,
     getFilterField,
+    getNextId,
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------

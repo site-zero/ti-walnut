@@ -172,37 +172,9 @@ export function useLocalListEdit(
   }
   //---------------------------------------------
   function getNextRowId(checkedIds: TableRowID[]): TableRowID | undefined {
-    if (_.isEmpty(checkedIds)) {
-      return;
-    }
-    // 编制索引
-    let idMap = Util.arrayToMap(checkedIds);
-    let lastId = _.last(checkedIds);
-
-    // 开始查找
-    let index = getRowIndex(lastId!);
-    if (index < 0) {
-      return;
-    }
-
     // 待选列表
     let list = _local_list.value || remoteList.value || [];
-
-    // 向后找，遇到第一个非选中的对象ID
-    for (let i = index + 1; i < list.length; i++) {
-      let id = getRowId(list[i], i);
-      if (!idMap.has(id)) {
-        return id;
-      }
-    }
-
-    // 向前找，遇到第一个非选中的对象ID
-    for (let i = index - 1; i >= 0; i--) {
-      let id = getRowId(list![i], i);
-      if (!idMap.has(id)) {
-        return id;
-      }
-    }
+    return Util.getNextId(list, checkedIds, getRowId);
   }
 
   /**
