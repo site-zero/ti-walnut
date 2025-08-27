@@ -642,10 +642,14 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     __save_local_select();
   }
 
-  async function selectItem(id: string) {
-    let currentId = id;
-    let checkedIds = [id];
-    await updateSelection(currentId, checkedIds);
+  async function selectItem(id?: string | null) {
+    if (_.isNil(id)) {
+      cancelSelection();
+    } else {
+      let currentId = id;
+      let checkedIds = [id];
+      await updateSelection(currentId, checkedIds);
+    }
     __save_local_select();
   }
 
@@ -934,6 +938,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     setPager,
 
     addLocalItem,
+    setActionStatus(st?: DataStoreActionStatus | null) {
+      _action_status.value = st || undefined;
+    },
 
     appendItem,
     prependItem,
