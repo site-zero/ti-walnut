@@ -1,25 +1,25 @@
 <script lang="ts" setup>
   //--------------------------------------------------
-  import { TiLayoutGrid } from '@site0/tijs';
-  import { computed, inject, ref, watch } from 'vue';
-  import { useRdsListStore, WN_HUB_APP_INST } from '../../../../lib';
-  import { useRdsBrowserLayout } from './rds-browser-layout';
-  import { useRdsBrowserSchema } from './rds-browser-schema';
-  import { RdsBrowserEmitter, RdsBrowserProps } from './rds-browser-types';
-  import { getKeepName, useRdsBrowser } from './use-rds-browser';
+  import { TiLayoutGrid } from "@site0/tijs";
+  import { computed, inject, ref, watch } from "vue";
+  import { useRdsListStore, WN_HUB_APP_INST } from "../../../../lib";
+  import { useRdsBrowserLayout } from "./rds-browser-layout";
+  import { useRdsBrowserSchema } from "./rds-browser-schema";
+  import { RdsBrowserEmitter, RdsBrowserProps } from "./rds-browser-types";
+  import { getKeepName, useRdsBrowser } from "./use-rds-browser";
   //--------------------------------------------------
   const emit = defineEmits<RdsBrowserEmitter>();
   //--------------------------------------------------
   const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const props = withDefaults(defineProps<RdsBrowserProps>(), {
-    layoutQuickColumns: '50% 1fr',
-    layoutQuickRows: 'auto auto 1fr auto',
-    defaultKeepMode: 'local',
+    layoutQuickColumns: "50% 1fr",
+    layoutQuickRows: "auto auto 1fr auto",
+    defaultKeepMode: "local",
     autoReload: true,
     messages: () => ({
-      warn_refresh: 'i18n:warn-refresh',
-      warn_drop_change: 'i18n:warn-drop-change',
+      warn_refresh: "i18n:warn-refresh",
+      warn_drop_change: "i18n:warn-drop-change",
     }),
   });
   //--------------------------------------------------
@@ -27,8 +27,8 @@
   //--------------------------------------------------
   const _store = computed(() => {
     let store = useRdsListStore({
-      keepQuery: getKeepName(props, 'Query'),
-      keepSelect: getKeepName(props, 'Selection'),
+      keepQuery: getKeepName(props, "Query"),
+      keepSelect: getKeepName(props, "Selection"),
       ...props.dataStore,
     });
     _store_at.value = Date.now();
@@ -76,6 +76,10 @@
   //     _store.value.reload();
   //   }
   // });
+  //--------------------------------------------------
+  defineExpose({
+    api: _api,
+  });
   //--------------------------------------------------
 </script>
 <template>

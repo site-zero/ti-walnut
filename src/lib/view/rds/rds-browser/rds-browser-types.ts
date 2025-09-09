@@ -6,19 +6,18 @@ import {
   LayoutGridProps,
   LayoutSchema,
   TableProps,
-  TableRowID,
   Vars,
-} from '@site0/tijs';
-import { ComputedRef } from 'vue';
-import { RdsListStoreApi, RdsListStoreOptions } from '../../../_store';
-import { useRdsBrowser } from './use-rds-browser';
+} from "@site0/tijs";
+import { ComputedRef } from "vue";
+import { RdsListStoreApi, RdsListStoreOptions } from "../../../_store";
+import { useRdsBrowser } from "./use-rds-browser";
 
 export type RdsBrowserEmitter = {
-  (event: 'create:item', ctx: RdsCreateNewItemContext): void;
+  (event: "create:item", ctx: RdsCreateNewItemContext): void;
 };
 
-export type RdsBrowserMsgKey = 'warn_refresh' | 'warn_drop_change';
-export type RdsBrowserActionHandleMark = 'handled' | 'unhandled';
+export type RdsBrowserMsgKey = "warn_refresh" | "warn_drop_change";
+export type RdsBrowserActionHandleMark = "handled" | "unhandled";
 
 export type RdsCreateNewItemContext = {
   store: RdsListStoreApi;
@@ -29,11 +28,11 @@ export type RdsCreateNewItemContext = {
 };
 
 export type KeepTarget =
-  | 'Query'
-  | 'Selection'
-  | 'Filter-Major'
-  | 'Table-Columns'
-  | 'GUI-Layout-Sizes';
+  | "Query"
+  | "Selection"
+  | "Filter-Major"
+  | "Table-Columns"
+  | "GUI-Layout-Sizes";
 
 export type RdsBrowserProps = {
   /**
@@ -43,7 +42,7 @@ export type RdsBrowserProps = {
 
   defaultKeepMode?: KeepMode;
 
-  keepModes?: Partial<Record<KeepTarget, KeepMode | 'no-keep' | undefined>>;
+  keepModes?: Partial<Record<KeepTarget, KeepMode | "no-keep" | undefined>>;
 
   /**
    * 界面mount后，是否自动加载数据
@@ -136,7 +135,7 @@ export type RdsBrowserProps = {
     Data: RdsListStoreApi,
     name: string,
     payload: any
-  ) => Promise<RdsBrowserActionHandleMark>;
+  ) => Promise<RdsBrowserActionHandleMark | void | undefined>;
 
   //--------------------------------------------------
   // 数据访问
@@ -151,12 +150,12 @@ export type RdsBrowserProps = {
   //--------------------------------------------------
   // 数据表单
   //--------------------------------------------------
-  form?: Omit<FormProps, 'data'>;
+  form?: Omit<FormProps, "data">;
 
   //--------------------------------------------------
   // 数据表格
   //--------------------------------------------------
-  table?: Omit<TableProps, 'data'>;
+  table?: Omit<TableProps, "data">;
 
   //--------------------------------------------------
   // 搜索过滤器
@@ -168,3 +167,7 @@ export type RdsBrowserProps = {
 // 定义特性
 //--------------------------------------------------
 export type RdsBrowserApi = ReturnType<typeof useRdsBrowser>;
+
+export type RdsBrowserExposeApi = {
+  api: RdsBrowserApi;
+};
