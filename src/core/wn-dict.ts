@@ -13,13 +13,12 @@ import {
   Util,
   ValGetter,
   Vars,
-  getLogger,
 } from '@site0/tijs';
 import _ from 'lodash';
 import { WnDictSetup } from '../lib';
 import { Walnut } from './wn-server';
 
-const log = getLogger('wn.dict');
+const debug = false;
 
 function makeWalnutDictGetData(
   data?: string | Vars[],
@@ -31,7 +30,7 @@ function makeWalnutDictGetData(
       // 加载静态资源
       if (data.startsWith('load://')) {
         return (signal?: AbortSignal): Promise<any[]> => {
-          return Walnut.loadJson(data, {signal});
+          return Walnut.loadJson(data, { signal });
         };
       }
 
@@ -203,7 +202,7 @@ export function installWalnutDicts(dicts?: Record<string, WnDictSetup>) {
   if (!dicts) {
     return;
   }
-  log.info('installWalnutDicts', dicts);
+  if (debug) console.log('installWalnutDicts', dicts);
   for (let dictName of _.keys(dicts)) {
     let _setup = dicts[dictName];
     // 动态字典

@@ -94,7 +94,7 @@ export type DomainConfig = {
    */
   i18n?: Record<string, string | string[]>;
   sidebar?: string;
-  dicts?: string | Record<string, WnDictSetup>;
+  dicts?: string | string[];
 
   /**
    * 可以给扩展(譬如 WnHub)使用， 一个 dirName 具体

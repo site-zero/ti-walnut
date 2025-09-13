@@ -1,4 +1,4 @@
-import { getLogger, Util, Vars } from "@site0/tijs";
+import { Util, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
 import {
@@ -12,7 +12,7 @@ import {
 } from "..";
 import { Walnut } from "../../core";
 
-const log = getLogger("wn.use-sqlx");
+const debug = false;
 
 export type SqlXApi = ReturnType<typeof defineSqlx>;
 
@@ -59,7 +59,8 @@ export function defineSqlx(daoName?: string) {
       if (list.length == 1) {
         return list[0] as SqlResult;
       } else if (list.length > 1) {
-        log.error(`Multiple result when fetch`, { sql, filter, list });
+        if (debug)
+          console.log(`Multiple result when fetch`, { sql, filter, list });
       }
     }
   }
@@ -76,7 +77,7 @@ export function defineSqlx(daoName?: string) {
       cmds.push("-cqn @vars");
       cmds.push(`@query ${sql} -p`);
       let cmdText = cmds.join(" ");
-      log.debug(cmdText, q);
+      if (debug) console.log(cmdText, q);
 
       // 执行查询
       let list = await Walnut.exec(cmdText, { input: qstr, as: "json" });
@@ -153,7 +154,7 @@ export function defineSqlx(daoName?: string) {
       cmds.push("-cqn @vars");
       cmds.push(`@query ${sql} -p`);
       let cmdText = cmds.join(" ");
-      log.debug(cmdText, filter);
+      if (debug) console.log(cmdText, filter);
 
       // 执行查询
       let list = await Walnut.exec(cmdText, { input: qstr, as: "json" });
@@ -300,7 +301,7 @@ export function defineSqlx(daoName?: string) {
 
     // 准备发送命令
     let cmdText = cmds.join(" ");
-    log.debug(cmdText);
+    if (debug) console.log(cmdText);
 
     // 执行查询
     let input = JSON.stringify(inputs);

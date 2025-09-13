@@ -3,7 +3,6 @@ import {
   buildConflict,
   BuildConflictItemOptions,
   buildDifferentItem,
-  getLogger,
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
@@ -21,7 +20,7 @@ import {
   useSqlx,
 } from "../../";
 
-const log = getLogger("wn.use-data-meta-store");
+const debug = false;
 
 export type RdsMetaStoreApi = ReturnType<typeof defineRdsMetaStore>;
 
@@ -141,14 +140,14 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   function makeChanges(): SqlExecInfo[] {
     // 保护一下
     if (!options.makeChange) {
-      log.warn("without options.makeChange");
+      if (debug) console.log("without options.makeChange");
       return [];
     }
     // 获取改动信息
     let changes = [] as SqlExecInfo[];
     changes.push(..._local.makeChange(options.makeChange));
 
-    log.debug("makeChanges", changes);
+    if (debug) console.log("makeChanges", changes);
     return changes;
   }
 
@@ -277,7 +276,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
       }
 
       // 最后执行更新
-      log.debug("saveChange", changes);
+      if (debug) console.log("saveChange", changes);
       await sqlx.exec(changes);
 
       // 更新远程结果

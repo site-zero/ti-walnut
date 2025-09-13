@@ -42,7 +42,14 @@ import { anyToHubViewOptions } from "./wn-obj-views";
 import { wnRunCommand } from "./wn-run-command";
 
 const TICKET_KEY = "Walnut-Ticket";
-const debug = false;
+const debug = true;
+
+/**
+ * 定义加载模式类型，用于指定加载 i18n 资源的模式。
+ * - "public": 加载公共内容，通常对应以 `load://` 开头的静态路径。
+ * - "protected": 加载受保护内容，通常对应需要用户登录才能访问的 Walnut 动态路径。
+ */
+type LoadMode = "public" | "protected";
 
 export function setTicketToLocalStore(ticket?: string | null) {
   if (ticket) {
@@ -164,12 +171,23 @@ export class WalnutServer {
       await this.loadI18n("public");
     }
 
-    this.setupConfig(conf);
+    this._setup_config(conf);
 
     return conf;
   } // async init(conf: ServerConfig) {
 
-  async setupConfig(conf: DomainConfig) {
+  /**
+   * 根据传入的域名配置初始化相关设置
+   *
+   * 该方法会执行以下操作：
+   * 1. 初始化语言环境
+   * 2. 初始化字典
+   * 3. 初始化系统界面相关设定
+   * 4. 加载 i18n 资源
+   *
+   * @param conf - 域名配置对象，包含语言、字典、界面等相关配置
+   */
+  async _setup_config(conf: DomainConfig) {
     // 初始化语言
     let lang = conf.lang;
     if (lang) {
@@ -180,13 +198,7 @@ export class WalnutServer {
 
     // 初始化字典
     if (conf.dicts) {
-      let dicts: Record<string, WnDictSetup> | undefined;
-      if (_.isString(conf.dicts)) {
-        dicts = await this.loadJson(conf.dicts);
-      } else {
-        dicts = conf.dicts;
-      }
-      installWalnutDicts(dicts);
+      this.loadDicts("public");
     }
 
     // 初始化系统界面相关的设定
@@ -214,6 +226,56 @@ export class WalnutServer {
   getConfig<T>(key: string, dft?: T): T {
     let re = _.get(this._conf, key);
     return re ?? dft;
+  }
+
+  findPath(path: string, content: Vars) {
+    let rePath: string | undefined = undefined;
+
+    // 获取路径规则
+    let __paths: Vars = Walnut.getConfig("objPath", {});
+
+    // hubPath 的值类似  `setting/a/b/c` 我们需要用下面的逻辑
+    // 来路由这个路径到真正的 Walnut 对象路径
+    // 我们会依次循环尝试：
+    //  - setting/a/b/c
+    //  - setting/a/b
+    //  - setting/a
+    //  - setting
+    // 看看 _paths 里有没有定制对应的映射
+    // 譬如，我们在 setting/a  的时候找到了映射，我们会保留 b/c 部分
+    // 以便最后添加到返回值的结尾，也就是说，如果规则是:
+    //  - setting/a : "~/.domain"
+    // 那么函数最后的返回值应该是 "~/.domain/b/c"
+    let pathArms = __paths[path];
+    // Handle partial path matching: try progressively shorter paths
+    if (!pathArms) {
+      const segments = path.split("/");
+
+      // 尝试逐步缩短路径来匹配
+      for (let i = segments.length - 1; i > 0; i--) {
+        let partialPath = segments.slice(0, i).join("/");
+        pathArms = __paths[partialPath];
+
+        if (pathArms) {
+          // 构造剩余路径并加入上下文，以便渲染
+          content.remain = segments.slice(i).join("/") || "";
+          break;
+        }
+      }
+    }
+
+    // 还是木有？！最后尝试一下通配符
+    if (!pathArms) {
+      pathArms = __paths["*"];
+    }
+
+    // 挑选路径模板
+    if (pathArms) {
+      rePath = Util.selectValue(content, pathArms);
+    }
+
+    // 搞定
+    return rePath;
   }
 
   findView(path: string, ctx: Vars = {}) {
@@ -640,7 +702,16 @@ export class WalnutServer {
     return await this.loadContentAsList(paths, options);
   }
 
-  async loadI18n(mode: "public" | "protected") {
+  /**
+   * 异步加载国际化资源。
+   *
+   * 根据传入的加载模式（`public` 或 `protected`），加载对应的国际化资源文件。
+   * 首先会根据配置中的语言设置获取对应语言的资源路径，然后根据加载模式调用不同的方法加载资源。
+   * 加载成功后，将资源内容解析为 JSON 并安装到国际化系统中。
+   *
+   * @param mode - 加载模式，`public` 表示加载公共内容，`protected` 表示加载受保护内容。
+   */
+  async loadI18n(mode: LoadMode) {
     let lang = this._conf.lang ?? "zh-cn";
     let paths = this._conf.i18n?.[lang] || this._conf.i18n?.["zh-cn"];
     // 防空
@@ -659,6 +730,35 @@ export class WalnutServer {
       if (result) {
         let json = JSON5.parse(result);
         I18n.putAll(json);
+      }
+    }
+  }
+
+  /**
+   * 异步加载字典资源。
+   *
+   * 根据传入的加载模式（`public` 或 `protected`），加载对应的字典资源文件。
+   * 首先会根据配置中的字典设置获取字典路径，然后根据加载模式调用不同的方法加载资源。
+   * 加载成功后，将资源内容解析为 JSON 并安装到字典系统中。
+   *
+   * @param mode - 加载模式，`public` 表示加载公共内容，`protected` 表示加载受保护内容。
+   */
+  async loadDicts(mode: LoadMode) {
+    const paths = this._conf.dicts;
+    // 防空
+    if (_.isEmpty(paths)) return;
+    // 收集结果
+    let results = [] as string[];
+    if (mode == "public") {
+      results = await this.loadPublicContents(paths!);
+    } else {
+      results = await this.loadProtectedContents(paths!);
+    }
+    // 安装
+    for (let result of results) {
+      if (result) {
+        let json = JSON5.parse(result);
+        installWalnutDicts(json);
       }
     }
   }
@@ -950,6 +1050,12 @@ export class WalnutServer {
           }
         }
       }
+
+      // 动态加载数据字典
+      if (this._conf.dicts) {
+        loading.push(this.loadDicts("protected"));
+      }
+
       // 动态加载保护多国语言
       if (this._conf.i18n) {
         loading.push(this.loadI18n("protected"));

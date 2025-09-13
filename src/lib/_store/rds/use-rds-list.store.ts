@@ -4,7 +4,6 @@ import {
   BuildConflictListOptions,
   buildDifferentListItems,
   ComboFilterValue,
-  getLogger,
   KeepInfo,
   Match,
   TableSelectEmitInfo,
@@ -36,7 +35,7 @@ import {
 } from "../../";
 import { Walnut } from "../../../core";
 
-const log = getLogger("wn.use-data-list-store");
+const debug = false;
 
 /**
  * 如果服务器的 SQL 是联合查询，通常查询的字段条件会有前缀
@@ -862,7 +861,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     const { transLevel = 1 } = setup;
     // 获取改动信息
     let changes = makeChanges();
-    log.debug("saveChange", changes);
+    if (debug) console.log("saveChange", changes);
     // 保护一下
     if (changes.length == 0) {
       return;

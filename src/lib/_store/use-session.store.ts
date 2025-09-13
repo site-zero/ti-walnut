@@ -293,60 +293,14 @@ export function useSessionStore() {
    */
   function getObjPath(hubPath: string): string {
     let aCtx: Vars = { path: hubPath, ...SE };
-    let path: string | undefined = undefined;
+    let path = Walnut.findPath(hubPath, aCtx);
 
-    // 获取路径规则
-    let __paths: Vars = Walnut.getConfig("objPath", {});
-
-    // hubPath 的值类似  `setting/a/b/c` 我们需要用下面的逻辑
-    // 来路由这个路径到真正的 Walnut 对象路径
-    // 我们会依次循环尝试：
-    //  - setting/a/b/c
-    //  - setting/a/b
-    //  - setting/a
-    //  - setting
-    // 看看 _paths 里有没有定制对应的映射
-    // 譬如，我们在 setting/a  的时候找到了映射，我们会保留 b/c 部分
-    // 以便最后添加到返回值的结尾，也就是说，如果规则是:
-    //  - setting/a : "~/.domain"
-    // 那么函数最后的返回值应该是 "~/.domain/b/c"
-    let pathArms = __paths[hubPath];
-    // Handle partial path matching: try progressively shorter paths
-    if (!pathArms) {
-      const segments = hubPath.split("/");
-
-      // 尝试逐步缩短路径来匹配
-      for (let i = segments.length - 1; i > 0; i--) {
-        let partialPath = segments.slice(0, i).join("/");
-        pathArms = __paths[partialPath];
-
-        if (pathArms) {
-          // 构造剩余路径并加入上下文，以便渲染
-          aCtx.remain = segments.slice(i).join("/") || "";
-          break;
-        }
-      }
-    }
-
-    // 还是木有？！最后尝试一下通配符
-    if (!pathArms) {
-      pathArms = __paths["*"];
-    }
-
-    // 挑选路径模板
-    if (pathArms) {
-      path = Util.selectValue(aCtx, pathArms);
-    }
-
-    // 根据模板渲染路径
-    if (path) {
-      // 编译模板，并渲染
-      let tmpl = Tmpl.parse(path);
-      return tmpl.render(aCtx, false);
+    if (!path) {
+      throw "Fail to getObjPath: " + hubPath;
     }
 
     // 默认规则
-    if (/^~\//.test(hubPath)) {
+    if (/^(~?\/)/.test(path)) {
       return hubPath;
     }
     return Util.appendPath("~", hubPath);
