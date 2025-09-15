@@ -5,6 +5,7 @@ import {
   init_ti_std_columns,
   init_ti_std_fields,
   installTiCoreI18n,
+  Match,
   openAppModal,
   setEnv,
   SideBarItem,
@@ -29,9 +30,11 @@ import {
   isWnObj,
   ServerConfig,
   SignInForm,
+  UIViewSetup,
   useGlobalStatus,
   UserSidebar,
-  WnDictSetup,
+  WnApplication,
+  WnAssociation,
   WnExecOptions,
   WnFetchObjOptions,
   WnLoadOptions,
@@ -72,6 +75,11 @@ export class WalnutServer {
   private _conf: ServerConfig;
 
   /**
+   * 记录服务视图配置
+   */
+  private _view: UIViewSetup;
+
+  /**
    * 会话票据
    */
   private _ticket?: string;
@@ -81,8 +89,23 @@ export class WalnutServer {
    */
   private _cache: Map<string, any>;
 
+  /**
+   * 当 loadMyDynmicUISettings 加载完毕后，服务器才会准备一系列动态 UI 相关的配置
+   * 通常这个时候 WnHubArena 才能加载 UI 的配置，为了保证这一点，我们需要提供一个地方
+   * 来注册回调
+   */
+  private _after_dynamic_ui_ready: undefined | (() => Promise<void>);
+
+  private _dynamic_ui_loading: boolean;
+  private _dynamic_ui_ready: boolean;
+
+  // 缓冲的应用列表
+  private _applications: Map<string, WnApplication>;
+  private _associations: WnAssociation[];
+
   constructor() {
     this._gl_sta = useGlobalStatus();
+    this._view = {} as UIViewSetup;
     this._conf = {
       protocal: "http",
       host: "localhost",
@@ -95,6 +118,10 @@ export class WalnutServer {
       document.body.getAttribute("session-ticket") ||
       TiStore.local.getString(TICKET_KEY, undefined);
     this._cache = new Map<string, any>();
+    this._dynamic_ui_loading = false;
+    this._dynamic_ui_ready = false;
+    this._applications = new Map<string, WnApplication>();
+    this._associations = [];
   }
 
   loadSettingFromDocument(doc: Document, appVersion: string, appTitle: string) {
@@ -229,10 +256,10 @@ export class WalnutServer {
   }
 
   findPath(path: string, content: Vars) {
-    let rePath: string | undefined = undefined;
+    let rePath: string = path;
 
     // 获取路径规则
-    let __paths: Vars = Walnut.getConfig("objPath", {});
+    let __paths: Vars = this._view.paths ?? {};
 
     // hubPath 的值类似  `setting/a/b/c` 我们需要用下面的逻辑
     // 来路由这个路径到真正的 Walnut 对象路径
@@ -283,7 +310,7 @@ export class WalnutServer {
     let view: string | HubViewOptions | undefined = undefined;
 
     // 获取路径规则
-    let __views = this._conf.views ?? {};
+    let __views = this._view.views ?? {};
     let viewArms = __views[path];
     if (!viewArms) {
       viewArms = __views["*"];
@@ -764,6 +791,44 @@ export class WalnutServer {
   }
 
   /**
+   * 异步加载视图设置。
+   *
+   * 该方法会从配置中获取视图设置文件的路径，若路径存在，则加载该文件内容，
+   * 并将内容解析为 JSON 格式后赋值给 `_view` 属性。
+   * 若路径不存在或加载失败，则不做任何操作。
+   */
+  async loadViewSetup() {
+    const viewSetupPath = this._conf.ui?.viewSetup;
+    // 防空
+    if (!viewSetupPath) return;
+    // 加载
+    let viewSetup = await this.loadContent(viewSetupPath);
+    // 安装
+    if (viewSetup) {
+      this._view = JSON5.parse(viewSetup);
+
+      // 准备应用列表
+      this._applications = new Map();
+      if (this._view.applications) {
+        for (let app of this._view.applications) {
+          this._applications.set(app.value, app);
+        }
+      }
+
+      // 准备关联列表
+      this._associations = [];
+      if (this._view.associations) {
+        for (let as of this._view.associations) {
+          this._associations.push({
+            apps: _.concat(as.apps),
+            test: Match.parse(as.test, false),
+          });
+        }
+      }
+    }
+  }
+
+  /**
    * 异步加载指定路径的文件并将其转换为Base64编码的字符串。
    *
    * @param objPath - 文件的路径。
@@ -1051,6 +1116,9 @@ export class WalnutServer {
         }
       }
 
+      // 动态加载视图设置
+      loading.push(this.loadViewSetup());
+
       // 动态加载数据字典
       if (this._conf.dicts) {
         loading.push(this.loadDicts("protected"));
@@ -1063,8 +1131,65 @@ export class WalnutServer {
 
       // 开始加载 ...
       if (loading.length > 0) {
+        this._dynamic_ui_loading = true;
         await Promise.all(loading);
+        // 执行回调函数
+        if (this._after_dynamic_ui_ready) {
+          await this._after_dynamic_ui_ready();
+        }
+        this._dynamic_ui_loading = false;
+        this._dynamic_ui_ready = true;
       }
+    }
+  }
+
+  /**
+   * 设置动态 UI 加载完成后的回调函数。
+   * 当 `loadMyDynmicUISettings` 加载完毕后，会执行该回调函数。
+   * 通常用于在动态 UI 配置准备好后，执行 WnHubArena 加载 UI 配置等操作。
+   *
+   * @param callback - 动态 UI 加载完成后要执行的回调函数，返回一个 Promise。
+   */
+  set afterDynamicUIReady(callback: () => Promise<void>) {
+    this._after_dynamic_ui_ready = callback;
+  }
+
+  /**
+   * 动态 UI 相关的配置是否已经加载完毕
+   */
+  get isDynamicUIReady() {
+    return this._dynamic_ui_ready;
+  }
+
+  /**
+   * 动态 UI 相关的配置是否正在加载
+   */
+  get isDynamicUILoading() {
+    return this._dynamic_ui_loading;
+  }
+
+  getObjApplications(obj: WnObj) {
+    let appNames: string[] = [];
+    for (let as of this._associations) {
+      if (as.test.test(obj)) {
+        appNames.push(...as.apps);
+      }
+    }
+    let apps = _.uniq(appNames);
+    let re = [] as WnApplication[];
+    for (let appName of apps) {
+      let app = this._applications.get(appName);
+      if (app) {
+        re.push(app);
+      }
+    }
+    return re;
+  }
+
+  getObjDefaultApplication(obj: WnObj) {
+    let apps = this.getObjApplications(obj);
+    if (apps.length > 0) {
+      return apps[0];
     }
   }
 

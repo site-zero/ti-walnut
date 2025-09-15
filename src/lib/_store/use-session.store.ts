@@ -301,9 +301,9 @@ export function useSessionStore() {
 
     // 默认规则
     if (/^(~?\/)/.test(path)) {
-      return hubPath;
+      return path;
     }
-    return Util.appendPath("~", hubPath);
+    return Util.appendPath("~", path);
   }
 
   /**

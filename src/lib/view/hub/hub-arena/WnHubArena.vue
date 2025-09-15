@@ -7,12 +7,13 @@
     TiLoading,
     Util,
     Vars,
-  } from '@site0/tijs';
-  import _ from 'lodash';
-  import { computed, inject, ref, watch } from 'vue';
-  import { WN_HUB_APP_INST } from '../../../_store';
-  import { useHubArenaReload } from './use-hub-arena-reload';
-  import { WnHubArenaProps } from './wn-hub-arena-types';
+  } from "@site0/tijs";
+  import _ from "lodash";
+  import { computed, inject, ref, watch } from "vue";
+  import { WN_HUB_APP_INST } from "../../../_store";
+  import { useHubArenaReload } from "./use-hub-arena-reload";
+  import { WnHubArenaProps } from "./wn-hub-arena-types";
+  import { Walnut } from "../../../../core";
   //--------------------------------------------------
   const props = defineProps<WnHubArenaProps>();
   //--------------------------------------------------
@@ -55,10 +56,19 @@
   watch(
     () => props.hubPath,
     async () => {
-      await _arena_reload.value();
+      const after_dynamic_ui_ready = async () => {
+        await _arena_reload.value();
+        buildGUI();
+      };
 
-      // 创建上下文
-      buildGUI();
+      // 动态 UI 相关的配置是否已经加载完毕
+      if (Walnut.isDynamicUIReady) {
+        await after_dynamic_ui_ready();
+      }
+      // 动态 UI 相关的配置还没有加载完毕，仅仅注册一个回调
+      else {
+        Walnut.afterDynamicUIReady = after_dynamic_ui_ready;
+      }
     },
     { immediate: true }
   );
@@ -68,6 +78,7 @@
   watch(
     () => _hub!.view.createWatchingObj(),
     (newCtx) => {
+      // console.log("watch:guiObj", newCtx);
       let diff = Util.getRecordDiffDeeply(_last_watch.value, newCtx);
       //console.log('watch:createWatchingObj()', diff);
       if (!_.isEmpty(diff)) {
@@ -77,6 +88,16 @@
     },
     { deep: true }
   );
+  //--------------------------------------------------
+  // watch(
+  //   () => _hub!.view.session.data.ticket,
+  //   () => {
+  //     console.log("watch:ticket", _hub!.view.session.hasTicket.value);
+  //     if (_hub!.view.session.hasTicket.value) {
+  //       buildGUI();
+  //     }
+  //   }
+  // );
   //--------------------------------------------------
   function onBlock(event: BlockEvent) {
     _hub!.view.onBlockEvent(event);

@@ -1,6 +1,8 @@
-import { Be, Util } from "@site0/tijs";
+import { Alert, Be, Util } from "@site0/tijs";
 import { Router } from "vue-router";
 import { GlobalStatusApi } from "../../_features";
+import { WnObj } from "../../../_types";
+import { Walnut } from "../../../core";
 
 export type HubNav = ReturnType<typeof useHubNav>;
 
@@ -48,15 +50,25 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
 
   /**
    * 从全局 _global.appPath 为起点，导航到 /open/{appPath}/{objName} 路径
-   * @param objName 对象名
+   * @param obj 对象
    */
-  function nav_open(objName: string) {
-    let basePath = _gl_sta.data.appPath
-      ? Util.appendPath("/open", _gl_sta.data.appPath)
-      : "/open";
-    let newPath = Util.appendPath(basePath, objName);
+  function nav_open(obj: WnObj) {
+    let app = Walnut.getObjDefaultApplication(obj);
+    if (!app) {
+      Alert(
+        `Fail to get default application of object: ${JSON.stringify(obj)}`,
+        { type: "warn" }
+      );
+      return;
+    }
+
+    let newPath = `/a/open/${app.value}`;
     // 使用 router 导航到新路径
-    Be.OpenUrl(newPath);
+    Be.OpenUrl(newPath, {
+      params: {
+        id: obj.id,
+      },
+    });
   }
 
   return {

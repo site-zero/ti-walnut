@@ -3,6 +3,8 @@ import {
   LayoutProps,
   SelectValueArm,
   SideBarItem,
+  StrOptionItem,
+  TiMatch,
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
@@ -75,27 +77,10 @@ type ServerUISetup = {
   useStdColumns?: boolean;
   fields?: string | string[];
   columns?: string | string[];
+  viewSetup?: string;
 };
 
-export type DomainConfig = {
-  lang?: I18nLang;
-  ui?: ServerUISetup;
-  /**
-   * 指定了 i18n 资源文件的路径
-   * {zh_cn: ['load://resources/i18n/zh_cn.json', '~/.i18n/zh_cn.json']]}
-   * 每个资源文件，如果不是 'load://' 开头，必须登录以后才能读取
-   * 这样，那些被登录之才能看到的界面（也就是主要界面）的文字可以交给标准数据模型动态管理
-   * 当然为了考虑消息，你也可以不这么做，甚至将资源文件静态编译到代码里
-   *
-   * 如果语言没有匹配，则考虑降级重试，优先级为
-   * 1) en-us
-   * 2) en
-   * 3) zh-cn  // 最后总是用 zh-cn 来兜底
-   */
-  i18n?: Record<string, string | string[]>;
-  sidebar?: string;
-  dicts?: string | string[];
-
+export type UIViewSetup = {
   /**
    * 可以给扩展(譬如 WnHub)使用， 一个 dirName 具体
    * 可以对应到哪个对象绝对路径，
@@ -150,7 +135,7 @@ export type DomainConfig = {
    *   ]
    * },
    */
-  objPath?: Record<string, SelectValueArm<string, Vars>>;
+  paths?: Record<string, SelectValueArm<string, Vars>>;
 
   /**
    * 指定一个 dirName 应该用哪个视图来呈现
@@ -184,6 +169,59 @@ export type DomainConfig = {
    * 应该抛错
    */
   views?: Record<string, SelectValueArm<string | HubViewOptions, Vars>>;
+
+  /**
+   * 注册的应用列表
+   */
+  applications?: WnApplication[];
+
+  /**
+   * 配置编辑器可以被哪些对象打开
+   */
+  associations?: WnAssociation[];
+};
+
+export type WnAssociationInput = {
+  /**
+   * 关联的应用列表
+   */
+  apps: string[]|string;
+  /**
+   * 关联对象的匹配条件
+   */
+  test: any;
+};
+
+export type WnApplication = Omit<StrOptionItem, "style" | "className">;
+export type WnAssociation = {
+  /**
+   * 关联的应用列表
+   */
+  apps: string[];
+  /**
+   * 关联对象的匹配条件
+   */
+  test: TiMatch;
+};
+
+export type DomainConfig = {
+  lang?: I18nLang;
+  ui?: ServerUISetup;
+  /**
+   * 指定了 i18n 资源文件的路径
+   * {zh_cn: ['load://resources/i18n/zh_cn.json', '~/.i18n/zh_cn.json']]}
+   * 每个资源文件，如果不是 'load://' 开头，必须登录以后才能读取
+   * 这样，那些被登录之才能看到的界面（也就是主要界面）的文字可以交给标准数据模型动态管理
+   * 当然为了考虑消息，你也可以不这么做，甚至将资源文件静态编译到代码里
+   *
+   * 如果语言没有匹配，则考虑降级重试，优先级为
+   * 1) en-us
+   * 2) en
+   * 3) zh-cn  // 最后总是用 zh-cn 来兜底
+   */
+  i18n?: Record<string, string | string[]>;
+  sidebar?: string;
+  dicts?: string | string[];
 };
 
 export type ServerConfig = DomainConfig & {
