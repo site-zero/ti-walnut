@@ -254,7 +254,7 @@ export function useWnObjUploader(
     try {
       _fail_message.value = undefined;
       let reo = await Walnut.uploadFile(file, options);
-      console.log("Upload Result Object:", reo, reo);
+      //console.log("Upload Result Object:", reo, reo);
       if (isAjaxResult(reo)) {
         if (reo.ok) {
           if (isWnObj(reo.data)) {

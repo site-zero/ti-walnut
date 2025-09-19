@@ -45,7 +45,7 @@ import { anyToHubViewOptions } from "./wn-obj-views";
 import { wnRunCommand } from "./wn-run-command";
 
 const TICKET_KEY = "Walnut-Ticket";
-const debug = true;
+const debug = false;
 
 /**
  * 定义加载模式类型，用于指定加载 i18n 资源的模式。
@@ -1252,6 +1252,59 @@ export class WalnutServer {
       addMeta = {},
     } = options;
 
+    // 判断是否支持该文件类型
+    // 这个 accept 就是标准的 input.accept 属性
+    // 支持 ".txt, text/plain, image/*" 这种格式的值
+    // 如果检查失败直接抛错
+    if (options.accept && file) {
+      const _accepts = options.accept
+        .toLowerCase()
+        .split(",")
+        .map((item) => item.trim());
+      const fileName = file.name.toLowerCase();
+      const fileType = file.type.toLowerCase();
+      let isAccepted = false;
+
+      for (const _accept of _accepts) {
+        // 后缀模式: .pdf
+        if (_accept.startsWith(".")) {
+          // 检查文件扩展名
+          const extension = _accept.toLowerCase();
+          if (fileName.endsWith(extension)) {
+            isAccepted = true;
+            break;
+          }
+        }
+        // 通配符: image/*
+        else if (_accept.includes("*")) {
+          // 使用正则表达式处理包含 * 的 MIME 类型
+          const pattern = _accept.replace(/\*/g, ".*");
+          const regex = new RegExp(`^${pattern}$`);
+          if (regex.test(fileType)) {
+            isAccepted = true;
+            break;
+          }
+        }
+        // 直接比较 MIME 类型
+        else {
+          if (fileType === _accept) {
+            isAccepted = true;
+            break;
+          }
+        }
+      }
+
+      if (!isAccepted) {
+        let msg = I18n.textf("i18n:warn-unaccept-file", {
+          fileType,
+          fileName,
+          accept: options.accept,
+        });
+        await Alert(msg, { type: "warn" });
+        throw new Error(msg);
+      }
+    }
+
     // 空值就没必要更新了
     addMeta = Util.filterRecordNilValue(addMeta || {});
 
@@ -1362,6 +1415,8 @@ export type WnUploadFileOptions = {
   target: string;
   mode?: "a" | "r" | "s";
   tmpl?: string;
+  // accept="image/*, text/*, .jpg, .jpeg, .pdf"
+  accept?: string;
   progress?: (info: WnUploadFileProgress) => void;
   signal?: AbortSignal;
   addMeta?: Vars;

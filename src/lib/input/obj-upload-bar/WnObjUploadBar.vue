@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-  import { ImageProps, TiUploadBar, UploadBarProps } from '@site0/tijs';
-  import _ from 'lodash';
-  import { computed, ref, watch } from 'vue';
-  import { WnObj } from '../..';
-  import { useWnObjUploader, WnObjUploaderEmitter } from '../../_features';
-  import { WnObjUploadBarProps } from './wn-obj-upload-bar-types';
+  import { ImageProps, TiUploadBar, UploadBarProps } from "@site0/tijs";
+  import _ from "lodash";
+  import { computed, ref, watch } from "vue";
+  import { WnObj } from "../..";
+  import { useWnObjUploader, WnObjUploaderEmitter } from "../../_features";
+  import { WnObjUploadBarProps } from "./wn-obj-upload-bar-types";
   //-----------------------------------------------------
   const emit = defineEmits<WnObjUploaderEmitter>();
   //-----------------------------------------------------
   const props = withDefaults(defineProps<WnObjUploadBarProps>(), {
-    valueType: 'idPath',
+    valueType: "idPath",
     uploadButton: true,
     clearButton: false,
   });
@@ -21,16 +21,16 @@
   );
   //-----------------------------------------------------
   const BarConfig = computed(() => {
-    let re: UploadBarProps = { ..._.omit(props, ['value', 'valueType']) };
+    let re: UploadBarProps = { ..._.omit(props, ["value", "valueType"]) };
     // 如果出错，显示一个错误类型
     if (Uploader.value.isInvalid.value) {
-      re.type = 'danger';
+      re.type = "danger";
       re.tip = Uploader.value.FailMessage.value;
     }
     // 这里拼装上对象显示
     re.preview = _.assign(
       {
-        objectFit: 'cover',
+        objectFit: "cover",
       } as ImageProps,
       props.preview,
       Uploader.value.Preview.value
@@ -39,10 +39,14 @@
     // 文字显示
     re.text = Uploader.value.Text.value;
 
+    // 上传限制
+    re.multi = false;
+    re.accept = props.upload.accept;
+
     // 没有值就不显示删除按钮
     if (!Uploader.value.hasValue.value) {
       re.clearButton = false;
-      re.prefixForClean = 'no';
+      re.prefixForClean = "no";
       re.nilValue = true;
     }
 

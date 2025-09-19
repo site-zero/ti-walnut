@@ -27,5 +27,6 @@
   "e.cmd.sqlx.exec.Failed": "SQL 执行失败",
   "e-upload-target-not-set": "上传目标未设置!",
   "warn-refresh": "你还有本地修改未被保存，刷新将会丢失这些未保存的改动，你确定要继续吗？",
-  "warn-drop-change": "移除本地修改将会丢失你所有未保存的改动，你确定要继续吗？"
+  "warn-drop-change": "移除本地修改将会丢失你所有未保存的改动，你确定要继续吗？",
+  "warn-unaccept-file": "文件类型 ${fileType} 或文件 ${fileName} 不在允许的范围内，允许的类型: ${accept}"
 }
