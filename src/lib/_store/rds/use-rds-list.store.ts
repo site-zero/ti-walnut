@@ -623,6 +623,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return [];
   }
 
+  function setItems(items: SqlResult[]) {
+    _local.setItems(items);
+  }
+
   function clear() {
     _local.clearItems();
   }
@@ -960,6 +964,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     removeChecked,
     removeItems,
+    setItems,
     clear,
     updateSelection,
     cancelSelection,

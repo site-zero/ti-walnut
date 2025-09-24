@@ -709,6 +709,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     return [];
   }
 
+  function setItems(items: WnObj[]) {
+    _local.setItems(items);
+  }
+
   function clear() {
     _local.clearItems();
   }
@@ -1090,6 +1094,7 @@ function defineStdListStore(options: StdListStoreOptions) {
 
     removeChecked,
     removeItems,
+    setItems,
     clear,
     updateSelection,
     cancelSelection,

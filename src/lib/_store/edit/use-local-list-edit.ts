@@ -437,6 +437,10 @@ export function useLocalListEdit(
     return removes;
   }
   //---------------------------------------------
+  function setItems(items: SqlResult[]) {
+    _local_list.value = items;
+  }
+  //---------------------------------------------
   function clearItems() {
     _local_list.value = [];
   }
@@ -534,7 +538,7 @@ export function useLocalListEdit(
           }
 
           // 记入列表
-          updateList.push(diff);
+          updateList.push(_.omitBy(diff, (v) => v === undefined));
         }
         // 必然是新记录，需要插入
         else {
@@ -559,7 +563,7 @@ export function useLocalListEdit(
               _.assign(newMeta, options.insertMeta);
             }
           }
-          insertList.push(newMeta);
+          insertList.push(_.omitBy(newMeta, (v) => v === undefined));
         }
       }
     }
@@ -657,6 +661,7 @@ export function useLocalListEdit(
     batchUpdateBy,
     findAndUpdate,
     removeLocalItems,
+    setItems,
     clearItems,
     //.....................
     makeChanges,
