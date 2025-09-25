@@ -521,13 +521,21 @@ export function useLocalListEdit(
             }
           }
 
+          // 忽略未定义值
+          let delta = _.omitBy(diff, (v) => v === undefined);
+
+          // 没啥好更新的
+          if (_.isEmpty(delta)) {
+            continue;
+          }
+
           // 补上 ID
           if (patchMetaUpdate) {
-            patchMetaUpdate(diff, id, remote);
+            patchMetaUpdate(delta, id, remote);
           }
 
           // 记入列表
-          updateList.push(_.omitBy(diff, (v) => v === undefined));
+          updateList.push(delta);
         }
         // 必然是新记录，需要插入
         else {
@@ -552,7 +560,16 @@ export function useLocalListEdit(
               _.assign(newMeta, options.insertMeta);
             }
           }
-          insertList.push(_.omitBy(newMeta, (v) => v === undefined));
+
+          // 忽略未定义值
+          newMeta = _.omitBy(newMeta, (v) => v === undefined);
+
+          // 没啥好插入的
+          if (_.isEmpty(newMeta)) {
+            continue;
+          }
+
+          insertList.push(newMeta);
         }
       }
     }
