@@ -348,7 +348,7 @@ export function defineRdsSimpleStore(options: RdsStoreDefination) {
   //---------------------------------------------
   async function onSelect(payload: TableSelectEmitInfo) {
     let currentId = (payload.currentId as string) ?? undefined;
-    let checkedIds = Util.mapTruthyKeys(payload.checkedIds) as string[];
+    let checkedIds = Util.anyToTruthyKeys(payload.checkedIds);
     await updateSelection(currentId, checkedIds);
     __save_local_select();
   }

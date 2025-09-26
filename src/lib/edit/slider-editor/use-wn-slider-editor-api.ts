@@ -8,17 +8,17 @@ import {
   useSelectable,
   Util,
   Vars,
-} from '@site0/tijs';
-import JSON5 from 'json5';
-import _ from 'lodash';
-import { computed, reactive } from 'vue';
-import { WnObj } from '../../../_types';
-import { Walnut } from '../../../core';
+} from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
+import { computed, reactive } from "vue";
+import { WnObj } from "../../../_types";
+import { Walnut } from "../../../core";
 import {
   WnSlider,
   WnSliderEditorProps,
   WnSliderEmitter,
-} from './wn-slider-editor-types';
+} from "./wn-slider-editor-types";
 
 export type WnSliderEditorApi = ReturnType<typeof useWnSliderEditorApi>;
 
@@ -26,7 +26,7 @@ export function useWnSliderEditorApi(
   props: WnSliderEditorProps,
   emit: WnSliderEmitter
 ) {
-  console.log('useWnSliderEditorApi');
+  console.log("useWnSliderEditorApi");
   //----------------------------------------------------
   // 选择特性
   //----------------------------------------------------
@@ -70,8 +70,8 @@ export function useWnSliderEditorApi(
   }
   //----------------------------------------------------
   const _keep = useKeep({
-    keepMode: 'local',
-    keepAt: getKeepName('WnSliderEditor-${id}-Selection'),
+    keepMode: "local",
+    keepAt: getKeepName("WnSliderEditor-${id}-Selection"),
   });
   //----------------------------------------------------
   function getKeepSelection() {
@@ -106,7 +106,7 @@ export function useWnSliderEditorApi(
       return {} as WnSlider;
     }
     if (_.isString(props.value)) {
-      return JSON5.parse(props.value ?? '{}') as WnSlider;
+      return JSON5.parse(props.value ?? "{}") as WnSlider;
     }
     return props.value as WnSlider;
   });
@@ -118,7 +118,7 @@ export function useWnSliderEditorApi(
   });
   //----------------------------------------------------
   const SliderFormData = computed(() => {
-    return _.omit(SliderData.value, 'medias');
+    return _.omit(SliderData.value, "medias");
   });
   //----------------------------------------------------
   const CurrentMedia = computed(() => {
@@ -132,7 +132,7 @@ export function useWnSliderEditorApi(
   //----------------------------------------------------
   function onSelect(payload: ListSelectEmitInfo) {
     selection.currentId = payload.currentId as string;
-    selection.checkedIds = payload.checkedIds as Map<string, boolean>;
+    selection.checkedIds = Util.arrayToMapAs(payload.checkedIds);
     saveSelection();
   }
   //----------------------------------------------------
@@ -142,7 +142,7 @@ export function useWnSliderEditorApi(
     if (!_.isEqual(data, SliderData.value)) {
       let val: string | WnSlider = data;
       // 转换为 JSON
-      if ('json' == props.valueType) {
+      if ("json" == props.valueType) {
         if ((props.formatJsonIndent ?? 0) > 0) {
           val = JSON.stringify(data, null, props.formatJsonIndent ?? 2);
         } else {
@@ -150,7 +150,7 @@ export function useWnSliderEditorApi(
         }
       }
       // 转换为 JSON5
-      else if ('json5' == props.valueType) {
+      else if ("json5" == props.valueType) {
         if ((props.formatJsonIndent ?? 0) > 0) {
           val = JSON5.stringify(data, null, props.formatJsonIndent ?? 2);
         } else {
@@ -158,18 +158,18 @@ export function useWnSliderEditorApi(
         }
       }
       // 通知改动
-      emit('change', val);
+      emit("change", val);
     }
   }
   //----------------------------------------------------
   async function updateCurrentMedia(delta: Vars) {
-    console.log('change', delta);
+    console.log("change", delta);
     if (CurrentMedia.value) {
       let index = CurrentMedia.value.index;
       // 如果更新了文件对象，需要修改一下 title
       if (delta.oid) {
         let obj = await Walnut.exec(`o 'id:${delta.oid}' @name @json -cqn`, {
-          as: 'json',
+          as: "json",
         });
         if (obj) {
           delta.title = obj.title || obj.name || obj.nm || obj.id;

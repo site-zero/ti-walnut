@@ -194,7 +194,7 @@ function defineGlobalStatus() {
     _data.selectedCols = 0;
     _data.currentObj = current ?? undefined;
     if (checkedIds) {
-      _data.selectedRows = checkedIds.size ?? 0;
+      _data.selectedRows = checkedIds.length ?? 0;
     } else {
       _data.selectedRows = 0;
     }
