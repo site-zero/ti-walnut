@@ -1168,6 +1168,15 @@ export class WalnutServer {
     return this._dynamic_ui_loading;
   }
 
+  /**
+   * 根据传入的 WnObj 对象，获取与之关联的应用列表。
+   *
+   * 该方法会遍历服务器缓存的关联关系（`_associations`），检查每个关联规则是否匹配传入的对象。
+   * 对于匹配的关联规则，将其对应的应用名称收集起来，去重后从应用缓存（`_applications`）中获取对应的应用对象。
+   *
+   * @param obj - 用于匹配关联规则的 WnObj 对象。
+   * @returns 与传入对象关联的 WnApplication 对象数组，如果没有匹配的应用，则返回空数组。
+   */
   getObjApplications(obj: WnObj) {
     let appNames: string[] = [];
     for (let as of this._associations) {
@@ -1186,6 +1195,15 @@ export class WalnutServer {
     return re;
   }
 
+  /**
+   * 获取对象的默认应用程序。
+   *
+   * 该方法会调用 `getObjApplications` 方法获取对象关联的应用程序列表，
+   * 如果列表不为空，则返回列表中的第一个应用程序。
+   *
+   * @param obj - 要查询的对象
+   * @returns 对象的默认应用程序，如果没有关联应用程序则返回 undefined
+   */
   getObjDefaultApplication(obj: WnObj) {
     let apps = this.getObjApplications(obj);
     if (apps.length > 0) {

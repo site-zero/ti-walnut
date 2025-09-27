@@ -1,8 +1,9 @@
-import { Alert, Be, Util } from "@site0/tijs";
+import { Alert, Be, ListProps, openAppModal, Util } from "@site0/tijs";
 import { Router } from "vue-router";
 import { GlobalStatusApi } from "../../_features";
 import { WnObj } from "../../../_types";
 import { Walnut } from "../../../core";
+import _ from "lodash";
 
 export type HubNav = ReturnType<typeof useHubNav>;
 
@@ -52,29 +53,78 @@ export function useHubNav(_gl_sta: GlobalStatusApi, _router: Router) {
    * 从全局 _global.appPath 为起点，导航到 /open/{appPath}/{objName} 路径
    * @param obj 对象
    */
-  function nav_open(obj: WnObj) {
-    let app = Walnut.getObjDefaultApplication(obj);
-    if (!app) {
-      Alert(
-        `Fail to get default application of object: ${JSON.stringify(obj)}`,
-        { type: "warn" }
-      );
-      return;
+  function nav_open(obj: WnObj, appName?: string) {
+    // 防空
+    if (!obj) return;
+
+    // 选择默认应用
+    if (!appName) {
+      let app = Walnut.getObjDefaultApplication(obj);
+      if (!app) {
+        Alert(
+          `Fail to get default application of object: ${JSON.stringify(obj)}`,
+          { type: "warn" }
+        );
+        return;
+      }
+      appName = app.value;
     }
 
-    let newPath = `/a/open/${app.value}`;
+    let newPath = `/a/open/${appName}`;
+    let appUrl = Walnut.getUrl(newPath);
     // 使用 router 导航到新路径
-    Be.OpenUrl(newPath, {
+    Be.OpenUrl(appUrl, {
       params: {
         id: obj.id,
       },
     });
   }
 
+  async function nav_open_with(obj: WnObj) {
+    console.log("nav_open_with", obj);
+    // 防空
+    if (!obj) return;
+
+    // 获取应用列表
+    let apps = Walnut.getObjApplications(obj);
+
+    if (_.isEmpty(apps)) {
+      await Alert(`没有适用于对象 [${obj.nm}] 的应用`, { type: "info" });
+    }
+
+    // 第一个作为默认应用
+    let dftAppName = _.first(apps)?.value;
+
+    // 让用户选择应用
+    let appName = await openAppModal({
+      title: "i18n:select",
+      type: "primary",
+      position: "top",
+      width: "480px",
+      height: "90%",
+      maxHeight: "960px",
+      result: dftAppName,
+      model: { event: "select.currentId", data: "currentId" },
+      comType: "TiList",
+      comConf: {
+        multi: false,
+        data: apps,
+      } as ListProps,
+    });
+    //console.log("nav_open_with", appName);
+
+    // 用户取消
+    if (!appName) return;
+
+    // 打开应用
+    nav_open(obj, appName);
+  }
+
   return {
     nav_into,
     nav_out,
     nav_open,
+    nav_open_with,
     set_hash,
   };
 }
