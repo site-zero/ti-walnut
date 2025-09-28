@@ -8,6 +8,8 @@ export async function wnRunCommand(
   cmdText: string,
   options: WnExecOptions = {}
 ): Promise<any> {
+  // 准备会话接口
+  const session = useSessionStore();
   //
   // Beacon 发送模式
   //
@@ -27,12 +29,18 @@ export async function wnRunCommand(
   //
   const bearAbort = options.bearAbort ?? true;
 
+  // 获取当前工作目录
+  let currentWorkDir = session.data.env?.PWD || "";
+
   // 准备参数
   init.method = "post";
   init.body = new URLSearchParams();
   init.body.append("mos", options.mos ?? "");
   init.body.append("cmd", cmdText);
   init.body.append("ffb", options.forceFlushBuffer ? "true" : "false");
+  if (currentWorkDir) {
+    init.body.append("PWD", currentWorkDir);
+  }
   if (options.input) {
     init.body.append("in", options.input);
   }
