@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-  import { useGlobalStatus, WnHubSkyProps } from '../../../../lib';
-  import { CssUtils, IconInput, TiIcon } from '@site0/tijs';
-  import { computed } from 'vue';
+  import { CssUtils, IconInput, TiIcon } from "@site0/tijs";
+  import { computed } from "vue";
+  import { useGlobalStatus, WnHubAvatar, WnHubMenu } from "../../../../lib";
+  import { WnHubSkyProps } from "./wn-hub-sky-types";
   //--------------------------------------------------
   const props = defineProps<WnHubSkyProps>();
   //--------------------------------------------------
@@ -13,7 +14,7 @@
   const LogoIcon = computed(() => {
     let icon: IconInput;
     if (!_gb_sta.data.appLogo) {
-      icon = 'fas-globe';
+      icon = "fas-globe";
     }
     // 指定图标
     // else if(/^icon:/.test(status.appLogo)){
@@ -27,7 +28,7 @@
   });
   //--------------------------------------------------
   let emit = defineEmits<{
-    (event: 'logout' | 'gohome'): void;
+    (event: "logout" | "gohome"): void;
   }>();
   //--------------------------------------------------
 </script>
@@ -40,15 +41,24 @@
         <TiIcon :value="LogoIcon" />
       </a>
     </div>
-    <div class="as-part is-crumb">
+    <div class="as-part is-name">
       <div class="as-title">
         <strong>{{ _gb_sta.data.appTitle }}</strong>
         <div class="as-version">V {{ _gb_sta.data.appVersion }}</div>
       </div>
     </div>
+    <div class="as-part is-crumb">
+      appPath: [{{ _gb_sta.data.appPath }}]
+    </div>
+    <div class="as-part is-avatar">
+      <WnHubAvatar @logout="emit('logout')"/>
+    </div>
+    <div class="as-part is-menu">
+      <WnHubMenu @logout="emit('logout')"/>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
-  @use './wn-hub-sky.scss';
+  @use "./wn-hub-sky.scss";
 </style>

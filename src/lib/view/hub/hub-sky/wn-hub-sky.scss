@@ -1,11 +1,10 @@
-@use '@site0/tijs/sass/_all.scss' as *;
+@use "@site0/tijs/sass/_all.scss" as *;
 
 .wn-hub-sky {
   @include flex-align-nowrap($ai: stretch);
   padding: 0;
 
   > .as-part {
-    margin: 0 2em 0 0;
     &.is-logo {
       @include flex-center;
       margin: 0;
@@ -26,10 +25,10 @@
         }
       }
     }
-    &.is-crumb {
+    &.is-name {
       @include flex-align-nowrap($ai: center);
       position: relative;
-      flex: 1 1 auto;
+      flex: 0 0 auto;
       > div.as-title {
         div.as-version {
           @include font-fixed;
@@ -43,6 +42,14 @@
           justify-self: flex-start;
         }
       }
+    }
+    &.is-crumb {
+      flex: 1 1 auto;
+      padding: 0 1em;
+    }
+    &.is-avatar,
+    &.is-menu {
+      @include flex-center;
     }
   }
 }
