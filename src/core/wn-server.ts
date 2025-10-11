@@ -135,10 +135,16 @@ export class WalnutServer {
     // 如果从 app 加载，则会增加一个 appPath 属性，
     // 这样 exit 命令时，会退到一个指定路径
     const appName = $body.getAttribute("app-name");
-    const appBase = $body.getAttribute("app-base");
     const quitPath = $body.getAttribute("quit-path");
     const domain = $body.getAttribute("domain");
     const loginSite = $body.getAttribute("login-site");
+
+    // 确保 appBase 是以 ‘/' 结尾的，因为根据 hubPath
+    // 读取真实的打开路径 appPath 的时候，需要的是一个相对路径
+    let appBase = $body.getAttribute("app-base");
+    if (appBase && !appBase.endsWith("/")) {
+      appBase += "/";
+    }
 
     // 更新本地存储的会话票据
     const ticket = $body.getAttribute("session-ticket");

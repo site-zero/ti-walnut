@@ -175,6 +175,9 @@ function defineGlobalStatus() {
 
     // 去掉 appBase
     let { appBase = "/" } = _data;
+    if (!appBase.endsWith("/")) {
+      appBase += "/";
+    }
     if (hubPath.startsWith(appBase)) {
       hubPath = hubPath.substring(appBase.length);
     }

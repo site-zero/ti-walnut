@@ -68,8 +68,8 @@ export type WnObjQueryOptions = {
 };
 
 export type WnObjInfo = {
-  id?: string;
-  ph?: string;
+  id?: string | null | undefined;
+  ph?: string | null | undefined;
 };
 
 type ServerUISetup = {
@@ -185,7 +185,7 @@ export type WnAssociationInput = {
   /**
    * 关联的应用列表
    */
-  apps: string[]|string;
+  apps: string[] | string;
   /**
    * 关联对象的匹配条件
    */
