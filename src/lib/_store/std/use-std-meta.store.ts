@@ -244,7 +244,15 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
     }
     // 保存内容
     _action_status.value = "saving";
-    await _content.saveChange();
+    let newObj = await _content.saveChange();
+    if (newObj) {
+      _remote.value = newObj;
+      // 更新本地元数据，更正内容相关的键
+      _local.updateMeta({
+        len: _content.ContentLenght.value,
+        sha1: _content.ContentSha1.value,
+      });
+    }
     _action_status.value = undefined;
   }
   //---------------------------------------------
@@ -252,6 +260,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   //---------------------------------------------
   function resetLocalChange() {
     _local.reset();
+    _content.reset();
   }
 
   function clearRemoteMeta() {
@@ -301,6 +310,7 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
 
   function dropChange() {
     _local.reset();
+    _content.dropLocalChange();
   }
 
   //---------------------------------------------

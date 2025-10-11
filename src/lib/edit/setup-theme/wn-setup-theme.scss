@@ -1,0 +1,72 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wn-gui-theme-setup {
+  padding: 1em;
+  user-select: none;
+  > h4 {
+    text-align: center;
+    padding: 0.5em;
+    margin: 0;
+    font-weight: bold;
+    font-size: 1.4em;
+  }
+  > main {
+    @include flex-center;
+    gap: 2em;
+    padding: 2em;
+    > dl {
+      @include flex-align-v-nowrap;
+      gap: 0.7em;
+      margin: 0;
+      padding: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: 0.5s ease-in-out;
+      box-shadow: 4px 4px 8px var(--ti-color-mask-thin);
+      &:hover {
+        opacity: 1;
+        background-color: var(--ti-color-highlight);
+      }
+      &.is-current,
+      &.is-current:hover {
+        opacity: 1;
+        background-color: var(--ti-color-primary);
+        color: var(--ti-color-primary-r);
+        > dd {
+          font-weight: bold;
+        }
+      }
+
+      &[data-theme="auto-color-mode"] > dt {
+        background: linear-gradient(to right, white 50%, black 50%);
+        color: white;
+        text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+          1px 1px 0 black;
+      }
+      &[data-theme="dark"] > dt {
+        background: radial-gradient(circle, #666 0%, #000 100%);
+        color: #000;
+      }
+      &[data-theme="light"] > dt {
+        background: #f6f6f6;
+        color: #444;
+      }
+      > dt {
+        @include flex-center;
+        flex: 1 1 auto;
+        font-size: 16px;
+        border-radius: 50%;
+        width: 64px;
+        height: 64px;
+        border: 1px solid var(--ti-color-border-dark);
+      }
+      > dd {
+        margin: 0;
+        padding: 0;
+        font-size: var(--ti-fontsz-s);
+        text-align: center;
+      }
+    } // > dl
+  }
+}
