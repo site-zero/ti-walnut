@@ -178,9 +178,21 @@ function defineGlobalStatus() {
     if (!appBase.endsWith("/")) {
       appBase += "/";
     }
+    // 譬如 
+    // appBase = '/a/open/wn.hub/'
+    // hubPath = '/a/load/wn.hub/files/a.mp4'
+    // 那么 appPath='files/a.mp4'
     if (hubPath.startsWith(appBase)) {
       hubPath = hubPath.substring(appBase.length);
     }
+    // 另外的情况
+    // appBase = '/a/open/wn.hub/'
+    // hubPath = '/a/load/wn.hub'
+    // 那么 appPath=''
+    else if(hubPath+"/" == appBase) {
+      hubPath = "";
+    }
+
     _data.appPath = hubPath;
   }
 
