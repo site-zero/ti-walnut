@@ -334,6 +334,41 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     return re;
   }
+
+  /**
+   * 生成当前选中项的数据差异对象
+   *
+   * 该函数会获取当前选中项的本地版本和远程版本数据，
+   * 然后对比这两个版本，生成差异对象。
+   * 如果当前没有选中项，或者找不到对应的本地或远程数据，
+   * 则返回 undefined。
+   *
+   * @returns 返回当前选中项的数据差异对象，如果没有差异或无选中项则返回 undefined
+   */
+  function makeCurrentDifferent(): Vars | undefined {
+    let currentId = _current_id.value;
+    if (_.isNil(currentId)) {
+      return undefined;
+    }
+    // 获取本地和远程两个版本
+    let local = _local.localList.value?.find(
+      (it, index) => getItemId(it, index) == currentId
+    );
+    if (!local) {
+      return undefined;
+    }
+    let remote = _remote.value?.find(
+      (it, index) => getItemId(it, index) == currentId
+    );
+    if (!remote) {
+      return undefined;
+    }
+
+    let diff = Util.buildDifferentItem(local, remote, {
+      getId: getItemId,
+    });
+    return diff?.delta;
+  }
   //---------------------------------------------
   // 冲突
   //---------------------------------------------
@@ -990,6 +1025,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     queryRemoteList,
     makeChanges,
     makeDifferents,
+    makeCurrentDifferent,
     makeConflict,
     applyConflicts,
     saveChange,

@@ -14,3 +14,5 @@ export * from "./edit/use-local-meta-edit";
 export * from "./edit/use-obj-edit";
 export * from "./edit/use-obj-edit-types";
 
+export * from "./use-entity-id.store";
+
