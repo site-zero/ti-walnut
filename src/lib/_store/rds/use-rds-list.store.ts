@@ -278,7 +278,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     return "partial";
   });
-
+  //---------------------------------------------
+  const Pager = computed(() => _query.value.pager);
+  const Filter = computed(() => _query.value.filter);
+  const Sorter = computed(() => _query.value.sorter);
   //---------------------------------------------
   // 基础本地方法
   //---------------------------------------------
@@ -949,6 +952,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     isRemoteEmpty,
     isLocalEmpty,
     CurrentItem,
+    Pager,
+    Filter,
+    Sorter,
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------

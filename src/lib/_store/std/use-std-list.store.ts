@@ -233,7 +233,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
     return "partial";
   });
-
+  //---------------------------------------------
+  const Pager = computed(() => _query.value.pager);
+  const Filter = computed(() => _query.value.filter);
+  const Sorter = computed(() => _query.value.sorter);
   //---------------------------------------------
   // 读写元数据
   //---------------------------------------------
@@ -1024,6 +1027,9 @@ function defineStdListStore(options: StdListStoreOptions) {
     isLocalEmpty,
     CurrentItem,
     CurrentContent: computed(() => _content.ContentText.value),
+    Pager,
+    Filter,
+    Sorter,
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
