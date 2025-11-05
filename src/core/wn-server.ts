@@ -1235,6 +1235,18 @@ export class WalnutServer {
     });
   }
 
+  async genIds(mode = "snowQ::10", n = 1): Promise<string[]> {
+    let ids = await this.exec(`val @gen '${mode}' -n ${n} -json`, {
+      as: "json",
+    });
+    return ids as string[];
+  }
+
+  async genId(mode = "snowQ::10"): Promise<string> {
+    let ids = await this.genIds(mode, 1);
+    return ids[0];
+  }
+
   async exec(cmdText: string, options: WnExecOptions = {}): Promise<any> {
     // 执行命令
     if (debug) console.log("exec>:", cmdText, options);
