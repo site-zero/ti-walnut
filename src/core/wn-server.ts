@@ -1235,7 +1235,7 @@ export class WalnutServer {
     });
   }
 
-  async genIds(mode = "snowQ::10", n = 1): Promise<string[]> {
+  async genIds(n = 1, mode = "snowQ::10"): Promise<string[]> {
     let ids = await this.exec(`val @gen '${mode}' -n ${n} -json`, {
       as: "json",
     });
@@ -1243,7 +1243,7 @@ export class WalnutServer {
   }
 
   async genId(mode = "snowQ::10"): Promise<string> {
-    let ids = await this.genIds(mode, 1);
+    let ids = await this.genIds(1, mode);
     return ids[0];
   }
 
