@@ -386,9 +386,64 @@ export function useLocalListEdit(
     return re;
   }
   //---------------------------------------------
+  // function removeLocalItems(forIds?: TableRowID[]): SqlResult[] {
+  //   // Guard
+  //   if (!forIds || _.isEmpty(forIds)) {
+  //     return [];
+  //   }
+
+  //   // 自动生成 localList
+  //   if (!_local_list.value) {
+  //     if (!remoteList.value) {
+  //       _local_list.value = [];
+  //     } else {
+  //       let json = JSON.stringify(remoteList.value);
+  //       _local_list.value = JSON.parse(json) as SqlResult[];
+  //     }
+  //   }
+
+  //   // Remove Local list
+  //   let ids = Util.arrayToMap(forIds);
+  //   let list = [] as SqlResult[];
+  //   let removes = [] as SqlResult[];
+  //   if (_local_list.value) {
+  //     for (let i = 0; i < _local_list.value.length; i++) {
+  //       let item = _local_list.value[i];
+  //       let id = getRowId(item, i);
+  //       // 需要删除的 ID
+  //       if (ids.has(id)) {
+  //         removes.push(item);
+  //       }
+  //       // 需要保留的 ID
+  //       else {
+  //         list.push(item);
+  //       }
+  //     }
+  //   }
+  //   _local_list.value = list;
+
+  //   // 返回删除的对象列表
+  //   return removes;
+  // }
   function removeLocalItems(forIds?: TableRowID[]): SqlResult[] {
     // Guard
     if (!forIds || _.isEmpty(forIds)) {
+      return [];
+    }
+
+    // Remove Local list
+    let ids = Util.arrayToMap(forIds);
+    return removeLocalItemsBy((item, index) => {
+      let itId = getRowId(item, index);
+      return ids.has(itId);
+    });
+  }
+  //---------------------------------------------
+  function removeLocalItemsBy(
+    predicate: (item: SqlResult, index: number) => boolean
+  ): SqlResult[] {
+    // Guard
+    if (!predicate) {
       return [];
     }
 
@@ -403,15 +458,13 @@ export function useLocalListEdit(
     }
 
     // Remove Local list
-    let ids = Util.arrayToMap(forIds);
     let list = [] as SqlResult[];
     let removes = [] as SqlResult[];
     if (_local_list.value) {
       for (let i = 0; i < _local_list.value.length; i++) {
         let item = _local_list.value[i];
-        let id = getRowId(item, i);
         // 需要删除的 ID
-        if (ids.has(id)) {
+        if (predicate(item, i)) {
           removes.push(item);
         }
         // 需要保留的 ID
@@ -667,6 +720,7 @@ export function useLocalListEdit(
     batchUpdateBy,
     findAndUpdate,
     removeLocalItems,
+    removeLocalItemsBy,
     setItems,
     clearItems,
     //.....................

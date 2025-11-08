@@ -729,6 +729,12 @@ function defineStdListStore(options: StdListStoreOptions) {
     return [];
   }
 
+  function removeItemsBy(
+    filter: (item: WnObj, index: number) => boolean
+  ): WnObj[] {
+    return _local.removeLocalItemsBy(filter);
+  }
+
   async function onSelect(payload: TableSelectEmitInfo) {
     let currentId = (payload.currentId as string) ?? undefined;
     let checkedIds = Util.anyToTruthyKeys(payload.checkedIds);
@@ -1100,6 +1106,7 @@ function defineStdListStore(options: StdListStoreOptions) {
 
     removeChecked,
     removeItems,
+    removeItemsBy,
     setItems,
     clear,
     updateSelection,

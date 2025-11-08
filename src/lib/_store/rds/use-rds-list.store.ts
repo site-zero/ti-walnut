@@ -677,6 +677,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     return [];
   }
+
+  function removeItemsBy(
+    filter: (item: SqlResult, index: number) => boolean
+  ): SqlResult[] {
+    return _local.removeLocalItemsBy(filter);
+  }
+
   //---------------------------------------------
   // 选择方法
   //---------------------------------------------
@@ -1005,6 +1012,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     removeChecked,
     removeItems,
+    removeItemsBy,
     setItems,
     clear,
     updateSelection,
