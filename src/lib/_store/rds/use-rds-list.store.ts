@@ -531,10 +531,11 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   function prependItem(item: SqlResult) {
     // 如果存在就更新
     let id = getItemId(item);
-    if (getItemById(id)) {
-      updateItemBy(item, { id });
+    let index = getItemIndex(id);
+    if (index >= 0) {
+      updateItemBy(item, { index });
     }
-    // 直接添加到结尾
+    // 直接添加到开头
     else {
       _local.prependToList(item);
     }
@@ -543,8 +544,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   function appendItem(item: SqlResult) {
     // 如果存在就更新
     let id = getItemId(item);
-    if (getItemById(id)) {
-      updateItemBy(item, { id });
+    let index = getItemIndex(id);
+    if (index >= 0) {
+      updateItemBy(item, { index });
     }
     // 直接添加到结尾
     else {
