@@ -1,5 +1,6 @@
-import { appendPath, Iconable, IconInput, Icons } from "@site0/tijs";
+import { appendPath, Iconable, IconInput, Icons, Vars } from "@site0/tijs";
 import { WnObj, WnObjContentFinger } from "../lib/_types";
+import _ from "lodash";
 
 /**
  * 对命令行参数进行安全处理，移除所有单引号、双引号和分号，防止命令注入。
@@ -9,6 +10,28 @@ import { WnObj, WnObjContentFinger } from "../lib/_types";
  */
 export function safeCmdArg(arg: string) {
   return arg.replaceAll(/['";]/g, "");
+}
+
+export function safeObjForCmdArg(input: any) {
+  if (!input) return input;
+  // 数组
+  if (_.isArray(input)) {
+    let re = [] as any[];
+    for (let li of input) {
+      re.push(safeObjForCmdArg(li));
+    }
+    return re;
+  }
+  // 对象
+  if (_.isPlainObject(input)) {
+    let re = {} as Vars;
+    _.forEach(input, (v, k) => {
+      re[k] = safeObjForCmdArg(v);
+    });
+    return re;
+  }
+  // 其他的通通当作字符串
+  return safeCmdArg(`${input}`);
 }
 
 /**
@@ -45,7 +68,7 @@ export function genWnPath(base: string, subPath?: string) {
     re = base;
   }
   // 指定了绝对子路径
-  else if (/^(id:|~\/|\/)/.test(subPath)) {
+  else if (/^(id:|~\/|\/)/.test(subPath) || subPath == "~") {
     re = subPath;
   }
   // 拼合路径

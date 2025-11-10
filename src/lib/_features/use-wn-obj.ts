@@ -1,44 +1,46 @@
-import { Util, Vars } from '@site0/tijs';
-import JSON5 from 'json5';
-import _ from 'lodash';
+import { Util, Vars } from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
 import {
   genWnPath,
   getQueryLimit,
   QueryFilter,
+  safeCmdArg,
+  safeObjForCmdArg,
   SqlPager,
   SqlQuery,
   Walnut,
   WnObjInfo,
   WnObjQueryOptions,
-} from '../../..';
-import { WnMetaSaving, WnObj } from '../_types';
+} from "../../..";
+import { WnMetaSaving, WnObj } from "../_types";
 
 export type WnObjFeature = WnMetaSaving & ReturnType<typeof useWnObj>;
 
 export type WnLoadContentOptions = {
-  as?: 'text' | 'json';
+  as?: "text" | "json";
 };
 
 const BUILD_IN_KEYS = [
-  'id',
-  'ph',
-  'ct',
-  'lm',
-  'c',
-  'm',
-  'md',
-  'g',
-  'race',
-  'd0',
-  'd1',
-  'sha1',
-  'len',
-  'ct',
-  'lm',
+  "id",
+  "ph",
+  "ct",
+  "lm",
+  "c",
+  "m",
+  "md",
+  "g",
+  "race",
+  "d0",
+  "d1",
+  "sha1",
+  "len",
+  "ct",
+  "lm",
 ];
 
-export function useWnObj(homePath: string = '~') {
-  const _home_path = homePath.replace(/'/g, '');
+export function useWnObj(homePath: string = "~") {
+  const _home_path = homePath.replace(/'/g, "");
   /**
    * @param path 对象路径
    * @returns 对象解析后的内容
@@ -48,7 +50,7 @@ export function useWnObj(homePath: string = '~') {
     let aph = genWnPath(_home_path, path);
 
     let cmdText = `o @fetch -ignore '${aph}'  @json -cqn`;
-    let re = await Walnut.exec(cmdText, { as: 'json' });
+    let re = await Walnut.exec(cmdText, { as: "json" });
     return re ?? undefined;
   }
 
@@ -58,9 +60,9 @@ export function useWnObj(homePath: string = '~') {
    */
   async function get(id: string): Promise<WnObj | undefined> {
     // 去掉危险的字符串
-    let theId = id.replace(/'/g, '');
+    let theId = id.replace(/'/g, "");
     let cmdText = `o @get -ignore '${theId}'  @json -cqn`;
-    let re = await Walnut.exec(cmdText, { as: 'json' });
+    let re = await Walnut.exec(cmdText, { as: "json" });
     return re ?? undefined;
   }
 
@@ -69,15 +71,15 @@ export function useWnObj(homePath: string = '~') {
    * @returns 对象解析后的内容
    */
   async function remove(...ids: string[]) {
-    let cmds = ['o @get -ignore'];
+    let cmds = ["o @get -ignore"];
     for (let id of ids) {
       // 去掉危险的字符串
-      let theId = id.replace(/'/g, '');
+      let theId = id.replace(/'/g, "");
       cmds.push(theId);
     }
     cmds.push(`@delete`);
-    let cmdText = cmds.join(' ');
-    await Walnut.exec(cmdText, { as: 'json' });
+    let cmdText = cmds.join(" ");
+    await Walnut.exec(cmdText, { as: "json" });
   }
 
   /**
@@ -91,7 +93,7 @@ export function useWnObj(homePath: string = '~') {
       throw `update obj need 'id' in meta!`;
     }
     // 确保，防止命令注入
-    let theId = id.replace(/['/\\]/g, '');
+    let theId = id.replace(/['/\\]/g, "");
 
     // 准备元数据
     let newMeta: Vars = _.omit(meta, ...BUILD_IN_KEYS);
@@ -99,7 +101,7 @@ export function useWnObj(homePath: string = '~') {
     // 准备输入
     let input = JSON.stringify(newMeta);
     let cmdText = `o @get -ignore '${theId}' @update  @json -cqn`;
-    let re = await Walnut.exec(cmdText, { as: 'json', input });
+    let re = await Walnut.exec(cmdText, { as: "json", input });
     return re ?? undefined;
   }
 
@@ -112,20 +114,20 @@ export function useWnObj(homePath: string = '~') {
     let parentPath = _home_path;
     // 指定了父路径
     if (pid) {
-      let theParentId = pid.replace(/'/g, '');
+      let theParentId = pid.replace(/'/g, "");
       parentPath = `id:${theParentId}`;
     }
 
     // 准备元数据
     let newMeta: Vars = _.omit(meta, ...BUILD_IN_KEYS);
-    newMeta.race = meta.race ?? 'FILE';
+    newMeta.race = meta.race ?? "FILE";
 
     // 准备输入
     let input = JSON.stringify(newMeta);
     let cmdText = `o @create -p '${parentPath}' @json -cqn`;
-    let re = await Walnut.exec(cmdText, { as: 'json', input });
+    let re = await Walnut.exec(cmdText, { as: "json", input });
     if (re) {
-      return _.omit(re, '__is_created');
+      return _.omit(re, "__is_created");
     }
     return undefined;
   }
@@ -148,7 +150,7 @@ export function useWnObj(homePath: string = '~') {
     let qs = JSON.stringify(_q.filter ?? {});
 
     // 准备命令
-    var cmds = ['o @query'];
+    var cmds = ["o @query"];
     // [-p ~/xxx]      # 指定一个父节点
     if (parentPathOrDir) {
       // 字符串，一定是路径
@@ -158,7 +160,7 @@ export function useWnObj(homePath: string = '~') {
       }
       // 指定了一个对象
       else if (parentPathOrDir.id) {
-        cmds.push(`-p 'id:${parentPathOrDir.id}'`);
+        cmds.push(`-p 'id:${safeCmdArg(parentPathOrDir.id)}'`);
       }
     }
 
@@ -169,19 +171,19 @@ export function useWnObj(homePath: string = '~') {
 
     // [-mine]         # 为条件添加 d0:"home", d1:"主组" 两条约束
     if (false !== options.mine) {
-      cmds.push('-mine');
+      cmds.push("-mine");
     }
     // [-hidden]       # 如果有隐藏对象，也要输出出来
     if (options.hidden) {
-      cmds.push('-hidden');
+      cmds.push("-hidden");
     }
     // [-quiet]        # 如果指定的父节点不存在，不要抛错，直接静默忍耐
     if (options.quiet) {
-      cmds.push('-quiet');
+      cmds.push("-quiet");
     }
     // [-pager]        # 表示要记录翻页信息
     if (_q.pager) {
-      cmds.push('-pager');
+      cmds.push("-pager");
       let ls = getQueryLimit(_q);
 
       // [-limit 10]     # 最多多少条记录
@@ -196,12 +198,12 @@ export function useWnObj(homePath: string = '~') {
     }
     // [-path]         # 确保每个查询出来的对象是有全路径属性的
     if (options.loadPath) {
-      cmds.push('-path');
+      cmds.push("-path");
     }
 
-    let cmdText = cmds.join(' ');
+    let cmdText = cmds.join(" ");
 
-    let reo = await Walnut.exec(cmdText, { input: qs, as: 'json' });
+    let reo = await Walnut.exec(cmdText, { input: qs, as: "json" });
     list = reo.list || [];
     page.pageNumber = reo.pager.pageNumber;
     page.pageSize = reo.pager.pageSize;
@@ -241,6 +243,70 @@ export function useWnObj(homePath: string = '~') {
     return null;
   }
 
+  type GetAncestorsOptions = {
+    /**
+     * 指定一个截止的祖先节点路径，默认 `~`
+     */
+    until?: string;
+    /**
+     * 指定一个截止的祖先节点条件
+     */
+    untilMatch?: Vars;
+
+    /**
+     * 输出也包括自己
+     */
+    includeSelft?: boolean;
+
+    /**
+     * 输出不包括第一个祖先节点
+     */
+    excludeTop?: boolean;
+  };
+
+  async function getAncestors(
+    options: GetAncestorsOptions = {},
+    path?: string
+  ): Promise<WnObj[]> {
+    // 准备命令
+    var cmds = ["o"];
+    // 指定基准对象路径，默认 homePath
+    if (path) {
+      cmds.push(`'${safeCmdArg(path)}'`);
+    } else {
+      cmds.push(`'${safeCmdArg(homePath || "~")}'`);
+    }
+    cmds.push("@ancestors");
+
+    // 定一个截止的祖先节点路径，服务器默认 `~`
+    if (options.until) {
+      cmds.push(`-until '${safeCmdArg(options.until)}'`);
+    }
+
+    // 选】指定一个截止的祖先节点条件
+    if (!_.isEmpty(options.untilMatch)) {
+      cmds.push(
+        `-um '${JSON.stringify(safeObjForCmdArg(options.untilMatch))}'`
+      );
+    }
+    // [-hidden]       # 如果有隐藏对象，也要输出出来
+    if (options.includeSelft) {
+      cmds.push("-self");
+    }
+    // [-quiet]        # 如果指定的父节点不存在，不要抛错，直接静默忍耐
+    if (options.excludeTop) {
+      cmds.push("-notop");
+    }
+
+    // 确保列表输出
+    cmds.push("@json -l");
+
+    let cmdText = cmds.join(" ");
+
+    let reo = await Walnut.exec(cmdText, { as: "json" });
+    return reo as WnObj[];
+  }
+
   async function writeText(path: string, content: string): Promise<WnObj> {
     let url = `/o/save/text?str=${path}`;
     let re = await Walnut.postFormToGetAjax(url, { content });
@@ -251,13 +317,13 @@ export function useWnObj(homePath: string = '~') {
     path: string,
     options: WnLoadContentOptions = {}
   ): Promise<any> {
-    let { as = 'text' } = options;
+    let { as = "text" } = options;
     let url = `/o/content?str=${path}`;
     let re = await Walnut.fetchText(url);
     if (_.isNil(re)) {
       return re;
     }
-    if ('json' == as) {
+    if ("json" == as) {
       return JSON5.parse(re);
     }
     return re;
@@ -271,11 +337,11 @@ export function useWnObj(homePath: string = '~') {
     let cmds = [`rename -cqno`];
     if (id) {
       // 去掉危险的字符串
-      let objId = id.replace(/'/g, '');
+      let objId = id.replace(/'/g, "");
       cmds.push(`-id '${objId}'`);
     } else if (ph) {
       // 去掉危险的字符串
-      let aph = ph.replace(/'/g, '');
+      let aph = ph.replace(/'/g, "");
       // 确保是绝对路径
       if (!/^[~/]/.test(aph)) {
         aph = Util.appendPath(_home_path, aph);
@@ -288,7 +354,7 @@ export function useWnObj(homePath: string = '~') {
     }
     cmds.push(`'${newName}'`);
 
-    let cmdText = cmds.join(' ');
+    let cmdText = cmds.join(" ");
     let re = await Walnut.exec(cmdText);
     re = _.trim(re);
     if (re && !/^e./.test(re)) {
@@ -308,6 +374,7 @@ export function useWnObj(homePath: string = '~') {
     query,
     queryChildren,
     getChild,
+    getAncestors,
     writeText,
     loadContent,
     rename,

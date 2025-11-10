@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { TiLayoutGrid } from "@site0/tijs";
-  import { computed } from "vue";
+  import { computed, watch } from "vue";
   import { useWnObjBrowserLayout } from "./gui-wn-obj-browser-layout";
   import { useWnObjBrowserSchema } from "./gui-wn-obj-browser-schema";
   import { useWnObjBrowserApi } from "./use-wn-obj-browser-api";
@@ -15,6 +15,15 @@
   //---------------------------------------------
   const GUILayout = computed(() => useWnObjBrowserLayout(props, _api));
   const GUISchema = computed(() => useWnObjBrowserSchema(props, _api));
+  //-----------------------------------------------------
+  watch(
+    () => [props.loadMode, props.homePath, props.objList, props.objPath],
+    async () => {
+      console.log("WnObjBrowser watch => reload");
+      await _api.reload();
+    },
+    { immediate: true }
+  );
   //-----------------------------------------------------
 </script>
 <template>

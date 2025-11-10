@@ -47,7 +47,6 @@ export default {
   WnObjTable: WnObjTableInfo,
   WnObjMeta: WnObjMetaInfo,
   WnObjPreview: WnObjPreviewInfo,
-  
 
   // RDS
   WnRdsBrowser: WnRdsBrowserInfo,
@@ -69,11 +68,7 @@ export * from "./hub/hub-sidenav/wn-hub-side-nav-index";
 export * from "./hub/hub-sky/wn-hub-sky-index";
 
 // Obj
-export * from "./obj/obj-list/wn-obj-list-index";
-export * from "./obj/obj-meta/wn-obj-meta-index";
-export * from "./obj/obj-preview/wn-obj-preview-index";
-export * from "./obj/obj-table/wn-obj-table-index";
-export * from "./obj/obj-viewer/wn-obj-viewer-index";
+export * from "./obj";
 
 // RDS
 export * from "./rds/rds-browser/rds-browser-index";
