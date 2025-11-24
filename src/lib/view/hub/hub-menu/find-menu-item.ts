@@ -1,13 +1,15 @@
-import { ActionBarItem, Match, TiMatch } from '@site0/tijs';
+import { ActionBarItemRefer, Match, TiMatch } from "@site0/tijs";
+import _ from "lodash";
 
-function __menu_exists(items: ActionBarItem[], am: TiMatch): boolean {
+function __menu_exists(items: ActionBarItemRefer[], am: TiMatch): boolean {
   for (let item of items) {
     if (am.test(item)) {
       return true;
     }
     // 递归
-    if (item.items) {
-      if (__menu_exists(item.items, am)) {
+    let subItems = _.get(item, "items");
+    if (_.isArray(subItems)) {
+      if (__menu_exists(subItems, am)) {
         return true;
       }
     }
@@ -15,7 +17,7 @@ function __menu_exists(items: ActionBarItem[], am: TiMatch): boolean {
   return false;
 }
 
-export function menuExists(items: ActionBarItem[], match: any): boolean {
+export function menuExists(items: ActionBarItemRefer[], match: any): boolean {
   let am = Match.parse(match);
   return __menu_exists(items, am);
 }
