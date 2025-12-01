@@ -680,8 +680,12 @@ function defineStdListStore(options: StdListStoreOptions) {
     return _local.updateItem(meta, options);
   }
 
-  function updateItemsBy(meta: WnObj, forIds?: string | string[]): WnObj[] {
+  function updateItemsById(meta: WnObj, forIds?: string | string[]): WnObj[] {
     return _local.batchUpdate(meta, forIds);
+  }
+
+  function updateItemsBy(delta: WnObj, predicate: (it: WnObj) => boolean) {
+    return _local.batchUpdateBy(delta, predicate);
   }
 
   function updateChecked(meta: WnObj): WnObj[] {
@@ -1101,6 +1105,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     updateItem,
     updateItems,
     updateItemBy,
+    updateItemsById,
     updateItemsBy,
     updateChecked,
 

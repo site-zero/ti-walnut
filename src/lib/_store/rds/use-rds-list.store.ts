@@ -628,11 +628,18 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return _local.updateItem(meta, options);
   }
 
-  function updateItemsBy(
+  function updateItemsById(
     meta: SqlResult,
     forIds?: string | string[]
   ): SqlResult[] {
     return _local.batchUpdate(meta, forIds);
+  }
+
+  function updateItemsBy(
+    delta: SqlResult,
+    predicate: (it: SqlResult) => boolean
+  ) {
+    return _local.batchUpdateBy(delta, predicate);
   }
 
   function updateChecked(meta: SqlResult): SqlResult[] {
@@ -1009,6 +1016,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     updateItem,
     updateItems,
     updateItemBy,
+    updateItemsById,
     updateItemsBy,
     updateChecked,
 
