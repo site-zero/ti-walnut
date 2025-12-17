@@ -1083,7 +1083,7 @@ export class WalnutServer {
     }
     // 逐个注册
     _.forEach(json, (fld, key) => {
-      _ofs.setFieldIfNoExists(key, fld);
+      _ofs.addFieldIfNoExists(key, fld);
     });
   }
 
