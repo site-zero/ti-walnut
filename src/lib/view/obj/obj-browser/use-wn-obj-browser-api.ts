@@ -1,3 +1,4 @@
+import { IDSelection, Pager, TableSelectEmitInfo, Util } from "@site0/tijs";
 import _ from "lodash";
 import { computed, ref } from "vue";
 import { useWnObj } from "../../..";
@@ -23,8 +24,10 @@ export function useWnObjBrowserApi(
   //-----------------------------------------------------
   const _loading = ref(false);
   const _obj_list = ref<WnObj[]>([]);
+  const _obj_pager = ref<Pager>({});
   const _obj_path = ref<WnObj[]>([]);
   const _current_dir_id = ref<string>();
+  const _sel_obj = ref<IDSelection<string>>({});
 
   //-----------------------------------------------------
   // 计算属性
@@ -40,18 +43,32 @@ export function useWnObjBrowserApi(
   });
   const ObjList = computed(() => _obj_list.value);
   const ObjPath = computed(() => _obj_path.value);
+  const Pager = computed(() => _obj_pager.value);
   const loading = computed(() => _loading.value);
   const CurrentDirId = computed(() => _current_dir_id.value);
-
+  //-----------------------------------------------------
+  const CurrentObj = computed(() => {
+    return _.find(ObjList.value, { id: _sel_obj.value.currentId });
+  });
+  //-----------------------------------------------------
+  const CheckedObjs = computed(() => {
+    let ids = Util.arrayToMap(_sel_obj.value.checkedIds);
+    return _.filter(ObjList.value, (obj) => ids.get(obj.id));
+  });
   //-----------------------------------------------------
   // 状态修改函数
   //-----------------------------------------------------
-
+  function onSelect(payload: TableSelectEmitInfo) {
+    _sel_obj.value = {
+      currentId: payload.currentId as string,
+      checkedIds: payload.checkedIds as string[],
+    };
+  }
   //-----------------------------------------------------
   // 远程加载函数
   //-----------------------------------------------------
   async function _load_obj_list() {
-    _obj_list.value = await objApi.queryChildren(
+    const [list, pager] = await objApi.queryChildren(
       {
         filter: {},
         sorter: { nm: 1 },
@@ -63,6 +80,8 @@ export function useWnObjBrowserApi(
         loadPath: false,
       }
     );
+    _obj_list.value = list;
+    _obj_pager.value = pager;
   }
   //-----------------------------------------------------
   async function _load_obj_path() {
@@ -103,10 +122,16 @@ export function useWnObjBrowserApi(
     LoadMode,
     ObjList,
     ObjPath,
+    Pager,
     loading,
     CurrentDirId,
+    CurrentObj,
+    CheckedObjs,
+    CurrentObjId: computed(() => _sel_obj.value.currentId),
+    CheckedObjIds: computed(() => _sel_obj.value.checkedIds),
 
     // 状态修改函数
+    onSelect,
 
     // 远程加载函数
     reload,

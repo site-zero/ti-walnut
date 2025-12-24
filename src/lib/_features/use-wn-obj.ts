@@ -1,4 +1,4 @@
-import { Util, Vars } from "@site0/tijs";
+import { Pager, Util, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
 import {
@@ -7,7 +7,6 @@ import {
   QueryFilter,
   safeCmdArg,
   safeObjForCmdArg,
-  SqlPager,
   SqlQuery,
   Walnut,
   WnObjInfo,
@@ -136,13 +135,14 @@ export function useWnObj(homePath: string = "~") {
     parentPathOrDir: WnObj | string,
     _q: SqlQuery,
     options: WnObjQueryOptions = {}
-  ): Promise<[WnObj[], SqlPager]> {
+  ): Promise<[WnObj[], Pager]> {
     let list: WnObj[] = [];
-    let page: SqlPager = {
+    let page: Pager = {
       pageNumber: 0,
       pageSize: 0,
       pageCount: 0,
       totalCount: 0,
+      count: 0,
     };
 
     // 准备查询条件
@@ -209,6 +209,7 @@ export function useWnObj(homePath: string = "~") {
     page.pageSize = reo.pager.pageSize;
     page.pageCount = reo.pager.pageCount;
     page.totalCount = reo.pager.totalCount;
+    page.count = list.length;
 
     return [list, page];
   }
