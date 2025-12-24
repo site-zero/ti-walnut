@@ -7,6 +7,7 @@ import {
   ComboFilterValue,
   KeepInfo,
   Match,
+  Pager,
   TableSelectEmitInfo,
   useKeep,
   Util,
@@ -25,7 +26,6 @@ import {
   QueryFilter,
   QuerySorter,
   RefreshOptions,
-  SqlPager,
   SqlPagerInput,
   SqlQuery,
   updatePager,
@@ -792,7 +792,7 @@ function defineStdListStore(options: StdListStoreOptions) {
 
   async function loadRemoteList(
     setup: WnObjQueryOptions = {}
-  ): Promise<[WnObj[], SqlPager]> {
+  ): Promise<[WnObj[], Pager]> {
     _action_status.value = "loading";
     try {
       // 准备查询条件
