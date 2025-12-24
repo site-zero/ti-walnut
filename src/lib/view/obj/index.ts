@@ -4,3 +4,4 @@ export * from "./obj-meta/wn-obj-meta-index";
 export * from "./obj-preview/wn-obj-preview-index";
 export * from "./obj-table/wn-obj-table-index";
 export * from "./obj-viewer/wn-obj-viewer-index";
+export * from "./obj-wall/wn-obj-wall-index";

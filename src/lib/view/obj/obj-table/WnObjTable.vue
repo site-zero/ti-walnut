@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { BUS_KEY, TiTable, TiThumb } from '@site0/tijs';
+  import { BUS_KEY, TiTable, TiThumb } from "@site0/tijs";
   import {
     computed,
     inject,
@@ -8,11 +8,11 @@
     ref,
     useTemplateRef,
     watch,
-  } from 'vue';
-  import { ObjUploadItem } from '../../../_types';
-  import { useObjDropToUpload } from './use-obj-drop-to-upload';
-  import { getObjTableColumns } from './use-obj-table-columns';
-  import { WnObjTableEmitter, WnObjTableProps } from './wn-obj-table-types';
+  } from "vue";
+  import { ObjUploadItem } from "../../../_types";
+  import { useObjDropToUpload } from "./use-obj-drop-to-upload";
+  import { getObjTableColumns } from "./use-obj-table-columns";
+  import { WnObjTableEmitter, WnObjTableProps } from "./wn-obj-table-types";
   //-------------------------------------------------------
   const bus = inject(BUS_KEY);
   //-------------------------------------------------------
@@ -22,7 +22,7 @@
     columns: () => getObjTableColumns(),
   });
   //-----------------------------------------------------
-  const $el = useTemplateRef('el');
+  const $el = useTemplateRef("el");
   const _drag_enter = ref(false);
   const _upload_files = ref<ObjUploadItem[]>([]);
   //-----------------------------------------------------
@@ -32,19 +32,19 @@
     target: () =>
       $el.value && props.upload ? ($el.value as HTMLElement) : null,
     uploadOptions: () => props.upload,
-    callback: (objs) => emit('upload:done', objs),
+    callback: (objs) => emit("upload:done", objs),
   });
   //-----------------------------------------------------
   const TopClass = computed(() => {
     return {
-      'drag-enter': _drag_enter.value || hasUploading.value,
+      "drag-enter": _drag_enter.value || hasUploading.value,
     };
   });
   //-----------------------------------------------------
   const hasUploading = computed(() => _upload_files.value.length > 0);
   //-----------------------------------------------------
   function doUpload() {
-    console.log('doUpload');
+    console.log("doUpload");
     _upload_api.doUploadFiles();
   }
   //-----------------------------------------------------
@@ -93,6 +93,7 @@
         :data="props.data ?? []"
         :current-id="props.currentId"
         :checked-ids="props.checkedIds"
+        :empty-roadblock="props.emptyRoadblock"
         @select="emit('select', $event)"
         @open="emit('open', $event)"
         @cell-change="emit('cell-change', $event)"
@@ -115,5 +116,5 @@
   </div>
 </template>
 <style lang="scss" scoped>
-  @use './wn-obj-table.scss';
+  @use "./wn-obj-table.scss";
 </style>

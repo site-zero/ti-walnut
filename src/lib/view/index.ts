@@ -4,12 +4,14 @@ import { TiComSet } from "@site0/tijs";
 import { WnConflictViewInfo } from "./conflict/wn-conflict-view-index";
 
 // Hub
-import { WnHubArenaInfo } from "./hub/hub-arena/wn-hub-arena-index";
-import { WnHubAvatarInfo } from "./hub/hub-avatar/wn-hub-avatar-index";
-import { WnHubFootInfo } from "./hub/hub-foot/wn-hub-foot-index";
-import { WnHubMenuInfo } from "./hub/hub-menu/wn-hub-menu-index";
-import { WnHubSideNavInfo } from "./hub/hub-sidenav/wn-hub-side-nav-index";
-import { WnHubSkyInfo } from "./hub/hub-sky/wn-hub-sky-index";
+import {
+  WnHubArenaInfo,
+  WnHubAvatarInfo,
+  WnHubFootInfo,
+  WnHubMenuInfo,
+  WnHubSideNavInfo,
+  WnHubSkyInfo,
+} from "./hub/";
 
 // Obj
 import {
@@ -19,14 +21,14 @@ import {
   WnObjPreviewInfo,
   WnObjTableInfo,
   WnObjViewerInfo,
+  WnObjWallInfo,
 } from "./obj";
 
 // RDS
 import { WnRdsBrowserInfo } from "./rds/rds-browser/rds-browser-index";
 
 // Misc
-import { WnCmdRunnerInfo } from "./misc/cmd-runner/wn-cmd-runner-index";
-import { WnSignInInfo } from "./misc/signin/wn-signin-index";
+import { WnCmdRunnerInfo, WnSignInInfo } from "./misc";
 
 export default {
   // Conflict
@@ -45,6 +47,7 @@ export default {
   WnObjViewer: WnObjViewerInfo,
   WnObjList: WnObjListInfo,
   WnObjTable: WnObjTableInfo,
+  WnObjWall: WnObjWallInfo,
   WnObjMeta: WnObjMetaInfo,
   WnObjPreview: WnObjPreviewInfo,
 

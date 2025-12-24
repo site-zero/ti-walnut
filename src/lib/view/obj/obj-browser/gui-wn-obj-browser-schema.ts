@@ -4,6 +4,7 @@ import { WnObjTableProps } from "../obj-table/wn-obj-table-types";
 import { WnObjViewerProps } from "../obj-viewer/wn-obj-viewer-types";
 import { WnObjBrowserApi } from "./use-wn-obj-browser-api";
 import { WnObjBrowserProps } from "./wn-obj-browser-types";
+import { WnObjWallProps } from "../../..";
 
 export function useWnObjBrowserSchema(
   _props: WnObjBrowserProps,
@@ -28,12 +29,13 @@ export function useWnObjBrowserSchema(
       } as CrumbProps,
     },
     list: {
-      comType: "WnObjTable",
+      //comType: "WnObjTable",
+      comType: "WnObjWall",
       comConf: {
         data: api.ObjList.value,
         currentId: api.CurrentObjId.value,
         checkedIds: api.CheckedObjIds.value,
-      } as WnObjTableProps,
+      } as WnObjWallProps,
       events: {
         select: ({ data }) => {
           console.log(data);
@@ -44,7 +46,8 @@ export function useWnObjBrowserSchema(
     detail: {
       comType: "WnObjViewer",
       comConf: {
-        data: api.CurrentObj.value,
+        meta: api.CurrentObj.value,
+        tabs: ["meta", "preview"],
       } as WnObjViewerProps,
     },
     foot: {
