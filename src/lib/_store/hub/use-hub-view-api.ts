@@ -105,7 +105,9 @@ export function useHubViewApi(options: HubViewApiOptions) {
   const createGUISchema = (GUIContext: Vars) => {
     // console.log('createGUISchema', GUIContext);
     let schema = _state.schema.value ?? {};
-    return Util.explainObj(GUIContext, schema);
+    return Util.explainObj(GUIContext, schema, {
+      jsValue: null,
+    });
   };
   const createGUIActions = (GUIContext: Vars) => {
     return Util.explainObj(GUIContext, _state.actions.value) as ActionBarProps;
