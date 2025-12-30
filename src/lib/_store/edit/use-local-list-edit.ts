@@ -526,6 +526,10 @@ export function useLocalListEdit(
       return changes;
     }
 
+    let overmode = options.overrideMode || "assign";
+    let overrideForUpdate = /^override-(all|update)$/.test(overmode);
+    let overrideForInsert = /^override-(all|insert)$/.test(overmode);
+
     // 对远程列表编制索引
     let remoteMap = _remote_map.value;
 
@@ -550,23 +554,20 @@ export function useLocalListEdit(
             continue;
           }
 
-          // 补上固定 Meta
-          if (options.defaultMeta) {
-            // 动态计算
-            if (_.isFunction(options.defaultMeta)) {
-              _.defaults(diff, options.defaultMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.defaults(diff, options.defaultMeta);
-            }
-          }
-
           // 指定固定更新数据
           if (options.updateMeta) {
             // 动态计算
             if (_.isFunction(options.updateMeta)) {
-              _.assign(diff, options.updateMeta(local, remote));
+              let new_diff = options.updateMeta(local, remote, diff);
+              // 直接替换为新的
+              if (overrideForUpdate) {
+                if (!new_diff) continue;
+                diff = new_diff;
+              }
+              // 合并两个值
+              else {
+                _.assign(diff, new_diff);
+              }
             }
             // 静态值
             else {
@@ -582,6 +583,18 @@ export function useLocalListEdit(
             continue;
           }
 
+          // 补上固定 Meta
+          if (options.defaultMeta) {
+            // 动态计算
+            if (_.isFunction(options.defaultMeta)) {
+              _.assign(diff, options.defaultMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.assign(diff, options.defaultMeta);
+            }
+          }
+
           // 补上 ID
           if (patchMetaUpdate) {
             patchMetaUpdate(delta, id, remote);
@@ -593,24 +606,34 @@ export function useLocalListEdit(
         // 必然是新记录，需要插入
         else {
           let newMeta = Util.jsonClone(local);
-          if (options.defaultMeta) {
-            // 动态计算
-            if (_.isFunction(options.defaultMeta)) {
-              _.defaults(newMeta, options.defaultMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.defaults(newMeta, options.defaultMeta);
-            }
-          }
           if (options.insertMeta) {
             // 动态计算
             if (_.isFunction(options.insertMeta)) {
-              _.assign(newMeta, options.insertMeta(local, remote));
+              let new_meta2 = options.insertMeta(local, remote);
+              // 直接替换为新的
+              if (overrideForInsert) {
+                if (!new_meta2) continue;
+                newMeta = new_meta2;
+              }
+              // 合并两个值
+              else {
+                _.assign(newMeta, new_meta2);
+              }
             }
             // 静态值
             else {
               _.assign(newMeta, options.insertMeta);
+            }
+          }
+
+          if (options.defaultMeta) {
+            // 动态计算
+            if (_.isFunction(options.defaultMeta)) {
+              _.assign(newMeta, options.defaultMeta(local, remote));
+            }
+            // 静态值
+            else {
+              _.assign(newMeta, options.defaultMeta);
             }
           }
 

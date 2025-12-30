@@ -115,8 +115,8 @@ export function useLocalMetaEdit(
 
   function makeChange(options: LocalMetaMakeChangeOptions): SqlExecInfo[] {
     // 检查 Console
-    let vars = getDiffMeta();
-    if (_.isEmpty(vars)) {
+    let diffOrNewMeta = getDiffMeta();
+    if (_.isEmpty(diffOrNewMeta)) {
       return [];
     }
 
@@ -127,16 +127,9 @@ export function useLocalMetaEdit(
     let local = localMeta.value;
     let remote = remoteMeta.value;
 
-    if (options.defaultMeta) {
-      // 动态计算
-      if (_.isFunction(options.defaultMeta)) {
-        _.defaults(vars, options.defaultMeta(local, remote));
-      }
-      // 静态值
-      else {
-        _.defaults(vars, options.defaultMeta);
-      }
-    }
+    let overmode = options.overrideMode || "assign";
+    let overrideForUpdate = /^override-(all|update)$/.test(overmode);
+    let overrideForInsert = /^override-(all|insert)$/.test(overmode);
 
     let sets = [] as SqlExecSetVar[];
     let sql = options.updateSql;
@@ -149,11 +142,21 @@ export function useLocalMetaEdit(
       if (options.insertMeta) {
         // 动态计算
         if (_.isFunction(options.insertMeta)) {
-          _.assign(vars, options.insertMeta(local, remote));
+          let new_meta2 = options.insertMeta(local, remote);
+          _.assign(diffOrNewMeta, new_meta2);
+          // 直接替换为新的
+          if (overrideForInsert) {
+            if (!new_meta2) return [];
+            diffOrNewMeta = new_meta2;
+          }
+          // 合并两个值
+          else {
+            _.assign(diffOrNewMeta, new_meta2);
+          }
         }
         // 静态值
         else {
-          _.assign(vars, options.insertMeta);
+          _.assign(diffOrNewMeta, options.insertMeta);
         }
       }
       // 自动生成 ID
@@ -163,11 +166,31 @@ export function useLocalMetaEdit(
     else if (options.updateMeta) {
       // 动态计算
       if (_.isFunction(options.updateMeta)) {
-        _.assign(vars, options.updateMeta(local, remote!));
+        let new_diff = options.updateMeta(local, remote!, diffOrNewMeta);
+        // 直接替换为新的
+        if (overrideForUpdate) {
+          if (!new_diff) return [];
+          diffOrNewMeta = new_diff;
+        }
+        // 合并两个值
+        else {
+          _.assign(diffOrNewMeta, new_diff);
+        }
       }
       // 静态值
       else {
-        _.assign(vars, options.updateMeta);
+        _.assign(diffOrNewMeta, options.updateMeta);
+      }
+    }
+
+    if (options.defaultMeta) {
+      // 动态计算
+      if (_.isFunction(options.defaultMeta)) {
+        _.assign(diffOrNewMeta, options.defaultMeta(local, remote));
+      }
+      // 静态值
+      else {
+        _.assign(diffOrNewMeta, options.defaultMeta);
       }
     }
 
@@ -178,7 +201,7 @@ export function useLocalMetaEdit(
     return [
       {
         sql,
-        vars,
+        vars: diffOrNewMeta,
         explain: true,
         reset: true,
         noresult: options.noresult,
