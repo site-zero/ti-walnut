@@ -16,7 +16,7 @@ export function useWnObjBrowserSchema(
         data: api.ObjPath.value,
         value: api.CurrentDirId.value,
         style: {
-          padding: "4px 4px 4px 8px",
+          padding: "4px 8px",
         },
         head: {
           prefixIcon: "fas-desktop",
