@@ -3,6 +3,7 @@ import _ from "lodash";
 import { computed, ref } from "vue";
 import { useWnObj } from "../../..";
 import { WnObj } from "../../../../_types";
+import { WnUploadFileOptions } from "../../../../core";
 import {
   WnObjBrowserEmitter,
   WnObjBrowserLoadMode,
@@ -54,6 +55,16 @@ export function useWnObjBrowserApi(
   const CheckedObjs = computed(() => {
     let ids = Util.arrayToMap(_sel_obj.value.checkedIds);
     return _.filter(ObjList.value, (obj) => ids.get(obj.id));
+  });
+  //-----------------------------------------------------
+  const UploadConfig = computed((): WnUploadFileOptions | undefined => {
+    if (!props.homePath) {
+      return;
+    }
+    return {
+      target: props.homePath,
+      mode: "a",
+    };
   });
   //-----------------------------------------------------
   // 状态修改函数
@@ -129,7 +140,7 @@ export function useWnObjBrowserApi(
     CheckedObjs,
     CurrentObjId: computed(() => _sel_obj.value.currentId),
     CheckedObjIds: computed(() => _sel_obj.value.checkedIds),
-
+    UploadConfig,
     // 状态修改函数
     onSelect,
 

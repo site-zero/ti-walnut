@@ -16,6 +16,7 @@ import {
 // Obj
 import {
   WnObjBrowserInfo,
+  WnObjGalleryInfo,
   WnObjListInfo,
   WnObjMetaInfo,
   WnObjPreviewInfo,
@@ -50,6 +51,7 @@ export default {
   WnObjWall: WnObjWallInfo,
   WnObjMeta: WnObjMetaInfo,
   WnObjPreview: WnObjPreviewInfo,
+  WnObjGallery: WnObjGalleryInfo,
 
   // RDS
   WnRdsBrowser: WnRdsBrowserInfo,

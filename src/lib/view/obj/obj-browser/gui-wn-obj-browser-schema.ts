@@ -1,10 +1,9 @@
 import { CrumbProps, LayoutSchema, PagerProps } from "@site0/tijs";
+import { WnObjGalleryProps } from "../../..";
 import { getWnObjIcon } from "../../../../core";
-import { WnObjTableProps } from "../obj-table/wn-obj-table-types";
 import { WnObjViewerProps } from "../obj-viewer/wn-obj-viewer-types";
 import { WnObjBrowserApi } from "./use-wn-obj-browser-api";
 import { WnObjBrowserProps } from "./wn-obj-browser-types";
-import { WnObjWallProps } from "../../..";
 
 export function useWnObjBrowserSchema(
   _props: WnObjBrowserProps,
@@ -30,12 +29,13 @@ export function useWnObjBrowserSchema(
     },
     list: {
       //comType: "WnObjTable",
-      comType: "WnObjWall",
+      comType: "WnObjGallery",
       comConf: {
         data: api.ObjList.value,
         currentId: api.CurrentObjId.value,
         checkedIds: api.CheckedObjIds.value,
-      } as WnObjWallProps,
+        upload: api.UploadConfig.value,
+      } as WnObjGalleryProps,
       events: {
         select: ({ data }) => {
           console.log(data);
@@ -47,7 +47,7 @@ export function useWnObjBrowserSchema(
       comType: "WnObjViewer",
       comConf: {
         meta: api.CurrentObj.value,
-        tabs: ["meta", "preview"],
+        tabs: ["preview", "meta"],
       } as WnObjViewerProps,
     },
     foot: {

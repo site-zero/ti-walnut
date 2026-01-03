@@ -1,0 +1,44 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wn-obj-gallery {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  //-----------------------------------------------
+  > .gallery-main {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  //-----------------------------------------------
+  > .uploading-box {
+    position: absolute;
+    inset: 3px;
+    z-index: $z-mask;
+    border: 2px dotted var(--ti-color-secondary);
+    pointer-events: none;
+    opacity: 0;
+    transition: 300ms;
+    background-color: var(--ti-color-highlight);
+    padding: var(--ti-gap-h);
+    > main {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: var(--ti-gap-h);
+    }
+  }
+  //-----------------------------------------------
+  &.drag-enter {
+    > .table-con {
+      filter: blur(1.5px);
+      opacity: 0.6;
+    }
+    > .uploading-box {
+      inset: 0;
+      opacity: 1;
+      pointer-events: fill;
+    }
+  }
+  //-----------------------------------------------
+}
