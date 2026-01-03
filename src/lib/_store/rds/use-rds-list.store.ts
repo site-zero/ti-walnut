@@ -183,7 +183,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     __make_prefix_appender(options.queryPrefix)
   );
   const _count_prefix_append = computed(() =>
-    __make_prefix_appender(options.countPrefix)
+    __make_prefix_appender(options.countPrefix ?? options.queryPrefix)
   );
   //---------------------------------------------
   function apply_query_prefix(

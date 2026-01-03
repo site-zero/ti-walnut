@@ -59,8 +59,13 @@ export function defineSqlx(daoName?: string) {
       if (list.length == 1) {
         return list[0] as SqlResult;
       } else if (list.length > 1) {
-        if (debug)
-          console.log(`Multiple result when fetch`, { sql, filter, list });
+        let errMsg =
+          `SQLX: Multiple result when fetch: ` +
+          JSON.stringify({ sql, filter, list }, null, 4);
+        if (debug) {
+          console.warn(errMsg, { sql, filter, list });
+        }
+        alert(errMsg);
       }
     }
   }
