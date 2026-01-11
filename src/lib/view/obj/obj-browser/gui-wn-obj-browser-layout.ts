@@ -1,26 +1,35 @@
-import { LayoutBlock, LayoutGridProps } from "@site0/tijs";
-import { WnObjBrowserProps } from "./wn-obj-browser-types";
+import { CssGridItem, KeepInfo, LayoutGridProps } from "@site0/tijs";
 import { WnObjBrowserApi } from "./use-wn-obj-browser-api";
+import { WnObjBrowserProps } from "./wn-obj-browser-types";
 
 export function useWnObjBrowserLayout(
   _props: WnObjBrowserProps,
   _api: WnObjBrowserApi
 ): LayoutGridProps {
+  let keepSizes: KeepInfo = "local: GUI-WnObjBrowser-Layout-Sizes-NoDetail";
+  let gridTemplateColumns = "1fr";
+  let blockGrid: CssGridItem | undefined = undefined;
+  if (_api.ShowDetail.value) {
+    keepSizes += "-WithDetail";
+    gridTemplateColumns = "1fr 1fr";
+    blockGrid = { gridColumn: "span 2" };
+  }
+
   return {
     className: "fit-parent as-card with-shadow r-s",
-    keepSizes: "local: GUI-WnObjBrowser-Layout-Sizes",
+    keepSizes,
     gridStyle: {
       backgroundColor: "var(--ti-color-body)",
     },
     layout: {
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns,
       gridTemplateRows: "auto 1fr auto",
       gap: "var(--ti-gap-m)",
     },
     blocks: [
       {
         name: "head",
-        grid: { gridColumn: "span 2" },
+        grid: blockGrid,
       },
       {
         name: "list",
@@ -37,7 +46,7 @@ export function useWnObjBrowserLayout(
       },
       {
         name: "foot",
-        grid: { gridColumn: "span 2" },
+        grid: blockGrid,
       },
     ],
   };

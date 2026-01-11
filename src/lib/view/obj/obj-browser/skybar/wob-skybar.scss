@@ -1,0 +1,11 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wob-skybar {
+  @include flex-align-nowrap; 
+  > .part-left {
+    flex:1 1 auto;
+  }
+  > .part-right {
+
+  }
+}

@@ -1,6 +1,5 @@
-import { CrumbProps, LayoutSchema, PagerProps } from "@site0/tijs";
-import { WnObjGalleryProps } from "../../..";
-import { getWnObjIcon } from "../../../../core";
+import { LayoutSchema, PagerProps } from "@site0/tijs";
+import { WnObjBrowserSkyBarProps, WnObjGalleryProps } from "../../..";
 import { WnObjViewerProps } from "../obj-viewer/wn-obj-viewer-types";
 import { WnObjBrowserApi } from "./use-wn-obj-browser-api";
 import { WnObjBrowserProps } from "./wn-obj-browser-types";
@@ -11,26 +10,31 @@ export function useWnObjBrowserSchema(
 ): LayoutSchema {
   return {
     head: {
-      comType: "TiCrumb",
+      comType: "WnObjBrowserSkyBar",
       comConf: {
-        data: api.ObjPath.value,
-        value: api.CurrentDirId.value,
-        style: {
-          padding: "4px 8px",
+        menuVars: api.MenuVars.value,
+        objPath: api.ObjPath.value,
+        objId: api.CurrentDirId.value,
+        galleryMode: api.ViewGalleryMode.value,
+        showDetail: api.ShowDetail.value,
+      } as WnObjBrowserSkyBarProps,
+      events: {
+        "change:gallery-mode": ({ data: galleryMode }) => {
+          api.setGalleryMode(galleryMode);
         },
-        head: {
-          prefixIcon: "fas-desktop",
-          suffixIcon: "zmdi-chevron-right",
+        "change:show-detail": ({ data: showDetail }) => {
+          api.setShowDetail(showDetail);
         },
-        getValue: "id",
-        getIcon: (obj) => getWnObjIcon(obj, "fas-cube"),
-        getText: (obj) => obj.title || obj.nm || obj.id,
-      } as CrumbProps,
+        "reload": async () => {
+          await api.reload();
+        },
+      },
     },
     list: {
       //comType: "WnObjTable",
       comType: "WnObjGallery",
       comConf: {
+        mode: api.ViewGalleryMode.value,
         data: api.ObjList.value,
         currentId: api.CurrentObjId.value,
         checkedIds: api.CheckedObjIds.value,

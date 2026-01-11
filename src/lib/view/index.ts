@@ -16,6 +16,7 @@ import {
 // Obj
 import {
   WnObjBrowserInfo,
+  WnObjBrowserSkyBarInfo,
   WnObjGalleryInfo,
   WnObjListInfo,
   WnObjMetaInfo,
@@ -45,6 +46,7 @@ export default {
 
   // Obj
   WnObjBrowser: WnObjBrowserInfo,
+  WnObjBrowserSkyBar: WnObjBrowserSkyBarInfo,
   WnObjViewer: WnObjViewerInfo,
   WnObjList: WnObjListInfo,
   WnObjTable: WnObjTableInfo,

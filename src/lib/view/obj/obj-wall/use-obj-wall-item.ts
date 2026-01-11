@@ -17,7 +17,7 @@ export type ObjWallApi = ReturnType<typeof useObjWallApi>;
 export function useObjWallApi(props: WnObjWallProps) {
   function getWallItem(itemContext: Vars): Required<ComRef> {
     let item = itemContext.item;
-    console.log(item);
+    //console.log(item);
     let preview: ImageProps = { height: "120px" };
     // 有缩略图
     if (item.thumb && item.id) {

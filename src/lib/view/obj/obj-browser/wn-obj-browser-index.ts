@@ -5,10 +5,10 @@ import WnObjBrowser from "./WnObjBrowser.vue";
 const COM_TYPE = "WnObjBrowser";
 
 const en_us = {
-  'com-name': 'WnObjBrowser',
+  "com-name": "WnObjBrowser",
 };
 const zh_cn = {
-  'com-name': '对象浏览器',
+  "com-name": "对象浏览器",
 };
 
 const WnObjBrowserInfo: TiComInfo = {
@@ -32,3 +32,4 @@ const WnObjBrowserInfo: TiComInfo = {
 
 export * from "./wn-obj-browser-types";
 export { WnObjBrowser, WnObjBrowserInfo };
+export * from "./skybar/wn-obj-browser-sky-bar-index";

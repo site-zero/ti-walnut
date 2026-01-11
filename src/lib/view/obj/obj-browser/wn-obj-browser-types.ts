@@ -1,4 +1,5 @@
-import { CommonProps } from "@site0/tijs";
+import { CommonProps, KeepInfo } from "@site0/tijs";
+import { GalleryMode } from "../../..";
 import { WnObj } from "../../../../_types";
 
 export type WnObjBrowserEmitter = {
@@ -18,6 +19,22 @@ export type WnObjBrowserProps = CommonProps & {
    *    > 否则为 worker 模式
    */
   loadMode?: WnObjBrowserLoadMode | "auto";
+  /**
+   * 对象展现模式，默认 ‘wall’
+   */
+  galleryMode?: GalleryMode;
+
+  /**
+   * 指定本地如何保存 GalleryMode 以及其他的本地设点
+   *
+   * ```js
+   * {
+   *   galleryMode: "wall",
+   *   showDetail: true,
+   * }
+   * ```
+   */
+  keepAt?: KeepInfo;
 
   /**
    * 主目录路径，在 puppet 模式下需要
