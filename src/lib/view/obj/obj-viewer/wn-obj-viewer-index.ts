@@ -1,17 +1,17 @@
-import { TiComInfo, TiComRace } from '@site0/tijs';
-import { App } from 'vue';
-import i18n from './i18n';
-import WnObjViewer from './WnObjViewer.vue';
+import { TiComInfo, TiComRace } from "@site0/tijs";
+import { App } from "vue";
+import i18n from "./i18n";
+import WnObjViewer from "./WnObjViewer.vue";
 
-const COM_TYPE = 'WnObjViewer';
+const COM_TYPE = "WnObjViewer";
 
 const WnObjViewerInfo: TiComInfo = {
-  icon: 'zmdi-shape',
+  icon: "zmdi-shape",
   race: TiComRace.VIEW,
   name: COM_TYPE,
-  text: 'i18n:wn-obj-viewer-com-name',
+  text: "i18n:wn-obj-viewer-com-name",
   i18n,
-  defaultProps: '---',
+  defaultProps: "---",
   exampleProps: [],
   com: WnObjViewer,
   install: (app: App) => {
@@ -19,4 +19,5 @@ const WnObjViewerInfo: TiComInfo = {
   },
 };
 
+export * from "./wn-obj-viewer-types";
 export { WnObjViewer, WnObjViewerInfo };
