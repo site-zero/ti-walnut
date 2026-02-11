@@ -24,8 +24,8 @@ export type LocalUpdateMetaPatcher = UpdateMetaPatcher;
 export type LocalMetaMakeDiffOptions = MakeDiffOptions;
 
 export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
-  updateSql: string;
-  insertSql: string;
+  updateSql?: string;
+  insertSql?: string;
   insertSet?: SqlInsertSet;
   insertPut?: string;
   updatePut?: string;
@@ -137,6 +137,9 @@ export function useLocalMetaEdit(
     // 新创建的记录需要设置更多字段
     if (isNewMeta()) {
       sql = options.insertSql;
+      if (!sql) {
+        return [];
+      }
       put = options.insertPut;
       // 创建时间， 对于 st/st_rsn 数据库里有默认值
       if (options.insertMeta) {
@@ -181,6 +184,10 @@ export function useLocalMetaEdit(
       else {
         _.assign(diffOrNewMeta, options.updateMeta);
       }
+    }
+
+    if (!sql) {
+      return [];
     }
 
     if (options.defaultMeta) {

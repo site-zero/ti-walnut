@@ -246,7 +246,7 @@ export function defineSqlx(daoName?: string) {
 
       //............. @vars
       cmds.push(`@vars '=I${i}'`);
-      if (opt.reset) {
+      if (opt.reset || _.isNil(opt.reset)) {
         cmds.push("-reset");
       }
       if (false !== opt.explain) {

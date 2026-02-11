@@ -671,7 +671,7 @@ export function useLocalListEdit(
     }
 
     // 对插入，生成配置
-    if (!_.isEmpty(insertList)) {
+    if (!_.isEmpty(insertList) && options.insertSql) {
       // 额外声明的服务生成变量
       let sets = [] as SqlExecSetVar[];
       join_exec_set_vars(sets, options.insertSet);
@@ -689,15 +689,17 @@ export function useLocalListEdit(
     }
 
     // 对更新，生成配置
-    for (let vars of updateList) {
-      changes.push({
-        sql: options.updateSql,
-        vars: vars,
-        explain: true,
-        reset: true,
-        noresult: options.noresult,
-        put: options.updatePut,
-      });
+    if (options.updateSql) {
+      for (let vars of updateList) {
+        changes.push({
+          sql: options.updateSql,
+          vars: vars,
+          explain: true,
+          reset: true,
+          noresult: options.noresult,
+          put: options.updatePut,
+        });
+      }
     }
 
     return changes;
