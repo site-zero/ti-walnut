@@ -276,7 +276,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   async function saveChange(options: Vars = {}) {
     const { force = false } = options;
     // 自动检测改动
-    if (!changed.value || force) {
+    if (!changed.value && !force) {
       return;
     }
     // 保存元数据
