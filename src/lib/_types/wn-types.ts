@@ -230,6 +230,12 @@ export type ServerConfig = DomainConfig & {
   protocal: "http" | "https";
   host: string;
   port: number;
+  // 指定 API 请求前缀，格式类似
+  // http://my_app.local.io:8080/api/
+  // 其中这个 my_app.local.io 必须是 domain 的 A 映射
+  // 如果是 B,C 映射，需要加上 domain 后缀
+  // > http://my_app.local.io:8080/api/{myDomain}
+  apiPrefix?: string;
   domain?: string;
   site?: string;
   // 指定受保护的设置，在一个应用需要跨越多个域使用的时候，

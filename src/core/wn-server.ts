@@ -426,6 +426,23 @@ export class WalnutServer {
     return [server_path, queryString].filter(Boolean).join("?");
   }
 
+  getApiUrl(path: string, params?: Vars) {
+    let { apiPrefix } = this._conf;
+    if (!apiPrefix) {
+      throw new Error("server.config.json: apiPrefix is required");
+    }
+    let url = Util.appendPath(apiPrefix, path);
+    if (!params || _.isEmpty(params)) {
+      return url;
+    }
+    const qs = new URLSearchParams();
+    _.forEach(params, (v, k) => {
+      qs.append(k, v);
+    });
+    let queryString = qs.toString();
+    return [url, queryString].filter(Boolean).join("?");
+  }
+
   getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
     let uri = [`/o/content?str=id:${id}`];
     let { download = "auto", downName, withTicket } = options;
