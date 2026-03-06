@@ -57,6 +57,10 @@ const debug = false;
  */
 export type RedQueryPrefixSetup = Record<string, any> | RdsQueryPrefixAppender;
 export type RdsQueryPrefixAppender = (key: string) => string;
+export type RdsFixedMatch =
+  | QueryFilter
+  | QueryFilter[]
+  | (() => QueryFilter | QueryFilter[]);
 
 export type RdsListStoreApi = ReturnType<typeof defineRdsListStore>;
 
@@ -64,11 +68,9 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   daoName?: string;
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
-  fixedMatch?:
-    | QueryFilter
-    | QueryFilter[]
-    | (() => QueryFilter | QueryFilter[]);
+  fixedMatch?: RdsFixedMatch;
   defaultFilter?: QueryFilter | (() => QueryFilter);
+  emptyFilterEmptyData?: boolean;
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string;
   sqlCount?: string;
@@ -842,7 +844,12 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       // 准备查询条件
       let q = __gen_query();
       apply_query_prefix(q, _query_prefix_append.value);
-      // console.log('queryRemoteList', q);
+      // console.log("queryRemoteList", q);
+      // 没有过滤条件，就不查询数据
+      if (options.emptyFilterEmptyData && _.isEmpty(q.filter)) {
+        return [];
+      }
+      // 真正去查询
       let list = await sqlx.query(options.sqlQuery, q);
       if (options.patchRemote) {
         let list2 = [] as SqlResult[];
@@ -891,6 +898,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   async function countRemote(filter: Vars | Vars[]): Promise<number> {
     if (!options.sqlCount) {
+      return 0;
+    }
+    // 没有过滤条件，就不查询数据
+    if (options.emptyFilterEmptyData && _.isEmpty(filter)) {
       return 0;
     }
     let total = await sqlx.count(options.sqlCount, filter);
