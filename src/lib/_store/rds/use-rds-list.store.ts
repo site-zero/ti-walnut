@@ -236,6 +236,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   function __reset_local_query() {
     _keep_query.value.remove();
+    _query.value = __create_data_query();
   }
   //---------------------------------------------
   function __save_local_select() {
