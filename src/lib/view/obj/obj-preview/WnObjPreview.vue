@@ -1,30 +1,30 @@
 <script lang="ts" setup>
-  import { CssUtils, Dom, I18n, Icons, TiIcon, TiRoadblock } from '@site0/tijs';
-  import hljs from 'highlight.js';
-  import 'highlight.js/styles/default.css';
-  import _ from 'lodash';
-  import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
-  import { renderMarkdown } from './use-markdown';
+  import { CssUtils, Dom, I18n, Icons, TiIcon, TiRoadblock } from "@site0/tijs";
+  import hljs from "highlight.js";
+  import "highlight.js/styles/default.css";
+  import _ from "lodash";
+  import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
+  import { renderMarkdown } from "./use-markdown";
   import {
     getObjCodeType,
     getObjPreviewInfo,
     loadTextPreviewContent,
-  } from './use-obj-preview';
-  import { WnObjPreviewProps } from './wn-obj-preview-types';
+  } from "./use-obj-preview";
+  import { WnObjPreviewProps } from "./wn-obj-preview-types";
   //-----------------------------------------------------
   const props = withDefaults(defineProps<WnObjPreviewProps>(), {
     emptyRoadblock: () => ({
-      icon: 'fas-arrow-left',
-      text: 'i18n:nil-detail',
+      icon: "fas-arrow-left",
+      text: "i18n:nil-detail",
     }),
   });
   //-----------------------------------------------------
-  const _text = ref('');
+  const _text = ref("");
   const _info = computed(() => getObjPreviewInfo(props));
   //-----------------------------------------------------
   const ObjMeta = computed(() => props.value ?? {});
   //-----------------------------------------------------
-  const ObjIcon = computed(() => Icons.getIcon(ObjMeta.value, 'far-file'));
+  const ObjIcon = computed(() => Icons.getIcon(ObjMeta.value, "far-file"));
   //-----------------------------------------------------
   const ObjText = computed(() => {
     let { title, nm, id } = ObjMeta.value;
@@ -42,17 +42,17 @@
   //-----------------------------------------------------
   const MainClass = computed(() => {
     return CssUtils.mergeClassName(`is-${_info.value.type}`, {
-      'has-text': !_.isEmpty(_text.value),
+      "has-text": !_.isEmpty(_text.value),
     });
   });
   //-----------------------------------------------------
-  const $main = useTemplateRef('main');
+  const $main = useTemplateRef("main");
   function highlightCode() {
     if (!$main.value) {
       return;
     }
     //console.log($main.value);
-    let $code = Dom.find(':scope > pre > code', $main.value);
+    let $code = Dom.find(":scope > pre > code", $main.value);
     if ($code) {
       hljs.highlightElement($code);
     }
@@ -87,6 +87,10 @@
       <template v-else-if="'html' == _info.type">
         <iframe :src="_info.src"></iframe>
       </template>
+      <!-- pdf: 用 iframe 引入 html-->
+      <template v-else-if="'pdf' == _info.type">
+        <iframe :src="_info.src"></iframe>
+      </template>
       <!-- image: 采用 <img> 加载内容-->
       <template v-else-if="'image' == _info.type">
         <img :src="_info.src" />
@@ -113,27 +117,27 @@
           <table>
             <tbody>
               <tr>
-                <th>{{ I18n.get('wn-obj-nm') }}</th>
+                <th>{{ I18n.get("wn-obj-nm") }}</th>
                 <td>{{ ObjMeta.nm }}</td>
               </tr>
               <tr>
-                <th>{{ I18n.get('wn-obj-title') }}</th>
+                <th>{{ I18n.get("wn-obj-title") }}</th>
                 <td>{{ ObjMeta.title }}</td>
               </tr>
               <tr>
-                <th>{{ I18n.get('wn-obj-tp') }}</th>
+                <th>{{ I18n.get("wn-obj-tp") }}</th>
                 <td>{{ ObjMeta.tp }}</td>
               </tr>
               <tr>
-                <th>{{ I18n.get('wn-obj-mime') }}</th>
+                <th>{{ I18n.get("wn-obj-mime") }}</th>
                 <td>{{ ObjMeta.mime }}</td>
               </tr>
               <tr>
-                <th>{{ I18n.get('wn-obj-len') }}</th>
+                <th>{{ I18n.get("wn-obj-len") }}</th>
                 <td>{{ ObjMeta.len }}</td>
               </tr>
               <tr>
-                <th>{{ I18n.get('wn-obj-sha1') }}</th>
+                <th>{{ I18n.get("wn-obj-sha1") }}</th>
                 <td>{{ ObjMeta.sha1 }}</td>
               </tr>
             </tbody>
@@ -142,7 +146,7 @@
         <footer>
           <a :href="_info.src" download>
             <i class="fa-solid fa-download"></i>
-            <span>{{ I18n.text('i18n:download-to-local') }}</span></a
+            <span>{{ I18n.text("i18n:download-to-local") }}</span></a
           >
         </footer>
       </template>
@@ -152,6 +156,6 @@
   </div>
 </template>
 <style lang="scss">
-  @use './wn-obj-preview.scss';
-  @use './use-markdown-article.scss';
+  @use "./wn-obj-preview.scss";
+  @use "./use-markdown-article.scss";
 </style>

@@ -444,13 +444,15 @@ export class WalnutServer {
   }
 
   getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
-    let uri = [`/o/content?str=id:${id}`];
     let { download = "auto", downName, withTicket } = options;
+    let uri = [];
+    if (downName) {
+      uri.push(`/o/content/${encodeURIComponent(downName)}?str=id:${id}`);
+    } else {
+      uri.push(`/o/content?str=id:${id}`);
+    }
     if (download) {
       uri.push(`d=${download}`);
-    }
-    if (downName) {
-      uri.push(`dnm=${encodeURIComponent(downName)}`);
     }
     if (withTicket && this._ticket) {
       uri.push(`_wn_ticket_=${this._ticket}`);
