@@ -1,14 +1,16 @@
 import {
   Alg,
+  Be,
+  Dom,
   HtmlSnippetProps,
   I18n,
   Icons,
   TipBoxProps,
   Vars,
-} from '@site0/tijs';
-import { FootTipMaker } from '../use-hub-foot-tips';
-import _ from 'lodash';
-import JSON5 from 'json5';
+} from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
+import { FootTipMaker } from "../use-hub-foot-tips";
 
 export const tip_maker_OBJ_INFO: FootTipMaker = (
   ctx,
@@ -26,10 +28,10 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
   let objIconHtml = Icons.fontIconHtml(objIconObj);
 
   // 准备获取字段名的函数
-  const TT = (key: string) => I18n.get('wn-obj-' + key, _.upperCase(key));
+  const TT = (key: string) => I18n.get("wn-obj-" + key, _.upperCase(key));
 
   // 准备标题
-  let titleHtml = '';
+  let titleHtml = "";
   if (title) {
     titleHtml = `<caption>
             <i class="fa-solid fa-calendar"></i>
@@ -48,13 +50,16 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
         key
       )
     ) {
-      moreMeta[key] = obj[key];
+      let val = obj[key];
+      if (!_.isNil(val)) {
+        moreMeta[key] = obj[key];
+      }
       continue;
     }
     // 其他的字段逐个打印
-    if ('tp' === key) {
+    if ("tp" === key) {
       stdFields[key] = `<tr><td nowrap>${TT(
-        'tp'
+        "tp"
       )}</td><td>${objIconHtml} ${tp}</td></tr>`;
     }
     // 直接写值
@@ -68,25 +73,25 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
   // 根据指定顺序输出
   let infoHtml = [];
   let infoKeys = [
-    'id',
-    'nm',
-    'title',
-    'icon',
-    'thumb',
-    'race',
-    'tp',
-    'mime',
-    'len',
-    'sha1',
-    'ct',
-    'lm',
-    'expi',
-    'c',
-    'g',
-    'm',
-    'md',
-    'd0',
-    'd1',
+    "id",
+    "nm",
+    "title",
+    "icon",
+    "thumb",
+    "race",
+    "tp",
+    "mime",
+    "len",
+    "sha1",
+    "ct",
+    "lm",
+    "expi",
+    "c",
+    "g",
+    "m",
+    "md",
+    "d0",
+    "d1",
   ];
 
   // Generate HTML rows for each standard field in order
@@ -98,11 +103,13 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
   // 最后附加上更多 JSON
   if (!_.isEmpty(moreMeta)) {
     infoHtml.push(
-      `<tr><td nowrap colspan="2"><pre>${JSON5.stringify(
-        moreMeta,
-        null,
-        2
-      )}</pre></td></tr>`
+      `<tr><td style="padding:0; position:relative" nowrap colspan="2">
+      <button class="foot-more-info-copy" style="
+      position:absolute; top:6px; right:16px; width:24px; height:24px;
+      padding:0; text-align:center; line-height:24px;
+      "><i class="fa-solid fa-copy"></i></button>
+      <pre style="max-height: 20em; padding:0.5em; overflow: auto;"
+      >${JSON5.stringify(moreMeta, null, 2)}</pre></td></tr>`
     );
   }
 
@@ -110,7 +117,7 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
   let scope = Alg.genSnowQ(6);
 
   return {
-    comType: 'TiHtmlSnippet',
+    comType: "TiHtmlSnippet",
     comConf: {
       content: `
 <style>
@@ -143,9 +150,21 @@ article[data-${scope}] > table pre {
 <table cell-spacing="0"">
 ${titleHtml}
 <tbody>
-    ${infoHtml.join('\n')}
-</tbody></table></article>
-`,
+    ${infoHtml.join("\n")}
+</tbody></table></article>`,
+      listenners: [
+        {
+          selector: "table button.foot-more-info-copy",
+          eventName: "click",
+          handler: (_emit, evt) => {
+            let $btn = evt.target as HTMLElement;
+            let $td = Dom.closest($btn, "td");
+            let json = JSON.stringify(obj, null, 2);
+            Be.Clipboard.write(json);
+            Be.BlinkIt($td);
+          },
+        },
+      ],
     } as HtmlSnippetProps,
   };
 };
