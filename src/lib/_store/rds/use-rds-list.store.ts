@@ -748,7 +748,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   function setFilter(filter: QueryFilter) {
-    _query.value.filter = Util.jsonClone(filter);
+    let flt = Util.filterRecordNilValue(filter);
+    _query.value.filter = Util.jsonClone(flt);
     __save_local_query();
   }
 
