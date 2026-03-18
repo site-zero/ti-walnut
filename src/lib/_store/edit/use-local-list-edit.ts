@@ -10,6 +10,7 @@ import {
 import _ from "lodash";
 import { computed, Ref, ref } from "vue";
 import {
+  getSqlStr,
   LocalMetaMakeChangeOptions,
   LocalMetaMakeDiffOptions,
   SqlExecInfo,
@@ -74,7 +75,7 @@ export type LocalListEditOptions = {
 export type LocalListMakeDiffOptions = LocalMetaMakeDiffOptions;
 
 export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions & {
-  deleteSql?: string;
+  deleteSql?: string | (() => string);
 };
 
 export type LocalListEdit = ReturnType<typeof useLocalListEdit>;
@@ -683,7 +684,7 @@ export function useLocalListEdit(
         explain: true,
         reset: true,
         noresult: options.noresult,
-        put: options.insertPut,
+        put: getSqlStr(options.insertPut),
         sets,
       });
     }
@@ -697,7 +698,7 @@ export function useLocalListEdit(
           explain: true,
           reset: true,
           noresult: options.noresult,
-          put: options.updatePut,
+          put: getSqlStr(options.updatePut),
         });
       }
     }

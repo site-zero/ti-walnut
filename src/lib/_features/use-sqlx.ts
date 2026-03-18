@@ -69,7 +69,10 @@ export function defineSqlx(daoName?: string) {
       }
     }
   }
-  async function __query(sql: string, q: Vars): Promise<SqlResult[]> {
+  async function __query(
+    sql: string | (() => string),
+    q: Vars
+  ): Promise<SqlResult[]> {
     try {
       let qobj = Util.filterRecordNilValueDeeply(q);
       let qstr = JSON.stringify(qobj);
@@ -80,7 +83,7 @@ export function defineSqlx(daoName?: string) {
         cmds.push(daoName);
       }
       cmds.push("-cqn @vars");
-      cmds.push(`@query ${sql} -p`);
+      cmds.push(`@query ${getSqlStr(sql)} -p`);
       let cmdText = cmds.join(" ");
       if (debug) console.log(cmdText, q);
 
@@ -108,7 +111,10 @@ export function defineSqlx(daoName?: string) {
    * @param query 查询条件
    * @returns 查询结果
    */
-  async function query(sql: string, query: SqlQuery): Promise<SqlResult[]> {
+  async function query(
+    sql: string | (() => string),
+    query: SqlQuery
+  ): Promise<SqlResult[]> {
     // 准备查询上下文
     let q = {
       filter: query.filter,
@@ -129,7 +135,10 @@ export function defineSqlx(daoName?: string) {
    * @param query 查询条件
    * @returns 查询结果
    */
-  async function select(sql: string, q: Vars): Promise<SqlResult[]> {
+  async function select(
+    sql: string | (() => string),
+    q: Vars
+  ): Promise<SqlResult[]> {
     // 准备查询上下文
     return await __query(sql, q);
   }
@@ -143,7 +152,7 @@ export function defineSqlx(daoName?: string) {
    * @returns 符合查询条件的记录数量
    */
   async function count(
-    sql: string,
+    sql: string | (() => string),
     filter: QueryFilter,
     countKey: string = "total"
   ): Promise<number> {
@@ -157,7 +166,7 @@ export function defineSqlx(daoName?: string) {
         cmds.push(daoName);
       }
       cmds.push("-cqn @vars");
-      cmds.push(`@query ${sql} -p`);
+      cmds.push(`@query ${getSqlStr(sql)} -p`);
       let cmdText = cmds.join(" ");
       if (debug) console.log(cmdText, filter);
 
@@ -287,7 +296,7 @@ export function defineSqlx(daoName?: string) {
         }
       }
       //............. @exec
-      cmds.push(`@exec ${opt.sql}`);
+      cmds.push(`@exec ${getSqlStr(opt.sql)}`);
       if (opt.noresult) {
         cmds.push("-noresult");
       }
@@ -345,4 +354,11 @@ export function defineSqlx(daoName?: string) {
 
   //-------------< Output Feature >------------------
   return { query, fetch, select, count, exec };
+}
+
+export function getSqlStr(sql?: string | (() => string)) {
+  if (_.isFunction(sql)) {
+    return sql();
+  }
+  return sql;
 }

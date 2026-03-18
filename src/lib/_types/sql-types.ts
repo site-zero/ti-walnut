@@ -112,7 +112,7 @@ export function isSqlExecFetchBack(input: any): input is SqlExecFetchBack {
 }
 
 export type SqlExecInfo = {
-  sql: string;
+  sql: string|(()=>string);
   // ------------------- sqlx @vars
   vars: SqlResult | SqlResult[];
   reset?: boolean;

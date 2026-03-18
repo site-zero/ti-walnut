@@ -72,8 +72,8 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   defaultFilter?: QueryFilter | (() => QueryFilter);
   emptyFilterEmptyData?: boolean;
   query: SqlQuery | (() => SqlQuery);
-  sqlQuery: string;
-  sqlCount?: string;
+  sqlQuery: string | (() => string);
+  sqlCount?: string | (() => string);
   queryPrefix?: RedQueryPrefixSetup;
   countPrefix?: RedQueryPrefixSetup;
   makeChange?: LocalListMakeChangeOptions;

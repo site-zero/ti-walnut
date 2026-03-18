@@ -232,6 +232,8 @@ export function useGlobalStatus(name: string = "_APP") {
   if (!re) {
     re = defineGlobalStatus();
     _G_status_instance.set(name, re);
+  }else {
+    re.resetData();
   }
   return re;
 }

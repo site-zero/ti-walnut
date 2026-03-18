@@ -8,6 +8,7 @@ import {
 import _ from "lodash";
 import { Ref, ref } from "vue";
 import {
+  getSqlStr,
   SqlExecFetchBack,
   SqlExecInfo,
   SqlExecSetVar,
@@ -24,11 +25,11 @@ export type LocalUpdateMetaPatcher = UpdateMetaPatcher;
 export type LocalMetaMakeDiffOptions = MakeDiffOptions;
 
 export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
-  updateSql?: string;
-  insertSql?: string;
+  updateSql?: string | (() => string);
+  insertSql?: string | (() => string);
   insertSet?: SqlInsertSet;
-  insertPut?: string;
-  updatePut?: string;
+  insertPut?: string | (() => string);
+  updatePut?: string | (() => string);
   fetchBack?: (local: SqlResult, remote?: SqlResult) => SqlExecFetchBack;
   noresult?: boolean;
 };
@@ -133,14 +134,14 @@ export function useLocalMetaEdit(
 
     let sets = [] as SqlExecSetVar[];
     let sql = options.updateSql;
-    let put: string | undefined = options.updatePut;
+    let put: string | undefined = getSqlStr(options.updatePut);
     // 新创建的记录需要设置更多字段
     if (isNewMeta()) {
-      sql = options.insertSql;
+      sql = getSqlStr(options.insertSql);
       if (!sql) {
         return [];
       }
-      put = options.insertPut;
+      put = getSqlStr(options.insertPut);
       // 创建时间， 对于 st/st_rsn 数据库里有默认值
       if (options.insertMeta) {
         // 动态计算

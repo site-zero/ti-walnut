@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { SqlLimit, SqlPager, SqlQuery } from '../_types';
+import _ from "lodash";
+import { SqlLimit, SqlPager, SqlQuery } from "../_types";
 
 export function updatePager(pager: SqlPager, update: Partial<SqlPager>) {
   let { pageNumber, pageSize, totalCount } = update;
