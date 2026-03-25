@@ -303,6 +303,11 @@ export type WnExecOptions = {
    * 如果我们运行一个长耗时的命令，这个选项或许是调用者期望的
    */
   forceFlushBuffer?: boolean;
+
+  /**
+   * 本次请求默认关闭日志
+   */
+  logOff?: boolean;
 };
 
 export type WnLoadOptions = {

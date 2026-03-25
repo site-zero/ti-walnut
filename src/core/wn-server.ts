@@ -409,6 +409,7 @@ export class WalnutServer {
 
     const qs = new URLSearchParams();
     _.forEach(params, (v, k) => {
+      if (_.isUndefined(v)) return;
       qs.append(k, v);
     });
     let queryString = qs.toString();
@@ -1292,9 +1293,12 @@ export class WalnutServer {
     if (options.beacon && this._ticket) {
       url = this.getUrl("/a/beacon_run/wn-term", {
         _wn_ticket_: this._ticket,
+        log_off: options.logOff ? true : undefined,
       });
     } else {
-      url = this.getUrl("/a/run/wn-term");
+      url = this.getUrl("/a/run/wn-term", {
+        log_off: options.logOff ? true : undefined,
+      });
     }
 
     // 准备请求细节
