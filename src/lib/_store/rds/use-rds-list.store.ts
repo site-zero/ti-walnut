@@ -269,6 +269,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       empty: isEmpty.value,
       hasCurrent: hasCurrent.value,
       hasChecked: hasChecked.value,
+      currentItem: CurrentItem.value,
     } as Vars;
   });
   //---------------------------------------------
