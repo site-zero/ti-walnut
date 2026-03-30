@@ -109,7 +109,18 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
       padding:0; text-align:center; line-height:24px;
       "><i class="fa-solid fa-copy"></i></button>
       <pre style="max-height: 20em; padding:0.5em; overflow: auto;"
-      >${JSON5.stringify(moreMeta, null, 2)}</pre></td></tr>`
+      >${JSON5.stringify(
+        moreMeta,
+        function (k, v) {
+          if (!k) return v;
+          if (_.isNil(v)) return undefined;
+          if (_.isString(v) && v.length > 32) {
+            return v.substring(0, 30) + "...";
+          }
+          return v;
+        },
+        2
+      )}</pre></td></tr>`
     );
   }
 
