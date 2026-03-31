@@ -70,7 +70,14 @@ export type RdsListStoreOptions = LocalListEditOptions & {
   keepSelect?: KeepInfo;
   fixedMatch?: RdsFixedMatch;
   defaultFilter?: QueryFilter | (() => QueryFilter);
-  emptyFilterEmptyData?: boolean;
+  /**
+   * 如果指定了这个选项，将会生成一个 AutoMatch
+   * 如果匹配了查询条件才可查询。
+   * 如果不声明这个选项，则什么条件都会查询
+   *
+   * 它的上下文输入为整个 SqlQuery 对象
+   */
+  filterReady?: any;
   query: SqlQuery | (() => SqlQuery);
   sqlQuery: string | (() => string);
   sqlCount?: string | (() => string);
@@ -101,6 +108,15 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   // 本地保存
   let _keep_query = computed(() => useKeep(options.keepQuery));
   let _keep_select = computed(() => useKeep(options.keepSelect));
+  //---------------------------------------------
+  //              检查查询条件是否就绪
+  //---------------------------------------------
+  function _is_filter_ready(q: SqlQuery): boolean {
+    if (!q || _.isEmpty(q)) return false;
+    if (_.isNil(options.filterReady)) return true;
+    const am = Match.parse(options.filterReady);
+    return am.test(q);
+  }
   //---------------------------------------------
   //              固定查询条件
   //---------------------------------------------
@@ -220,10 +236,6 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   const _current_id = ref<string>();
   const _checked_ids = ref<string[]>([]);
   //---------------------------------------------
-  let selection = _keep_select.value.loadObj() ?? {};
-  _current_id.value = selection.currentId;
-  _checked_ids.value = selection.checkedIds || [];
-  //---------------------------------------------
   function __save_local_query() {
     _keep_query.value.save({
       filter: _query.value.filter,
@@ -248,6 +260,13 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   function __reset_local_select() {
     _keep_select.value.remove();
+  }
+  //---------------------------------------------
+  function updateGlobalStatus() {
+    if (options.globalStatus) {
+      options.globalStatus.data.selectedRows = _checked_ids.value.length;
+      options.globalStatus.data.currentObj = CurrentItem.value;
+    }
   }
   //---------------------------------------------
   //                 组合其他特性
@@ -729,10 +748,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _checked_ids.value = checkedIds ?? [];
 
     // 更新全局状态
-    if (options.globalStatus) {
-      options.globalStatus.data.selectedRows = _checked_ids.value.length;
-      options.globalStatus.data.currentObj = CurrentItem.value;
-    }
+    updateGlobalStatus();
   }
 
   function cancelSelection() {
@@ -849,7 +865,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       apply_query_prefix(q, _query_prefix_append.value);
       // console.log("queryRemoteList", q);
       // 没有过滤条件，就不查询数据
-      if (options.emptyFilterEmptyData && _.isEmpty(q.filter)) {
+      if (!_is_filter_ready(q)) {
         return [];
       }
       // 真正去查询
@@ -882,6 +898,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
    */
   async function queryRemoteList(): Promise<void> {
     _remote.value = await loadRemoteList();
+    updateGlobalStatus();
   }
   //---------------------------------------------
   async function countRemoteList() {
@@ -891,6 +908,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
     _action_status.value = "loading";
     let q = __gen_query();
+    if (!_is_filter_ready(q)) {
+      return;
+    }
     apply_query_prefix(q, _count_prefix_append.value);
     let total = await countRemote(q.filter);
     if (_query.value.pager) {
@@ -904,7 +924,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       return 0;
     }
     // 没有过滤条件，就不查询数据
-    if (options.emptyFilterEmptyData && _.isEmpty(filter)) {
+    if (!_is_filter_ready({ filter })) {
       return 0;
     }
     let total = await sqlx.count(options.sqlCount, filter);
@@ -954,6 +974,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       });
     }
   }
+  //---------------------------------------------
+  let selection = _keep_select.value.loadObj() ?? {};
+  _current_id.value = selection.currentId;
+  _checked_ids.value = selection.checkedIds || [];
 
   //---------------------------------------------
   //  输出特性
