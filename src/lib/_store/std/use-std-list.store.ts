@@ -578,6 +578,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     return re;
   }
 
+  function getFilterField(key: string, dft?: any) {
+    return _.get(_query.value.filter, key) ?? dft;
+  }
+
   function getNextId(): string | undefined {
     return _local.getNextRowId(_checked_ids.value) as string;
   }
@@ -782,6 +786,49 @@ function defineStdListStore(options: StdListStoreOptions) {
   }
 
   const CurrentItem = computed(() => getCurrentItem());
+
+  function setQuery(q: ComboFilterValue) {
+    _.assign(_query.value, q);
+    __save_local_query();
+  }
+
+  function setFilter(filter: QueryFilter) {
+    _query.value.filter = Util.jsonClone(filter);
+    __save_local_query();
+  }
+
+  function setSorter(sorter: QuerySorter) {
+    _query.value.sorter = Util.jsonClone(sorter);
+    __save_local_query();
+  }
+
+  function setPager(page: Partial<SqlPagerInput>) {
+    if (!_query.value.pager) {
+      _query.value.pager = {
+        pageNumber: 1,
+        pageSize: 20,
+      };
+    }
+    updatePager(_query.value.pager, page);
+    __save_local_query();
+  }
+
+  //-----------------------------------------------------
+  async function applyPager(pg: Partial<SqlPagerInput>) {
+    setPager(pg);
+    await refresh();
+  }
+  //-----------------------------------------------------
+  async function applySorter(sorter: QuerySorter) {
+    setSorter(sorter);
+    await refresh();
+  }
+  //-----------------------------------------------------
+  async function applyFilter(flt: Vars) {
+    setFilter(flt);
+    await refresh();
+  }
+  //-----------------------------------------------------
 
   function __gen_query(): SqlQuery {
     let q = Util.jsonClone(_query.value);
@@ -1055,10 +1102,8 @@ function defineStdListStore(options: StdListStoreOptions) {
     findItemsById,
     findItemsByMatch,
     findItemsBy,
+    getFilterField,
     getNextId,
-    getFilterField: (key: string, dft?: any) => {
-      return _.get(_query.value.filter, key) ?? dft;
-    },
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
@@ -1066,31 +1111,14 @@ function defineStdListStore(options: StdListStoreOptions) {
     clearRemoteList,
     setRemoteList,
 
-    setQuery(q: ComboFilterValue) {
-      _.assign(_query.value, q);
-      __save_local_query();
-    },
+    setQuery,
+    setFilter,
+    setSorter,
+    setPager,
 
-    setFilter(filter: QueryFilter) {
-      _query.value.filter = Util.jsonClone(filter);
-      __save_local_query();
-    },
-
-    setSorter(sorter: QuerySorter) {
-      _query.value.sorter = Util.jsonClone(sorter);
-      __save_local_query();
-    },
-
-    setPager(page: Partial<SqlPagerInput>) {
-      if (!_query.value.pager) {
-        _query.value.pager = {
-          pageNumber: 1,
-          pageSize: 20,
-        };
-      }
-      updatePager(_query.value.pager, page);
-      __save_local_query();
-    },
+    applyPager,
+    applyFilter,
+    applySorter,
 
     addLocalItem(meta: WnObj) {
       _local.appendToList(meta);

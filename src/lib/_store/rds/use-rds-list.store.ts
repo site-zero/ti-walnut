@@ -785,7 +785,22 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     updatePager(_query.value.pager, page);
     __save_local_query();
   }
-
+  //-----------------------------------------------------
+  async function applyPager(pg: Partial<SqlPagerInput>) {
+    setPager(pg);
+    await refresh();
+  }
+  //-----------------------------------------------------
+  async function applySorter(sorter: QuerySorter) {
+    setSorter(sorter);
+    await refresh();
+  }
+  //-----------------------------------------------------
+  async function applyFilter(flt: Vars) {
+    setFilter(flt);
+    await refresh();
+  }
+  //-----------------------------------------------------
   function addLocalItem(meta: SqlResult) {
     _local.appendToList(meta);
   }
@@ -1039,6 +1054,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     setFilter,
     setSorter,
     setPager,
+
+    applyPager,
+    applyFilter,
+    applySorter,
 
     addLocalItem,
     setActionStatus(st?: DataStoreActionStatus | null) {
