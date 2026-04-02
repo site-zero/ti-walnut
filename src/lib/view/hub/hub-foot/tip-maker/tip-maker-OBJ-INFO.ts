@@ -114,6 +114,7 @@ export const tip_maker_OBJ_INFO: FootTipMaker = (
         function (k, v) {
           if (!k) return v;
           if (_.isNil(v)) return undefined;
+          if (/^(passwd|salt)$/.test(k)) return "******";
           if (_.isString(v) && v.length > 32) {
             return v.substring(0, 30) + "...";
           }

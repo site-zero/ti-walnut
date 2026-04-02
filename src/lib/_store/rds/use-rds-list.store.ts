@@ -731,7 +731,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       cancelSelection();
     } else {
       let currentId = id;
-      let checkedIds = [id];
+      let checkedIds = id ? [id] : [];
       await updateSelection(currentId, checkedIds);
     }
     __save_local_select();

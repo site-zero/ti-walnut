@@ -746,9 +746,9 @@ function defineStdListStore(options: StdListStoreOptions) {
     __save_local_select();
   }
 
-  async function selectItem(id: string) {
+  async function selectItem(id: string | null) {
     let currentId = id;
-    let checkedIds = [id];
+    let checkedIds = id ? [id] : [];
     await updateSelection(currentId, checkedIds);
     __save_local_select();
   }
