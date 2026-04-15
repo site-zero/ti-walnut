@@ -221,7 +221,19 @@ function defineRdsListStore(options: RdsListStoreOptions) {
       return newKey;
     };
     if (query.filter) {
-      query.filter = _.mapKeys(query.filter, use_appender);
+      // 数组的话，逐个处理
+      if (_.isArray(query.filter)) {
+        let new_flt = [];
+        for (let flt of query.filter) {
+          let flt2 = _.mapKeys(flt, use_appender);
+          new_flt.push(flt2);
+        }
+        query.filter = new_flt;
+      }
+      // 直接处理
+      else {
+        query.filter = _.mapKeys(query.filter, use_appender);
+      }
     }
     if (query.sorter) {
       query.sorter = _.mapKeys(query.sorter, use_appender);
