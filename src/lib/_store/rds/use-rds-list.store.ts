@@ -885,7 +885,6 @@ function defineRdsListStore(options: RdsListStoreOptions) {
    * @returns {Promise<SqlResult[]>} 包含远程列表数据的 Promise
    */
   async function loadRemoteList(): Promise<SqlResult[]> {
-    _action_status.value = "loading";
     try {
       // 准备查询条件
       let q = __gen_query();
@@ -896,6 +895,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
         return [];
       }
       // 真正去查询
+      _action_status.value = "loading";
       let list = await sqlx.query(options.sqlQuery, q);
       if (options.patchRemote) {
         let list2 = [] as SqlResult[];
@@ -933,17 +933,18 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (!options.sqlCount) {
       return;
     }
-    _action_status.value = "loading";
+    
     let q = __gen_query();
     if (!_is_filter_ready(q)) {
       return;
     }
     apply_query_prefix(q, _count_prefix_append.value);
+    _action_status.value = "loading";
     let total = await countRemote(q.filter);
+    _action_status.value = undefined;
     if (_query.value.pager) {
       updatePagerTotal(_query.value.pager, total);
     }
-    _action_status.value = undefined;
   }
   //---------------------------------------------
   async function countRemote(filter: Vars | Vars[]): Promise<number> {
