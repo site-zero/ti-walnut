@@ -1319,6 +1319,7 @@ export class WalnutServer {
       uploadName = file.name,
       mode = "a",
       tmpl = "${major}(${nb})${suffix}",
+      prefix,
       progress,
       signal,
       addMeta = {},
@@ -1389,6 +1390,7 @@ export class WalnutServer {
       nm: uploadName,
       sz: file.size,
       mime: file.type,
+      prefix,
       m: mode,
       tmpl,
     };
@@ -1487,6 +1489,7 @@ export type WnUploadFileOptions = {
   target: string;
   mode?: "a" | "r" | "s";
   tmpl?: string;
+  prefix?: string | null;
   // accept="image/*, text/*, .jpg, .jpeg, .pdf"
   accept?: string;
   progress?: (info: WnUploadFileProgress) => void;
