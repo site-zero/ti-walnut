@@ -13,6 +13,7 @@
   import { WnObjPreviewProps } from "./wn-obj-preview-types";
   //-----------------------------------------------------
   const props = withDefaults(defineProps<WnObjPreviewProps>(), {
+    showTopMenu: true,
     emptyRoadblock: () => ({
       icon: "fas-arrow-left",
       text: "i18n:nil-detail",
@@ -70,6 +71,15 @@
 </script>
 <template>
   <div class="wn-obj-preview fit-parent">
+    <div class="top-menu" v-if="props.showTopMenu && _info.showTopMenu">
+      <a
+        :href="_info.downloadLink"
+        target="_blank"
+        download
+        data-tip="i18n:download">
+        <i class="zmdi zmdi-cloud-download"></i>
+      </a>
+    </div>
     <main :class="MainClass" ref="main">
       <!-- folder: 就显示一个文件夹的图标-->
       <template v-if="'folder' == _info.type">
@@ -144,8 +154,8 @@
           </table>
         </main>
         <footer>
-          <a :href="_info.src" download>
-            <i class="fa-solid fa-download"></i>
+          <a :href="_info.downloadLink" target="_blank" download>
+            <i class="zmdi zmdi-cloud-download"></i>
             <span>{{ I18n.text("i18n:download-to-local") }}</span></a
           >
         </footer>

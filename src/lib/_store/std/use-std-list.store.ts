@@ -894,14 +894,18 @@ function defineStdListStore(options: StdListStoreOptions) {
    * 7. 将 `_action_status` 重置为 `undefined`。
    */
   async function queryRemoteList(setup: WnObjQueryOptions = {}): Promise<void> {
-    let [list, pager] = await loadRemoteList(setup);
+    try {
+      let [list, pager] = await loadRemoteList(setup);
 
-    // 更新结果集
-    _remote.value = list ?? [];
+      // 更新结果集
+      _remote.value = list ?? [];
 
-    // 更新翻页信息
-    if (_query.value.pager) {
-      updatePager(_query.value.pager, pager);
+      // 更新翻页信息
+      if (_query.value.pager) {
+        updatePager(_query.value.pager, pager);
+      }
+    } catch (err) {
+      console.error("Error happened when queryRemoteList:", err);
     }
   }
 

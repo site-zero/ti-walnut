@@ -7,6 +7,10 @@ export type WnObjPreviewProps = {
    * 空白数据，显示的样式
    */
   emptyRoadblock?: RoadblockProps;
+  /**
+   * 是否显示顶级的小菜单
+   */
+  showTopMenu?: boolean;
 };
 
 export type WnObjPreivewInfo = {
@@ -31,4 +35,13 @@ export type WnObjPreivewInfo = {
    * 如果是 binary 类型，则显示下载链接
    */
   src: string;
+  /**
+   * 是否显示顶部菜单
+   */
+  showTopMenu?: boolean;
+
+  /**
+   * 下载链接
+   */
+  downloadLink: string;
 };

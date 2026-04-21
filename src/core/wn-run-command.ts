@@ -47,6 +47,13 @@ export async function wnRunCommand(
 
   try {
     let resp = await fetch(url, init);
+
+    // 直接给了一个 401 ，那么就需要重新登录了，我需要主动刷新一下页面
+    if (resp.status == 401) {
+      window.location.reload();
+      return;
+    }
+
     let str = await resp.text();
     // 处理一下文本
     if (options.mos) {

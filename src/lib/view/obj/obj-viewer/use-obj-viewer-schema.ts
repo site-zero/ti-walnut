@@ -4,12 +4,12 @@ import {
   LayoutSchema,
   RoadblockProps,
   Util,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { WnObjMetaProps, WnObjPreviewProps } from '../../..';
-import { getWnObjIcon } from '../../../../core';
-import { WnObjViewerApi } from './use-wn-obj-viewer';
-import { WnObjViewerProps } from './wn-obj-viewer-types';
+} from "@site0/tijs";
+import _ from "lodash";
+import { WnObjMetaProps, WnObjPreviewProps } from "../../..";
+import { getWnObjIcon } from "../../../../core";
+import { WnObjViewerApi } from "./use-wn-obj-viewer";
+import { WnObjViewerProps } from "./wn-obj-viewer-types";
 
 export function useObjViewerSchema(
   props: WnObjViewerProps,
@@ -23,7 +23,7 @@ export function useObjViewerSchema(
   // 默认元数据
   //----------------------------------------------------
   _blocks.meta = {
-    comType: 'WnObjMeta',
+    comType: "WnObjMeta",
     comConf: {
       value: props.meta,
       fields: props.fields,
@@ -31,16 +31,17 @@ export function useObjViewerSchema(
     } as WnObjMetaProps,
     events: {
       //change: ({ data }) => api.onMetaChange(data),
-      change: 'meta:change',
+      change: "meta:change",
     },
   };
   //----------------------------------------------------
   // 默认预览
   //----------------------------------------------------
   _blocks.preview = {
-    comType: 'WnObjPreview',
+    comType: "WnObjPreview",
     comConf: {
       value: props.meta,
+      showTopMenu: props.previewShowTopMenu,
     } as WnObjPreviewProps,
   };
   //----------------------------------------------------
@@ -48,7 +49,7 @@ export function useObjViewerSchema(
   //----------------------------------------------------
   if (api.canEditContent()) {
     _blocks.content = {
-      comType: 'TiCodeEditor',
+      comType: "TiCodeEditor",
       comConf: {
         type: props.meta?.tp,
         mime: props.meta?.mime,
@@ -61,23 +62,23 @@ export function useObjViewerSchema(
   }
   // 否则显示一个路障牌
   else if (props.meta) {
-    let key_type = api.isDIR() ? 'folder' : 'file';
+    let key_type = api.isDIR() ? "folder" : "file";
     let text = I18n.getf(
       `wn-obj-viewer-can-not-edit-${key_type}`,
       props.meta ?? {}
     );
     let icon = getWnObjIcon(props.meta ?? {});
     _blocks.content = {
-      comType: 'TiRoadblock',
+      comType: "TiRoadblock",
       comConf: {
         icon,
         text,
-        className: 'is-primary-r',
-        size: 'normal',
-        iconStyle: { fontSize: '6em', height: 'unset', width: 'unset' },
+        className: "is-primary-r",
+        size: "normal",
+        iconStyle: { fontSize: "6em", height: "unset", width: "unset" },
         textStyle: {
-          padding: '1em 4em',
-          maxWidth: '480px',
+          padding: "1em 4em",
+          maxWidth: "480px",
         },
       } as RoadblockProps,
     };
@@ -85,7 +86,7 @@ export function useObjViewerSchema(
   // 显示空白占位
   else {
     _blocks.content = {
-      comType: 'TiRoadblock',
+      comType: "TiRoadblock",
       comConf: props.emptyRoadblock,
     };
   }

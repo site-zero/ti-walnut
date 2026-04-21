@@ -12,6 +12,7 @@
     tabsAlign: "left",
     tabsAt: "bottom",
     tabItemSpace: "m",
+    previewShowTopMenu: true,
     tabs: () => ["meta", "preview", "content"],
     emptyRoadblock: () => ({
       icon: "fas-arrow-left",

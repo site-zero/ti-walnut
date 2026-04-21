@@ -1,11 +1,11 @@
-import { TiComInfo, TiComRace } from '@site0/tijs';
-import { App } from 'vue';
-import WnObjPreview from './WnObjPreview.vue';
+import { TiComInfo, TiComRace } from "@site0/tijs";
+import { App } from "vue";
+import WnObjPreview from "./WnObjPreview.vue";
 
-const COM_TYPE = 'WnObjPreview';
+const COM_TYPE = "WnObjPreview";
 
 const WnObjPreviewInfo: TiComInfo = {
-  icon: 'fas-list',
+  icon: "fas-list",
   race: TiComRace.VIEW,
   name: COM_TYPE,
   com: WnObjPreview,
@@ -15,4 +15,5 @@ const WnObjPreviewInfo: TiComInfo = {
 };
 
 export { WnObjPreview, WnObjPreviewInfo };
-export * from './wn-obj-preview-types';
+export * from "./wn-obj-preview-types";
+export * from "./use-obj-preview";

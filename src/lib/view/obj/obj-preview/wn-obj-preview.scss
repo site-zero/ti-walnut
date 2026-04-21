@@ -1,11 +1,32 @@
-@use '@site0/tijs/sass/_all.scss' as *;
+@use "@site0/tijs/sass/_all.scss" as *;
 
 .wn-obj-preview {
   overflow: hidden;
+  position: relative;
+  //------------------------------------------
+  > div.top-menu {
+    position: absolute;
+    right: var(--ti-gap-b);
+    top: var(--ti-gap-s);
+    font-size: var(--ti-fontsz-s);
+    border-radius: 0 0 0 var(--ti-measure-r-s);
+    z-index: $z-over;
+    @include flex-align-nowrap;
+    > a {
+      display: block;
+      padding: 0.3em 0.5em;
+      color: var(--ti-color-highlight-f);
+      &:hover {
+        background-color: var(--ti-color-highlight);
+      }
+    }
+  }
+  //------------------------------------------
   > main {
     width: 100%;
     height: 100%;
-    position: relative;
+    background-color: var(--ti-color-card);
+    color: var(--ti-color-card-f);
     //----------------------------------------
     // text
     &.is-text,
@@ -14,12 +35,13 @@
         position: absolute;
         inset: 0;
         font-size: var(--ti-fontsz-m);
-        padding: 0.8em;
+        padding: 0;
         margin: 0;
         overflow: auto;
+        background-color: transparent;
         > code {
-          background-color: transparent;
           @include font-fixed;
+          background-color: transparent;
           &.hljs {
             overflow: visible;
           }

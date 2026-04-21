@@ -461,6 +461,29 @@ export class WalnutServer {
     return this.getUrl(uri.join("&"));
   }
 
+  getUrlForObjOpen(
+    id: string,
+    options: GetUrlForObjContentOptions = {}
+  ): [string, Vars] {
+    let { download = "auto", downName, withTicket } = options;
+    let params: Vars = {
+      str: `id:${id}`,
+    };
+    let uri: string;
+    if (downName) {
+      uri = `/o/content/${encodeURIComponent(downName)}`;
+    } else {
+      uri = `/o/content`;
+    }
+    if (download) {
+      params.d = download;
+    }
+    if (withTicket && this._ticket) {
+      params._wn_ticket_ = this._ticket;
+    }
+    return [this.getUrl(uri), params];
+  }
+
   getRequestInit(signal?: AbortSignal, options: RequestInit = {}): RequestInit {
     let headers: HeadersInit = {};
     if (this._ticket) {
@@ -1238,18 +1261,32 @@ export class WalnutServer {
   }
 
   async showRuntimeInfo() {
-    let re = await this.exec("sys -runtime -nice");
+    let re = await this.exec(
+      [
+        `sys -runtime -nice`,
+        `echo "#\n# LOGIN USER:\n#"`,
+        `me`,
+        `echo "#\n# SESSION:\n#"`,
+        `session`,
+      ].join(";")
+    );
     await openAppModal({
       title: "Walnut Runtime Info",
       type: "info",
       position: "right",
-      width: "640px",
+      minWidth: "640px",
+      maxWidth: "900px",
+      width: "70%",
       height: "100%",
       clickMaskToClose: true,
       textOk: null,
       textCancel: null,
       comType: "TiHtmlSnippet",
       comConf: {
+        className: "cover-parent",
+        style: {
+          overflow: "auto",
+        },
         content: `<pre>${re}</pre>`,
       },
     });
@@ -1390,10 +1427,13 @@ export class WalnutServer {
       nm: uploadName,
       sz: file.size,
       mime: file.type,
-      prefix,
       m: mode,
       tmpl,
     };
+
+    if (prefix) {
+      params.prefix = prefix;
+    }
 
     // 将 params 转换为查询字符串
     const queryString = new URLSearchParams(params).toString();

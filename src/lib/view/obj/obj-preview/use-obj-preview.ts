@@ -1,17 +1,33 @@
+import { GetUrlForObjContentOptions, Walnut, WnObj } from "@site0/ti-walnut";
 import { Ref } from "vue";
-import { GetUrlForObjContentOptions, Walnut } from "../../../../core";
-import { WnObj } from "../../../_types";
 import { WnObjPreivewInfo, WnObjPreviewProps } from "./wn-obj-preview-types";
 
+export function getObjDownloadName(obj: WnObj): string {
+  let { nm, title, tp } = obj;
+  let downName = nm;
+  if (title) {
+    if (!title.endsWith(`.${tp}`)) {
+      downName = [title, tp].join(".");
+    } else {
+      downName = title;
+    }
+  }
+  return downName;
+}
+
 export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
-  let { id, race, mime, nm, title, tp } = props.value ?? {};
+  let obj = props.value ?? {};
+  let { id, race, mime } = obj;
   if (!race || !id) {
-    return { type: "none", src: "" };
+    return { type: "none", src: "", downloadLink: "#" };
   }
 
   if ("DIR" == race) {
-    return { type: "folder", src: "" };
+    return { type: "folder", src: "", downloadLink: "#" };
   }
+
+  // 计算下载名称
+  let downName = getObjDownloadName(obj);
 
   // /o/content?str=id:3c..8c&d=(auto|force|raw）
   let down: GetUrlForObjContentOptions = {
@@ -23,11 +39,18 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
   let info: WnObjPreivewInfo = {
     type: "binary",
     src: "",
+    showTopMenu: true,
+    downloadLink: Walnut.getUrlForObjContent(id, {
+      download: "force",
+      downName,
+      withTicket: true,
+    }),
   };
 
   // 不知道什么类型，就直接下载了
   if (!mime) {
     down.download = "auto";
+    info.showTopMenu = false;
   }
   // 网页
   else if (/^(text\/html)$/.test(mime)) {
@@ -37,15 +60,9 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
   // PDF
   else if (/^(application\/pdf)$/.test(mime)) {
     info.type = "pdf";
+    info.showTopMenu = false;
     down.download = "raw";
-    down.downName = nm;
-    if (title) {
-      if (!title.endsWith(`.${tp}`)) {
-        down.downName = [title, tp].join(".");
-      } else {
-        down.downName = title;
-      }
-    }
+    down.downName = downName;
   }
   // JSON
   else if (
@@ -81,9 +98,13 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
     down.download = "raw";
   }
   // 视频
-  if (/^video\//.test(mime)) {
+  else if (/^video\//.test(mime)) {
     info.type = "video";
     down.download = "raw";
+  }
+  // 其他默认，就是下载信息
+  else {
+    info.showTopMenu = false;
   }
 
   // 补完 src
@@ -97,9 +118,12 @@ export async function loadTextPreviewContent(
   info: WnObjPreivewInfo,
   _text: Ref<string>
 ) {
+  // 文本内容
   if (/^(json|text|markdown)$/.test(info.type)) {
     _text.value = await Walnut.exec(info.src);
-  } else {
+  }
+  // 没内容
+  else {
     _text.value = "";
   }
 }

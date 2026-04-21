@@ -7,20 +7,20 @@ import {
   RoadblockProps,
   TabsAspect,
   Vars,
-} from '@site0/tijs';
-import _ from 'lodash';
-import { WnUploadFileOptions } from '../../../../core';
+} from "@site0/tijs";
+import _ from "lodash";
+import { WnUploadFileOptions } from "../../../../core";
 
 export type WnObjViewerEmitter = {
-  (event: 'show-content', contentIsShown: boolean): void;
-  (event: 'meta-change', delta: Vars): void;
-  (event: 'content-change', content: string): void;
+  (event: "show-content", contentIsShown: boolean): void;
+  (event: "meta-change", delta: Vars): void;
+  (event: "content-change", content: string): void;
 };
 
 export type WnObjViewerEmitEventName =
-  | 'show-content'
-  | 'meta-change'
-  | 'content-change';
+  | "show-content"
+  | "meta-change"
+  | "content-change";
 
 export function isWnObjViewerEmitEventName(
   input: any
@@ -45,7 +45,7 @@ export type WnObjViewerPartialChange = {
    * - merge: 深层合并对应键的对象
    * - assign: 浅层合并对应键的对象
    */
-  setMode?: 'merge' | 'assign';
+  setMode?: "merge" | "assign";
   /**
    * 键路径
    */
@@ -139,7 +139,7 @@ export type WnObjViewerProps = TabsAspect & {
   /**
    * 元数据表单的配置信息
    */
-  metaFormConf?: Omit<FormProps, 'fields'>;
+  metaFormConf?: Omit<FormProps, "fields">;
 
   /**
    * 弹出面板的默认属性，如果不设置回从右侧滑入，占 62% 宽度
@@ -154,4 +154,8 @@ export type WnObjViewerProps = TabsAspect & {
    * 空白数据，显示的样式
    */
   emptyRoadblock?: RoadblockProps;
+  /**
+   * 是否显示顶级的小菜单
+   */
+  previewShowTopMenu?: boolean;
 };
