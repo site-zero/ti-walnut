@@ -283,6 +283,12 @@ export function useAuthStore(options: AuthStoreOptions) {
       _Main.value.updateCurrent(delta);
     }
   }
+  //-----------------------------------------------------
+  function dropChange() {
+    _users.dropChange();
+    _roles.dropChange();
+    _user_role_mappings.dropChange();
+  }
   //---------------------------------------------
   function getChanges(): Vars[] {
     let re: Vars[] = [];
@@ -345,6 +351,7 @@ export function useAuthStore(options: AuthStoreOptions) {
     CurrentItem,
     listData,
     // 编辑方法
+    dropChange,
     getChanges,
     updateCurrent,
     // 便利方法

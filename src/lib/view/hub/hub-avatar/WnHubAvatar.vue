@@ -1,12 +1,12 @@
 <script lang="ts" setup>
   import {
+    AjaxResult,
     Alert,
+    AlertError,
     Alg,
     IconInput,
     Prompt,
     TiIcon,
-    AjaxResult,
-    AlertError,
   } from "@site0/tijs";
   import _ from "lodash";
   import { computed } from "vue";
@@ -23,7 +23,12 @@
   const session = useSessionStore();
   //--------------------------------------------------
   const Me = computed((): UserInfo => {
-    return session.data.me ?? {};
+    return (
+      session.data.me ?? {
+        roles: {},
+        mainRole: "BLOCK",
+      }
+    );
   });
   //--------------------------------------------------
   const MyName = computed(() => {

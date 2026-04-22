@@ -1,7 +1,14 @@
-import { Alert, Gender, Str, Tmpl, Util, Vars, toGender } from "@site0/tijs";
+import { Alert, Gender, toGender, Util, Vars } from "@site0/tijs";
 import _ from "lodash";
 import { computed, reactive, ref } from "vue";
-import { SignInForm, useGlobalStatus } from "..";
+import {
+  SignInForm,
+  toWnRoles,
+  toWnUserRace,
+  useGlobalStatus,
+  WnRole,
+  WnUserRace,
+} from "..";
 import { Walnut } from "../../core";
 
 /*
@@ -75,16 +82,14 @@ export type UserSession = {
 
 export type UserSessionApi = ReturnType<typeof useSessionStore>;
 
-export type WnRole = "MEMBER" | "ADMIN" | "GUEST";
-
 export type UserInfo = {
   loginName?: string;
+  userRace?: WnUserRace;
+  roles: Record<string, WnRole>;
   mainGroup?: string;
-  role?: string[];
+  mainRole: WnRole;
   nickname?: string;
   gender?: Gender;
-  roleInOp?: WnRole;
-  roleInDomain?: WnRole;
   sysAccount?: boolean;
   avatar?: string;
   meta?: Vars;
@@ -110,20 +115,18 @@ const SE = reactive({
 function _translate_session_result(data: any) {
   let env = data.envs || {};
   let me = data.me || {};
-  // 角色，老版本可能是半角分隔字符串，新版本可能是数组
-  let myRole = me.role;
-  if (_.isString(myRole)) {
-    myRole = Str.splitIgnoreBlank(myRole);
-  }
+  let roles = toWnRoles(me.roles);
+  let mainGroup = data.mainGroup || me.grp;
+  let mainRole = roles[mainGroup] || "BLOCK";
   SE.ticket = data.ticket;
   SE.me = {
     loginName: data.unm || me.name || me.loginName || me.nm,
-    mainGroup: data.grp || me.groupName || me.mainGroup || me.grp,
-    role: myRole,
+    userRace: toWnUserRace(me.userRace),
+    roles,
+    mainGroup,
+    mainRole,
     gender: toGender(me.sex),
     nickname: me.nickname,
-    roleInOp: me.roleInOp,
-    roleInDomain: me.roleInDomain,
     sysAccount: me.sysAccount ? true : false,
     meta: me.meta || {},
   };
