@@ -49,18 +49,18 @@ export function getKeepName(
 /**
  * 视图主体逻辑入口
  *
- * @param store  数据访问
+ * @param _rds  数据访问
  * @param props  控件属性
  * @returns 视图主体逻辑
  */
 export function useRdsBrowser(
-  store: RdsListStoreApi,
+  _rds: RdsListStoreApi,
   props: RdsBrowserProps,
   emit: RdsBrowserEmitter
 ) {
   //--------------------------------------------------
   const TableEmptyRoadblock = computed((): RoadblockProps => {
-    if (store.ActionStatus.value == "loading") {
+    if (_rds.ActionStatus.value == "loading") {
       return {
         icon: "fas-spinner fa-pulse",
         text: "i18n:loading",
@@ -78,11 +78,11 @@ export function useRdsBrowser(
 
   //--------------------------------------------------
   const StatusVars = computed(() => ({
-    changed: store.changed.value,
-    hasChecked: store.hasChecked.value,
-    hasCurrent: store.hasCurrent.value,
-    reloading: store.ActionStatus.value == "loading",
-    saving: store.ActionStatus.value == "saving",
+    changed: _rds.changed.value,
+    hasChecked: _rds.hasChecked.value,
+    hasCurrent: _rds.hasCurrent.value,
+    reloading: _rds.ActionStatus.value == "loading",
+    saving: _rds.ActionStatus.value == "saving",
   }));
 
   //--------------------------------------------------
@@ -97,9 +97,9 @@ export function useRdsBrowser(
   //--------------------------------------------------
   // 数据
   //--------------------------------------------------
-  const TableCurrentId = computed(() => store.currentId.value);
+  const TableCurrentId = computed(() => _rds.currentId.value);
   const TableCheckedIds = computed(() =>
-    Util.arrayToMap(store.checkedIds.value)
+    Util.arrayToMap(_rds.checkedIds.value)
   );
 
   //--------------------------------------------------
@@ -110,8 +110,8 @@ export function useRdsBrowser(
       layout: "oneline",
       keepMajor: getKeepName(props, "Filter-Major"),
       value: {
-        filter: store.query.value.filter,
-        sorter: store.query.value.sorter,
+        filter: _rds.query.value.filter,
+        sorter: _rds.query.value.sorter,
       },
     } as ComboFilterProps) as ComboFilterProps;
   });
@@ -122,8 +122,8 @@ export function useRdsBrowser(
   const DataPagerConfig = computed(() => {
     return {
       mode: "jumper",
-      ...(store.query.value.pager ?? {}),
-      count: store.listData.value.length,
+      ...(_rds.query.value.pager ?? {}),
+      count: _rds.listData.value.length,
     } as PagerProps;
   });
 
@@ -142,7 +142,7 @@ export function useRdsBrowser(
       } as TableProps,
       props.table,
       {
-        data: store.listData.value,
+        data: _rds.listData.value,
       } as TableProps
     ) as TableProps;
   });
@@ -160,7 +160,7 @@ export function useRdsBrowser(
       } as FormProps,
       props.form,
       {
-        data: store.getCurrentItem(),
+        data: _rds.getCurrentItem(),
       } as FormProps
     ) as FormProps;
   });
@@ -182,7 +182,7 @@ export function useRdsBrowser(
   function canRefreshSafely() {
     let msg = (props.messages ?? {}).warn_refresh;
     if (msg) {
-      if (store.changed.value) {
+      if (_rds.changed.value) {
         Alert(msg, { type: "warn" });
         return false;
       }
@@ -192,7 +192,7 @@ export function useRdsBrowser(
 
   async function refresh() {
     if (canRefreshSafely()) {
-      await store.reload();
+      await _rds.reload();
     }
   }
 
@@ -200,7 +200,7 @@ export function useRdsBrowser(
   // 响应事件
   //--------------------------------------------------
   function onTableRowSelect(payload: TableSelectEmitInfo) {
-    store.onSelect(payload);
+    _rds.onSelect(payload);
   }
 
   function onFilterChange(payload: ComboFilterValue) {
@@ -209,11 +209,11 @@ export function useRdsBrowser(
       return;
     }
     // 更新 filter / sorter
-    store.setQuery(payload);
-    store.setPager({ pageNumber: 1 });
+    _rds.setQuery(payload);
+    _rds.setPager({ pageNumber: 1 });
 
     // 自动重新加载
-    store.reload();
+    _rds.reload();
   }
 
   function onFilterReset() {
@@ -221,11 +221,11 @@ export function useRdsBrowser(
       return;
     }
     // 更新 filter / sorter
-    store.setQuery(DefaultFilterQuery.value);
-    store.setPager({ pageNumber: 1 });
+    _rds.setQuery(DefaultFilterQuery.value);
+    _rds.setPager({ pageNumber: 1 });
 
     // 自动重新加载
-    store.reload();
+    _rds.reload();
   }
 
   function onPageNumberChange(pn: number) {
@@ -234,9 +234,9 @@ export function useRdsBrowser(
       return;
     }
     // 更新
-    store.setPager({ pageNumber: pn });
+    _rds.setPager({ pageNumber: pn });
     // 自动重新加载
-    store.reload();
+    _rds.reload();
   }
 
   function onPageSizeChange(pgsz: number) {
@@ -245,24 +245,23 @@ export function useRdsBrowser(
       return;
     }
     // 更新
-    store.setPager({ pageNumber: 1, pageSize: pgsz });
+    _rds.setPager({ pageNumber: 1, pageSize: pgsz });
     // 自动重新加载
-    store.reload();
+    _rds.reload();
   }
 
   function onCurrentMetaChange(payload: SqlResult) {
     console.log("onDetailChange", payload);
-    store.updateCurrent(payload);
+    _rds.updateCurrent(payload);
   }
 
   async function onActionFire(barEvent: ActionBarEvent) {
     let { name, payload } = barEvent;
-    // console.log("onActionFire", name, payload);
+    console.log("onActionFire", name, payload);
 
     // 自定义处理
     if (props.handleAction) {
-      let mark =
-        (await props.handleAction(store, name, payload)) ?? "unhandled";
+      let mark = (await props.handleAction(_rds, name, payload)) ?? "unhandled";
       if (mark == "handled") {
         return;
       }
@@ -276,7 +275,7 @@ export function useRdsBrowser(
     else if ("create" == name) {
       if (props.createNewItem) {
         // 准备上下文
-        let ctx: RdsCreateNewItemContext = { store };
+        let ctx: RdsCreateNewItemContext = { store: _rds };
         if (props.genNewId) {
           ctx.newId = await Walnut.exec(`val @gen '${props.genNewId}'`);
         }
@@ -307,16 +306,16 @@ export function useRdsBrowser(
         // 指定了新数据就创建
         if (it) {
           let id = getId(it);
-          store.addLocalItem(it);
+          _rds.addLocalItem(it);
           if (!_.isNil(id)) {
-            store.updateSelection(id);
+            _rds.updateSelection(id);
           }
         }
       }
     }
     // Save
     else if ("save" == name) {
-      store.saveChange({ transLevel: 1 });
+      _rds.saveChange({ transLevel: 1 });
     }
     // Drop
     else if ("reset" == name) {
@@ -324,18 +323,18 @@ export function useRdsBrowser(
       if (msg) {
         Confirm(msg, { type: "warn" }).then((yes) => {
           if (yes) {
-            store.dropChange();
+            _rds.dropChange();
           }
         });
       }
       // 直接干掉
       else {
-        store.dropChange();
+        _rds.dropChange();
       }
     }
     // Remove
     else if ("remove" == name) {
-      store.removeChecked();
+      _rds.removeChecked();
     }
     // warn unhandled action
     else {
@@ -347,7 +346,7 @@ export function useRdsBrowser(
   //--------------------------------------------------
   return {
     // 数据模型
-    store,
+    store: _rds,
 
     // 计算属性
     TableEmptyRoadblock,

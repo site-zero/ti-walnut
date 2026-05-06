@@ -1,4 +1,4 @@
-import { Vars } from "@site0/tijs";
+import { TableRowID, Vars } from "@site0/tijs";
 import _ from "lodash";
 
 export type QueryFilter = Vars;
@@ -111,8 +111,19 @@ export function isSqlExecFetchBack(input: any): input is SqlExecFetchBack {
   return true;
 }
 
-export type SqlExecInfo = {
-  sql: string|(()=>string);
+export type SqlMakeChangeResult = {
+  changes: SqlExecAction[];
+  errors?: SqlExecPreError[];
+};
+
+export type SqlExecPreError = {
+  index: number;
+  rowId: TableRowID;
+  errMsg: string;
+};
+
+export type SqlExecAction = {
+  sql: string | (() => string);
   // ------------------- sqlx @vars
   vars: SqlResult | SqlResult[];
   reset?: boolean;

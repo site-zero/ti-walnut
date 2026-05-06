@@ -13,7 +13,7 @@ import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   isWnObj,
-  LocalMetaEditOptions,
+  LocalMetaEditSetup,
   MetaStoreConflicts,
   RefreshOptions,
   useLocalMetaEdit,
@@ -26,7 +26,7 @@ import { useObjContentStore } from "../use-obj-content.store";
 
 export type StdMetaStoreApi = ReturnType<typeof defineStdMetaStore>;
 
-export type StdMetaStoreOptions = LocalMetaEditOptions & {
+export type StdMetaStoreOptions = LocalMetaEditSetup & {
   /**
    * 对象路径，通常就是一个文件对象
    */

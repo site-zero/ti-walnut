@@ -1,14 +1,14 @@
-import { CssUtils, TipsApi, useValuePipe, Util } from '@site0/tijs';
-import _ from 'lodash';
-import { HubView } from '../../../_store/hub';
-import { FootValueContext, useHubFootTips } from './use-hub-foot-tips';
+import { GlobalStatusApi, SessionStore } from "@site0/ti-walnut";
+import { CssUtils, TipsApi, useValuePipe, Util } from "@site0/tijs";
+import _ from "lodash";
+import { FootValueContext, useHubFootTips } from "./use-hub-foot-tips";
 import {
   DisplayFootPart,
   DisplayFootPartItem,
   FootPart,
   FootPartItem,
   WnHubFootProps,
-} from './wn-hub-foot-types';
+} from "./wn-hub-foot-types";
 
 /**
  * @name useHutFoot
@@ -33,15 +33,18 @@ import {
  */
 export function useHutFoot(
   props: WnHubFootProps,
-  _hub_view: HubView,
+  _gb_sta: GlobalStatusApi,
+  session: SessionStore,
   _tip_api: TipsApi,
   _tip_ids: number[]
 ): DisplayFootPart[] {
   //-----------------------------------------------
+
+  //-----------------------------------------------
   // 准备上下文，用来渲染值和提示信息
   let ctx: FootValueContext = {
-    G: _hub_view.global.data ?? {},
-    session: _hub_view.session.data ?? {},
+    G: _gb_sta.data ?? {},
+    session: session.data ?? {},
   };
   //-----------------------------------------------
   // 清空旧的 tip 记录
@@ -61,7 +64,7 @@ export function useHutFoot(
     let re = {
       index,
       itemKey: `${partKey}-item-${index}`,
-      ..._.omit(item, 'tip', 'icon'),
+      ..._.omit(item, "tip", "icon"),
     } as DisplayFootPartItem;
 
     // 准备 Icon
@@ -99,7 +102,7 @@ export function useHutFoot(
     let displayPart = {
       index,
       uniqKey: `part-${index}`,
-      type: part.type || 'default',
+      type: part.type || "default",
       text: part.text,
       suffix: part.suffix,
       style: CssUtils.mergeStyles(
@@ -119,25 +122,25 @@ export function useHutFoot(
     }
 
     // 特殊处理：选区
-    if ('selection' == displayPart.type) {
-      let val = [_hub_view.global.data.selectedRows ?? 0].join('');
+    if ("selection" == displayPart.type) {
+      let val = [_gb_sta.data.selectedRows ?? 0].join("");
       displayPart.items.push({
         index: 0,
         itemKey: `${displayPart.uniqKey}-item-0`,
-        type: 'text',
-        text: 'i18n:wn-hub-foot-selected',
+        type: "text",
+        text: "i18n:wn-hub-foot-selected",
         value: val,
         rawValue: val,
         action: part.action,
       });
     }
     // 特殊处理：视图
-    else if ('view' == displayPart.type) {
-      let val = _hub_view.global.data.viewName ?? '---';
+    else if ("view" == displayPart.type) {
+      let val = _gb_sta.data.viewName ?? "---";
       displayPart.items.push({
         index: 0,
         itemKey: `${displayPart.uniqKey}-item-0`,
-        type: 'text',
+        type: "text",
         value: val,
         rawValue: val,
         action: part.action,

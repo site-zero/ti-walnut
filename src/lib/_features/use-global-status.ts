@@ -178,7 +178,7 @@ function defineGlobalStatus() {
     if (!appBase.endsWith("/")) {
       appBase += "/";
     }
-    // 譬如 
+    // 譬如
     // appBase = '/a/open/wn.hub/'
     // hubPath = '/a/load/wn.hub/files/a.mp4'
     // 那么 appPath='files/a.mp4'
@@ -189,7 +189,7 @@ function defineGlobalStatus() {
     // appBase = '/a/open/wn.hub/'
     // hubPath = '/a/load/wn.hub'
     // 那么 appPath=''
-    else if(hubPath+"/" == appBase) {
+    else if (hubPath + "/" == appBase) {
       hubPath = "";
     }
 
@@ -232,7 +232,7 @@ export function useGlobalStatus(name: string = "_APP") {
   if (!re) {
     re = defineGlobalStatus();
     _G_status_instance.set(name, re);
-  }else {
+  } else {
     re.resetData();
   }
   return re;

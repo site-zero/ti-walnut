@@ -1,4 +1,15 @@
 import {
+  dftGetErrMessageForInsertOrUpdate,
+  getSqlStr,
+  LocalMetaMakeChangeOptions,
+  LocalMetaMakeDiffOptions,
+  SqlExecAction,
+  SqlExecPreError,
+  SqlExecSetVar,
+  SqlMakeChangeResult,
+  SqlResult,
+} from "@site0/ti-walnut";
+import {
   applyFieldChangeDiff,
   DiffItem,
   Match,
@@ -9,14 +20,6 @@ import {
 } from "@site0/tijs";
 import _ from "lodash";
 import { computed, Ref, ref } from "vue";
-import {
-  getSqlStr,
-  LocalMetaMakeChangeOptions,
-  LocalMetaMakeDiffOptions,
-  SqlExecInfo,
-  SqlExecSetVar,
-  SqlResult,
-} from "../../../lib";
 import { join_exec_set_vars } from "./join-exec-set-vars";
 
 /**
@@ -41,7 +44,7 @@ export type LocalListUpdateItemOptions = {
 /**
  * 本地列表编辑选项
  */
-export type LocalListEditOptions = {
+export type LocalListEditSetup = {
   /**
    * 在 `makeChange` 时使用的补丁元数据更新函数。
    * 如果指定为 `null`，则不会自动添加更新 ID。
@@ -85,16 +88,16 @@ export type LocalListEdit = ReturnType<typeof useLocalListEdit>;
  * 它提供了一系列方法来操作本地列表，并根据本地列表和远程列表的差异生成相应的 SQL 执行信息。
  *
  * @param remoteList - 远程列表的引用。
- * @param options - 本地列表编辑选项。
+ * @param setup - 本地列表编辑选项。
  * @returns 包含本地列表和一系列操作方法的对象。
  *
  */
 export function useLocalListEdit(
   remoteList: Ref<SqlResult[] | undefined>,
-  options: LocalListEditOptions = {}
+  setup: LocalListEditSetup = {}
 ) {
   //console.log('useLocalListEdit', remoteList, options);
-  let { getId = "id" } = options;
+  let { getId = "id" } = setup;
   let _local_list = ref<SqlResult[] | undefined>();
   //---------------------------------------------
   // 计算属性
@@ -174,14 +177,14 @@ export function useLocalListEdit(
     | null
     | ((diff: Vars, id: TableRowID, remote: SqlResult) => void) = null;
   // 默认行为
-  if (_.isUndefined(options.patchMetaUpdate)) {
+  if (_.isUndefined(setup.patchMetaUpdate)) {
     patchMetaUpdate = (diff: Vars, id: TableRowID, _remote: SqlResult) => {
       diff["id"] = id;
     };
   }
   // 用户已指定
-  else if (options.patchMetaUpdate) {
-    patchMetaUpdate = options.patchMetaUpdate;
+  else if (setup.patchMetaUpdate) {
+    patchMetaUpdate = setup.patchMetaUpdate;
   }
   //---------------------------------------------
   function initLocalList() {
@@ -212,7 +215,7 @@ export function useLocalListEdit(
         if (defaultMeta) {
           _.defaults(re, defaultMeta);
         }
-        if (options.autoRemoveItemNilValue) {
+        if (setup.autoRemoveItemNilValue) {
           clearItemNilValue({ index: i });
         }
         return re;
@@ -519,12 +522,25 @@ export function useLocalListEdit(
    * });
    * ```
    */
-  function makeChanges(options: LocalListMakeChangeOptions) {
-    let changes = [] as SqlExecInfo[];
+  function makeChanges(
+    options: LocalListMakeChangeOptions
+  ): SqlMakeChangeResult {
+    // 准备参数
+    let { getErrMessageForUpdate, getErrMessageForInsert } = options;
+    if (!getErrMessageForInsert) {
+      getErrMessageForInsert = dftGetErrMessageForInsertOrUpdate;
+    }
+    if (!getErrMessageForUpdate) {
+      getErrMessageForUpdate = dftGetErrMessageForInsertOrUpdate;
+    }
+
+    // 准备返回值
+    let changes = [] as SqlExecAction[];
+    let errors = [] as SqlExecPreError[];
 
     // 如果没有做过任何修改 ...
     if (!_local_list.value) {
-      return changes;
+      return { changes, errors };
     }
 
     let overmode = options.overrideMode || "assign";
@@ -546,7 +562,9 @@ export function useLocalListEdit(
         let id = getRowId(local, i);
         localMap.set(id, local);
         let remote = remoteMap.get(id);
+        //......................................
         // 已经存在，必然是要更新记录
+        //......................................
         if (remote) {
           let diff = Util.getRecordDiff(remote, local, {
             checkRemoveFromOrgin: true,
@@ -577,7 +595,7 @@ export function useLocalListEdit(
           }
 
           // 忽略未定义值
-          let delta = _.omitBy(diff, (v) => v === undefined);
+          let delta: SqlResult = _.omitBy(diff, (v) => _.isUndefined(v));
 
           // 没啥好更新的
           if (_.isEmpty(delta)) {
@@ -601,10 +619,28 @@ export function useLocalListEdit(
             patchMetaUpdate(delta, id, remote);
           }
 
+          // 检查数据
+          if (getErrMessageForUpdate) {
+            let errMsg = getErrMessageForUpdate(delta);
+            if ("skip" == errMsg) {
+              continue;
+            }
+            if (errMsg) {
+              errors.push({
+                index: i,
+                rowId: id,
+                errMsg,
+              });
+            }
+          }
           // 记入列表
-          updateList.push(delta);
+          else {
+            updateList.push(delta);
+          }
         }
+        //......................................
         // 必然是新记录，需要插入
+        //......................................
         else {
           let newMeta = Util.jsonClone(local);
           if (options.insertMeta) {
@@ -646,7 +682,24 @@ export function useLocalListEdit(
             continue;
           }
 
-          insertList.push(newMeta);
+          // 检查数据
+          if (getErrMessageForInsert) {
+            let errMsg = getErrMessageForInsert(newMeta);
+            if ("skip" == errMsg) {
+              continue;
+            }
+            if (errMsg) {
+              errors.push({
+                index: i,
+                rowId: id,
+                errMsg,
+              });
+            }
+          }
+          // 没有错误，加入插入列表
+          else {
+            insertList.push(newMeta);
+          }
         }
       }
     }
@@ -703,7 +756,7 @@ export function useLocalListEdit(
       }
     }
 
-    return changes;
+    return { changes, errors };
   }
   //---------------------------------------------
   function makeDifferents(options: LocalListMakeDiffOptions = {}): DiffItem[] {

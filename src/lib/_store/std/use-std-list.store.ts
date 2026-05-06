@@ -21,7 +21,7 @@ import {
   GlobalStatusApi,
   isWnObj,
   ListStoreConflicts,
-  LocalListEditOptions,
+  LocalListEditSetup,
   LocalListUpdateItemOptions,
   QueryFilter,
   QuerySorter,
@@ -42,7 +42,7 @@ import { auto_create_obj } from "./support/auto-create-home";
 
 export type StdListStoreApi = ReturnType<typeof defineStdListStore>;
 
-export type StdListStoreOptions = LocalListEditOptions & {
+export type StdListStoreOptions = LocalListEditSetup & {
   /**
    * 主目录路径，通常就是一个文件夹，如果是 thing 文件夹，
    * 那么，除了生米这个参数，还需要声明 indexPath='index'

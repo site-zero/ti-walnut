@@ -8,7 +8,7 @@ import {
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
-import { HubViewOptions } from "../_store";
+import { DeprecationTypes } from "vue";
 
 export type AjaxResult = {
   ok: boolean;
@@ -72,6 +72,9 @@ export type WnObjInfo = {
   ph?: string | null | undefined;
 };
 
+/**
+ * @deprecated 我放弃采用 HubView 机制，绝大多数情况，它可能是在给我的维护挖坑
+ */
 type ServerUISetup = {
   useStdFields?: boolean;
   useStdColumns?: boolean;
@@ -80,6 +83,9 @@ type ServerUISetup = {
   viewSetup?: string;
 };
 
+/**
+ * @deprecated 我放弃采用 HubView 机制，绝大多数情况，它可能是在给我的维护挖坑
+ */
 export type UIViewSetup = {
   /**
    * 可以给扩展(譬如 WnHub)使用， 一个 dirName 具体
@@ -168,7 +174,7 @@ export type UIViewSetup = {
    * 可以作为默认选择， 唯一不同的是，如果最后连  '*' 都没有匹配
    * 应该抛错
    */
-  views?: Record<string, SelectValueArm<string | HubViewOptions, Vars>>;
+  views?: Record<string, SelectValueArm<string | any, Vars>>;
 
   /**
    * 注册的应用列表

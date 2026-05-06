@@ -5,10 +5,8 @@ import { WnConflictViewInfo } from "./conflict/wn-conflict-view-index";
 
 // Hub
 import {
-  WnHubArenaInfo,
   WnHubAvatarInfo,
   WnHubFootInfo,
-  WnHubMenuInfo,
   WnHubSideNavInfo,
   WnHubSkyInfo,
 } from "./hub/";
@@ -37,9 +35,7 @@ export default {
   WnConflictView: WnConflictViewInfo,
 
   // Hub
-  WnHubArena: WnHubArenaInfo,
   WnHubAvatar: WnHubAvatarInfo,
-  WnHubMenu: WnHubMenuInfo,
   WnHubFoot: WnHubFootInfo,
   WnHubSideNav: WnHubSideNavInfo,
   WnHubSky: WnHubSkyInfo,
@@ -67,10 +63,8 @@ export default {
 export * from "./conflict/wn-conflict-view-index";
 
 // Hub
-export * from "./hub/hub-arena/wn-hub-arena-index";
 export * from "./hub/hub-avatar/wn-hub-avatar-index";
 export * from "./hub/hub-foot/wn-hub-foot-index";
-export * from "./hub/hub-menu/wn-hub-menu-index";
 export * from "./hub/hub-sidenav/wn-hub-side-nav-index";
 export * from "./hub/hub-sky/wn-hub-sky-index";
 

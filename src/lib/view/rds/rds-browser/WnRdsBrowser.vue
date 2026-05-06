@@ -1,16 +1,14 @@
 <script lang="ts" setup>
   //--------------------------------------------------
+  import { useGlobalStatus, useRdsListStore } from "@site0/ti-walnut";
   import { TiLayoutGrid } from "@site0/tijs";
-  import { computed, inject, ref, watch } from "vue";
-  import { useRdsListStore, WN_HUB_APP_INST } from "../../../../lib";
+  import { computed, ref, watch } from "vue";
   import { useRdsBrowserLayout } from "./rds-browser-layout";
   import { useRdsBrowserSchema } from "./rds-browser-schema";
   import { RdsBrowserEmitter, RdsBrowserProps } from "./rds-browser-types";
   import { getKeepName, useRdsBrowser } from "./use-rds-browser";
   //--------------------------------------------------
   const emit = defineEmits<RdsBrowserEmitter>();
-  //--------------------------------------------------
-  const _hub = inject(WN_HUB_APP_INST);
   //--------------------------------------------------
   const props = withDefaults(defineProps<RdsBrowserProps>(), {
     layoutQuickColumns: "50% 1fr",
@@ -24,12 +22,14 @@
   });
   //--------------------------------------------------
   const _store_at = ref(0);
+  const _gb_sta = useGlobalStatus();
   //--------------------------------------------------
   const _store = computed(() => {
     let store = useRdsListStore({
       keepQuery: getKeepName(props, "Query"),
       keepSelect: getKeepName(props, "Selection"),
       ...props.dataStore,
+      globalStatus: _gb_sta,
     });
     _store_at.value = Date.now();
     //console.log('store!!!!!!!!!!!!!!', store);
@@ -54,7 +54,7 @@
   });
   //--------------------------------------------------
   const GUIScheme = computed(() => {
-    let schema = useRdsBrowserSchema(props, _api.value, _hub?.view);
+    let schema = useRdsBrowserSchema(props, _api.value);
     if (props.guiSchema) {
       return props.guiSchema(schema, _api.value);
     }

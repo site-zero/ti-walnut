@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-  import { Be, Dom, I18n, Icons, TI_TIP_API_KEY, TiIcon } from '@site0/tijs';
-  import _ from 'lodash';
-  import { computed, inject, onUnmounted, useTemplateRef } from 'vue';
-  import { WN_HUB_APP_INST } from '../../../_store';
-  import { useHutFoot } from './use-hub-foot';
+  import { Be, Dom, I18n, Icons, TI_TIP_API_KEY, TiIcon } from "@site0/tijs";
+  import _ from "lodash";
+  import { computed, inject, onUnmounted, useTemplateRef } from "vue";
+  import { useGlobalStatus } from "../../../_features";
+  import { useSessionStore } from "../../../_store";
+  import { useHutFoot } from "./use-hub-foot";
   import {
     DisplayFootPartItem,
     FootPart,
     WnHubFootEmitter,
     WnHubFootProps,
-  } from './wn-hub-foot-types';
+  } from "./wn-hub-foot-types";
   //--------------------------------------------------
   const emit = defineEmits<WnHubFootEmitter>();
   //--------------------------------------------------
@@ -22,77 +23,79 @@
     }
   });
   //--------------------------------------------------
-  const $el = useTemplateRef('el');
-  const _hub = inject(WN_HUB_APP_INST);
+  const $el = useTemplateRef("el");
+
   //--------------------------------------------------
   const props = withDefaults(defineProps<WnHubFootProps>(), {
-    align: 'flex-start',
+    align: "flex-start",
     parts: () =>
       [
         {
-          type: 'info',
-          icon: 'zmdi-cloud-outline',
+          type: "info",
+          icon: "zmdi-cloud-outline",
           items: [
             {
-              value: '=G.currentObj.id',
-              icon: 'fas-key',
-              valuePiping: '$ELLIPSIS',
-              pipeContext: { at: 'center', maxLen: 8 },
+              value: "=G.currentObj.id",
+              icon: "fas-key",
+              valuePiping: "$ELLIPSIS",
+              pipeContext: { at: "center", maxLen: 8 },
               // tip: {
               //   content: '->ID: ${rawValue}',
               // },
-              tip: 'OBJ-INFO',
+              tip: "OBJ-INFO",
             },
-            { value: '=G.currentObj.c', icon: 'far-user' },
+            { value: "=G.currentObj.c", icon: "far-user" },
             {
-              value: '=G.currentObj.ct',
-              icon: 'zmdi-time',
-              valuePiping: '$TIME_TEXT',
-              tip: 'DT-UTC=Created On',
-            },
-            {
-              value: '=G.currentObj.lm',
-              icon: 'zmdi-time-countdown',
-              valuePiping: '$TIME_TEXT',
-              tip: 'DT-UTC=Modified On',
+              value: "=G.currentObj.ct",
+              icon: "zmdi-time",
+              valuePiping: "$TIME_TEXT",
+              tip: "DT-UTC=Created On",
             },
             {
-              value: '=G.currentObj.tp',
+              value: "=G.currentObj.lm",
+              icon: "zmdi-time-countdown",
+              valuePiping: "$TIME_TEXT",
+              tip: "DT-UTC=Modified On",
+            },
+            {
+              value: "=G.currentObj.tp",
               icon: (ctx) => {
                 return Icons.getIcon(ctx.G.currentObj || {});
               },
-              tip: 'OBJ-TSMS',
+              tip: "OBJ-TSMS",
             },
             {
-              value: '=G.currentObj.md',
-              icon: 'fas-shield-halved',
-              valuePiping: '$MOD_STR',
-              tip: 'OBJ-MD',
+              value: "=G.currentObj.md",
+              icon: "fas-shield-halved",
+              valuePiping: "$MOD_STR",
+              tip: "OBJ-MD",
             },
             {
-              value: '=G.currentObj.len',
-              valuePiping: '$SIZE_TEXT',
-              tip: 'OBJ-TSMS',
+              value: "=G.currentObj.len",
+              valuePiping: "$SIZE_TEXT",
+              tip: "OBJ-TSMS",
             },
           ],
         },
         {
-          type: 'view',
-          align: 'flex-end',
-          flex: '1 1 auto',
-          action: 'show:hub:view',
+          type: "view",
+          align: "flex-end",
+          flex: "1 1 auto",
+          action: "show:hub:view",
         },
-        { type: 'selection', icon: 'zmdi-mouse', flex: '0 0 auto' },
+        { type: "selection", icon: "zmdi-mouse", flex: "0 0 auto" },
       ] as FootPart[],
   });
   //--------------------------------------------------
+  const _gb_sta = useGlobalStatus();
+  const session = useSessionStore();
   const _parts = computed(() =>
-    useHutFoot(props, _hub!.view, _tip_api!, _tip_ids)
+    useHutFoot(props, _gb_sta, session, _tip_api!, _tip_ids)
   );
   //--------------------------------------------------
   const TopStyle = computed(() => {
     return {
-      'justify-content': props.align ?? 'flex-start',
+      "justify-content": props.align ?? "flex-start",
     };
   });
   //--------------------------------------------------
@@ -156,5 +159,5 @@
   </div>
 </template>
 <style scoped lang="scss">
-  @use './wn-hub-foot.scss';
+  @use "./wn-hub-foot.scss";
 </style>

@@ -1,4 +1,29 @@
 import {
+  DataStoreActionStatus,
+  DataStoreLoadStatus,
+  GlobalStatusApi,
+  JoinChange,
+  joinSqlChanges,
+  ListStoreConflicts,
+  LocalListEditSetup,
+  LocalListMakeChangeOptions,
+  LocalListUpdateItemOptions,
+  QueryFilter,
+  QuerySorter,
+  RefreshOptions,
+  SqlExecAction,
+  SqlExecPreError,
+  SqlMakeChangeResult,
+  SqlPagerInput,
+  SqlQuery,
+  SqlResult,
+  updatePager,
+  updatePagerTotal,
+  useLocalListEdit,
+  useSqlx,
+  Walnut,
+} from "@site0/ti-walnut";
+import {
   apply_conflict_list,
   buildConflictList,
   BuildConflictListOptions,
@@ -14,26 +39,6 @@ import {
 } from "@site0/tijs";
 import _ from "lodash";
 import { computed, ref } from "vue";
-import {
-  DataStoreActionStatus,
-  DataStoreLoadStatus,
-  GlobalStatusApi,
-  ListStoreConflicts,
-  LocalListEditOptions,
-  LocalListMakeChangeOptions,
-  LocalListUpdateItemOptions,
-  QueryFilter,
-  QuerySorter,
-  RefreshOptions,
-  SqlPagerInput,
-  SqlQuery,
-  SqlResult,
-  updatePager,
-  updatePagerTotal,
-  useLocalListEdit,
-  useSqlx,
-} from "../../";
-import { Walnut } from "../../../core";
 
 const debug = false;
 
@@ -64,7 +69,7 @@ export type RdsFixedMatch =
 
 export type RdsListStoreApi = ReturnType<typeof defineRdsListStore>;
 
-export type RdsListStoreOptions = LocalListEditOptions & {
+export type RdsListStoreOptions = LocalListEditSetup & {
   daoName?: string;
   keepQuery?: KeepInfo;
   keepSelect?: KeepInfo;
@@ -348,12 +353,36 @@ function defineRdsListStore(options: RdsListStoreOptions) {
    *
    * @returns 返回数据变更对象数组，未配置变更选项时返回空数组
    */
-  function makeChanges() {
+  function makeChanges(): SqlMakeChangeResult {
     // 保护一下
     if (!options.makeChange) {
-      return [];
+      return { changes: [] };
     }
     return _local.makeChanges(options.makeChange);
+  }
+
+  function joinChanges(changes: SqlExecAction[]): SqlExecPreError[] {
+    let mcr = makeChanges();
+    if (mcr.errors && mcr.errors.length > 0) {
+      return mcr.errors;
+    }
+    if (mcr.changes && mcr.changes.length > 0) {
+      changes.push(...mcr.changes);
+    }
+    return [];
+  }
+
+  function joinChangesAndErrors(
+    changes: SqlExecAction[],
+    errors: SqlExecPreError[]
+  ) {
+    let mcr = makeChanges();
+    if (mcr.errors && mcr.errors.length > 0) {
+      errors.push(...mcr.errors);
+    }
+    if (mcr.changes && mcr.changes.length > 0) {
+      changes.push(...mcr.changes);
+    }
   }
 
   /**
@@ -933,7 +962,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     if (!options.sqlCount) {
       return;
     }
-    
+
     let q = __gen_query();
     if (!_is_filter_ready(q)) {
       return;
@@ -980,8 +1009,16 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   async function saveChange(setup: Vars = {}) {
     const { transLevel = 1 } = setup;
     // 获取改动信息
-    let changes = makeChanges();
-    if (debug) console.log("saveChange", changes);
+    let mcre = makeChanges();
+    if (debug) console.log("saveChange", mcre);
+
+    // 有错误的话，不要执行
+    let changes: SqlExecAction[] = [];
+    if (JoinChange.WithError == joinSqlChanges(changes, mcre)) {
+      return;
+    }
+
+    // 根据改动列表，执行对应的 SQL
     // 保护一下
     if (changes.length == 0) {
       return;
@@ -996,10 +1033,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
 
     // 更新远程结果
     if (options.refreshWhenSave) {
-      queryRemoteList().then(() => {
-        //强制取消本地改动
-        _local.reset();
-      });
+      await queryRemoteList();
+      //强制取消本地改动
+      _local.reset();
     }
   }
   //---------------------------------------------
@@ -1118,6 +1154,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     countRemote,
     queryRemoteList,
     makeChanges,
+    joinChanges,
+    joinChangesAndErrors,
     makeDifferents,
     makeCurrentDifferent,
     makeConflict,

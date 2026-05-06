@@ -1,28 +1,60 @@
 import {
-  MakeDiffOptions,
-  MetaPatcher,
-  UpdateMetaPatcher,
-  Util,
-  Vars,
-} from "@site0/tijs";
+  getSqlStr,
+  SqlExecAction,
+  SqlExecFetchBack,
+  SqlExecPreError,
+  SqlExecSetVar,
+  SqlMakeChangeResult,
+  SqlResult,
+} from "@site0/ti-walnut";
+import { MakeDiffOptions, TableRowID, Util, Vars } from "@site0/tijs";
 import _ from "lodash";
 import { Ref, ref } from "vue";
-import {
-  getSqlStr,
-  SqlExecFetchBack,
-  SqlExecInfo,
-  SqlExecSetVar,
-  SqlResult,
-} from "../../../lib";
 import { join_exec_set_vars, SqlInsertSet } from "./join-exec-set-vars";
 
-export type LocalMetaEditOptions = {
+export type LocalMetaEditSetup = {
   isNew?: (meta: SqlResult) => boolean;
+  /**
+   * 从指定对象获取 ID 的方法。
+   *
+   * - `string` : 表示一个数据键，将通过 `_.get` 获取值，这个值必须是 `T` 或者可以被 `anyConvertor` 转换的值
+   * - `Function` : 一个获取 ID 的函数
+   *
+   * @param it - SQL 结果
+   * @param index - 索引
+   * @returns 表行 ID
+   */
+  getId?: string | ((it: SqlResult) => TableRowID);
 };
 
-export type LocalMetaPatcher = MetaPatcher;
-export type LocalUpdateMetaPatcher = UpdateMetaPatcher;
-export type LocalMetaMakeDiffOptions = MakeDiffOptions;
+// export type LocalMetaPatcher = MetaPatcher;
+// export type LocalUpdateMetaPatcher = UpdateMetaPatcher;
+export type LocalMetaMakeDiffOptions = MakeDiffOptions & {
+  /**
+   * 为了确保数据不会被错误的更新，可以指明一个检查函数
+   *
+   * @param meta  要更新的数据记录字段
+   * @returns 错误信息，如果合法则返回 undefined
+   */
+  getErrMessageForUpdate?: (meta: Vars) => string | "skip" | undefined;
+  /**
+   * 为了确保数据不会被错误的插入，可以指明一个检查函数
+   *
+   * @param meta  要插入的数据记录字段
+   * @returns 错误信息，如果合法则返回 undefined
+   */
+  getErrMessageForInsert?: (meta: Vars) => string | "skip" | undefined;
+};
+
+export function dftGetErrMessageForInsertOrUpdate(
+  meta: Vars
+): string | "skip" | undefined {
+  // 过滤掉所有 undefined 的值，以及 id 字段（如果存在）
+  let cleanMeta = _.omitBy(meta, (v, k) => _.isUndefined(v) || k === "id");
+  if (_.isEmpty(cleanMeta)) {
+    return "skip";
+  }
+}
 
 export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
   updateSql?: string | (() => string);
@@ -38,10 +70,12 @@ export type LocalMetaEdit = ReturnType<typeof useLocalMetaEdit>;
 
 export function useLocalMetaEdit(
   remoteMeta: Ref<SqlResult | undefined>,
-  options: LocalMetaEditOptions = {}
+  setup: LocalMetaEditSetup = {}
 ) {
-  let { isNew = (meta: SqlResult) => "new" == meta.id || _.isNil(meta.id) } =
-    options;
+  let {
+    getId = "id",
+    isNew = (meta: SqlResult) => "new" == meta.id || _.isNil(meta.id),
+  } = setup;
   /*---------------------------------------------
                     
                  数据模型
@@ -63,7 +97,7 @@ export function useLocalMetaEdit(
     }
     return isNew(remoteMeta.value);
   }
-
+  //---------------------------------------------
   function isChanged() {
     if (isNewMeta()) {
       return !_.isEmpty(localMeta.value);
@@ -73,13 +107,23 @@ export function useLocalMetaEdit(
     }
     return false;
   }
-
+  //---------------------------------------------
+  /**
+   * 获取数据的 ID
+   */
+  function getMetaId(it: SqlResult): TableRowID {
+    if (_.isString(getId)) {
+      return _.get(it, getId) ?? "--no-id--";
+    }
+    return getId(it) ?? "--no-id--";
+  }
+  //---------------------------------------------
   function reset() {
     if (localMeta.value) {
       localMeta.value = undefined;
     }
   }
-
+  //---------------------------------------------
   /**
    * 更新一条记录的某个字段
    *
@@ -114,16 +158,29 @@ export function useLocalMetaEdit(
     return {};
   }
 
-  function makeChange(options: LocalMetaMakeChangeOptions): SqlExecInfo[] {
+  function makeChange(
+    options: LocalMetaMakeChangeOptions
+  ): SqlMakeChangeResult {
+    // 准备参数
+    let { getErrMessageForUpdate, getErrMessageForInsert } = options;
+    if (!getErrMessageForInsert) {
+      getErrMessageForInsert = dftGetErrMessageForInsertOrUpdate;
+    }
+    if (!getErrMessageForUpdate) {
+      getErrMessageForUpdate = dftGetErrMessageForInsertOrUpdate;
+    }
+
     // 检查 Console
     let diffOrNewMeta = getDiffMeta();
     if (_.isEmpty(diffOrNewMeta)) {
-      return [];
+      return { changes: [] };
     }
+
+    const errors: SqlExecPreError[] = [];
 
     // 语法上防一下空
     if (!localMeta.value) {
-      return [];
+      return { changes: [] };
     }
     let local = localMeta.value;
     let remote = remoteMeta.value;
@@ -139,7 +196,7 @@ export function useLocalMetaEdit(
     if (isNewMeta()) {
       sql = getSqlStr(options.insertSql);
       if (!sql) {
-        return [];
+        return { changes: [] };
       }
       put = getSqlStr(options.insertPut);
       // 创建时间， 对于 st/st_rsn 数据库里有默认值
@@ -150,7 +207,7 @@ export function useLocalMetaEdit(
           _.assign(diffOrNewMeta, new_meta2);
           // 直接替换为新的
           if (overrideForInsert) {
-            if (!new_meta2) return [];
+            if (!new_meta2) return { changes: [] };
             diffOrNewMeta = new_meta2;
           }
           // 合并两个值
@@ -165,6 +222,21 @@ export function useLocalMetaEdit(
       }
       // 自动生成 ID
       join_exec_set_vars(sets, options.insertSet);
+
+      // 检查一下数据
+      if (getErrMessageForInsert) {
+        let errMsg = getErrMessageForInsert(diffOrNewMeta);
+        if ("skip" == errMsg) {
+          return { changes: [] };
+        }
+        if (errMsg) {
+          errors.push({
+            index: 0,
+            rowId: getMetaId(local),
+            errMsg,
+          });
+        }
+      }
     }
     // 已经存在的，那么要把 ID 设置一下
     else if (options.updateMeta) {
@@ -173,7 +245,7 @@ export function useLocalMetaEdit(
         let new_diff = options.updateMeta(local, remote!, diffOrNewMeta);
         // 直接替换为新的
         if (overrideForUpdate) {
-          if (!new_diff) return [];
+          if (!new_diff) return { changes: [] };
           diffOrNewMeta = new_diff;
         }
         // 合并两个值
@@ -185,10 +257,24 @@ export function useLocalMetaEdit(
       else {
         _.assign(diffOrNewMeta, options.updateMeta);
       }
+
+      if (getErrMessageForUpdate) {
+        let errMsg = getErrMessageForUpdate(diffOrNewMeta);
+        if ("skip" == errMsg) {
+          return { changes: [] };
+        }
+        if (errMsg) {
+          errors.push({
+            index: 0,
+            rowId: getMetaId(local),
+            errMsg,
+          });
+        }
+      }
     }
 
     if (!sql) {
-      return [];
+      return { changes: [] };
     }
 
     if (options.defaultMeta) {
@@ -206,18 +292,35 @@ export function useLocalMetaEdit(
     if (options.fetchBack) {
       fb = options.fetchBack(local, remote);
     }
-    return [
-      {
-        sql,
-        vars: diffOrNewMeta,
-        explain: true,
-        reset: true,
-        noresult: options.noresult,
-        sets,
-        put,
-        fetchBack: fb,
-      },
-    ];
+    return {
+      changes: [
+        {
+          sql,
+          vars: diffOrNewMeta,
+          explain: true,
+          reset: true,
+          noresult: options.noresult,
+          sets,
+          put,
+          fetchBack: fb,
+        },
+      ],
+      errors,
+    };
+  }
+
+  function joinChange(
+    changes: SqlExecAction[],
+    options: LocalMetaMakeChangeOptions
+  ): SqlExecPreError[] {
+    let mcr = makeChange(options);
+    if (mcr.errors && mcr.errors.length > 0) {
+      return mcr.errors;
+    }
+    if (mcr.changes && mcr.changes.length > 0) {
+      changes.push(...mcr.changes);
+    }
+    return [];
   }
   /*---------------------------------------------
                     
@@ -229,10 +332,12 @@ export function useLocalMetaEdit(
     localMeta,
     isNewMeta,
     isChanged,
+    getMetaId,
     reset,
     updateMeta,
     setMeta,
     getDiffMeta,
     makeChange,
+    joinChange,
   };
 }

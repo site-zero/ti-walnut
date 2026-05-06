@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { CssUtils, IconInput, TiIcon } from "@site0/tijs";
   import { computed } from "vue";
-  import { useGlobalStatus, WnHubAvatar, WnHubMenu } from "../../../../lib";
+  import { useGlobalStatus, WnHubAvatar } from "../../../../lib";
   import { WnHubSkyProps } from "./wn-hub-sky-types";
   //--------------------------------------------------
   const props = defineProps<WnHubSkyProps>();
@@ -47,14 +47,9 @@
         <div class="as-version">V {{ _gb_sta.data.appVersion }}</div>
       </div>
     </div>
-    <div class="as-part is-crumb">
-      appPath: [{{ _gb_sta.data.appPath }}]
-    </div>
+    <div class="as-part is-crumb">appPath: [{{ _gb_sta.data.appPath }}]</div>
     <div class="as-part is-avatar">
-      <WnHubAvatar @logout="emit('logout')"/>
-    </div>
-    <div class="as-part is-menu">
-      <WnHubMenu @logout="emit('logout')"/>
+      <WnHubAvatar @logout="emit('logout')" />
     </div>
   </div>
 </template>

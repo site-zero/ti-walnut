@@ -1,16 +1,17 @@
-import { Util, Vars } from "@site0/tijs";
+import { SqlExecPreError, Walnut } from "@site0/ti-walnut";
+import { AlertError, Util, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
 import {
   getQueryLimit,
   QueryFilter,
-  SqlExecInfo,
+  SqlExecAction,
   SqlExecOptions,
   SqlExecResult,
+  SqlMakeChangeResult,
   SqlQuery,
   SqlResult,
 } from "..";
-import { Walnut } from "../../core";
 
 const debug = false;
 
@@ -196,7 +197,7 @@ export function defineSqlx(daoName?: string) {
    * @returns 执行结果
    */
   async function exec(
-    infos: SqlExecInfo | SqlExecInfo[],
+    infos: SqlExecAction | SqlExecAction[],
     options: SqlExecOptions = {}
   ): Promise<SqlExecResult | undefined> {
     let inputs = {} as Vars;
@@ -361,4 +362,64 @@ export function getSqlStr(sql?: string | (() => string)) {
     return sql();
   }
   return sql;
+}
+
+export type JoinSqlChangesSetup = {
+  quiet?: boolean;
+};
+
+export function joinSqlChanges(
+  changes: SqlExecAction[],
+  mcre: SqlMakeChangeResult,
+  setup: JoinSqlChangesSetup = {}
+): JoinChange {
+  let { quiet } = setup;
+  if (quiet) {
+    if (mcre.errors && mcre.errors.length > 0) {
+      console.warn("joinSqlChanges errors:", mcre);
+      return JoinChange.WithError;
+    }
+  }
+  if (tryAlertJoinChangeError(mcre.errors)) {
+    return JoinChange.WithError;
+  }
+
+  for (let change of mcre.changes) {
+    changes.push(change);
+  }
+  return JoinChange.NoError;
+}
+
+export function tryAlertJoinChangeError(
+  errors: SqlExecPreError[] | undefined
+): boolean {
+  if (errors && errors.length > 0) {
+    console.warn("joinSqlChanges errors:", errors);
+    const errMsgs = _.map(errors, (err) => err.errMsg);
+    AlertError("Fail to joinChanges", null, errMsgs);
+    return true;
+  }
+  return false;
+}
+
+export function joinSqlChangesAndErrors(
+  changes: SqlExecAction[],
+  errors: SqlExecPreError[],
+  mcre: SqlMakeChangeResult
+): JoinChange {
+  let re: JoinChange = JoinChange.NoError;
+  if (mcre.errors && mcre.errors.length > 0) {
+    errors.push(...mcre.errors);
+    re = JoinChange.WithError;
+  }
+
+  if (mcre.changes && mcre.changes.length > 0) {
+    changes.push(...mcre.changes);
+  }
+  return re;
+}
+
+export enum JoinChange {
+  WithError = 1,
+  NoError = 0,
 }

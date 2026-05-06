@@ -11,7 +11,6 @@ import {
   SideBarItem,
   Str,
   TiStore,
-  Tmpl,
   updateInstalledComponentsLangs,
   useObjColumns,
   useObjFields,
@@ -25,7 +24,6 @@ import {
   AjaxResult,
   DomainConfig,
   GlobalStatusApi,
-  HubViewOptions,
   isAjaxResult,
   isWnObj,
   ServerConfig,
@@ -41,7 +39,6 @@ import {
   WnObj,
 } from "../lib";
 import { installWalnutDicts } from "./wn-dict";
-import { anyToHubViewOptions } from "./wn-obj-views";
 import { wnRunCommand } from "./wn-run-command";
 
 const TICKET_KEY = "Walnut-Ticket";
@@ -309,86 +306,6 @@ export class WalnutServer {
 
     // 搞定
     return rePath;
-  }
-
-  findView(path: string, ctx: Vars = {}) {
-    let aCtx = { path, ...ctx };
-    let view: string | HubViewOptions | undefined = undefined;
-
-    // 获取路径规则
-    let __views = this._view.views ?? {};
-    let viewArms = __views[path];
-    if (!viewArms) {
-      viewArms = __views["*"];
-    }
-
-    // 挑选路径模板
-    if (viewArms) {
-      view = Util.selectValue(aCtx, viewArms);
-    }
-
-    // 根据模板渲染路径
-    if (view) {
-      // 编译模板，并渲染
-      if (_.isString(view)) {
-        let tmpl = Tmpl.parse(view);
-        return tmpl.render(aCtx, false);
-      }
-      // 展开上下文
-      return Util.explainObj(aCtx, view);
-    }
-  }
-
-  /**
-   * 加载指定对象的视图选项。
-   *
-   * 首先，它会检查 Hub 节点本身是否为一个视图对象。如果不是，它会基于 `server.config.json#views` 查找视图设置。
-   * 如果找到的视图是一个字符串，它会被视为一个 JSON5 文件的路径，然后该文件会被加载并解析为 `HubViewOptions`。
-   * 如果视图已经是一个 `HubViewOptions` 对象，则直接返回。
-   *
-   * @param hubPath Hub 节点的路径，用于在 `server.config.json#views` 中查找视图设置。
-   * @param hubObj Hub 节点对象，用于确定它是否为视图对象以及查找视图设置。
-   * @returns `HubViewOptions` 对象，如果未找到则返回 `null`
-   */
-  async loadHubViewOptions(
-    hubPath: string,
-    hubObj: WnObj
-  ): Promise<HubViewOptions | null> {
-    let view: HubViewOptions | string | undefined = undefined;
-    // 对象本身就是一个视图对象
-    if (
-      isWnObj(hubObj) &&
-      (("hub_view" == hubObj.tp && "FILE" == hubObj.race) ||
-        /\.view.json5?$/.test(hubObj.nm))
-    ) {
-      view = `id:${hubObj.id}`;
-    }
-    // 对象关联了视图
-    else if (hubObj && hubObj.view) {
-      view = hubObj.view;
-    }
-    // 根据 server.config.json#views 的定义，获取视图设置
-    else {
-      view = this.findView(hubPath, hubObj);
-    }
-
-    // 防空
-    if (!view) {
-      return null;
-    }
-
-    // View 是一个 JSON5 文件, 需要加载一下
-    if (_.isString(view)) {
-      let json = await this.loadContent(view, { cache: true });
-      if (!json) {
-        return null;
-      }
-      let input = JSON5.parse(json);
-      return anyToHubViewOptions(input);
-    }
-
-    // 直接就是 View 本身
-    return anyToHubViewOptions(view);
   }
 
   getAppStaticPath(path: string) {

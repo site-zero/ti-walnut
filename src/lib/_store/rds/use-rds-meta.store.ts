@@ -1,4 +1,20 @@
 import {
+  DataStoreActionStatus,
+  DataStoreLoadStatus,
+  JoinChange,
+  joinSqlChanges,
+  LocalMetaEditSetup,
+  LocalMetaMakeChangeOptions,
+  MetaStoreConflicts,
+  QueryFilter,
+  SqlExecAction,
+  SqlExecPreError,
+  SqlMakeChangeResult,
+  SqlResult,
+  useLocalMetaEdit,
+  useSqlx,
+} from "@site0/ti-walnut";
+import {
   apply_conflict,
   buildConflict,
   BuildConflictItemOptions,
@@ -7,24 +23,12 @@ import {
 } from "@site0/tijs";
 import _ from "lodash";
 import { computed, ref } from "vue";
-import {
-  DataStoreActionStatus,
-  DataStoreLoadStatus,
-  LocalMetaEditOptions,
-  LocalMetaMakeChangeOptions,
-  MetaStoreConflicts,
-  QueryFilter,
-  SqlExecInfo,
-  SqlResult,
-  useLocalMetaEdit,
-  useSqlx,
-} from "../../";
 
 const debug = false;
 
 export type RdsMetaStoreApi = ReturnType<typeof defineRdsMetaStore>;
 
-export type RdsMetaStoreOptions = LocalMetaEditOptions & {
+export type RdsMetaStoreOptions = LocalMetaEditSetup & {
   daoName?: string;
   filter: QueryFilter;
   sqlFetch: string;
@@ -119,36 +123,28 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     return _.isEmpty(_remote.value);
   }
 
-  async function loadRemoteMeta(): Promise<SqlResult | undefined> {
-    //console.log('I am fetch remote', _filter.value);
-    _action_status.value = "loading";
-    try {
-      let re = await sqlx.fetch(options.sqlFetch, _filter.value);
-      if (re && options.patchRemote) {
-        re = options.patchRemote(re);
-      }
-      return re;
-    } finally {
-      _action_status.value = undefined;
-    }
-  }
-
-  async function fetchRemoteMeta(): Promise<void> {
-    _remote.value = await loadRemoteMeta();
-  }
-
-  function makeChanges(): SqlExecInfo[] {
+  function makeChanges(): SqlMakeChangeResult {
     // 保护一下
     if (!options.makeChange) {
       if (debug) console.log("without options.makeChange");
-      return [];
+      return { changes: [] };
     }
     // 获取改动信息
-    let changes = [] as SqlExecInfo[];
-    changes.push(..._local.makeChange(options.makeChange));
+    let mcre = _local.makeChange(options.makeChange);
 
-    if (debug) console.log("makeChanges", changes);
-    return changes;
+    if (debug) console.log("makeChanges", mcre);
+    return mcre;
+  }
+
+  function joinChanges(changes: SqlExecAction[]): SqlExecPreError[] {
+    let mcr = makeChanges();
+    if (mcr.errors && mcr.errors.length > 0) {
+      return mcr.errors;
+    }
+    if (mcr.changes && mcr.changes.length > 0) {
+      changes.push(...mcr.changes);
+    }
+    return [];
   }
 
   function getDiffMeta() {
@@ -201,6 +197,77 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     let { server, localDiff } = cf;
     _remote.value = server;
     apply_conflict(_local.localMeta, server, localDiff);
+  }
+
+  //---------------------------------------------
+  //                  远程操作
+  //---------------------------------------------
+  /**
+   * 从数据库加载元数据
+   * 该方法会执行 sqlFetch 查询，返回查询结果
+   * 如果配置了 patchRemote，会对结果进行处理
+   * @returns 加载的元数据或 undefined
+   */
+  async function loadRemoteMeta(): Promise<SqlResult | undefined> {
+    //console.log('I am fetch remote', _filter.value);
+    _action_status.value = "loading";
+    try {
+      let re = await sqlx.fetch(options.sqlFetch, _filter.value);
+      if (re && options.patchRemote) {
+        re = options.patchRemote(re);
+      }
+      return re;
+    } finally {
+      _action_status.value = undefined;
+    }
+  }
+
+  /**
+   * 从远程加载元数据并更新本地存储
+   * 该方法会调用 loadRemoteMeta 获取最新数据，
+   * 然后将结果设置到 _remote 引用中
+   */
+  async function fetchRemoteMeta(): Promise<void> {
+    _remote.value = await loadRemoteMeta();
+  }
+
+  /**
+   * 保存当前的修改到远程服务器
+   * 会先检查修改并生成变更操作，然后执行这些操作
+   * 如果配置了 refreshWhenSave，保存后会刷新远程数据并重置本地修改
+   */
+  async function saveChange(): Promise<void> {
+    // 获取改动信息
+    let mcre = makeChanges();
+
+    // 有错误的话，不要执行
+    let changes: SqlExecAction[] = [];
+    if (JoinChange.WithError == joinSqlChanges(changes, mcre)) {
+      return;
+    }
+
+    // 保护一下
+    if (changes.length == 0) {
+      return;
+    }
+
+    // 最后执行更新
+    if (debug) console.log("saveChange", changes);
+    await sqlx.exec(changes);
+
+    // 更新远程结果
+    if (options.refreshWhenSave) {
+      await fetchRemoteMeta();
+      resetLocalChange();
+    }
+  }
+
+  /**
+   * 重新加载数据：重置本地修改并从远程获取最新数据
+   */
+  async function reload(): Promise<void> {
+    resetLocalChange();
+    await fetchRemoteMeta();
   }
 
   /*---------------------------------------------
@@ -257,39 +324,18 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     },
 
     makeChanges,
+    joinChanges,
     getDiffMeta,
     makeConflict,
     createConflictBy,
     applyConflicts,
     //---------------------------------------------
-    //                  远程方法
+    //                  远程操作
     //---------------------------------------------
+    loadRemoteMeta,
     fetchRemoteMeta,
-
-    saveChange: async (): Promise<void> => {
-      // 获取改动信息
-      let changes = makeChanges();
-
-      // 保护一下
-      if (changes.length == 0) {
-        return;
-      }
-
-      // 最后执行更新
-      if (debug) console.log("saveChange", changes);
-      await sqlx.exec(changes);
-
-      // 更新远程结果
-      if (options.refreshWhenSave) {
-        await fetchRemoteMeta();
-        resetLocalChange();
-      }
-    },
-
-    reload: async (): Promise<void> => {
-      resetLocalChange();
-      await fetchRemoteMeta();
-    },
+    saveChange,
+    reload,
   };
 }
 
