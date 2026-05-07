@@ -1,13 +1,15 @@
 import {
-  dftGetErrMessageForInsertOrUpdate,
   getSqlStr,
   LocalMetaMakeChangeOptions,
   LocalMetaMakeDiffOptions,
+  PatchMeta,
+  patchMetaBy,
   SqlExecAction,
   SqlExecPreError,
   SqlExecSetVar,
   SqlMakeChangeResult,
   SqlResult,
+  useMakeMetaChange,
 } from "@site0/ti-walnut";
 import {
   applyFieldChangeDiff,
@@ -46,18 +48,6 @@ export type LocalListUpdateItemOptions = {
  */
 export type LocalListEditSetup = {
   /**
-   * 在 `makeChange` 时使用的补丁元数据更新函数。
-   * 如果指定为 `null`，则不会自动添加更新 ID。
-   *
-   * @param diff - 变量的差异
-   * @param id - 表行 ID
-   * @param remote - 远程 SQL 结果
-   */
-  patchMetaUpdate?:
-    | null
-    | ((diff: Vars, id: TableRowID, remote: SqlResult) => void);
-
-  /**
    * 从指定对象获取 ID 的方法。
    *
    * - `string` : 表示一个数据键，将通过 `_.get` 获取值，这个值必须是 `T` 或者可以被 `anyConvertor` 转换的值
@@ -70,19 +60,24 @@ export type LocalListEditSetup = {
   getId?: string | ((it: SqlResult, index: number) => TableRowID);
 
   /**
+   * @see {@link PatchMeta}
+   */
+  patchMetaUpdate?: null | PatchMeta;
+
+  /**
    * 当 `updateItem` 时，是否清除值为 `null` 的字段。
    */
   autoRemoveItemNilValue?: boolean;
 };
-
+//---------------------------------------------
 export type LocalListMakeDiffOptions = LocalMetaMakeDiffOptions;
-
+//---------------------------------------------
 export type LocalListMakeChangeOptions = LocalMetaMakeChangeOptions & {
   deleteSql?: string | (() => string);
 };
-
+//---------------------------------------------
 export type LocalListEdit = ReturnType<typeof useLocalListEdit>;
-
+//---------------------------------------------
 /**
  * useLocalListEdit 是一个用于管理本地列表编辑的钩子函数。
  * 它提供了一系列方法来操作本地列表，并根据本地列表和远程列表的差异生成相应的 SQL 执行信息。
@@ -97,8 +92,22 @@ export function useLocalListEdit(
   setup: LocalListEditSetup = {}
 ) {
   //console.log('useLocalListEdit', remoteList, options);
-  let { getId = "id" } = setup;
-  let _local_list = ref<SqlResult[] | undefined>();
+  //---------------------------------------------
+  // 分析参数
+  //---------------------------------------------
+  const { getId = "id" } = setup;
+  //---------------------------------------------
+  const patchMetaWhenUpdate = function (
+    meta: Vars,
+    id: TableRowID,
+    remote: SqlResult
+  ) {
+    patchMetaBy(meta, id, remote, setup.patchMetaUpdate);
+  };
+  //---------------------------------------------
+  // 数据模型
+  //---------------------------------------------
+  const _local_list = ref<SqlResult[] | undefined>();
   //---------------------------------------------
   // 计算属性
   //---------------------------------------------
@@ -131,7 +140,7 @@ export function useLocalListEdit(
         {
           remoteMap: _remote_map.value,
           getId,
-          patchMetaUpdate,
+          patchMetaUpdate: patchMetaWhenUpdate,
           findOneQuiet: true,
         }
       );
@@ -170,22 +179,22 @@ export function useLocalListEdit(
     return Util.getNextId(list, checkedIds, getRowId);
   }
 
-  /**
-   * 补充数据（仅当更新时）
-   */
-  let patchMetaUpdate:
-    | null
-    | ((diff: Vars, id: TableRowID, remote: SqlResult) => void) = null;
-  // 默认行为
-  if (_.isUndefined(setup.patchMetaUpdate)) {
-    patchMetaUpdate = (diff: Vars, id: TableRowID, _remote: SqlResult) => {
-      diff["id"] = id;
-    };
-  }
-  // 用户已指定
-  else if (setup.patchMetaUpdate) {
-    patchMetaUpdate = setup.patchMetaUpdate;
-  }
+  // /**
+  //  * 补充数据（仅当更新时）
+  //  */
+  // let patchMetaUpdate:
+  //   | null
+  //   | ((diff: Vars, id: TableRowID, remote: SqlResult) => void) = null;
+  // // 默认行为
+  // if (_.isUndefined(setup.patchMetaUpdate)) {
+  //   patchMetaUpdate = (diff: Vars, id: TableRowID, _remote: SqlResult) => {
+  //     diff["id"] = id;
+  //   };
+  // }
+  // // 用户已指定
+  // else if (setup.patchMetaUpdate) {
+  //   patchMetaUpdate = setup.patchMetaUpdate;
+  // }
   //---------------------------------------------
   function initLocalList() {
     if (!_local_list.value) {
@@ -525,15 +534,6 @@ export function useLocalListEdit(
   function makeChanges(
     options: LocalListMakeChangeOptions
   ): SqlMakeChangeResult {
-    // 准备参数
-    let { getErrMessageForUpdate, getErrMessageForInsert } = options;
-    if (!getErrMessageForInsert) {
-      getErrMessageForInsert = dftGetErrMessageForInsertOrUpdate;
-    }
-    if (!getErrMessageForUpdate) {
-      getErrMessageForUpdate = dftGetErrMessageForInsertOrUpdate;
-    }
-
     // 准备返回值
     let changes = [] as SqlExecAction[];
     let errors = [] as SqlExecPreError[];
@@ -543,16 +543,27 @@ export function useLocalListEdit(
       return { changes, errors };
     }
 
-    let overmode = options.overrideMode || "assign";
-    let overrideForUpdate = /^override-(all|update)$/.test(overmode);
-    let overrideForInsert = /^override-(all|insert)$/.test(overmode);
-
-    // 对远程列表编制索引
-    let remoteMap = _remote_map.value;
-
     // 准备两个列表
     let insertList = [] as Vars[];
     let updateList = [] as Vars[];
+    const _maker = useMakeMetaChange({
+      ...options,
+      getErrMessageForInsert: options.getErrMessageForInsert,
+      getErrMessageForUpdate: options.getErrMessageForUpdate,
+      patchMetaWhenUpdate,
+      addMetaForInsert: (meta) => {
+        insertList.push(meta);
+      },
+      addMetaForUpdate: (meta) => {
+        updateList.push(meta);
+      },
+      addError: (err) => {
+        errors.push(err);
+      },
+    });
+
+    // 对远程列表编制索引
+    let remoteMap = _remote_map.value;
 
     // 循环本地列表，顺便编制一个本地列表的ID 索引
     let localMap = new Map<TableRowID, SqlResult>();
@@ -566,140 +577,13 @@ export function useLocalListEdit(
         // 已经存在，必然是要更新记录
         //......................................
         if (remote) {
-          let diff = Util.getRecordDiff(remote, local, {
-            checkRemoveFromOrgin: true,
-          });
-          if (_.isEmpty(diff)) {
-            continue;
-          }
-
-          // 指定固定更新数据
-          if (options.updateMeta) {
-            // 动态计算
-            if (_.isFunction(options.updateMeta)) {
-              let new_diff = options.updateMeta(local, remote, diff);
-              // 直接替换为新的
-              if (overrideForUpdate) {
-                if (!new_diff) continue;
-                diff = new_diff;
-              }
-              // 合并两个值
-              else {
-                _.assign(diff, new_diff);
-              }
-            }
-            // 静态值
-            else {
-              _.assign(diff, options.updateMeta);
-            }
-          }
-
-          // 忽略未定义值
-          let delta: SqlResult = _.omitBy(diff, (v) => _.isUndefined(v));
-
-          // 没啥好更新的
-          if (_.isEmpty(delta)) {
-            continue;
-          }
-
-          // 补上固定 Meta
-          if (options.defaultMeta) {
-            // 动态计算
-            if (_.isFunction(options.defaultMeta)) {
-              _.assign(diff, options.defaultMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.assign(diff, options.defaultMeta);
-            }
-          }
-
-          // 补上 ID
-          if (patchMetaUpdate) {
-            patchMetaUpdate(delta, id, remote);
-          }
-
-          // 检查数据
-          if (getErrMessageForUpdate) {
-            let errMsg = getErrMessageForUpdate(delta);
-            if ("skip" == errMsg) {
-              continue;
-            }
-            if (errMsg) {
-              errors.push({
-                index: i,
-                rowId: id,
-                errMsg,
-              });
-            }
-          }
-          // 记入列表
-          else {
-            updateList.push(delta);
-          }
+          _maker.joinChangeForUpdate({ index: i, id, local, remote });
         }
         //......................................
         // 必然是新记录，需要插入
         //......................................
         else {
-          let newMeta = Util.jsonClone(local);
-          if (options.insertMeta) {
-            // 动态计算
-            if (_.isFunction(options.insertMeta)) {
-              let new_meta2 = options.insertMeta(local, remote);
-              // 直接替换为新的
-              if (overrideForInsert) {
-                if (!new_meta2) continue;
-                newMeta = new_meta2;
-              }
-              // 合并两个值
-              else {
-                _.assign(newMeta, new_meta2);
-              }
-            }
-            // 静态值
-            else {
-              _.assign(newMeta, options.insertMeta);
-            }
-          }
-
-          if (options.defaultMeta) {
-            // 动态计算
-            if (_.isFunction(options.defaultMeta)) {
-              _.assign(newMeta, options.defaultMeta(local, remote));
-            }
-            // 静态值
-            else {
-              _.assign(newMeta, options.defaultMeta);
-            }
-          }
-
-          // 忽略未定义值
-          newMeta = _.omitBy(newMeta, (v) => v === undefined);
-
-          // 没啥好插入的
-          if (_.isEmpty(newMeta)) {
-            continue;
-          }
-
-          // 检查数据
-          if (getErrMessageForInsert) {
-            let errMsg = getErrMessageForInsert(newMeta);
-            if ("skip" == errMsg) {
-              continue;
-            }
-            if (errMsg) {
-              errors.push({
-                index: i,
-                rowId: id,
-                errMsg,
-              });
-            }
-          }
-          // 没有错误，加入插入列表
-          else {
-            insertList.push(newMeta);
-          }
+          _maker.joinChangeForInsert({ index: i, id, local });
         }
       }
     }
@@ -765,7 +649,7 @@ export function useLocalListEdit(
       ...options,
       remoteMap: _remote_map.value,
       getId,
-      patchMetaUpdate,
+      patchMetaUpdate: patchMetaWhenUpdate,
     });
   }
   //---------------------------------------------
