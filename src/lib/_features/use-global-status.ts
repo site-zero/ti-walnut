@@ -1,5 +1,6 @@
 import { ProcessProps, TableSelectEmitInfo, Util, Vars } from "@site0/tijs";
-import { reactive } from "vue";
+import _ from "lodash";
+import { reactive, watch } from "vue";
 
 /**
  * 描述了一个应用路径的解析后信息。
@@ -124,6 +125,7 @@ function defineGlobalStatus() {
   } as GlobalStatus);
 
   function resetData() {
+    console.log("resetData");
     _data.processing = false;
     _data.process = undefined;
     _data.selectedCols = undefined;
@@ -216,6 +218,17 @@ function defineGlobalStatus() {
     }
   }
 
+  // watch(
+  //   () => _data.currentObj,
+  //   (newVal, oldVal) => {
+  //     if (_.isNil(newVal) && oldVal) {
+  //       console.warn("currentObj[OFF] changed", newVal, oldVal);
+  //     } else {
+  //       console.log("currentObj[ON] changed", newVal, oldVal);
+  //     }
+  //   }
+  // );
+
   return {
     data: _data,
     parseAppPath,
@@ -228,12 +241,18 @@ function defineGlobalStatus() {
 
 const _G_status_instance = new Map<string, GlobalStatusApi>();
 
-export function useGlobalStatus(name: string = "_APP") {
+type GlobalStatusApiSetup = {
+  autoReset?: boolean;
+  name?: string;
+};
+
+export function useGlobalStatus(setup: GlobalStatusApiSetup = {}) {
+  let { name = "_APP", autoReset = true } = setup;
   let re = _G_status_instance.get(name);
   if (!re) {
     re = defineGlobalStatus();
     _G_status_instance.set(name, re);
-  } else {
+  } else if (autoReset) {
     re.resetData();
   }
   return re;
