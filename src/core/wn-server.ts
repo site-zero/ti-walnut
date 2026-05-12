@@ -177,16 +177,25 @@ export class WalnutServer {
       lang: "zh-cn",
     });
 
-    // 确保 config 里面有正确的 domain
-    config.domain = domain || undefined;
-    config.site = loginSite || undefined;
+    // // 确保 config 里面有正确的 domain
+    // config.domain = domain || undefined;
+    // config.site = loginSite || undefined;
 
     // 根据配置文件，设置全局状态管理
     if (config.logo) {
       this._gl_sta.data.appLogo = config.logo;
     }
+    if (config.mainLogo) {
+      this._gl_sta.data.signupMainLogo = config.mainLogo;
+    }
     if (config.title) {
       this._gl_sta.data.appTitle = config.title;
+    }
+    if (config.site) {
+      this._gl_sta.data.loginSite = config.site;
+    }
+    if (config.domain) {
+      this._gl_sta.data.domain = config.domain;
     }
 
     // 初始化服务器

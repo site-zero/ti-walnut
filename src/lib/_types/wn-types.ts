@@ -8,7 +8,6 @@ import {
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
-import { DeprecationTypes } from "vue";
 
 export type AjaxResult = {
   ok: boolean;
@@ -232,6 +231,7 @@ export type DomainConfig = {
 
 export type ServerConfig = DomainConfig & {
   logo?: string;
+  mainLogo?: string;
   title?: string;
   protocal: "http" | "https";
   host: string;

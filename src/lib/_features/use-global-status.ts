@@ -37,6 +37,7 @@ export type GlobalStatus = {
   //..........................................
   // 应用整体状态
   appLogo?: string;
+  signupMainLogo?: string;
   appTitle?: string;
   appVersion?: string;
   appName?: string;
