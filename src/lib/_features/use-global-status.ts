@@ -125,7 +125,7 @@ function defineGlobalStatus() {
   } as GlobalStatus);
 
   function resetData() {
-    console.log("resetData");
+    //console.log("resetData");
     _data.processing = false;
     _data.process = undefined;
     _data.selectedCols = undefined;
