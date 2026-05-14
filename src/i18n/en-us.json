@@ -22,6 +22,8 @@
   "wn-obj-ct": "Created On",
   "wn-obj-lm": "Modified On",
   "wn-obj-expi": "Expired At",
+  "wn-processing-login": "Signing in...",
+  "wn-processing-save": "Saving...",
   "e-auth-account-noexists": "User Not Exists",
   "e-auth-login-invalid-passwd": "User Auth Error",
   "e-cmd-sqlx-exec-Failed": "SQL execution failed",

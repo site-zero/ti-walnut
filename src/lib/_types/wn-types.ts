@@ -232,7 +232,7 @@ export type DomainConfig = {
 export type ServerConfig = DomainConfig & {
   logo?: string;
   mainLogo?: string;
-  title?: string;
+  appTitle?: string;
   protocal: "http" | "https";
   host: string;
   port: number;

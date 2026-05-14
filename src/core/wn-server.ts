@@ -149,7 +149,7 @@ export class WalnutServer {
 
     // 初始化全局状态
     this._gl_sta.data.appVersion = appVersion ?? "0.0.0";
-    this._gl_sta.data.appTitle = appTitle ?? "A Walnut Application";
+    this._gl_sta.data.appTitle = appTitle ?? "Walnut";
     this._gl_sta.data.appName = appName || undefined;
     this._gl_sta.data.appBase = appBase || "/";
     this._gl_sta.data.quitPath = quitPath || undefined;
@@ -188,8 +188,8 @@ export class WalnutServer {
     if (config.mainLogo) {
       this._gl_sta.data.signupMainLogo = config.mainLogo;
     }
-    if (config.title) {
-      this._gl_sta.data.appTitle = config.title;
+    if (config.appTitle) {
+      this._gl_sta.data.appTitle = config.appTitle;
     }
     if (config.site) {
       this._gl_sta.data.loginSite = config.site;

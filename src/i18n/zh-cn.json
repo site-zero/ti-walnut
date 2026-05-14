@@ -22,6 +22,8 @@
   "wn-obj-ct": "创建时间",
   "wn-obj-lm": "最后修改",
   "wn-obj-expi": "过期时间",
+  "wn-processing-login": "登录中...",
+  "wn-processing-save": "保存中...",
   "e-auth-account-noexists": "账户不存在",
   "e-auth-login-invalid-passwd": "账户密码错误",
   "e.cmd.sqlx.exec.Failed": "SQL 执行失败",
