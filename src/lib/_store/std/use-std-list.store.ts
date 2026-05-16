@@ -786,6 +786,7 @@ function defineStdListStore(options: StdListStoreOptions) {
   }
 
   const CurrentItem = computed(() => getCurrentItem());
+  const CurrentContent = computed(() => _content.ContentText.value);
 
   function setQuery(q: ComboFilterValue) {
     _.assign(_query.value, q);
@@ -919,7 +920,10 @@ function defineStdListStore(options: StdListStoreOptions) {
   async function create(meta: WnObj): Promise<WnObj | undefined> {
     meta.pid = _dir_index.value?.id;
     if (!meta.pid) {
-      throw "create need parent id";
+      if (!_home_obj.value) {
+        throw `无法创建对象，因为没有找到主目录对象`;
+      }
+      meta.pid = _home_obj.value?.id;
     }
     let re = await _obj.create(meta);
     if (isWnObj(re)) {
@@ -1087,7 +1091,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     isRemoteEmpty,
     isLocalEmpty,
     CurrentItem,
-    CurrentContent: computed(() => _content.ContentText.value),
+    CurrentContent,
     Pager,
     Filter,
     Sorter,

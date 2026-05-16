@@ -50,6 +50,7 @@
     &.is-avatar,
     &.is-menu {
       @include flex-center;
+      padding:0 var(--ti-gap-s);
     }
   }
 }

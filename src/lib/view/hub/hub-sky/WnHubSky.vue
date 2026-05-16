@@ -51,9 +51,13 @@
     <div class="as-part is-avatar">
       <WnHubAvatar @logout="emit('logout')" />
     </div>
+    <div class="as-part is-menu">
+      <a @click="emit('logout')"
+        ><i class="fa-solid fa-arrow-right-from-bracket"></i
+      ></a>
+    </div>
   </div>
 </template>
-
 <style lang="scss">
   @use "./wn-hub-sky.scss";
 </style>
