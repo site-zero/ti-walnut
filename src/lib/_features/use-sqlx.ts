@@ -1,5 +1,5 @@
 import { SqlExecPreError, Walnut } from "@site0/ti-walnut";
-import { AlertError, Util, Vars } from "@site0/tijs";
+import { AlertError, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
 import {
@@ -75,8 +75,10 @@ export function defineSqlx(daoName?: string) {
     q: Vars
   ): Promise<SqlResult[]> {
     try {
-      let qobj = Util.filterRecordNilValueDeeply(q);
-      let qstr = JSON.stringify(qobj);
+      // zozoh@20260520 原来设计的是所有 null 值需要显示的声明 '<null>'
+      // 但是现在我觉得这样太违反直觉了，应该在 use-rds-list.store 那边做掉
+      //let qobj = Util.filterRecordNilValueDeeply(q);
+      let qstr = JSON.stringify(q);
 
       // 准备命令
       let cmds = [`sqlx`];
@@ -158,8 +160,10 @@ export function defineSqlx(daoName?: string) {
     countKey: string = "total"
   ): Promise<number> {
     try {
-      let qobj = Util.filterRecordNilValueDeeply(filter);
-      let qstr = JSON.stringify(qobj);
+      // zozoh@20260520 原来设计的是所有 null 值需要显示的声明 '<null>'
+      // 但是现在我觉得这样太违反直觉了，应该在 use-rds-list.store 那边做掉
+      //let qobj = Util.filterRecordNilValueDeeply(filter);
+      let qstr = JSON.stringify(filter);
 
       // 准备命令
       let cmds = [`sqlx`];
