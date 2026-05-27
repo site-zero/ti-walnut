@@ -127,7 +127,7 @@ function _translate_session_result(data: any) {
     mainRole,
     gender: toGender(me.sex),
     nickname: me.nickname,
-    sysAccount: me.sysAccount ? true : false,
+    sysAccount: me.userRace === "SYS",
     meta: me.meta || {},
   };
   SE.env = env;
