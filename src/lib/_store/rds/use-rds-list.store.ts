@@ -499,6 +499,29 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   }
 
   /**
+   * 获取远程数据
+   */
+  function getRemoteItemById(id?: string): SqlResult | undefined {
+    if (_.isNil(id)) {
+      return undefined;
+    }
+    for (let it of _remote.value ?? []) {
+      let itId = getItemId(it);
+      if (itId == id) {
+        return it;
+      }
+    }
+  }
+
+  function getRemoteItemByIndex(index: number): SqlResult | undefined {
+    let list = _remote.value || [];
+    if (index < 0 || index >= list.length) {
+      return undefined;
+    }
+    return list[index];
+  }
+
+  /**
    * 获取数据的 ID
    */
   function getItemId(it: SqlResult, index: number = -1): string {
@@ -1076,7 +1099,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //---------------------------------------------
     //                  Getters
     //---------------------------------------------
-    //isChanged: () => _local.isChanged(),
+    getRemoteItemById,
+    getRemoteItemByIndex,
+    //---------------------------------------------
     existsInRemote,
     getItemId,
     getItemIndex,
