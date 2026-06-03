@@ -708,6 +708,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return re;
   }
 
+  function setRemoteItemBy(meta: Vars, options: LocalListUpdateItemOptions) {
+    _local.setRemoteItem(meta, options);
+  }
+
   function updateItemBy(
     meta: Vars,
     options: LocalListUpdateItemOptions
@@ -1142,6 +1146,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     prependItem,
     appendItems,
     prependItems,
+
+    setRemoteItemBy,
 
     updateCurrent,
     updateItem,

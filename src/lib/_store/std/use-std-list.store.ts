@@ -249,7 +249,7 @@ function defineStdListStore(options: StdListStoreOptions) {
         if (diff.existsInTarget && diff.existsInMine) {
           let obj = await _obj.update(diff.delta);
           if (obj) {
-            updateItemBy(obj, { id: obj.id });
+            setRemoteItemBy(obj, { id: obj.id });
           }
         }
         // 插入新对象
@@ -675,6 +675,10 @@ function defineStdListStore(options: StdListStoreOptions) {
       }
     }
     return re;
+  }
+
+  function setRemoteItemBy(meta: Vars, options: LocalListUpdateItemOptions) {
+    _local.setRemoteItem(meta, options);
   }
 
   function updateItemBy(
@@ -1136,6 +1140,8 @@ function defineStdListStore(options: StdListStoreOptions) {
     prependItem,
     appendItems,
     prependItems,
+
+    setRemoteItemBy,
 
     updateCurrent,
     updateItem,

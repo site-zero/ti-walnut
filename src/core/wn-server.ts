@@ -7,6 +7,7 @@ import {
   installTiCoreI18n,
   Match,
   openAppModal,
+  OpenUrlOptions,
   setEnv,
   SideBarItem,
   Str,
@@ -385,6 +386,32 @@ export class WalnutServer {
       uri.push(`_wn_ticket_=${this._ticket}`);
     }
     return this.getUrl(uri.join("&"));
+  }
+
+  getUrlForObjDownload(
+    id: string,
+    options: GetUrlForObjContentOptions = {}
+  ): [string, OpenUrlOptions] {
+    let { download = "auto", downName, withTicket } = options;
+    let url: string;
+    let params: Vars = {
+      str: `id:${id}`,
+    };
+    if (downName) {
+      url = `/o/content/${encodeURIComponent(downName)}`;
+    } else {
+      url = `/o/content`;
+    }
+    if (download) {
+      params.d = download;
+    }
+    if (withTicket && this._ticket) {
+      params._wn_ticket_ = this._ticket;
+    }
+    return [
+      this.getUrl(url, params),
+      { target: "_blank", method: "GET", params },
+    ];
   }
 
   getUrlForObjOpen(
@@ -1283,10 +1310,25 @@ export class WalnutServer {
       mode = "a",
       tmpl = "${major}(${nb})${suffix}",
       prefix,
+      requiredPrefix,
       progress,
       signal,
       addMeta = {},
     } = options;
+
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type.toLowerCase();
+
+    // 检查文件上传前缀
+    if (requiredPrefix && !prefix) {
+      let msg = I18n.textf("i18n:warn-upload-required-prefix", {
+        fileType,
+        fileName,
+        accept: options.accept,
+      });
+      //await Alert(msg, { type: "warn" });
+      throw new Error(msg);
+    }
 
     // 判断是否支持该文件类型
     // 这个 accept 就是标准的 input.accept 属性
@@ -1297,8 +1339,6 @@ export class WalnutServer {
         .toLowerCase()
         .split(",")
         .map((item) => item.trim());
-      const fileName = file.name.toLowerCase();
-      const fileType = file.type.toLowerCase();
       let isAccepted = false;
 
       for (const _accept of _accepts) {
@@ -1336,7 +1376,7 @@ export class WalnutServer {
           fileName,
           accept: options.accept,
         });
-        await Alert(msg, { type: "warn" });
+        //await Alert(msg, { type: "warn" });
         throw new Error(msg);
       }
     }
@@ -1455,7 +1495,15 @@ export type WnUploadFileOptions = {
   target: string;
   mode?: "a" | "r" | "s";
   tmpl?: string;
+  /**
+   * 上传的文件，需要自动加上这个指定的前缀
+   */
   prefix?: string | null;
+
+  /**
+   * 开启这个选项，没有指定 prefix 传，将被拒绝
+   */
+  requiredPrefix?: boolean;
   // accept="image/*, text/*, .jpg, .jpeg, .pdf"
   accept?: string;
   progress?: (info: WnUploadFileProgress) => void;

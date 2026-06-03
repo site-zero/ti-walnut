@@ -204,8 +204,26 @@ export function useLocalListEdit(
     return false;
   }
   //---------------------------------------------
-  function updateItem(
+  function setRemoteItem(
     meta: Vars,
+    updateOptions: LocalListUpdateItemOptions
+  ): SqlResult | undefined {
+    let { index, id, defaultMeta } = updateOptions;
+    if (id) {
+      index = getRowIndex(id);
+    }
+    let len = remoteList.value?.length || 0;
+    if (_.isNumber(index) && index >= 0 && index < len) {
+      if (defaultMeta) {
+        _.defaults(meta, defaultMeta);
+      }
+      remoteList.value![index] = meta;
+      return meta;
+    }
+  }
+  //---------------------------------------------
+  function updateItem(
+    delta: Vars,
     updateOptions: LocalListUpdateItemOptions
   ): SqlResult | undefined {
     let { index, id, defaultMeta } = updateOptions;
@@ -220,7 +238,7 @@ export function useLocalListEdit(
       initLocalList();
       if (_local_list.value && i < _local_list.value.length) {
         let re = _local_list.value[i];
-        _.assign(re, meta);
+        _.assign(re, delta);
         if (defaultMeta) {
           _.defaults(re, defaultMeta);
         }
@@ -677,6 +695,7 @@ export function useLocalListEdit(
     append,
     prependToList,
     prepend,
+    setRemoteItem,
     updateItem,
     clearItemNilValue,
     batchUpdate,
