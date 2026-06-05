@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-  import { LabelProps, TiLabel } from '@site0/tijs';
-  import { computed } from 'vue';
-  import { getWnObjIcon } from '../../../core';
-  import { WnObjThumbProps } from './wn-obj-thumb-types';
+  import { LabelProps, TiLabel } from "@site0/tijs";
+  import { computed } from "vue";
+  import { getWnObjIcon } from "../../../core";
+  import { WnObjThumbProps } from "./wn-obj-thumb-types";
   //-----------------------------------------------------
   const props = defineProps<WnObjThumbProps>();
   //-----------------------------------------------------
@@ -14,10 +14,13 @@
     let value = props.value ?? {};
     let re: LabelProps = { autoI18n: true };
     if (value) {
-      let { title, nm } = value;
+      let { title, nm, tp } = value;
       if (title && nm) {
         if (title != nm) {
           re.value = title;
+          if (tp) {
+            re.value = [title, tp].join(".");
+          }
           re.autoI18n = true;
           //re.suffixText = nm;
         } else {
@@ -33,7 +36,7 @@
     }
     // 空名称
     else {
-      re.value = 'i18n:nil';
+      re.value = "i18n:nil";
     }
     return re;
   });
