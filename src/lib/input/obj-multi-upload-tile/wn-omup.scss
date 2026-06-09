@@ -1,0 +1,45 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wn-obj-multi-upload-tail {
+  position: relative;
+  border: 1px solid var(--ti-color-border-thin);
+  border-radius: var(--ti-measure-r-s);
+  padding: var(--ti-gap-m);
+  user-select: none;
+  min-height: 100px;
+  //-----------------------------------------------------
+  a.placeholder {
+    @include flex-align-nowrap;
+    gap: var(--ti-gap-m);
+  }
+  //-----------------------------------------------------
+  &.drag-enter {
+    > .tile-con {
+      filter: blur(1.5px);
+      opacity: 0.6;
+    }
+    > .uploading-box {
+      inset: 0;
+      opacity: 1;
+      pointer-events: fill;
+    }
+  }
+  //-----------------------------------------------------
+  > .uploading-box {
+    position: absolute;
+    inset: 3px;
+    z-index: $z-mask;
+    border: 2px dotted var(--ti-color-secondary);
+    pointer-events: none;
+    opacity: 0;
+    transition: 300ms;
+    background-color: var(--ti-color-highlight);
+    padding: var(--ti-gap-h);
+    > main {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: var(--ti-gap-h);
+    }
+  }
+  //-----------------------------------------------------
+}
