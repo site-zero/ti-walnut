@@ -37,13 +37,13 @@ export type MakeMetaChangeParams = {
 };
 
 /**
-   * 在 `makeChange` 时使用的补丁元数据更新函数。
-   * 如果指定为 `null`，则不会自动添加更新 ID。
-   *
-   * @param diff - 变量的差异
-   * @param id - 表行 ID
-   * @param remote - 远程 SQL 结果
-   */
+ * 在 `makeChange` 时使用的补丁元数据更新函数。
+ * 如果指定为 `null`，则不会自动添加更新 ID。
+ *
+ * @param diff - 变量的差异
+ * @param id - 表行 ID
+ * @param remote - 远程 SQL 结果
+ */
 export type PatchMeta = (diff: Vars, id: TableRowID, remote: SqlResult) => void;
 
 /**
@@ -152,11 +152,12 @@ export function useMakeMetaChange(options: MakeMetaChangeOptions) {
     if (options.defaultMeta) {
       // 动态计算
       if (_.isFunction(options.defaultMeta)) {
-        _.assign(diff, options.defaultMeta(local, remote));
+        let dftDiff = options.defaultMeta(local, remote);
+        _.assign(delta, dftDiff);
       }
       // 静态值
       else {
-        _.assign(diff, options.defaultMeta);
+        _.assign(delta, options.defaultMeta);
       }
     }
 

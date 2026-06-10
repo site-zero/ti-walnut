@@ -91,6 +91,11 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     }
     return "unloaded";
   });
+
+  //---------------------------------------------
+  function getFilterField(key: string, dft?: any) {
+    return _.get(_filter, key) ?? dft;
+  }
   //---------------------------------------------
   function reset() {
     clearRemoteMeta();
@@ -111,6 +116,26 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
 
   function resetLocalChange() {
     _local.reset();
+  }
+
+  function setActionStatus(st?: DataStoreActionStatus | null) {
+    _action_status.value = st || undefined;
+  }
+
+  function updateFilter(filter: QueryFilter) {
+    _.assign(_filter.value, filter);
+  }
+
+  function setFilter(filter: QueryFilter) {
+    _filter.value = filter;
+  }
+
+  function updateMeta(meta: SqlResult) {
+    _local.updateMeta(meta);
+  }
+
+  function setMeta(meta: SqlResult) {
+    _local.setMeta(meta);
   }
 
   //---------------------------------------------
@@ -296,9 +321,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //                  Getters
     //---------------------------------------------
     isChanged: () => _local.isChanged(),
-    getFilterField: (key: string, dft?: any) => {
-      return _.get(_filter, key) ?? dft;
-    },
+    getFilterField,
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
@@ -307,21 +330,11 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     reset,
     dropChange,
 
-    updateFilter(filter: QueryFilter) {
-      _.assign(_filter.value, filter);
-    },
-
-    setFilter(filter: QueryFilter) {
-      _filter.value = filter;
-    },
-
-    updateMeta(meta: SqlResult) {
-      _local.updateMeta(meta);
-    },
-
-    setMeta(meta: SqlResult) {
-      _local.setMeta(meta);
-    },
+    setActionStatus,
+    updateFilter,
+    setFilter,
+    updateMeta,
+    setMeta,
 
     makeChanges,
     joinChanges,

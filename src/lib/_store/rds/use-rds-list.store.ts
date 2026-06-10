@@ -868,6 +868,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     setFilter(flt);
     await refresh();
   }
+  //---------------------------------------------
+  function setActionStatus(st?: DataStoreActionStatus | null) {
+    _action_status.value = st || undefined;
+  }
   //-----------------------------------------------------
   function addLocalItem(meta: SqlResult) {
     _local.appendToList(meta);
@@ -1137,10 +1141,8 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     applyFilter,
     applySorter,
 
+    setActionStatus,
     addLocalItem,
-    setActionStatus(st?: DataStoreActionStatus | null) {
-      _action_status.value = st || undefined;
-    },
 
     appendItem,
     prependItem,
