@@ -10,14 +10,19 @@ export type WnGenIdOptions = {
    * 批量生成 ID 的数量，默认为 100
    */
   batchSize?: number;
+
+  /**
+   * 可以预先分配足量的 ID
+   */
+  newIds?: string[];
 };
 
 export type WnGenIdsApi = ReturnType<typeof useWnGenIds>;
 
 export function useWnGenIds(options: WnGenIdOptions = {}) {
-  const { mode = "snowQ::10", batchSize = 100 } = options;
+  const { mode = "snowQ::10", batchSize = 100, newIds = [] } = options;
   // 缓存 ids
-  let _ids: string[] = [];
+  let _ids: string[] = newIds;
   let _index = 0;
 
   function reset() {

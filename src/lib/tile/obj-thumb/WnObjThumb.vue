@@ -18,8 +18,9 @@
       if (title && nm) {
         if (title != nm) {
           re.value = title;
-          if (tp) {
-            re.value = [title, tp].join(".");
+          let suffix = "." + tp;
+          if (tp && !title.endsWith(suffix)) {
+            re.value = title + suffix;
           }
           re.autoI18n = true;
           //re.suffixText = nm;

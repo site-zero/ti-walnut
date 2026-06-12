@@ -36,7 +36,11 @@ import {
   WnObjContentFinger,
   WnObjQueryOptions,
 } from "../../";
-import { getObjContentFinger, isObjContentEditable } from "../../../core/wn";
+import {
+  getObjContentFinger,
+  isObjContentEditable,
+  parseObjId,
+} from "../../../core/wn";
 import { useObjContentStore } from "../use-obj-content.store";
 import { auto_create_obj } from "./support/auto-create-home";
 
@@ -71,6 +75,14 @@ export type StdListStoreOptions = LocalListEditSetup & {
    * 固定过滤条件
    */
   fixedMatch?: QueryFilter | (() => QueryFilter);
+  /**
+   * 如果指定了这个选项，将会生成一个 AutoMatch
+   * 如果匹配了查询条件才可查询。
+   * 如果不声明这个选项，则什么条件都会查询
+   *
+   * 它的上下文输入为整个 SqlQuery 对象
+   */
+  filterReady?: any;
   /**
    * 默认查询条件
    */
@@ -113,12 +125,24 @@ function defineStdListStore(options: StdListStoreOptions) {
   if (_.isNil(_options.autoRemoveItemNilValue)) {
     _options.autoRemoveItemNilValue = true;
   }
+  //---------------------------------------------
+  // 本地状态
+  //---------------------------------------------
   let _keep_query_by = ref(options?.keepQuery);
   let _keep_select_by = ref(options?.keepSelect);
   const _obj = useWnObj();
   const _home_obj = ref<WnObj>();
   const _dir_index = ref<WnObj>();
   const _dir_data = ref<WnObj>();
+  //---------------------------------------------
+  //              检查查询条件是否就绪
+  //---------------------------------------------
+  function _is_filter_ready(q: SqlQuery): boolean {
+    if (!q || _.isEmpty(q)) return false;
+    if (_.isNil(options.filterReady)) return true;
+    const am = Match.parse(options.filterReady);
+    return am.test(q);
+  }
   //---------------------------------------------
   // 本地状态数据
   const _keep_query = computed(() => useKeep(_keep_query_by.value));
@@ -233,6 +257,14 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
     return "partial";
   });
+  //---------------------------------------------
+  const CurrentObjId = computed(() => {
+    if (_current_id.value) {
+      return parseObjId(_current_id.value);
+    }
+  });
+  const CurrentObjHomeId = computed(() => CurrentObjId.value?.homeId);
+  const CurrentObjSelfId = computed(() => CurrentObjId.value?.selfId);
   //---------------------------------------------
   const Pager = computed(() => _query.value.pager);
   const Filter = computed(() => _query.value.filter);
@@ -850,6 +882,10 @@ function defineStdListStore(options: StdListStoreOptions) {
       // 准备查询条件
       let q = __gen_query();
       //console.log('queryRemoteList', q);
+      // 没有过滤条件，就不查询数据
+      if (!_is_filter_ready(q)) {
+        return [[], { pageNumber: 0, pageSize: 0 }];
+      }
       let oDir = IndexDirObj.value;
 
       // 防空，如果未找到主目录对象，就直接清空数据
@@ -1096,6 +1132,9 @@ function defineStdListStore(options: StdListStoreOptions) {
     isLocalEmpty,
     CurrentItem,
     CurrentContent,
+    CurrentObjId,
+    CurrentObjHomeId,
+    CurrentObjSelfId,
     Pager,
     Filter,
     Sorter,
