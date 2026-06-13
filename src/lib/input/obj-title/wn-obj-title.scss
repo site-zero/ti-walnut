@@ -1,0 +1,71 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wn-obj-title {
+  --box-color-border: var(--ti-color-border-dark);
+  --box-color-text: var(--ti-color-box-f);
+  --box-color-bg: var(--ti-color-box);
+  --box-color-focus-border: var(--ti-color-primary);
+  --box-color-focus-text: var(--ti-color-highlight-f);
+  --box-color-focus-bg: var(--ti-color-highlight);
+  --box-fontsz: inherit;
+  --box-padding: var(--ti-box-pad-m);
+  --box-radius: var(--ti-measure-r-s);
+  font-size: var(--box-fontsz);
+  flex: 1 1 auto;
+  border: 1px solid var(--box-color-border);
+  border-radius: var(--box-radius);
+  @include flex-align-nowrap($ai: stretch);
+  //-----------------------------------------------------
+  // &.is-editing {
+  //   border-color: var(--box-color-focus-border);
+  //   background-color: var(--box-color-focus-bg);
+  //   color: var(--box-color-focus-text);
+  // }
+  //-----------------------------------------------------
+  > .as-text {
+    flex: 1 1 auto;
+    width: 100px;
+    height: 2.5em;
+    line-height: 2.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 0.5em;
+  }
+  //-----------------------------------------------------
+  > .as-icon {
+    @include flex-align-nowrap($ai: stretch);
+    //---------------------------------------------------
+    &.is-info {
+      border-right: 1px solid var(--ti-color-border-shallow);
+      width: 1.5em;
+      font-size: 1.3em;
+      @include flex-center;
+      cursor: pointer;
+      &:hover{
+        background-color: var(--ti-color-border-shallow);
+      }
+    }
+    //---------------------------------------------------
+    &.is-menu {
+      border-left: 1px solid var(--ti-color-border-shallow);
+    }
+    //---------------------------------------------------
+    a {
+      @include flex-center;
+      color: var(--box-color-text);
+      width: 2em;
+      > i {
+        transition: transform 0.3s;
+      }
+      &:hover {
+        color: var(--box-color-focus-border);
+        background-color: var(--box-color-focus-bg);
+        text-decoration: none;
+        > i {
+          transform: rotate(10deg) scale(1.3);
+        }
+      }
+    }
+  }
+  //-----------------------------------------------------
+}
