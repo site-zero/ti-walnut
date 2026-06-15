@@ -30,7 +30,6 @@ export function isWnObj(obj: any): obj is WnObj {
     obj &&
     typeof obj === "object" &&
     _.isString(obj.id) &&
-    _.isString(obj.pid) &&
     /^(DIR|FILE)$/.test(obj.race) &&
     _.isString(obj.nm)
   );

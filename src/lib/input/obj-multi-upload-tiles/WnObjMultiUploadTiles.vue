@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-  import { ObjUploadItem, useObjDropToUpload } from "@site0/ti-walnut";
+  import {
+    ObjUploadItem,
+    useObjDropToUpload,
+    WnObjWall,
+  } from "@site0/ti-walnut";
   import { I18n, TiIcon, TiThumb } from "@site0/tijs";
   import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
   import { useWnObjMultiUploadTailApi } from "./use-wn-omup-api";
@@ -10,10 +14,12 @@
   //-----------------------------------------------------
   const emit = defineEmits<WnObjMultiUploadTailEmitter>();
   const props = withDefaults(defineProps<WnObjMultiUploadTailProps>(), {
-    placeholder: "i18n:wn-obj-multi-upload-tail-placeholder",
+    placeholder: "i18n:wn-obj-multi-upload-tiles-placeholder",
     uploadIcon: "fas-upload",
+    valueType: "idPath",
   });
-  const _api = useWnObjMultiUploadTailApi(props, { emit });
+  //-----------------------------------------------------
+  const api = useWnObjMultiUploadTailApi(props, emit);
   //-----------------------------------------------------
   const $el = useTemplateRef("el");
   const _drag_enter = ref(false);
@@ -43,6 +49,22 @@
     }
   );
   //-----------------------------------------------------
+  watch(
+    () => props.value,
+    async () => {
+      await api.reloadObjs();
+    },
+    { immediate: true }
+  );
+  //-----------------------------------------------------
+  watch(
+    () => props.mountHome,
+    async () => {
+      await api.reloadMountHome();
+    },
+    { immediate: true }
+  );
+  //-----------------------------------------------------
   onMounted(() => {
     if (props.upload) {
       _upload_api.reset();
@@ -52,11 +74,14 @@
 </script>
 <template>
   <div class="wn-obj-multi-upload-tail" :class="TopClass" ref="el">
-    {{ _drag_enter }}
-    <a class="placeholder">
+    <!--| 占位 |-->
+    <a class="placeholder" v-if="api.isEmpty.value">
       <TiIcon :value="props.uploadIcon" />
       <span>{{ I18n.text(props.placeholder) }}</span>
     </a>
+    <!--| 展示控件 |-->
+    <WnObjWall v-else :data="api.ObjList.value" />
+    <!--| 上传 |-->
     <div class="uploading-box">
       <main v-if="hasUploading">
         <TiThumb

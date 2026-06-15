@@ -876,7 +876,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   function addLocalItem(meta: SqlResult) {
     _local.appendToList(meta);
   }
-
+  //-----------------------------------------------------
   function __gen_query(): SqlQuery {
     let q = Util.jsonClone(_query.value);
     q.filter = q.filter ?? {};

@@ -19,6 +19,7 @@ import {
   buildConflict,
   BuildConflictItemOptions,
   buildDifferentItem,
+  Match,
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
@@ -30,7 +31,15 @@ export type RdsMetaStoreApi = ReturnType<typeof defineRdsMetaStore>;
 
 export type RdsMetaStoreOptions = LocalMetaEditSetup & {
   daoName?: string;
-  filter: QueryFilter;
+  /**
+   * 如果指定了这个选项，将会生成一个 AutoMatch
+   * 如果匹配了查询条件才可查询。
+   * 如果不声明这个选项，则什么条件都会查询
+   *
+   * 它的上下文输入为整个 SqlQuery 对象
+   */
+  filterReady?: any;
+  filter: QueryFilter | (() => QueryFilter);
   sqlFetch: string;
   makeChange?: LocalMetaMakeChangeOptions;
   refreshWhenSave?: boolean;
@@ -53,7 +62,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   //---------------------------------------------
   const _remote = ref<SqlResult>();
   const _action_status = ref<DataStoreActionStatus>();
-  const _filter = ref<QueryFilter>(options.filter);
+  //const _filter = ref<QueryFilter>(options.filter);
   //---------------------------------------------
   const hasRemoteMeta = computed(() => {
     if (!_remote.value || _.isEmpty(_remote.value)) {
@@ -91,11 +100,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     }
     return "unloaded";
   });
-
-  //---------------------------------------------
-  function getFilterField(key: string, dft?: any) {
-    return _.get(_filter, key) ?? dft;
-  }
   //---------------------------------------------
   function reset() {
     clearRemoteMeta();
@@ -122,13 +126,13 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     _action_status.value = st || undefined;
   }
 
-  function updateFilter(filter: QueryFilter) {
-    _.assign(_filter.value, filter);
-  }
+  // function updateFilter(filter: QueryFilter) {
+  //   _.assign(_filter.value, filter);
+  // }
 
-  function setFilter(filter: QueryFilter) {
-    _filter.value = filter;
-  }
+  // function setFilter(filter: QueryFilter) {
+  //   _filter.value = filter;
+  // }
 
   function updateMeta(meta: SqlResult) {
     _local.updateMeta(meta);
@@ -223,7 +227,24 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     _remote.value = server;
     apply_conflict(_local.localMeta, server, localDiff);
   }
+  //---------------------------------------------
+  //                  帮助函数
+  //---------------------------------------------
+  function __gen_filter(): QueryFilter {
+    if (_.isFunction(options.filter)) {
+      return options.filter();
+    }
 
+    // 直接采用
+    return _.cloneDeep(options.filter);
+  }
+  //---------------------------------------------
+  function _is_filter_ready(flt: QueryFilter): boolean {
+    if (!flt || _.isEmpty(flt)) return false;
+    if (_.isNil(options.filterReady)) return true;
+    const am = Match.parse(options.filterReady);
+    return am.test(flt);
+  }
   //---------------------------------------------
   //                  远程操作
   //---------------------------------------------
@@ -237,7 +258,12 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //console.log('I am fetch remote', _filter.value);
     _action_status.value = "loading";
     try {
-      let re = await sqlx.fetch(options.sqlFetch, _filter.value);
+      let flt = __gen_filter();
+      let re = await sqlx.fetch(options.sqlFetch, flt);
+      // 没有过滤条件，就不查询数据
+      if (!_is_filter_ready(flt)) {
+        return undefined;
+      }
       if (re && options.patchRemote) {
         re = options.patchRemote(re);
       }
@@ -304,7 +330,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     // 数据模型
     _local,
     status: _action_status,
-    filter: _filter,
     remoteMeta: _remote,
     //---------------------------------------------
     //                  计算属性
@@ -321,7 +346,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //                  Getters
     //---------------------------------------------
     isChanged: () => _local.isChanged(),
-    getFilterField,
     //---------------------------------------------
     //                  本地方法
     //---------------------------------------------
@@ -331,8 +355,6 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     dropChange,
 
     setActionStatus,
-    updateFilter,
-    setFilter,
     updateMeta,
     setMeta,
 

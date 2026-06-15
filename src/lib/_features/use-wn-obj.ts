@@ -54,6 +54,26 @@ export function useWnObj(homePath: string = "~") {
   }
 
   /**
+   * 批量获取多个对象。
+   * @param paths 对象路径列表
+   * @returns 对象解析后的内容列表
+   */
+  async function fetchBy(...paths: string[]): Promise<WnObj[]> {
+    if (_.isEmpty(paths)) {
+      return [];
+    }
+    let cmd = ["o"];
+    for (let path of paths) {
+      let aph = genWnPath(_home_path, path);
+      cmd.push(`@fetch -ignore '${aph}'`);
+    }
+    cmd.push(`@json -cqn`);
+    let cmdText = cmd.join(" ");
+    let re = await Walnut.exec(cmdText, { as: "json" });
+    return re ?? [];
+  }
+
+  /**
    * @param path 对象路径
    * @returns 对象解析后的内容
    */
@@ -63,6 +83,26 @@ export function useWnObj(homePath: string = "~") {
     let cmdText = `o @get -ignore '${theId}'  @json -cqn`;
     let re = await Walnut.exec(cmdText, { as: "json" });
     return re ?? undefined;
+  }
+
+  /**
+   * 批量获取多个对象。
+   * @param paths 对象路径列表
+   * @returns 对象解析后的内容列表
+   */
+  async function getBy(...ids: string[]): Promise<WnObj[]> {
+    if (_.isEmpty(ids)) {
+      return [];
+    }
+    let cmd = ["o"];
+    for (let id of ids) {
+      let theId = id.replace(/'/g, "");
+      cmd.push(`@get -ignore '${theId}'`);
+    }
+    cmd.push(`@json -cqn`);
+    let cmdText = cmd.join(" ");
+    let re = await Walnut.exec(cmdText, { as: "json" });
+    return re ?? [];
   }
 
   /**
@@ -368,7 +408,9 @@ export function useWnObj(homePath: string = "~") {
   //---------------------------------------------
   return {
     fetch,
+    fetchBy,
     get,
+    getBy,
     remove,
     update,
     create,

@@ -11,6 +11,7 @@
     showChecker: true,
     multi: true,
     layoutHint: "<120>",
+    thumbFontSize: 'm'
   });
   //-----------------------------------------------------
   const api = useObjWallApi(props);
