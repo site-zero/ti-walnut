@@ -80,7 +80,8 @@
       <span>{{ I18n.text(props.placeholder) }}</span>
     </a>
     <!--| 展示控件 |-->
-    <WnObjWall v-else :data="api.ObjList.value" />
+    <WnObjWall v-else :data="api.ObjList.value"
+     />
     <!--| 上传 |-->
     <div class="uploading-box">
       <main v-if="hasUploading">

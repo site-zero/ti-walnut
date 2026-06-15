@@ -45,7 +45,7 @@ export type WnObjWallProps = CommonProps &
     //-------------------------------------
 
     /**
-     * * 缩率图，如果是字体图标，那么 `<i>` 的自定义样式
+     * 缩略图，如果是字体图标，那么 `<i>` 的自定义样式
      */
     thumbFontStyle?: Vars;
 
