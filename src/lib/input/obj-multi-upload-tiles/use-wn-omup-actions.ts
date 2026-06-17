@@ -45,8 +45,8 @@ export function useWnObjMultiUploadTilesActions(
           text: "i18n:del-ing",
         },
         enabled: { hasChecked: true, idle: true },
-        action: () => {
-          api.removeChecked();
+        action: async () => {
+          await api.removeChecked();
         },
       },
       // {},

@@ -16,7 +16,7 @@ import {
   WnObjMultiUploadTilesProps,
 } from "./wn-omup-types";
 
-import { Alert, Be, Vars } from "@site0/tijs";
+import { Alert, Be, Confirm, Vars } from "@site0/tijs";
 
 export type WnObjMultiUploadTilesApi = ReturnType<
   typeof useWnObjMultiUploadTilesApi
@@ -198,6 +198,11 @@ export function useWnObjMultiUploadTilesApi(
     // 防空
     if (_.isEmpty(objs)) {
       Alert("Please Select files to delete", { type: "warn" });
+      return;
+    }
+
+    // 确认
+    if (!(await Confirm("i18n:del-hard", { type: "warn" }))) {
       return;
     }
 
