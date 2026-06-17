@@ -1,11 +1,25 @@
 import {
+  AjaxResult,
+  DomainConfig,
+  getGlobalStatus,
+  isAjaxResult,
+  isWnObj,
+  ServerConfig,
+  SignInForm,
+  UserSidebar,
+  useUploadName,
+  WnApplication,
+  WnAssociation,
+  WnExecOptions,
+  WnFetchObjOptions,
+  WnLoadOptions,
+  WnObj,
+} from "@site0/ti-walnut";
+import {
   Alert,
   ENV_KEYS,
   I18n,
-  init_ti_std_columns,
-  init_ti_std_fields,
   installTiCoreI18n,
-  Match,
   openAppModal,
   OpenUrlOptions,
   setEnv,
@@ -21,24 +35,6 @@ import {
 import JSON5 from "json5";
 import _ from "lodash";
 import { installWalnutI18n } from "../i18n";
-import {
-  AjaxResult,
-  DomainConfig,
-  GlobalStatusApi,
-  isAjaxResult,
-  isWnObj,
-  ServerConfig,
-  SignInForm,
-  UIViewSetup,
-  useGlobalStatus,
-  UserSidebar,
-  WnApplication,
-  WnAssociation,
-  WnExecOptions,
-  WnFetchObjOptions,
-  WnLoadOptions,
-  WnObj,
-} from "../lib";
 import { installWalnutDicts } from "./wn-dict";
 import { wnRunCommand } from "./wn-run-command";
 
@@ -65,17 +61,12 @@ export type GetUrlForObjContentOptions = {
 };
 
 export class WalnutServer {
-  private _gl_sta: GlobalStatusApi;
+  //private _gl_sta: GlobalStatusApi;
 
   /**
    * 记录远端服务器属性
    */
   private _conf: ServerConfig;
-
-  /**
-   * 记录服务视图配置
-   */
-  private _view: UIViewSetup;
 
   /**
    * 会话票据
@@ -87,13 +78,6 @@ export class WalnutServer {
    */
   private _cache: Map<string, any>;
 
-  /**
-   * 当 loadMyDynmicUISettings 加载完毕后，服务器才会准备一系列动态 UI 相关的配置
-   * 通常这个时候 WnHubArena 才能加载 UI 的配置，为了保证这一点，我们需要提供一个地方
-   * 来注册回调
-   */
-  private _after_dynamic_ui_ready: undefined | (() => Promise<void>);
-
   private _dynamic_ui_loading: boolean;
   private _dynamic_ui_ready: boolean;
 
@@ -102,8 +86,7 @@ export class WalnutServer {
   private _associations: WnAssociation[];
 
   constructor() {
-    this._gl_sta = useGlobalStatus();
-    this._view = {} as UIViewSetup;
+    //this._gl_sta = useGlobalStatus();
     this._conf = {
       protocal: "http",
       host: "localhost",
@@ -149,19 +132,21 @@ export class WalnutServer {
     setTicketToLocalStore(ticket);
 
     // 初始化全局状态
-    this._gl_sta.data.appVersion = appVersion ?? "0.0.0";
-    this._gl_sta.data.appTitle = appTitle ?? "Walnut";
-    this._gl_sta.data.appName = appName || undefined;
-    this._gl_sta.data.appBase = appBase || "/";
-    this._gl_sta.data.quitPath = quitPath || undefined;
-    this._gl_sta.data.serverBase = serverBase;
-    this._gl_sta.data.configName = configName;
-    this._gl_sta.data.domain = domain || undefined;
-    this._gl_sta.data.loginSite = loginSite || undefined;
+    const _gl_sta = getGlobalStatus();
+    _gl_sta.data.appVersion = appVersion ?? "0.0.0";
+    _gl_sta.data.appTitle = appTitle ?? "Walnut";
+    _gl_sta.data.appName = appName || undefined;
+    _gl_sta.data.appBase = appBase || "/";
+    _gl_sta.data.quitPath = quitPath || undefined;
+    _gl_sta.data.serverBase = serverBase;
+    _gl_sta.data.configName = configName;
+    _gl_sta.data.domain = domain || undefined;
+    _gl_sta.data.loginSite = loginSite || undefined;
   }
 
   async prepare() {
-    let { serverBase, configName, domain, loginSite } = this._gl_sta.data;
+    const _gl_sta = getGlobalStatus();
+    let { serverBase, configName, domain, loginSite } = _gl_sta.data;
 
     // 准备服务配置文件路径
     let configPath = [serverBase, configName].join("/");
@@ -184,19 +169,19 @@ export class WalnutServer {
 
     // 根据配置文件，设置全局状态管理
     if (config.logo) {
-      this._gl_sta.data.appLogo = config.logo;
+      _gl_sta.data.appLogo = config.logo;
     }
     if (config.mainLogo) {
-      this._gl_sta.data.signupMainLogo = config.mainLogo;
+      _gl_sta.data.signupMainLogo = config.mainLogo;
     }
     if (config.appTitle) {
-      this._gl_sta.data.appTitle = config.appTitle;
+      _gl_sta.data.appTitle = config.appTitle;
     }
     if (config.site) {
-      this._gl_sta.data.loginSite = config.site;
+      _gl_sta.data.loginSite = config.site;
     }
     if (config.domain) {
-      this._gl_sta.data.domain = config.domain;
+      _gl_sta.data.domain = config.domain;
     }
 
     // 初始化服务器
@@ -241,18 +226,6 @@ export class WalnutServer {
       this.loadDicts("public");
     }
 
-    // 初始化系统界面相关的设定
-    if (conf.ui) {
-      // 启用标准表单字段
-      if (conf.ui.useStdFields) {
-        init_ti_std_fields();
-      }
-      // 启用标准表格列
-      if (conf.ui.useStdColumns) {
-        init_ti_std_columns();
-      }
-    }
-
     // 加载 i18n 资源
     if (conf.i18n) {
       await this.loadI18n("public");
@@ -268,58 +241,9 @@ export class WalnutServer {
     return re ?? dft;
   }
 
-  findPath(path: string, content: Vars) {
-    let rePath: string = path;
-
-    // 获取路径规则
-    let __paths: Vars = this._view.paths ?? {};
-
-    // hubPath 的值类似  `setting/a/b/c` 我们需要用下面的逻辑
-    // 来路由这个路径到真正的 Walnut 对象路径
-    // 我们会依次循环尝试：
-    //  - setting/a/b/c
-    //  - setting/a/b
-    //  - setting/a
-    //  - setting
-    // 看看 _paths 里有没有定制对应的映射
-    // 譬如，我们在 setting/a  的时候找到了映射，我们会保留 b/c 部分
-    // 以便最后添加到返回值的结尾，也就是说，如果规则是:
-    //  - setting/a : "~/.domain"
-    // 那么函数最后的返回值应该是 "~/.domain/b/c"
-    let pathArms = __paths[path];
-    // Handle partial path matching: try progressively shorter paths
-    if (!pathArms) {
-      const segments = path.split("/");
-
-      // 尝试逐步缩短路径来匹配
-      for (let i = segments.length - 1; i > 0; i--) {
-        let partialPath = segments.slice(0, i).join("/");
-        pathArms = __paths[partialPath];
-
-        if (pathArms) {
-          // 构造剩余路径并加入上下文，以便渲染
-          content.remain = segments.slice(i).join("/") || "";
-          break;
-        }
-      }
-    }
-
-    // 还是木有？！最后尝试一下通配符
-    if (!pathArms) {
-      pathArms = __paths["*"];
-    }
-
-    // 挑选路径模板
-    if (pathArms) {
-      rePath = Util.selectValue(content, pathArms);
-    }
-
-    // 搞定
-    return rePath;
-  }
-
   getAppStaticPath(path: string) {
-    let { serverBase = "/" } = this._gl_sta.data;
+    const _gl_sta = getGlobalStatus();
+    let { serverBase = "/" } = _gl_sta.data;
     return Util.appendPath(serverBase, path);
   }
 
@@ -793,44 +717,6 @@ export class WalnutServer {
   }
 
   /**
-   * 异步加载视图设置。
-   *
-   * 该方法会从配置中获取视图设置文件的路径，若路径存在，则加载该文件内容，
-   * 并将内容解析为 JSON 格式后赋值给 `_view` 属性。
-   * 若路径不存在或加载失败，则不做任何操作。
-   */
-  async loadViewSetup() {
-    const viewSetupPath = this._conf.ui?.viewSetup;
-    // 防空
-    if (!viewSetupPath) return;
-    // 加载
-    let viewSetup = await this.loadContent(viewSetupPath);
-    // 安装
-    if (viewSetup) {
-      this._view = JSON5.parse(viewSetup);
-
-      // 准备应用列表
-      this._applications = new Map();
-      if (this._view.applications) {
-        for (let app of this._view.applications) {
-          this._applications.set(app.value, app);
-        }
-      }
-
-      // 准备关联列表
-      this._associations = [];
-      if (this._view.associations) {
-        for (let as of this._view.associations) {
-          this._associations.push({
-            apps: _.concat(as.apps),
-            test: Match.parse(as.test, false),
-          });
-        }
-      }
-    }
-  }
-
-  /**
    * 异步加载指定路径的文件并将其转换为Base64编码的字符串。
    *
    * @param objPath - 文件的路径。
@@ -1048,7 +934,8 @@ export class WalnutServer {
     }
 
     // 确保每个菜单项目的链接是正确的
-    let { appBase = "/" } = this._gl_sta.data;
+    const _gl_sta = getGlobalStatus();
+    let { appBase = "/" } = _gl_sta.data;
     const _tidy_href_of_bar_item = (sbItem: SideBarItem) => {
       if (sbItem.href) {
         if (!sbItem.href.startsWith(appBase)) {
@@ -1098,29 +985,9 @@ export class WalnutServer {
     });
   }
 
-  async loadMyDynmicUISettings() {
+    async loadMyDynmicUISettings() {
     let loading = [] as Promise<void>[];
     if (this._ticket) {
-      if (this._conf.ui) {
-        // 动态加载预定义字段
-        if (this._conf.ui.fields) {
-          let paths = _.concat(this._conf.ui.fields);
-          for (let ph of paths) {
-            loading.push(this.fetchUIFields(ph));
-          }
-        }
-        // 动态加载预定义表格列
-        if (this._conf.ui.columns) {
-          let paths = _.concat(this._conf.ui.columns);
-          for (let ph of paths) {
-            loading.push(this.fetchUIColumns(ph));
-          }
-        }
-      }
-
-      // 动态加载视图设置
-      loading.push(this.loadViewSetup());
-
       // 动态加载数据字典
       if (this._conf.dicts) {
         loading.push(this.loadDicts("protected"));
@@ -1135,25 +1002,10 @@ export class WalnutServer {
       if (loading.length > 0) {
         this._dynamic_ui_loading = true;
         await Promise.all(loading);
-        // 执行回调函数
-        if (this._after_dynamic_ui_ready) {
-          await this._after_dynamic_ui_ready();
-        }
         this._dynamic_ui_loading = false;
         this._dynamic_ui_ready = true;
       }
     }
-  }
-
-  /**
-   * 设置动态 UI 加载完成后的回调函数。
-   * 当 `loadMyDynmicUISettings` 加载完毕后，会执行该回调函数。
-   * 通常用于在动态 UI 配置准备好后，执行 WnHubArena 加载 UI 配置等操作。
-   *
-   * @param callback - 动态 UI 加载完成后要执行的回调函数，返回一个 Promise。
-   */
-  set afterDynamicUIReady(callback: () => Promise<void>) {
-    this._after_dynamic_ui_ready = callback;
   }
 
   /**
@@ -1397,8 +1249,10 @@ export class WalnutServer {
       tmpl,
     };
 
+    // 可能是动态前缀，因此需要渲染一下
     if (prefix) {
-      params.prefix = prefix;
+      const upname = useUploadName({ name: prefix });
+      params.prefix = upname();
     }
 
     // 将 params 转换为查询字符串

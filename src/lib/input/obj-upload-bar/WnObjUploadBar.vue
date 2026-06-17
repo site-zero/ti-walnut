@@ -2,7 +2,7 @@
   import { ImageProps, TiUploadBar, UploadBarProps } from "@site0/tijs";
   import _ from "lodash";
   import { computed, ref, watch } from "vue";
-  import { WnObj } from "../..";
+  import { WnObj } from "@site0/ti-walnut";
   import { useWnObjUploader, WnObjUploaderEmitter } from "../../_features";
   import { WnObjUploadBarProps } from "./wn-obj-upload-bar-types";
   //-----------------------------------------------------

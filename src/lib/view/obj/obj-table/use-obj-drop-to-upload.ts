@@ -1,12 +1,26 @@
-import { AlertError, Be, useDropping } from '@site0/tijs';
-import { Ref } from 'vue';
-import { Walnut, WnUploadFileOptions } from '../../../../core';
-import { ObjUploadItem, WnObj } from '../../../_types';
+import {
+  ObjUploadItem,
+  useUploadName,
+  Walnut,
+  WnObj,
+  WnUploadFileNameRender,
+  WnUploadFileOptions,
+} from "@site0/ti-walnut";
+import { AlertError, Be, useDropping } from "@site0/tijs";
+import { Ref } from "vue";
 
 export type ObjDropToUploadOptions = {
   _drag_enter: Ref<boolean>;
   _upload_files: Ref<ObjUploadItem[]>;
   target: () => HTMLElement | null;
+  /**
+   * 开启这个选项，将支持从剪贴板复制截图
+   *
+   * 文件名格式这里指定，譬如 `screenshot-${now}`
+   *
+   */
+  screenshotName?: string | WnUploadFileNameRender;
+  screenshotWithPrefix?: boolean;
   // 需要采用动态上传参数，因为随着目录的变化，上传参数可能会变化
   uploadOptions: () => WnUploadFileOptions | undefined;
   callback: (objs: WnObj[]) => void;
@@ -15,7 +29,15 @@ export type ObjDropToUploadOptions = {
 export type ObjDropToUploadApi = ReturnType<typeof useObjDropToUpload>;
 
 export function useObjDropToUpload(options: ObjDropToUploadOptions) {
-  let { target, _drag_enter, _upload_files, uploadOptions, callback } = options;
+  let {
+    target,
+    _drag_enter,
+    _upload_files,
+    screenshotName,
+    screenshotWithPrefix = false,
+    uploadOptions,
+    callback,
+  } = options;
 
   /**
    * 检查上传是否完成。
@@ -62,10 +84,10 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
    *
    * @private
    */
-  function _do_upload() {
+  function _do_upload(withPrefix = true) {
     let up_options = uploadOptions();
     if (!up_options || !up_options.target) {
-      console.error('No upload options');
+      console.error("No upload options");
       return;
     }
 
@@ -86,6 +108,11 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
         },
         signal: item.abort.signal,
       };
+      // 指定不需要前缀
+      if (!withPrefix && uploading.prefix) {
+        uploading.prefix = undefined;
+        uploading.requiredPrefix = false;
+      }
 
       // 执行上传
       Walnut.uploadFile(item.file, uploading)
@@ -124,13 +151,13 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
         // 显示控件
         preview: {
           src: file,
-          width: '100%',
-          height: '64px',
-          objectFit: 'contain',
+          width: "100%",
+          height: "64px",
+          objectFit: "contain",
         },
         text: file.name,
         width: 100,
-        textSize: 's',
+        textSize: "s",
       });
     }
   }
@@ -157,15 +184,29 @@ export function useObjDropToUpload(options: ObjDropToUploadOptions) {
    * 主动创建一个 input 元素，然后模拟用户点击
    */
   async function doUploadFiles() {
-    let files = await Be.doUploadFiles();
+    let files = await Be.chooseFiles();
     if (files.length > 0) {
       _join_upload_items(files);
       _do_upload();
     }
   }
 
+  async function tryUploadImageFromClipboard() {
+    if (!screenshotName) {
+      return;
+    }
+    let get_fnm = useUploadName({ name: screenshotName });
+    let fnm = get_fnm();
+    let file = await Be.Clipboard.readImageFile(fnm);
+    if (file) {
+      _join_upload_items([file]);
+      _do_upload(screenshotWithPrefix);
+    }
+  }
+
   return {
     reset: dropping,
     doUploadFiles,
+    tryUploadImageFromClipboard,
   };
 }

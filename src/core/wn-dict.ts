@@ -15,7 +15,7 @@ import {
   Vars,
 } from '@site0/tijs';
 import _ from 'lodash';
-import { WnDictSetup } from '../lib';
+import { WnDictSetup } from "@site0/ti-walnut";
 import { Walnut } from './wn-server';
 
 const debug = false;

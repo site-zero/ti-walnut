@@ -2,7 +2,7 @@
   import { ImageProps, TiUploadTile, UploadTileProps } from "@site0/tijs";
   import _ from "lodash";
   import { computed, ref, watch } from "vue";
-  import { WnObj } from "../..";
+  import { WnObj } from "@site0/ti-walnut";
   import { useWnObjUploader, WnObjUploaderEmitter } from "../../_features";
   import { WnObjUploadTileProps } from "./wn-obj-upload-tile-types";
   //-----------------------------------------------------

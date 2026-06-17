@@ -2,7 +2,7 @@
   import { TiWall, WallProps } from "@site0/tijs";
   import _ from "lodash";
   import { computed } from "vue";
-  import { useObjWallApi } from "./use-obj-wall-item";
+  import { useObjWallApi } from "./use-obj-wall-api";
   import { WnObjWallEmitter, WnObjWallProps } from "./wn-obj-wall-types";
   //-----------------------------------------------------
   const emit = defineEmits<WnObjWallEmitter>();
@@ -11,10 +11,10 @@
     showChecker: true,
     multi: true,
     layoutHint: "<120>",
-    thumbFontSize: 'm'
+    thumbFontSize: "m",
   });
   //-----------------------------------------------------
-  const api = useObjWallApi(props);
+  const api = useObjWallApi(props, emit);
   //-----------------------------------------------------
   const WallConfig = computed((): Partial<WallProps> => {
     return _.assign({}, _.omit(props, "data"), {
@@ -24,5 +24,9 @@
   //-----------------------------------------------------
 </script>
 <template>
-  <TiWall v-bind="WallConfig" :data="props.data" />
+  <TiWall
+    v-bind="WallConfig"
+    :data="props.data"
+    @select="api.onSelect"
+    @open="api.onOpen" />
 </template>

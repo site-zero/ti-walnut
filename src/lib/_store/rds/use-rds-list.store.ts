@@ -737,6 +737,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     return _local.batchUpdate(meta, _checked_ids.value);
   }
 
+  function getNextItemId(...ids: string[]): string | undefined {
+    return _local.getNextRowId(ids) as string | undefined;
+  }
+
   function removeChecked(): SqlResult[] {
     if (hasChecked.value) {
       // 首先查找一下可能是否需要高亮下一个的 ID
@@ -782,6 +786,16 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     filter: (item: SqlResult, index: number) => boolean
   ): SqlResult[] {
     return _local.removeLocalItemsBy(filter);
+  }
+
+  function removeRemoteItems(forIds?: string | string[]): SqlResult[] {
+    return _local.removeRemoteItems(forIds as string[]);
+  }
+
+  function removeRemoteItemsBy(
+    filter: (item: SqlResult, index: number) => boolean
+  ): SqlResult[] {
+    return _local.removeRemoteItemsBy(filter);
   }
 
   //---------------------------------------------
@@ -1159,9 +1173,12 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     updateItemsBy,
     updateChecked,
 
+    getNextItemId,
     removeChecked,
     removeItems,
     removeItemsBy,
+    removeRemoteItems,
+    removeRemoteItemsBy,
     setItems,
     clear,
     updateSelection,

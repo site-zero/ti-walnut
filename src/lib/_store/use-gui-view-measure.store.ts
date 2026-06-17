@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { GuiViewLayoutMode } from '../_types/wn-types';
+import { GuiViewLayoutMode } from "@site0/ti-walnut";;
 
 const _view_mode = ref<GuiViewLayoutMode>('desktop');
 

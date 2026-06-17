@@ -1,3 +1,4 @@
+import { RdsListStoreApi, SqlResult, Walnut } from "@site0/ti-walnut";
 import {
   ActionBarEvent,
   Alert,
@@ -15,9 +16,6 @@ import {
 } from "@site0/tijs";
 import _ from "lodash";
 import { computed } from "vue";
-import { Walnut } from "../../../../core/wn";
-import { RdsListStoreApi } from "../../../_store";
-import { SqlResult } from "../../../_types";
 import {
   KeepTarget,
   RdsBrowserEmitter,
@@ -70,7 +68,7 @@ export function useRdsBrowser(
       text: "i18n:empty-data",
       mode: "auto",
       layout: "A",
-      size: "normal",
+      size: "m",
       opacity: "shadowy",
       icon: "zmdi-apps",
     };

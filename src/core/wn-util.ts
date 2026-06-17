@@ -1,5 +1,5 @@
+import { WnObj, WnObjContentFinger } from "@site0/ti-walnut";
 import { appendPath, Iconable, IconInput, Icons, Vars } from "@site0/tijs";
-import { WnObj, WnObjContentFinger } from "../lib/_types";
 import _ from "lodash";
 
 /**

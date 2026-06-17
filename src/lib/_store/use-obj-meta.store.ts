@@ -1,7 +1,7 @@
 import { FieldStatus, Util, Vars } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ComputedRef, Ref, ref } from 'vue';
-import { WnMetaSaving, WnObj, WnObjContentFinger } from '../../..';
+import { WnMetaSaving, WnObj, WnObjContentFinger } from "@site0/ti-walnut";
 
 export type ObjMetaStoreFeature = {
   //---------------------------------------------

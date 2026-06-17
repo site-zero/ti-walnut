@@ -1,4 +1,10 @@
 <script lang="ts" setup>
+  import {
+    ObjUploadItem,
+    useObjDropToUpload,
+    WnObjTable,
+    WnObjWall,
+  } from "@site0/ti-walnut";
   import { BUS_KEY, CssUtils, TiRoadblock, TiThumb } from "@site0/tijs";
   import {
     computed,
@@ -9,8 +15,6 @@
     useTemplateRef,
     watch,
   } from "vue";
-  import { useObjDropToUpload, WnObjTable, WnObjWall } from "../";
-  import { ObjUploadItem } from "../../../_types";
   import { useWnObjGalleryApi } from "./use-wn-obj-gallery-api";
   import {
     WnObjGalleryEmitter,

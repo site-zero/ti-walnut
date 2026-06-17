@@ -8,7 +8,7 @@ import {
 import _ from "lodash";
 import { computed, ComputedRef, ref } from "vue";
 import { GalleryMode, useWnObj } from "../../..";
-import { WnObj } from "../../../../_types";
+import { WnObj } from "@site0/ti-walnut";
 import { WnUploadFileOptions } from "../../../../core";
 import {
   WnObjBrowserEmitter,

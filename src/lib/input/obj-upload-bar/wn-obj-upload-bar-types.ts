@@ -1,6 +1,6 @@
-import { CommonProps, UploadBarProps } from '@site0/tijs';
-import { WnObjUploaderProps } from '../../';
+import { WnObjUploaderProps } from "@site0/ti-walnut";
+import { CommonProps, UploadBarProps } from "@site0/tijs";
 
 export type WnObjUploadBarProps = CommonProps &
-  Omit<UploadBarProps, 'actions'> &
+  Omit<UploadBarProps, "actions"> &
   WnObjUploaderProps & {};

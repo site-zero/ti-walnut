@@ -1,6 +1,6 @@
 import { CommonProps, KeepInfo } from "@site0/tijs";
 import { GalleryMode } from "../../..";
-import { WnObj } from "../../../../_types";
+import { WnObj } from "@site0/ti-walnut";
 
 export type WnObjBrowserEmitter = {
   (event: "change", payload: any): void;

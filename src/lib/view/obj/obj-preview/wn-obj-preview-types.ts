@@ -1,5 +1,5 @@
+import { WnObj } from "@site0/ti-walnut";
 import { RoadblockProps } from "@site0/tijs";
-import { WnObj } from "../../../_types";
 
 export type WnObjPreviewProps = {
   value?: WnObj;

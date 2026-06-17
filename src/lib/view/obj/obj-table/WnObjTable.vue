@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+  import { ObjUploadItem } from "@site0/ti-walnut";
   import { BUS_KEY, TiTable, TiThumb } from "@site0/tijs";
   import {
     computed,
@@ -9,7 +10,6 @@
     useTemplateRef,
     watch,
   } from "vue";
-  import { ObjUploadItem } from "../../../_types";
   import { useObjDropToUpload } from "./use-obj-drop-to-upload";
   import { getObjTableColumns } from "./use-obj-table-columns";
   import { WnObjTableEmitter, WnObjTableProps } from "./wn-obj-table-types";
@@ -31,6 +31,7 @@
     _upload_files,
     target: () =>
       $el.value && props.upload ? ($el.value as HTMLElement) : null,
+    screenshotName: props.screenshotName,
     uploadOptions: () => props.upload,
     callback: (objs) => emit("upload:done", objs),
   });
@@ -44,24 +45,50 @@
   const hasUploading = computed(() => _upload_files.value.length > 0);
   //-----------------------------------------------------
   function doUpload() {
-    console.log("doUpload");
     _upload_api.doUploadFiles();
   }
   //-----------------------------------------------------
-  let _watched_bus: string | undefined = undefined;
+  function tryUploadScreenshot() {
+    _upload_api.tryUploadImageFromClipboard();
+  }
+  //-----------------------------------------------------
+  type WatchedBusRecord = {
+    upload: null | string;
+    screenshot: null | string;
+  };
+  const _watched_bus = {
+    upload: null,
+    screenshot: null,
+  } as WatchedBusRecord;
+  //-----------------------------------------------------
   watch(
-    () => props.busUploadKey,
+    () => [props.busUploadKey, props.busScreenshotKey],
     () => {
-      if (_watched_bus) {
-        bus?.off(doUpload, _watched_bus);
-      }
-      if (bus && props.busUploadKey) {
-        bus.on(props.busUploadKey, doUpload);
-        _watched_bus = props.busUploadKey;
+      if (bus) {
+        // 取消注册：upload
+        if (_watched_bus.upload) {
+          bus.off(doUpload, _watched_bus.upload);
+        }
+        // 取消注册：screenshot
+        if (_watched_bus.screenshot) {
+          bus.off(doUpload, _watched_bus.screenshot);
+        }
+
+        // 监听: upload
+        if (props.busUploadKey) {
+          bus.on(props.busUploadKey, doUpload);
+          _watched_bus.upload = props.busUploadKey;
+        }
+        // 监听: screenshot
+        if (props.busScreenshotKey) {
+          bus.on(props.busScreenshotKey, tryUploadScreenshot);
+          _watched_bus.screenshot = props.busScreenshotKey;
+        }
       }
     },
     { immediate: true }
   );
+  //-----------------------------------------------------
   //-----------------------------------------------------
   watch(
     () => props.upload,
@@ -77,8 +104,11 @@
   });
   //-----------------------------------------------------
   onUnmounted(() => {
-    if (_watched_bus) {
-      bus?.off(doUpload, _watched_bus);
+    if (_watched_bus.upload) {
+      bus?.off(doUpload, _watched_bus.upload);
+    }
+    if (_watched_bus.screenshot) {
+      bus?.off(tryUploadScreenshot, _watched_bus.screenshot);
     }
   });
   //-----------------------------------------------------

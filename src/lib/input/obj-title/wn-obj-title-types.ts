@@ -1,5 +1,5 @@
 import { CommonProps } from "@site0/tijs";
-import { WnObj } from "../../_types";
+import { WnObj } from "@site0/ti-walnut";
 
 export type WnObjTitleEmitter = {
   (event: "change", payload: string | null): void;

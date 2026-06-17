@@ -1,9 +1,9 @@
-import { ObjDataStatus, Vars, Util } from "@site0/tijs";
+import { WnObj, WnObjContentFinger } from "@site0/ti-walnut";
+import { ObjDataStatus, Util, Vars } from "@site0/tijs";
 import { diffLines } from "diff";
 import _ from "lodash";
 import { computed, ref } from "vue";
 import { useWnObj } from "../_features/use-wn-obj";
-import { WnObj, WnObjContentFinger } from "../_types/wn-types";
 
 export type ObjContentDiff = {
   finger: WnObjContentFinger;

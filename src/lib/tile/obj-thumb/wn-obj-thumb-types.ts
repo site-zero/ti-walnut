@@ -1,5 +1,4 @@
-import { CommonProps, IconInput } from '@site0/tijs';
-import { WnObjInput } from '../../_types';
+import { CommonProps, IconInput } from "@site0/tijs";
 
 export type WnObjThumbInfo = {
   title?: string;

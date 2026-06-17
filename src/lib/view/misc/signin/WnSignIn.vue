@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { Alert, I18n, Vars } from "@site0/tijs";
   import { reactive } from "vue";
-  import { SignInForm } from "../../../";
+  import { SignInForm } from "@site0/ti-walnut";
 
   let emit = defineEmits<(event: "submit", info: SignInForm) => void>();
 

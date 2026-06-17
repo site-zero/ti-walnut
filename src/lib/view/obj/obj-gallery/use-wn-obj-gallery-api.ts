@@ -1,9 +1,5 @@
-import {
-  SelectEmitInfo,
-  TableRowData,
-  TableRowID,
-  WallItem,
-} from "@site0/tijs";
+import { SelectEmitInfo, TableRowData, TableRowID } from "@site0/tijs";
+import { WnObjWallItem } from "../obj-wall/wn-obj-wall-types";
 import {
   GallerySelectEmitInfo,
   WnObjGalleryEmitter,
@@ -26,11 +22,11 @@ export function useWnObjGalleryApi(
     emit("select", info as GallerySelectEmitInfo);
   }
   //-----------------------------------------------------
-  function onOpenWallItem(item: WallItem) {
+  function onOpenWallItem(item: WnObjWallItem) {
     emit("open", {
-      id: item.id as string,
+      id: item.id,
       index: item.index,
-      rawData: item.rawData,
+      obj: item.obj,
     });
   }
   //-----------------------------------------------------
@@ -38,7 +34,7 @@ export function useWnObjGalleryApi(
     emit("open", {
       id: item.id as string,
       index: item.index,
-      rawData: item.rawData,
+      obj: item.rawData,
     });
   }
   //-----------------------------------------------------

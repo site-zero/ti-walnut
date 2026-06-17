@@ -1,6 +1,3 @@
-import { Alert, Gender, toGender, Util, Vars } from "@site0/tijs";
-import _ from "lodash";
-import { computed, reactive, ref } from "vue";
 import {
   SignInForm,
   toWnRoles,
@@ -8,7 +5,10 @@ import {
   useGlobalStatus,
   WnRole,
   WnUserRace,
-} from "..";
+} from "@site0/ti-walnut";
+import { Alert, Gender, toGender, Vars } from "@site0/tijs";
+import _ from "lodash";
+import { computed, reactive, ref } from "vue";
 import { Walnut } from "../../core";
 
 /*
@@ -134,7 +134,7 @@ function _translate_session_result(data: any) {
   SE.mainGroup = data.grp || me.groupName || me.mainGroup || me.grp;
   SE.mainRole = data.mainRole;
   SE.userId = data.userId;
-  SE.loginName = data.loginName;
+  SE.loginName = SE.me.loginName;
   SE.loginAt = new Date(data.me.login || 0);
   SE.expireAt = new Date(data.expi || 0);
   SE.homePath = env["HOME"];
@@ -278,38 +278,6 @@ export function useSessionStore() {
   }
 
   /**
-   * 根据用户路径生成实际的对象路径。
-   *
-   * **功能**：
-   * - 根据全局配置中的路径规则和当前会话上下文，生成实际的对象路径。
-   * - 支持直接映射和条件路径选择， fallback 到默认规则。
-   *
-   * **参数**：
-   * - `uPath: string` - 用户提供的路径字符串。
-   *
-   * **返回值**：
-   * - `string` - 生成的实际对象路径。
-   *
-   * **设计动机**：
-   * - 提供灵活的路径管理机制，适应 Walnut 系统中不同用户和环境的需求。
-   * - 通过配置文件动态调整路径逻辑，无需硬编码，提升可维护性。
-   */
-  function getObjPath(hubPath: string): string {
-    let aCtx: Vars = { path: hubPath, ...SE };
-    let path = Walnut.findPath(hubPath, aCtx);
-
-    if (!path) {
-      throw "Fail to getObjPath: " + hubPath;
-    }
-
-    // 默认规则
-    if (/^(~?\/)/.test(path)) {
-      return path;
-    }
-    return Util.appendPath("~", path);
-  }
-
-  /**
    * 重新加载当前会话信息。
    *
    * **功能**：
@@ -352,7 +320,6 @@ export function useSessionStore() {
     // ........................ Getters
     hasTicket: computed(() => (SE.ticket ? true : false)),
     // ........................ Actions
-    getObjPath,
     signIn,
     signOut,
     resetSession,

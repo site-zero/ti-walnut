@@ -1,6 +1,6 @@
 import { TipBoxProps, Util } from '@site0/tijs';
 import _ from 'lodash';
-import { GlobalStatus, UserSession } from '../../..';
+import { GlobalStatus, UserSession } from "@site0/ti-walnut";
 import { tip_maker_DT_UTC } from './tip-maker/tip-maker-DT-UTC';
 import { tip_maker_OBJ_MD } from './tip-maker/tip-maker-OBJ-MD';
 import { tip_maker_OBJ_TSMS } from './tip-maker/tip-maker-OBJ-TSMS';

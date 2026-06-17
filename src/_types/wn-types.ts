@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 export type AjaxResult = {
   ok: boolean;
   errCode?: string;
@@ -6,7 +8,7 @@ export type AjaxResult = {
 };
 
 export function isAjaxResult(re: any): re is AjaxResult {
-  if (re && 'boolean' === typeof re.ok) {
+  if (re && _.isBoolean(re.ok)) {
     return true;
   }
   return false;
@@ -17,12 +19,26 @@ export type WnObj = Record<string, any>;
 export function isWnObj(obj: any): obj is WnObj {
   return (
     obj &&
-    typeof obj === 'object' &&
-    'string' === typeof obj.id &&
-    'string' === typeof obj.pid &&
+    typeof obj === "object" &&
+    _.isString(obj.id) &&
     /^(DIR|FILE)$/.test(obj.race) &&
-    'string' === typeof obj.nm
+    _.isString(obj.nm)
   );
+}
+
+export function toWnObj(obj: any): WnObj {
+  if (!isWnObj(obj)) {
+    throw "Not WnObj: " + JSON.stringify(obj);
+  }
+  return obj;
+}
+
+export function toWnObjs(objs: any[]): WnObj[] {
+  let re = [] as WnObj[];
+  for (let o of objs) {
+    re.push(toWnObj(o));
+  }
+  return re;
 }
 
 export type WnObjContentFinger = {
@@ -33,7 +49,7 @@ export type WnObjContentFinger = {
   tp: string;
 };
 
-export type WnRace = 'DIR' | 'FILE';
+export type WnRace = "DIR" | "FILE";
 
 export type WnObjQueryOptions = {
   /**
@@ -56,6 +72,18 @@ export type WnObjQueryOptions = {
 };
 
 export type WnObjInfo = {
-  id?: string;
-  ph?: string;
+  id?: string | null | undefined;
+  ph?: string | null | undefined;
 };
+
+export type WnUploadNameContext = {
+  nowInSec: string;
+  nowInMin: string;
+  today: string;
+  timeInSec: string;
+  timeInMin: string;
+  loginName: string;
+  nickname: string;
+};
+
+export type WnUploadFileNameRender = (ctx: WnUploadNameContext) => string;

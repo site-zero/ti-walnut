@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { SqlExecSetVar } from '../../_types';
+import { SqlExecSetVar } from "@site0/ti-walnut";
+import _ from "lodash";
 
 export type SqlInsertSet =
   | SqlExecSetVar

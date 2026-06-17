@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-  import { TiLayoutGrid, TiThumb } from '@site0/tijs';
-  import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
-  import { ObjUploadItem } from '../../_types';
-  import { useObjDropToUpload } from '../../view/obj/obj-table/use-obj-drop-to-upload';
-  import { useWnSliderEditorApi } from './use-wn-slider-editor-api';
-  import { useWnSliderEditorLayout } from './use-wn-slider-editor-layout';
-  import { useWnSliderEditorScheme } from './use-wn-slider-editor-schema';
+  import { TiLayoutGrid, TiThumb } from "@site0/tijs";
+  import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
+  import { ObjUploadItem } from "@site0/ti-walnut";
+  import { useObjDropToUpload } from "../../view/obj/obj-table/use-obj-drop-to-upload";
+  import { useWnSliderEditorApi } from "./use-wn-slider-editor-api";
+  import { useWnSliderEditorLayout } from "./use-wn-slider-editor-layout";
+  import { useWnSliderEditorScheme } from "./use-wn-slider-editor-schema";
   import {
     WnSliderEditorProps,
     WnSliderEmitter,
-  } from './wn-slider-editor-types';
+  } from "./wn-slider-editor-types";
   //-----------------------------------------------------
   const emit = defineEmits<WnSliderEmitter>();
   //-----------------------------------------------------
@@ -17,7 +17,7 @@
   //-----------------------------------------------------
   const api = useWnSliderEditorApi(props, emit);
   //-----------------------------------------------------
-  const $el = useTemplateRef('el');
+  const $el = useTemplateRef("el");
   const _drag_enter = ref(false);
   const _upload_files = ref<ObjUploadItem[]>([]);
   //-----------------------------------------------------
@@ -37,7 +37,7 @@
   //-----------------------------------------------------
   const TopClass = computed(() => {
     return {
-      'drag-enter': _drag_enter.value || hasUploading.value,
+      "drag-enter": _drag_enter.value || hasUploading.value,
     };
   });
   //-----------------------------------------------------
@@ -83,5 +83,5 @@
   </div>
 </template>
 <style lang="scss" scoped>
-  @use './wn-slider-editor.scss';
+  @use "./wn-slider-editor.scss";
 </style>

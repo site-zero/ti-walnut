@@ -1,5 +1,5 @@
 import { CommonProps, Vars } from "@site0/tijs";
-import { WnObj } from "../../../../_types";
+import { WnObj } from "@site0/ti-walnut";
 import { GalleryMode } from "../../obj-gallery/wn-obj-gallery-types";
 
 export type WnObjBrowserSkyBarEmitter = {

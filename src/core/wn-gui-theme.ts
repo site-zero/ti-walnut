@@ -1,7 +1,7 @@
 import { openAppModal, StrOptionItem, TiStore } from "@site0/tijs";
 
+import { WnSetupThemeProps } from "@site0/ti-walnut";
 import _ from "lodash";
-import { WnSetupThemeProps } from "../lib";
 
 export type WnGUIThemeOptions = {
   themeKey?: string;

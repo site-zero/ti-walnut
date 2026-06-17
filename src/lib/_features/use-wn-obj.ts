@@ -12,7 +12,7 @@ import {
   WnObjInfo,
   WnObjQueryOptions,
 } from "../../..";
-import { WnMetaSaving, WnObj } from "../_types";
+import { WnMetaSaving, WnObj } from "@site0/ti-walnut";
 
 export type WnObjFeature = WnMetaSaving & ReturnType<typeof useWnObj>;
 
@@ -106,19 +106,41 @@ export function useWnObj(homePath: string = "~") {
   }
 
   /**
-   * @param path 对象路径
-   * @returns 对象解析后的内容
+   * 批量删除多个对象。
+   *
+   * @param ids 对象ID列表
+   * @returns 删除后的对象列表
    */
-  async function remove(...ids: string[]) {
+  async function removeById(...ids: string[]): Promise<WnObj[]> {
     let cmds = ["o @get -ignore"];
     for (let id of ids) {
       // 去掉危险的字符串
       let theId = id.replace(/'/g, "");
-      cmds.push(theId);
+      cmds.push(`'${theId}'`);
     }
-    cmds.push(`@delete`);
+    cmds.push(`@delete @json -cqn`);
     let cmdText = cmds.join(" ");
-    await Walnut.exec(cmdText, { as: "json" });
+    let re = await Walnut.exec(cmdText, { as: "json" });
+    return re ?? [];
+  }
+
+  /**
+   * 批量删除多个对象。
+   *
+   * @param paths 对象路径列表
+   * @returns 删除后的对象列表
+   */
+  async function removeByPath(...paths: string[]): Promise<WnObj[]> {
+    let cmds = ["o @fetch -ignore"];
+    for (let path of paths) {
+      // 去掉危险的字符串
+      let thePath = path.replace(/'/g, "");
+      cmds.push(`'${thePath}'`);
+    }
+    cmds.push(`@delete @json -cqn`);
+    let cmdText = cmds.join(" ");
+    let re = await Walnut.exec(cmdText, { as: "json" });
+    return re ?? [];
   }
 
   /**
@@ -411,7 +433,8 @@ export function useWnObj(homePath: string = "~") {
     fetchBy,
     get,
     getBy,
-    remove,
+    removeById,
+    removeByPath,
     update,
     create,
     query,

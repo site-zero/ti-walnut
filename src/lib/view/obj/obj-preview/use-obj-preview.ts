@@ -17,7 +17,7 @@ export function getObjDownloadName(obj: WnObj): string {
 
 export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
   let obj = props.value ?? {};
-  let { id, race, mime } = obj;
+  let { id, race, mime, len } = obj;
   if (!race || !id) {
     return { type: "none", src: "", downloadLink: "#" };
   }
@@ -79,10 +79,10 @@ export function getObjPreviewInfo(props: WnObjPreviewProps): WnObjPreivewInfo {
     info.type = "markdown";
     info.src = `cat id:${id}`;
   }
-  // 文本
+  // 文本（太大就不显示内容了）
   else if (
-    /^text\//.test(mime) ||
-    /^application\/(x-)?javascript|sql/.test(mime)
+    len < 100000 &&
+    (/^text\//.test(mime) || /^application\/(x-)?javascript|sql/.test(mime))
   ) {
     info.type = "text";
     info.src = `cat id:${id}`;

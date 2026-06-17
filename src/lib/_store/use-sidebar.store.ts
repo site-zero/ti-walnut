@@ -2,7 +2,7 @@ import { Match, SideBarItem, TiMatch, Util } from '@site0/tijs';
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { Walnut } from '../../core';
-import { UserSidebar } from '../_types/wn-types';
+import { UserSidebar } from "@site0/ti-walnut";;
 
 const _sidebar = ref<UserSidebar>();
 

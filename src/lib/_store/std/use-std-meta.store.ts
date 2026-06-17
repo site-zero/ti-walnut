@@ -20,7 +20,7 @@ import {
   useWnObj,
   WnObj,
   WnObjContentFinger,
-} from "../../";
+} from "@site0/ti-walnut";
 import { getObjContentFinger } from "../../../core";
 import { useObjContentStore } from "../use-obj-content.store";
 

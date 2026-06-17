@@ -456,14 +456,18 @@ export function useLocalListEdit(
   //   // 返回删除的对象列表
   //   return removes;
   // }
-  function removeLocalItems(forIds?: TableRowID[]): SqlResult[] {
-    // Guard
-    if (!forIds || _.isEmpty(forIds)) {
+  function removeLocalItems(forIds?: TableRowID | TableRowID[]): SqlResult[] {
+    // 防空：1
+    if (!forIds) return [];
+    let _for_ids = _.concat([], forIds);
+
+    // 防空：2
+    if (_.isEmpty(_for_ids)) {
       return [];
     }
 
     // Remove Local list
-    let ids = Util.arrayToMap(forIds);
+    let ids = Util.arrayToMap(_for_ids);
     return removeLocalItemsBy((item, index) => {
       let itId = getRowId(item, index);
       return ids.has(itId);
@@ -489,25 +493,45 @@ export function useLocalListEdit(
     }
 
     // Remove Local list
-    let list = [] as SqlResult[];
-    let removes = [] as SqlResult[];
-    if (_local_list.value) {
-      for (let i = 0; i < _local_list.value.length; i++) {
-        let item = _local_list.value[i];
-        // 需要删除的 ID
-        if (predicate(item, i)) {
-          removes.push(item);
-        }
-        // 需要保留的 ID
-        else {
-          list.push(item);
-        }
-      }
-    }
+    let { list, removed } = Util.removeListBy(
+      _local_list.value ?? [],
+      predicate
+    );
+
+    // 更新列表
     _local_list.value = list;
 
     // 返回删除的对象列表
-    return removes;
+    return removed;
+  }
+  //---------------------------------------------
+  function removeRemoteItems(forIds?: TableRowID | TableRowID[]): SqlResult[] {
+    // 防空：1
+    if (!forIds) return [];
+    let _for_ids = _.concat([], forIds);
+
+    // 防空：2
+    if (_.isEmpty(_for_ids)) {
+      return [];
+    }
+
+    // Remove Local list
+    let ids = Util.arrayToMap(_for_ids);
+    return removeRemoteItemsBy((item, index) => {
+      let itId = getRowId(item, index);
+      return ids.has(itId);
+    });
+  }
+  //---------------------------------------------
+  function removeRemoteItemsBy(
+    predicate: (item: SqlResult, index: number) => boolean
+  ): SqlResult[] {
+    let { list, removed } = Util.removeListBy(
+      remoteList.value ?? [],
+      predicate
+    );
+    remoteList.value = list;
+    return removed;
   }
   //---------------------------------------------
   function setItems(items: SqlResult[]) {
@@ -703,6 +727,8 @@ export function useLocalListEdit(
     findAndUpdate,
     removeLocalItems,
     removeLocalItemsBy,
+    removeRemoteItems,
+    removeRemoteItemsBy,
     setItems,
     clearItems,
     //.....................

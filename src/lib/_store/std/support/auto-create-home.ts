@@ -1,5 +1,5 @@
 import { Util } from '@site0/tijs';
-import { WnObj, WnRace } from '../../..';
+import { WnObj, WnRace } from "@site0/ti-walnut";
 import { Walnut } from '../../../../core';
 
 export async function auto_create_obj(

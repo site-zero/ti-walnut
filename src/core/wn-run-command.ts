@@ -1,6 +1,6 @@
+import { SessionStore, useSessionStore, WnExecOptions } from "@site0/ti-walnut";
 import { AlertError, Vars } from "@site0/tijs";
 import JSON5 from "json5";
-import { SessionStore, useSessionStore, WnExecOptions } from "../lib";
 
 export async function wnRunCommand(
   url: string,

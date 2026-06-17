@@ -74,7 +74,7 @@ export function useObjViewerSchema(
         icon,
         text,
         className: "is-primary-r",
-        size: "normal",
+        size: "m",
         iconStyle: { fontSize: "6em", height: "unset", width: "unset" },
         textStyle: {
           padding: "1em 4em",

@@ -1,21 +1,4 @@
 import {
-  Alert,
-  apply_conflict_list,
-  buildConflictList,
-  BuildConflictListOptions,
-  buildDifferentListItems,
-  ComboFilterValue,
-  KeepInfo,
-  Match,
-  Pager,
-  TableSelectEmitInfo,
-  useKeep,
-  Util,
-  Vars,
-} from "@site0/tijs";
-import _ from "lodash";
-import { computed, ref } from "vue";
-import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   GlobalStatusApi,
@@ -35,12 +18,29 @@ import {
   WnObj,
   WnObjContentFinger,
   WnObjQueryOptions,
-} from "../../";
+} from "@site0/ti-walnut";
+import {
+  Alert,
+  apply_conflict_list,
+  buildConflictList,
+  BuildConflictListOptions,
+  buildDifferentListItems,
+  ComboFilterValue,
+  KeepInfo,
+  Match,
+  Pager,
+  TableSelectEmitInfo,
+  useKeep,
+  Util,
+  Vars,
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, ref } from "vue";
 import {
   getObjContentFinger,
   isObjContentEditable,
   parseObjId,
-} from "../../../core/wn";
+} from "@site0/ti-walnut";
 import { useObjContentStore } from "../use-obj-content.store";
 import { auto_create_obj } from "./support/auto-create-home";
 
@@ -293,7 +293,7 @@ function defineStdListStore(options: StdListStoreOptions) {
         }
         // 删除远程对象
         else if (!diff.existsInMine && diff.existsInTarget) {
-          await _obj.remove(diff.id as string);
+          await _obj.removeById(diff.id as string);
         }
       }
       _action_status.value = undefined;
@@ -732,6 +732,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     return _local.batchUpdate(meta, _checked_ids.value);
   }
 
+  function getNextItemId(...ids: string[]): string | undefined {
+    return _local.getNextRowId(ids) as string | undefined;
+  }
+
   function removeChecked(): WnObj[] {
     if (hasChecked.value && !_.isEmpty(_checked_ids.value)) {
       // 首先查找一下可能是否需要高亮下一个的 ID
@@ -777,6 +781,16 @@ function defineStdListStore(options: StdListStoreOptions) {
     filter: (item: WnObj, index: number) => boolean
   ): WnObj[] {
     return _local.removeLocalItemsBy(filter);
+  }
+
+  function removeRemoteItems(forIds?: string | string[]): WnObj[] {
+    return _local.removeRemoteItems(forIds as string[]);
+  }
+
+  function removeRemoteItemsBy(
+    filter: (item: WnObj, index: number) => boolean
+  ): WnObj[] {
+    return _local.removeRemoteItemsBy(filter);
   }
 
   async function onSelect(payload: TableSelectEmitInfo) {
@@ -1190,9 +1204,12 @@ function defineStdListStore(options: StdListStoreOptions) {
     updateItemsBy,
     updateChecked,
 
+    getNextItemId,
     removeChecked,
     removeItems,
     removeItemsBy,
+    removeRemoteItems,
+    removeRemoteItemsBy,
     setItems,
     clear,
     updateSelection,

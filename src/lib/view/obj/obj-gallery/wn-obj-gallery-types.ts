@@ -1,13 +1,13 @@
 import { CommonProps, RoadblockProps, SelectEmitInfo } from "@site0/tijs";
 import { WnObjWallProps } from "../../..";
-import { WnObj } from "../../../../_types";
+import { WnObj } from "@site0/ti-walnut";
 import { WnUploadFileOptions } from "../../../../core";
 
 export type GallerySelectEmitInfo = SelectEmitInfo<string>;
 export type GalleryItem = {
   id: string;
   index: number;
-  rawData: WnObj;
+  obj: WnObj;
 };
 
 export type WnObjGalleryEmitter = {

@@ -11,7 +11,7 @@ import {
   useRdsListStore,
   useSessionStore,
   useStdListStore,
-} from "../..";
+} from "@site0/ti-walnut";
 import {
   getUserRoleName,
   StoreListApi,

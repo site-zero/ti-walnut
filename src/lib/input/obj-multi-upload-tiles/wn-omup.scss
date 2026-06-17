@@ -1,16 +1,27 @@
 @use "@site0/tijs/sass/_all.scss" as *;
 
-.wn-obj-multi-upload-tail {
+.wn-obj-multi-upload-tiles {
   position: relative;
   border: 1px solid var(--ti-color-border-thin);
   border-radius: var(--ti-measure-r-s);
-  padding: var(--ti-gap-m);
   user-select: none;
   min-height: 100px;
   //-----------------------------------------------------
-  a.placeholder {
-    @include flex-align-nowrap;
+  .placeholder {
+    @include flex-align-nowrap($jc: center);
     gap: var(--ti-gap-m);
+    position: absolute;
+    top: 2em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--ti-color-fog);
+    transition: 300ms;
+    cursor: pointer;
+    &:hover {
+      color: var(--ti-color-primary);
+      transform: scale(1.2);
+    }
   }
   //-----------------------------------------------------
   &.drag-enter {
@@ -22,6 +33,29 @@
       inset: 0;
       opacity: 1;
       pointer-events: fill;
+    }
+  }
+  //-----------------------------------------------------
+  > .part-menu {
+    @include flex-align-nowrap($jc: space-between);
+    border-bottom: 1px dashed var(--ti-color-border-thin);
+    .menu-head {
+      @include flex-align-nowrap;
+      @include font-fixed;
+      flex: 1 1 auto;
+      gap: 0.5em;
+      padding: 0 0.5em;
+      font-size: 0.8em;
+      white-space: nowrap;
+      overflow: hidden;
+      span {
+        flex: 0 1 auto;
+      }
+      a {
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
   //-----------------------------------------------------

@@ -1,21 +1,19 @@
-import { Alert, I18n, Icons, ImageProps, Util } from "@site0/tijs";
-import JSON5 from "json5";
-import _ from "lodash";
-import { computed, Ref, ref } from "vue";
 import {
   AjaxResult,
   getWnObjIcon,
   isAjaxResult,
-  Walnut,
-  WnUploadFileOptions,
-} from "../../..";
-import {
   isWnObj,
   useWnObj,
+  Walnut,
   WnObj,
   WnObjInput,
   WnObjInputType,
-} from "../../lib";
+  WnUploadFileOptions,
+} from "@site0/ti-walnut";
+import { Alert, I18n, Icons, ImageProps, Util } from "@site0/tijs";
+import JSON5 from "json5";
+import _ from "lodash";
+import { computed, Ref, ref } from "vue";
 
 export type WnObjUploaderEmitter = {
   (event: "change", payload: WnObjInput | null): void;
