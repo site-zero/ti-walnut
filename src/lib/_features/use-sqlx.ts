@@ -428,3 +428,36 @@ export enum JoinChange {
   WithError = 1,
   NoError = 0,
 }
+
+export function compactSqlChanges(changes: SqlExecAction[]): SqlExecAction[] {
+  // 准备一个生成唯一键的方法，需要不止考虑到一个 SqlExecAction 的 sql
+  // 还需要考虑到其他设置信息
+  const __gen_sea_key = (change: SqlExecAction) => {
+    let sql = getSqlStr(change.sql);
+    if (!sql) return null;
+    return [sql, JSON.stringify(_.omit(change, "vars"))].join("::");
+  };
+
+  // 采用 Record 以便尽量保持原本的执行顺序
+  let map: Record<string, SqlExecAction> = {};
+  for (let change of changes) {
+    // 防空
+    if (_.isEmpty(change.vars)) continue;
+    let seaKey = __gen_sea_key(change);
+    // 再次防空
+    if (!seaKey) continue;
+
+    // 看看有没有必要融合
+    let ea = map[seaKey];
+    if (!ea) {
+      map[seaKey] = change;
+      continue;
+    }
+
+    // 融合
+    ea.vars = _.concat([], ea.vars, change.vars);
+  }
+
+  // 搞定
+  return _.values(map);
+}
