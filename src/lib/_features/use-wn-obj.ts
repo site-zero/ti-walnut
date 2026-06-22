@@ -1,3 +1,4 @@
+import { isWnObj, WnMetaSaving, WnObj } from "@site0/ti-walnut";
 import { Pager, Util, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
@@ -12,12 +13,16 @@ import {
   WnObjInfo,
   WnObjQueryOptions,
 } from "../../..";
-import { WnMetaSaving, WnObj } from "@site0/ti-walnut";
 
 export type WnObjFeature = WnMetaSaving & ReturnType<typeof useWnObj>;
 
 export type WnLoadContentOptions = {
   as?: "text" | "json";
+};
+
+export type WnGetObjSetup = {
+  strict?: boolean;
+  loadPath?: boolean;
 };
 
 const BUILD_IN_KEYS = [
@@ -77,10 +82,23 @@ export function useWnObj(homePath: string = "~") {
    * @param path 对象路径
    * @returns 对象解析后的内容
    */
-  async function get(id: string): Promise<WnObj | undefined> {
+  async function get(
+    id: string,
+    setup: WnGetObjSetup = {}
+  ): Promise<WnObj | undefined> {
+    const { strict = false, loadPath = false } = setup;
     // 去掉危险的字符串
-    let theId = id.replace(/'/g, "");
-    let cmdText = `o @get -ignore '${theId}'  @json -cqn`;
+    const theId = id.replace(/'/g, "");
+    const cmds = ["o @get"];
+    if (!strict) {
+      cmds.push(`-ignore`);
+    }
+    cmds.push(`'${theId}'`);
+    if (loadPath) {
+      cmds.push(`@path`);
+    }
+    cmds.push(`@json -cqn`);
+    let cmdText = cmds.join(" ");
     let re = await Walnut.exec(cmdText, { as: "json" });
     return re ?? undefined;
   }
@@ -191,6 +209,39 @@ export function useWnObj(homePath: string = "~") {
       return _.omit(re, "__is_created");
     }
     return undefined;
+  }
+
+  async function moveTo(
+    o: WnObj,
+    targetPath: string
+  ): Promise<WnObj | undefined> {
+    // 暂时仅仅支持文件
+    if ("FILE" !== o.race) {
+      alert(
+        `Only support move FILE objects for now! \nObject ${JSON.stringify(o)}`
+      );
+      return;
+    }
+    let srcId = o.id;
+    let cmdText = `cpobj 'id:${srcId}' '${targetPath}' -e '^(title|lbls|local|width|height)$' -cqn`;
+    let newSrcObj = await Walnut.exec(cmdText, { as: "json" });
+    if (isWnObj(newSrcObj)) {
+      // 如果这对象是个图片，且原来就有缩略图，那么改一下缩略图路径
+      // 旧对象的缩略图就不用了
+      if (o.thumb) {
+        cmdText = [
+          `o @fetch ${o.thumb} @update 'thumb_src:"id:${newSrcObj.id}"'`,
+          `@fetch -reset 'id:${newSrcObj.id}' @update 'thumb:"${o.thumb}"'`,
+          `@fetch -reset 'id:${o.id}' @update 'thumb:null'`,
+        ].join(" ");
+        await Walnut.exec(cmdText);
+      }
+
+      // 可以删掉旧对象了
+      cmdText = `rm 'id:${srcId}'`;
+      await Walnut.exec(cmdText);
+    }
+    return newSrcObj;
   }
 
   async function query(
@@ -437,6 +488,7 @@ export function useWnObj(homePath: string = "~") {
     removeByPath,
     update,
     create,
+    moveTo,
     query,
     queryChildren,
     getChild,

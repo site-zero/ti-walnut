@@ -23,10 +23,19 @@ export type WnObjUploaderEmitter = {
 export type WnObjUploadSetup = Omit<WnUploadFileOptions, "progress" | "signal">;
 
 export type WnObjUploaderProps = {
-  value?: WnObjInput;
+  value?: WnObjInput | null;
   valueType?: WnObjInputType;
   upload: WnObjUploadSetup;
   placeholder?: string;
+
+  /**
+   * 指定了上传的文件的挂载目录。
+   * 处理 value 输入的时候，如果用户直接从数据表里查询的
+   * 通常 objId 是不带两段式前缀的。
+   *
+   * 因此指定了这个属性，控件会强制为输入的对象加入这个 ID 前缀
+   */
+  mountHome?: WnObjInput;
 };
 
 export function useWnObjUploader(
@@ -40,6 +49,7 @@ export function useWnObjUploader(
   const _progress = ref<number>(0);
   const _file = ref<File>();
   const _fail_message = ref<string>();
+  const _mnt_home = ref<WnObj>();
   const objs = useWnObj();
 
   /**
@@ -135,6 +145,18 @@ export function useWnObjUploader(
     throw new Error(`Unknown WnObjInputType: ${ValueType.value}`);
   }
 
+  async function reloadMountHome() {
+    if (props.mountHome) {
+      if (isWnObj(props.mountHome)) {
+        _mnt_home.value = _.cloneDeep(props.mountHome);
+      } else {
+        _mnt_home.value = await objs.fetch(props.mountHome);
+      }
+    } else {
+      _mnt_home.value = undefined;
+    }
+  }
+
   /**
    * 根据传入的 `WnObjInput` 加载 `WnObj` 对象及其 base64 数据。
    *
@@ -151,7 +173,7 @@ export function useWnObjUploader(
    *  - 加载对象后，如果对象有 `thumb` 属性，则会异步加载其 base64 数据。
    *  - 加载失败时，会将 `_obj.value` 设置为 `undefined`。
    */
-  async function loadObj(input?: WnObjInput) {
+  async function loadObj(input?: WnObjInput | null) {
     let _input_type = ValueType.value;
 
     // 防空
@@ -161,6 +183,9 @@ export function useWnObjUploader(
       return;
     }
 
+    // 读取挂载目录
+    await reloadMountHome();
+
     // 获取类型
     if (isWnObj(input) && _input_type === "obj") {
       _obj.value = Util.jsonClone(input);
@@ -169,21 +194,13 @@ export function useWnObjUploader(
     else if (_.isString(input)) {
       // ID
       if (_input_type === "id") {
-        // 使用缓存
-        let obj = _cache.get(input);
-        if (!obj) {
-          obj = await objs.get(input);
-        }
-        __set_obj(obj);
+        let objId = input;
+        await __load_by_obj_id(objId);
       }
       // id:xxxx
       else if (_input_type === "idPath") {
         let objId = input.substring(3).trim();
-        let obj = _cache.get(objId);
-        if (!obj) {
-          obj = await objs.fetch(input);
-        }
-        __set_obj(obj);
+        await __load_by_obj_id(objId);
       }
       // /path/to/obj
       else if (_input_type === "path") {
@@ -290,6 +307,23 @@ export function useWnObjUploader(
 
     // 上传完成后
     _file.value = undefined;
+  }
+
+  async function __load_by_obj_id(id: string) {
+    let theId = id;
+    let homeId = _mnt_home.value?.id || null;
+    // 强制设置上 homeId 前缀
+    if (homeId && !theId.startsWith(homeId)) {
+      theId = `${homeId}:${theId}`;
+    }
+    // 尝试命中缓存
+    let obj = _cache.get(theId);
+    // 真实读取
+    if (!obj) {
+      obj = await objs.get(theId);
+    }
+    // 无论如何更新缓存
+    __set_obj(obj);
   }
 
   /**
