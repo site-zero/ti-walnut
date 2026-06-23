@@ -297,6 +297,9 @@ export class WalnutServer {
 
   getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
     let { download = "auto", downName, withTicket } = options;
+    if(id && id.startsWith("id:")){
+      id = id.substring(3).trim();
+    }
     let uri = [];
     if (downName) {
       uri.push(`/o/content/${encodeURIComponent(downName)}?str=id:${id}`);

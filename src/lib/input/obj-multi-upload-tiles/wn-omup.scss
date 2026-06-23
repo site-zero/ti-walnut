@@ -20,7 +20,7 @@
     cursor: pointer;
     &:hover {
       color: var(--ti-color-primary);
-      transform: scale(1.2);
+      transform: translateY(-2px);
     }
   }
   //-----------------------------------------------------
