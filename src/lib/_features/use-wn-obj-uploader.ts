@@ -36,6 +36,18 @@ export type WnObjUploaderProps = {
    * 因此指定了这个属性，控件会强制为输入的对象加入这个 ID 前缀
    */
   mountHome?: WnObjInput;
+
+  /**
+   * 当用户点击删除按钮时，是否允许控件自动删除文件。
+   * 默认为 true
+   */
+  canRemoveFile?: boolean;
+
+  /**
+   * 当用户点击删除按钮时的回调
+   * 回调如果返回 false，则表示删除不成功
+   */
+  onRemoveFile?: (obj: WnObj, emit: WnObjUploaderEmitter) => Promise<boolean>;
 };
 
 export function useWnObjUploader(
@@ -337,17 +349,31 @@ export function useWnObjUploader(
   }
 
   async function doClear() {
+    const can_remove = props.canRemoveFile ?? true;
     if (_obj.value && _obj.value.id) {
-      _progress.value = _.random(0, 0.8, true);
-      await Walnut.exec(`rm 'id:${_obj.value.id}'`);
-      _progress.value = 1;
-      _.delay(() => {
-        _progress.value = 0;
-        _obj.value = undefined;
-        _base64_data.value = undefined;
-        _fail_message.value = undefined;
-        emit("change", null);
-      }, 200);
+      const obj = { ..._obj.value };
+      let del_ok = false;
+      // 可以的话就真删
+      if (can_remove) {
+        _progress.value = _.random(0, 0.8, true);
+        await Walnut.exec(`rm 'id:${obj.id}'`);
+        del_ok = true;
+        _progress.value = 1;
+      }
+      // 调用回调
+      if (props.onRemoveFile) {
+        del_ok = await props.onRemoveFile(obj, emit);
+      }
+      // 清理状态
+      if (del_ok) {
+        _.delay(() => {
+          _progress.value = 0;
+          _obj.value = undefined;
+          _base64_data.value = undefined;
+          _fail_message.value = undefined;
+          emit("change", null);
+        }, 200);
+      }
     }
   }
 

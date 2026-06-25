@@ -82,7 +82,6 @@ export function useObjWallApi(props: WnObjWallProps, emit: WnObjWallEmitter) {
   }
 
   function onSelect(payload: WallSelectEmitInfo) {
-    console.log("onSelect", payload);
     let pld: WnObjWallSelectEmitInfo = {
       currentId: payload.currentId as string,
       checkedIds: payload.checkedIds as string[],

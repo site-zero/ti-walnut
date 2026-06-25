@@ -8,6 +8,7 @@ import {
   KeepInfo,
   RoadblockProps,
   TableEmitter,
+  TextFragment,
 } from "@site0/tijs";
 
 export type WnObjTableEmitter = TableEmitter & {
@@ -21,7 +22,14 @@ export type WnObjTableProps = {
   currentId?: string;
   checkedIds?: string[];
   upload?: WnUploadFileOptions;
+
+  head?: TextFragment;
+  tail?: TextFragment;
   emptyRoadblock?: RoadblockProps;
+
+  fuse?: string | boolean;
+  multi?: boolean;
+
   /**
    * 开启这个选项，将支持从剪贴板复制截图
    *
