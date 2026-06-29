@@ -31,6 +31,7 @@ import {
   ComboFilterValue,
   KeepInfo,
   Match,
+  TableRowID,
   TableSelectEmitInfo,
   TiMatch,
   useKeep,
@@ -340,6 +341,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     _remote.value = list;
   }
 
+  function setLocalList(list: SqlResult[]) {
+    _local.setItems(list);
+  }
+
   function resetLocalAndRemote() {
     dropChange();
     clearRemoteList();
@@ -538,7 +543,10 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     }
   }
 
-  function getItemIndex(id: string) {
+  function getItemIndex(id: TableRowID | null | undefined) {
+    if (_.isNil(id)) {
+      return -1;
+    }
     return _local.getRowIndex(id);
   }
 
@@ -657,6 +665,30 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     for (let item of items) {
       appendItem(item);
     }
+  }
+
+  function insertItemsBefore(items: SqlResult[], atIndex: number) {
+    _local.insertItemsBefore(items, atIndex);
+  }
+
+  function insertItemsAfter(items: SqlResult[], atIndex: number) {
+    _local.insertItemsAfter(items, atIndex);
+  }
+
+  function insertItemsBeforeId(
+    items: SqlResult[],
+    itemId: TableRowID | undefined | null
+  ) {
+    let index = getItemIndex(itemId);
+    _local.insertItemsBefore(items, index);
+  }
+
+  function insertItemsAfterId(
+    items: SqlResult[],
+    itemId: TableRowID | undefined | null
+  ) {
+    let index = getItemIndex(itemId);
+    _local.insertItemsAfter(items, index);
   }
 
   function updateCurrent(meta: SqlResult): SqlResult | undefined {
@@ -1145,6 +1177,7 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     dropChange,
     clearRemoteList,
     setRemoteList,
+    setLocalList,
 
     setQuery,
     setFilter,
@@ -1164,6 +1197,11 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     prependItems,
 
     setRemoteItemBy,
+
+    insertItemsBefore,
+    insertItemsAfter,
+    insertItemsBeforeId,
+    insertItemsAfterId,
 
     updateCurrent,
     updateItem,

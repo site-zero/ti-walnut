@@ -1,11 +1,14 @@
 import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
+  getObjContentFinger,
   GlobalStatusApi,
+  isObjContentEditable,
   isWnObj,
   ListStoreConflicts,
   LocalListEditSetup,
   LocalListUpdateItemOptions,
+  parseObjId,
   QueryFilter,
   QuerySorter,
   RefreshOptions,
@@ -36,11 +39,6 @@ import {
 } from "@site0/tijs";
 import _ from "lodash";
 import { computed, ref } from "vue";
-import {
-  getObjContentFinger,
-  isObjContentEditable,
-  parseObjId,
-} from "@site0/ti-walnut";
 import { useObjContentStore } from "../use-obj-content.store";
 import { auto_create_obj } from "./support/auto-create-home";
 
@@ -487,6 +485,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     _remote.value = list;
   }
 
+  function setLocalList(list: WnObj[]) {
+    _local.setItems(list);
+  }
+
   function setOptions(opt: StdListStoreOptions) {
     _options = Util.jsonClone(opt);
   }
@@ -541,7 +543,10 @@ function defineStdListStore(options: StdListStoreOptions) {
     }
   }
 
-  function getItemIndex(id: string) {
+  function getItemIndex(id: string | null | undefined) {
+    if (_.isNil(id)) {
+      return -1;
+    }
     return _local.getRowIndex(id);
   }
 
@@ -658,6 +663,38 @@ function defineStdListStore(options: StdListStoreOptions) {
     for (let item of objs) {
       appendItem(item);
     }
+  }
+
+  function insertItemsBefore(items: WnObj[], atIndex: number) {
+    if (atIndex <= 0 || atIndex >= listData.value.length) {
+      _local.append(...items);
+    } else {
+      _local.insertItemsBefore(items, atIndex);
+    }
+  }
+
+  function insertItemsAfter(items: WnObj[], atIndex: number) {
+    if (atIndex <= 0 || atIndex >= listData.value.length) {
+      _local.append(...items);
+    } else {
+      _local.insertItemsAfter(items, atIndex);
+    }
+  }
+
+  function insertItemsBeforeId(
+    items: WnObj[],
+    itemId: string | undefined | null
+  ) {
+    let index = getItemIndex(itemId);
+    _local.insertItemsBefore(items, index);
+  }
+
+  function insertItemsAfterId(
+    items: WnObj[],
+    itemId: string | undefined | null
+  ) {
+    let index = getItemIndex(itemId);
+    _local.insertItemsAfter(items, index);
   }
 
   function updateCurrent(meta: WnObj): WnObj | undefined {
@@ -1175,6 +1212,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     dropChange,
     clearRemoteList,
     setRemoteList,
+    setLocalList,
 
     setQuery,
     setFilter,
@@ -1195,6 +1233,11 @@ function defineStdListStore(options: StdListStoreOptions) {
     prependItems,
 
     setRemoteItemBy,
+
+    insertItemsBefore,
+    insertItemsAfter,
+    insertItemsBeforeId,
+    insertItemsAfterId,
 
     updateCurrent,
     updateItem,

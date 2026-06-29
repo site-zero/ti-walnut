@@ -250,6 +250,30 @@ export function useLocalListEdit(
     }
   }
   //---------------------------------------------
+  function insertItemsBefore(items: SqlResult[], atIndex: number) {
+    if (!items || _.isEmpty(items)) {
+      return;
+    }
+    initLocalList();
+    if (atIndex < 0 || atIndex >= _local_list.value!.length) {
+      appendItems(items);
+    } else {
+      _local_list.value?.splice(atIndex, 0, ...items);
+    }
+  }
+  //---------------------------------------------
+  function insertItemsAfter(items: SqlResult[], atIndex: number) {
+    if (!items || _.isEmpty(items)) {
+      return;
+    }
+    initLocalList();
+    if (atIndex < 0 || atIndex >= _local_list.value!.length) {
+      appendItems(items);
+    } else {
+      _local_list.value?.splice(atIndex + 1, 0, ...items);
+    }
+  }
+  //---------------------------------------------
   function clearItemNilValue(
     options: LocalListUpdateItemOptions
   ): SqlResult | undefined {
@@ -307,12 +331,24 @@ export function useLocalListEdit(
   }
   //---------------------------------------------
   function append(...newItems: SqlResult[]) {
+    if (!newItems || _.isEmpty(newItems)) {
+      return;
+    }
     // 自动生成 localList
     if (!_local_list.value) {
       _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     _local_list.value.push(...newItems);
+  }
+  //---------------------------------------------
+  function appendItems(items: SqlResult[]) {
+    if (!items || _.isEmpty(items)) {
+      return;
+    }
+    initLocalList();
+    let N = _local_list.value!.length || 0;
+    _local_list.value!.splice(N, 0, ...items);
   }
   //---------------------------------------------
   function prependToList(newItem: SqlResult) {
@@ -325,12 +361,23 @@ export function useLocalListEdit(
   }
   //---------------------------------------------
   function prepend(...newItems: SqlResult[]) {
+    if (!newItems || _.isEmpty(newItems)) {
+      return;
+    }
     // 自动生成 localList
     if (!_local_list.value) {
       _local_list.value = Util.jsonClone(remoteList.value || []);
     }
 
     _local_list.value.unshift(...newItems);
+  }
+  //---------------------------------------------
+  function prependItems(items: SqlResult[]) {
+    if (!items || _.isEmpty(items)) {
+      return;
+    }
+    initLocalList();
+    _local_list.value!.splice(0, 0, ...items);
   }
   //---------------------------------------------
   function batchUpdate(
@@ -717,10 +764,14 @@ export function useLocalListEdit(
     updateListField,
     appendToList,
     append,
+    appendItems,
     prependToList,
     prepend,
+    prependItems,
     setRemoteItem,
     updateItem,
+    insertItemsBefore,
+    insertItemsAfter,
     clearItemNilValue,
     batchUpdate,
     batchUpdateBy,
