@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-  import { ImageProps, TiUploadBar, UploadBarProps } from "@site0/tijs";
+  import { WnObj } from "@site0/ti-walnut";
+  import { Alert, ImageProps, TiUploadBar, UploadBarProps } from "@site0/tijs";
   import _ from "lodash";
   import { computed, ref, watch } from "vue";
-  import { WnObj } from "@site0/ti-walnut";
   import { useWnObjUploader, WnObjUploaderEmitter } from "../../_features";
   import { WnObjUploadBarProps } from "./wn-obj-upload-bar-types";
   //-----------------------------------------------------
@@ -21,7 +21,9 @@
   );
   //-----------------------------------------------------
   const BarConfig = computed(() => {
-    let re: UploadBarProps = { ..._.omit(props, ["value", "valueType"]) };
+    let re: UploadBarProps = {
+      ..._.omit(props, ["value", "valueType", "onChooseFile"]),
+    };
     // 如果出错，显示一个错误类型
     if (Uploader.value.isInvalid.value) {
       re.type = "danger";
@@ -59,6 +61,10 @@
   });
   //-----------------------------------------------------
   function onUploadFile(file: File) {
+    if (_obj.value && !props.canReplace) {
+      Alert("i18n:wn-obj-upload-bar-can-not-replace", { type: "warn" });
+      return;
+    }
     Uploader.value.doUpload(file);
   }
   //-----------------------------------------------------
@@ -77,5 +83,6 @@
   <TiUploadBar
     v-bind="BarConfig"
     @upload="onUploadFile"
-    @clear="Uploader.doClear()" />
+    @clear="Uploader.doRemoveFile()"
+    @choose-file="Uploader.doChooseFile()" />
 </template>

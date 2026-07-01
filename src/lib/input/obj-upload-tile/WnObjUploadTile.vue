@@ -79,5 +79,5 @@
   <TiUploadTile
     v-bind="TileConfig"
     @upload="onUploadFile"
-    @clear="Uploader.doClear()" />
+    @clear="Uploader.doRemoveFile()" />
 </template>

@@ -3,9 +3,11 @@ import {
   getWnObjIcon,
   isAjaxResult,
   isWnObj,
+  parseObjId,
   useWnObj,
   Walnut,
   WnObj,
+  WnObjId,
   WnObjInput,
   WnObjInputType,
   WnUploadFileOptions,
@@ -15,9 +17,16 @@ import JSON5 from "json5";
 import _ from "lodash";
 import { computed, Ref, ref } from "vue";
 
+export type WnUploaderChooseFilePayload = {
+  obj: WnObj;
+  objId: WnObjId;
+  value: WnObjInput;
+};
+
 export type WnObjUploaderEmitter = {
   (event: "change", payload: WnObjInput | null): void;
   (event: "fail", payload: AjaxResult): void;
+  (event: "choose-file", payload: WnUploaderChooseFilePayload): void;
 };
 
 export type WnObjUploadSetup = Omit<WnUploadFileOptions, "progress" | "signal">;
@@ -48,6 +57,16 @@ export type WnObjUploaderProps = {
    * 回调如果返回 false，则表示删除不成功
    */
   onRemoveFile?: (obj: WnObj, emit: WnObjUploaderEmitter) => Promise<boolean>;
+
+  /**
+   * 当用户点击选择文件按钮时的回调
+   *
+   * @param obj 已经选择的对象
+   * @returns 新选择的对象
+   */
+  onOpenToChooseFile?: (
+    obj: WnObj | null
+  ) => Promise<WnObj | null | undefined | void>;
 };
 
 export function useWnObjUploader(
@@ -322,6 +341,10 @@ export function useWnObjUploader(
   }
 
   async function __load_by_obj_id(id: string) {
+    // 无需重复加载
+    if (_obj.value?.id === id) {
+      return;
+    }
     let theId = id;
     let homeId = _mnt_home.value?.id || null;
     // 强制设置上 homeId 前缀
@@ -348,7 +371,7 @@ export function useWnObjUploader(
     }
   }
 
-  async function doClear() {
+  async function doRemoveFile() {
     const can_remove = props.canRemoveFile ?? true;
     if (_obj.value && _obj.value.id) {
       const obj = { ..._obj.value };
@@ -373,6 +396,23 @@ export function useWnObjUploader(
           _fail_message.value = undefined;
           emit("change", null);
         }, 200);
+      }
+    }
+    // 仅仅是一个通知
+    else {
+      emit("change", null);
+    }
+  }
+
+  async function doChooseFile() {
+    // 用户指定了选择文件的行为
+    if (props.onOpenToChooseFile) {
+      let newObj = await props.onOpenToChooseFile(_obj.value || null);
+      if (newObj) {
+        _obj.value = newObj || undefined;
+        let val = __to_obj_value(newObj);
+        let objId = parseObjId(newObj.id);
+        emit("choose-file", { obj: newObj, value: val, objId });
       }
     }
   }
@@ -402,6 +442,7 @@ export function useWnObjUploader(
     loadObj,
     doUpload,
     abortUpload,
-    doClear,
+    doRemoveFile,
+    doChooseFile,
   };
 }

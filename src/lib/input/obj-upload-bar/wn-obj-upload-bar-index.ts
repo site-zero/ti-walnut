@@ -7,10 +7,12 @@ const COM_TYPE = 'WnObjUploadBar';
 const en_us = {
   'com-name': 'Object Upload Bar',
   'placeholder': 'Choose file to upload',
+  'can-not-replace': 'Can not replace exists file!',
 };
 const zh_cn = {
   'com-name': '对象上传条',
   'placeholder': '选择要上传的文件',
+  'can-not-replace': '不能替换已存在的文件！',
 };
 
 const WnObjUploadBarInfo: TiComInfo = {
