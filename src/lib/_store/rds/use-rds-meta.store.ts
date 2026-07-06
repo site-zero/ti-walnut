@@ -114,6 +114,10 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     _remote.value = meta;
   }
 
+  function updateRemoteMeta(delta: SqlResult) {
+    _.assign(_remote.value, delta);
+  }
+
   function dropChange() {
     _local.reset();
   }
@@ -351,6 +355,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     //---------------------------------------------
     clearRemoteMeta,
     setRemoteMeta,
+    updateRemoteMeta,
     reset,
     dropChange,
 
