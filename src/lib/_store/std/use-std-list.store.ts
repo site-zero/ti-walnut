@@ -85,6 +85,13 @@ export type StdListStoreOptions = LocalListEditSetup & {
    * 默认查询条件
    */
   query?: SqlQuery | (() => SqlQuery);
+
+  /**
+   * 对处理好的 Query 数据做进一步修改
+   *
+   * @param q 即将发送查询的数据
+   */
+  patchQuery?: (q: SqlQuery) => void;
   /**
    * 保存后自动刷新结果
    */
@@ -922,6 +929,9 @@ function defineStdListStore(options: StdListStoreOptions) {
     let q = Util.jsonClone(_query.value);
     q.filter = q.filter ?? {};
     _.assign(q.filter, __create_fixed_match());
+    if (options.patchQuery) {
+      options.patchQuery(q);
+    }
     return q;
   }
 

@@ -85,6 +85,12 @@ export type RdsListStoreOptions = LocalListEditSetup & {
    */
   filterReady?: any;
   query: SqlQuery | (() => SqlQuery);
+  /**
+   * 对处理好的 Query 数据做进一步修改
+   *
+   * @param q 即将发送查询的数据
+   */
+  patchQuery?: (q: SqlQuery) => void;
   sqlQuery: string | (() => string);
   sqlCount?: string | (() => string);
   queryPrefix?: RedQueryPrefixSetup;
@@ -959,6 +965,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //
     if (_.isEmpty(q.filter)) {
       q.filter = __create_default_filter();
+    }
+    if (options.patchQuery) {
+      options.patchQuery(q);
     }
     return q;
   }

@@ -1,4 +1,10 @@
-import { CommonProps, IconInput } from "@site0/tijs";
+import {
+  BoxAspectProps,
+  CommonProps,
+  IconInput,
+  IconProps,
+  Vars,
+} from "@site0/tijs";
 
 export type WnObjThumbInfo = {
   title?: string;
@@ -9,6 +15,10 @@ export type WnObjThumbInfo = {
   tp?: string;
 };
 
-export type WnObjThumbProps = CommonProps & {
-  value?: WnObjThumbInfo;
-};
+export type WnObjThumbProps = CommonProps &
+  BoxAspectProps & {
+    value?: Vars;
+    getStyle?: (obj: Vars) => Vars;
+    getPrefixIcons?: (obj: Vars) => IconProps[];
+    getSuffixIcons?: (obj: Vars) => IconProps[];
+  };

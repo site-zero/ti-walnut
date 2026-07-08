@@ -5,10 +5,10 @@ import WnObjTitle from "./WnObjTitle.vue";
 const COM_TYPE = "WnObjTitle";
 
 const en_us = {
-  'com-name': 'WnObjTitle',
+  "com-name": "WnObjTitle",
 };
 const zh_cn = {
-  'com-name': 'WnObjTitle',
+  "com-name": "WnObjTitle",
 };
 
 const WnObjTitleInfo: TiComInfo = {
@@ -32,3 +32,4 @@ const WnObjTitleInfo: TiComInfo = {
 
 export * from "./wn-obj-title-types";
 export { WnObjTitle, WnObjTitleInfo };
+export * from "./support";

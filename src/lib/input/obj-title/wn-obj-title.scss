@@ -25,30 +25,27 @@
   > .as-text {
     flex: 1 1 auto;
     width: 100px;
-    height: 2.5em;
-    line-height: 2.5em;
+    height: 2.3em;
+    line-height: 2.3em;
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0 0.5em;
   }
   //-----------------------------------------------------
-  > .as-icon {
+  > .as-info {
     @include flex-align-nowrap($ai: stretch);
     //---------------------------------------------------
-    &.is-info {
-      border-right: 1px solid var(--ti-color-border-shallow);
-      width: 1.5em;
-      font-size: 1.3em;
+    > .info-icon {
       @include flex-center;
+      width: 1.5em;
+      border-right: 1px solid var(--ti-color-border-shallow);
+      font-size: 1.3em;
       cursor: pointer;
-      &:hover{
+      &:hover {
         background-color: var(--ti-color-border-shallow);
       }
     }
-    //---------------------------------------------------
-    &.is-menu {
-      border-left: 1px solid var(--ti-color-border-shallow);
-    }
+
     //---------------------------------------------------
     a {
       @include flex-center;
@@ -66,6 +63,11 @@
         }
       }
     }
+  }
+  //---------------------------------------------------
+  > .as-menu {
+    @include flex-align-nowrap($ai: stretch);
+    border-left: 1px solid var(--ti-color-border-shallow);
   }
   //-----------------------------------------------------
 }

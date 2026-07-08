@@ -1,48 +1,52 @@
 <script lang="ts" setup>
-  import { LabelProps, TiLabel } from "@site0/tijs";
+  import { CssUtils, TiIcon, useBoxAspect } from "@site0/tijs";
   import { computed } from "vue";
-  import { getWnObjIcon } from "../../../core";
+  import { useObjThumbApi } from "./use-obj-thumb-api";
   import { WnObjThumbProps } from "./wn-obj-thumb-types";
   //-----------------------------------------------------
-  const props = defineProps<WnObjThumbProps>();
-  //-----------------------------------------------------
-  const ObjIcon = computed(() => {
-    return getWnObjIcon(props.value);
+  const props = withDefaults(defineProps<WnObjThumbProps>(), {
+    boxFontSize: "s",
+    boxPadding: "t",
   });
   //-----------------------------------------------------
-  const ObjLabel = computed(() => {
-    let value = props.value ?? {};
-    let re: LabelProps = { autoI18n: true };
-    if (value) {
-      let { title, nm, tp } = value;
-      if (title && nm) {
-        if (title != nm) {
-          re.value = title;
-          let suffix = "." + tp;
-          if (tp && !title.endsWith(suffix)) {
-            re.value = title + suffix;
-          }
-          re.autoI18n = true;
-          //re.suffixText = nm;
-        } else {
-          re.value = nm;
-          re.autoI18n = false;
-        }
-      }
-      // 只有名称
-      else {
-        re.value = nm;
-        re.autoI18n = false;
-      }
+  const api = useObjThumbApi(props);
+  //-----------------------------------------------------
+  const Aspect = computed(() =>
+    useBoxAspect(props, {
+      getElement: () => null,
+      getDockingElement: () => null,
+      isFocused: () => false,
+      isTipBoxReady: () => false,
+      isReadonly: () => true,
+      autoFloatWhenTipReady: () => false,
+    })
+  );
+  //-----------------------------------------------------
+  const TopClass = computed(() => {
+    return Aspect.value.TopClass.value;
+  });
+  //-----------------------------------------------------
+  const TopStyle = computed(() => {
+    let css = {};
+    if (props.getStyle) {
+      css = props.getStyle(props.value || {});
     }
-    // 空名称
-    else {
-      re.value = "i18n:nil";
-    }
-    return re;
+    return CssUtils.mergeStyles([Aspect.value.TopStyle.value, css]);
   });
   //-----------------------------------------------------
 </script>
 <template>
-  <TiLabel v-bind="ObjLabel" :prefix-icon="ObjIcon" />
+  <div class="wn-obj-thumb" :class="TopClass" :style="TopStyle">
+    <div class="part-icon"><TiIcon :value="api.ObjIcon.value" /></div>
+    <div v-for="icon in api.PrefixIcons.value" class="part-icon">
+      <TiIcon v-bind="icon" />
+    </div>
+    <div class="part-text">{{ api.ObjText.value }}</div>
+    <div v-for="icon in api.SuffixIcons.value" class="part-icon">
+      <TiIcon v-bind="icon" />
+    </div>
+  </div>
 </template>
+<style lang="scss">
+  @use "./wn-obj-thumb.scss";
+</style>

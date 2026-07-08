@@ -1,0 +1,18 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wn-obj-thumb {
+  @include flex-align;
+  gap: var(--ti-gap-s);
+  font-size: var(--box-fontsz);
+  padding: var(--box-padding);
+  text-align: var(--box-align);
+  color: var(--box-color-text);
+  > .part-icon {
+    @include flex-center;
+    width: 1.5em;
+  }
+  > .part-text {
+    @include flex-center;
+    padding: 0 0.2em;
+  }
+}

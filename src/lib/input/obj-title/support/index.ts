@@ -1,0 +1,1 @@
+export * from './wn-obj-gen-title-tip'
