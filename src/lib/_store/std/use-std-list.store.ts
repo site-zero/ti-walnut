@@ -32,6 +32,7 @@ import {
   KeepInfo,
   Match,
   Pager,
+  TableRowID,
   TableSelectEmitInfo,
   useKeep,
   Util,
@@ -378,9 +379,20 @@ function defineStdListStore(options: StdListStoreOptions) {
    * 然后除了冲突的字段， local 的字段全部用 server 字段替换
    */
   function applyConflicts(cf: ListStoreConflicts) {
+    // 用来保持原来的数据顺序
+    let id_list = _.map(listData.value, (it) => getItemId(it) as TableRowID);
+
+    // 处理数据冲突
     let { server, localDiff } = cf;
     _remote.value = server;
-    apply_conflict_list(_local.localList, server, localDiff);
+    apply_conflict_list(
+      server,
+      localDiff,
+      (list) => {
+        _local.localList.value = list;
+      },
+      id_list
+    );
   }
   //---------------------------------------------
   // 读写内容

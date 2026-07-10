@@ -229,7 +229,11 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
   function applyConflicts(cf: MetaStoreConflicts) {
     let { server, localDiff } = cf;
     _remote.value = server;
-    apply_conflict(_local.localMeta, server, localDiff);
+    if (server && localDiff) {
+      apply_conflict(server, localDiff, (newMeta) => {
+        _local.localMeta.value = newMeta;
+      });
+    }
   }
   //---------------------------------------------
   //                  帮助函数

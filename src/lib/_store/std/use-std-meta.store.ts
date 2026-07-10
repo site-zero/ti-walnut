@@ -1,15 +1,4 @@
 import {
-  Alert,
-  apply_conflict,
-  buildConflict,
-  BuildConflictItemOptions,
-  buildDifferentItem,
-  Util,
-  Vars,
-} from "@site0/tijs";
-import _ from "lodash";
-import { computed, ref } from "vue";
-import {
   DataStoreActionStatus,
   DataStoreLoadStatus,
   isWnObj,
@@ -21,6 +10,17 @@ import {
   WnObj,
   WnObjContentFinger,
 } from "@site0/ti-walnut";
+import {
+  Alert,
+  apply_conflict,
+  buildConflict,
+  BuildConflictItemOptions,
+  buildDifferentItem,
+  Util,
+  Vars,
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, ref } from "vue";
 import { getObjContentFinger } from "../../../core";
 import { useObjContentStore } from "../use-obj-content.store";
 
@@ -173,7 +173,11 @@ function defineStdMetaStore(options?: StdMetaStoreOptions) {
   function applyConflicts(cf: MetaStoreConflicts) {
     let { server, localDiff } = cf;
     _remote.value = server;
-    apply_conflict(_local.localMeta, server, localDiff);
+    if (server && localDiff) {
+      apply_conflict(server, localDiff, (newMeta) => {
+        _local.localMeta.value = newMeta;
+      });
+    }
   }
   //---------------------------------------------
   // 读写内容
