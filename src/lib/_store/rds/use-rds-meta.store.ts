@@ -20,6 +20,7 @@ import {
   BuildConflictItemOptions,
   buildDifferentItem,
   Match,
+  Util,
   Vars,
 } from "@site0/tijs";
 import _ from "lodash";
@@ -244,7 +245,7 @@ function defineRdsMetaStore(options: RdsMetaStoreOptions) {
     }
 
     // 直接采用
-    return _.cloneDeep(options.filter);
+    return Util.jsonClone(options.filter);
   }
   //---------------------------------------------
   function _is_filter_ready(flt: QueryFilter): boolean {

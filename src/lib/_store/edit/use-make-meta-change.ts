@@ -178,7 +178,7 @@ export function useMakeMetaChange(options: MakeMetaChangeOptions) {
     let { index, id, local } = params;
 
     // 生成克隆数据，避免直接修改本地数据
-    let newMeta = _.cloneDeep(local);
+    let newMeta = Util.jsonClone(local);
 
     // 检查数据
     if (getErrMessageForInsert) {

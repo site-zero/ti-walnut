@@ -1,9 +1,9 @@
-import { Alg, Vars } from "@site0/tijs";
+import { Alg, Util, Vars } from "@site0/tijs";
 import JSON5 from "json5";
 import _ from "lodash";
 
 export function gen_wn_obj_title_tip_html(obj: Vars): string {
-  let meta = _.cloneDeep(obj);
+  let meta = Util.jsonClone(obj);
   if (_.isString(meta.local)) {
     meta.local = JSON5.parse(meta.local);
   }

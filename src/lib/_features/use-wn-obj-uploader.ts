@@ -179,7 +179,7 @@ export function useWnObjUploader(
   async function reloadMountHome() {
     if (props.mountHome) {
       if (isWnObj(props.mountHome)) {
-        _mnt_home.value = _.cloneDeep(props.mountHome);
+        _mnt_home.value = Util.jsonClone(props.mountHome);
       } else {
         _mnt_home.value = await objs.fetch(props.mountHome);
       }

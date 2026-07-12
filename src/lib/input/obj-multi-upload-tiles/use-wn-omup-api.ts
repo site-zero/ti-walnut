@@ -16,7 +16,7 @@ import {
   WnObjMultiUploadTilesProps,
 } from "./wn-omup-types";
 
-import { Alert, Be, Confirm, Vars } from "@site0/tijs";
+import { Alert, Be, Confirm, Util, Vars } from "@site0/tijs";
 
 export type WnObjMultiUploadTilesApi = ReturnType<
   typeof useWnObjMultiUploadTilesApi
@@ -72,7 +72,7 @@ export function useWnObjMultiUploadTilesApi(
   //-----------------------------------------------------
   const ObjList = computed(() => {
     const homeId = _mnt_home.value ? _mnt_home.value.id : undefined;
-    let re = _.cloneDeep(_obj_list.value);
+    let re = Util.jsonClone(_obj_list.value);
     for (let o of re) {
       // 强制设置上 homeId 前缀
       if (homeId && !o.id.startsWith(homeId)) {
@@ -223,7 +223,7 @@ export function useWnObjMultiUploadTilesApi(
     // 检索归纳输入值
     for (let oid of props.value || []) {
       if (isWnObj(oid)) {
-        load_objs.set(oid.id, _.cloneDeep(oid));
+        load_objs.set(oid.id, Util.jsonClone(oid));
         list_ids.push(oid.id);
       } else {
         load_ids.push(oid);
@@ -266,7 +266,7 @@ export function useWnObjMultiUploadTilesApi(
   async function reloadMountHome() {
     if (props.mountHome) {
       if (isWnObj(props.mountHome)) {
-        _mnt_home.value = _.cloneDeep(props.mountHome);
+        _mnt_home.value = Util.jsonClone(props.mountHome);
       } else {
         _mnt_home.value = await objs.fetch(props.mountHome);
       }
