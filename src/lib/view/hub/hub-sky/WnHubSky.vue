@@ -13,7 +13,7 @@
   //--------------------------------------------------
   const LogoIcon = computed(() => {
     let icon: IconInput;
-    if (!_gb_sta.data.appLogo) {
+    if (!_gb_sta.Data.value.appLogo) {
       icon = "fas-globe";
     }
     // 指定图标
@@ -22,7 +22,7 @@
     // }
     // 默认就是图片
     else {
-      icon = _gb_sta.data.appLogo;
+      icon = _gb_sta.Data.value.appLogo;
     }
     return icon;
   });
@@ -43,11 +43,13 @@
     </div>
     <div class="as-part is-name">
       <div class="as-title">
-        <strong>{{ _gb_sta.data.appTitle }}</strong>
-        <div class="as-version">V {{ _gb_sta.data.appVersion }}</div>
+        <strong>{{ _gb_sta.Data.value.appTitle }}</strong>
+        <div class="as-version">V {{ _gb_sta.Data.value.appVersion }}</div>
       </div>
     </div>
-    <div class="as-part is-crumb">appPath: [{{ _gb_sta.data.appPath }}]</div>
+    <div class="as-part is-crumb">
+      appPath: [{{ _gb_sta.Data.value.appPath }}]
+    </div>
     <div class="as-part is-avatar">
       <WnHubAvatar @logout="emit('logout')" />
     </div>

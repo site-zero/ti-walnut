@@ -372,8 +372,10 @@ export function defineRdsSimpleStore(options: RdsStoreDefination) {
 
     // 更新全局状态
     if (options.globalStatus) {
-      options.globalStatus.data.selectedRows = _checked_ids.value.length;
-      options.globalStatus.data.currentObj = CurrentItem.value;
+      options.globalStatus.setData({
+        selectedRows: _checked_ids.value.length,
+        currentObj: CurrentItem.value,
+      });
     }
   }
 

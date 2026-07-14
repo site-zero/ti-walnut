@@ -43,7 +43,7 @@ export function useHutFoot(
   //-----------------------------------------------
   // 准备上下文，用来渲染值和提示信息
   let ctx: FootValueContext = {
-    G: _gb_sta.data ?? {},
+    G: _gb_sta.Data.value ?? {},
     session: session.data ?? {},
   };
   //-----------------------------------------------
@@ -123,7 +123,7 @@ export function useHutFoot(
 
     // 特殊处理：选区
     if ("selection" == displayPart.type) {
-      let val = [_gb_sta.data.selectedRows ?? 0].join("");
+      let val = [_gb_sta.Data.value.selectedRows ?? 0].join("");
       displayPart.items.push({
         index: 0,
         itemKey: `${displayPart.uniqKey}-item-0`,
@@ -136,7 +136,7 @@ export function useHutFoot(
     }
     // 特殊处理：视图
     else if ("view" == displayPart.type) {
-      let val = _gb_sta.data.viewName ?? "---";
+      let val = _gb_sta.Data.value.viewName ?? "---";
       displayPart.items.push({
         index: 0,
         itemKey: `${displayPart.uniqKey}-item-0`,

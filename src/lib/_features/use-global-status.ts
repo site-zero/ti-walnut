@@ -1,37 +1,46 @@
-import { ProcessProps, TableSelectEmitInfo, Util, Vars } from "@site0/tijs";
-import { reactive } from "vue";
+import {
+  ButtonProps,
+  ProcessProps,
+  TableSelectEmitInfo,
+  Util,
+  Vars,
+} from "@site0/tijs";
+import _ from "lodash";
+import { computed, ref } from "vue";
 
-/**
- * 描述了一个应用路径的解析后信息。
- *
- * 例如：/a/b/c/d 解析后的信息如下：
- */
-export type AppPathInfo = {
-  /**
-   * 路径的深度，例如：`/a/b/c/d` 的深度为 4
-   */
-  depth: number;
+const debug = true;
 
-  /**
-   * 路径的基础部分，例如：`/a/b/c/d` 的基础部分为 `/a/b/c`
-   */
-  base?: string;
+// /**
+//  * 描述了一个应用路径的解析后信息。
+//  *
+//  * 例如：/a/b/c/d 解析后的信息如下：
+//  */
+// export type AppPathInfo = {
+//   /**
+//    * 路径的深度，例如：`/a/b/c/d` 的深度为 4
+//    */
+//   depth: number;
 
-  /**
-   * 路径的最后一部分，例如：`/a/b/c/d` 的最后一部分为 `d`
-   */
-  entryName?: string;
+//   /**
+//    * 路径的基础部分，例如：`/a/b/c/d` 的基础部分为 `/a/b/c`
+//    */
+//   base?: string;
 
-  /**
-   * 路径的最顶层目录名，例如：`/a/b/c/d` 的最顶层目录为 `a`
-   */
-  top?: string;
+//   /**
+//    * 路径的最后一部分，例如：`/a/b/c/d` 的最后一部分为 `d`
+//    */
+//   entryName?: string;
 
-  /**
-   * 路径的除去最顶层目录后剩余部分，例如：`/a/b/c/d` 的剩余部分为 `/b/c/d`
-   */
-  remain?: string;
-};
+//   /**
+//    * 路径的最顶层目录名，例如：`/a/b/c/d` 的最顶层目录为 `a`
+//    */
+//   top?: string;
+
+//   /**
+//    * 路径的除去最顶层目录后剩余部分，例如：`/a/b/c/d` 的剩余部分为 `/b/c/d`
+//    */
+//   remain?: string;
+// };
 
 export type GlobalStatus = {
   //..........................................
@@ -80,91 +89,99 @@ export type GlobalStatus = {
 export type GlobalStatusApi = ReturnType<typeof defineGlobalStatus>;
 
 function defineGlobalStatus() {
-  let _data = reactive({
-    // 应用整体状态
-    serverBase: "/",
-    configName: "server.config.json",
-    appPath: undefined,
-    viewName: "unknown",
+  let _data = ref({} as GlobalStatus);
+  resetData();
 
-    appLoading: false,
-    loading: false,
-    saving: false,
-    removing: false,
-    changed: false,
-    exposeHidden: false,
-
-    // 全局执行状态
-    processing: false,
-    process: undefined,
-    // process: {
-    //   title: {
-    //     //prefixIcon: 'fas-chalkboard-user',
-    //     text: 'I have some work to do',
-    //   },
-    //   progress: {
-    //     value: 0.4,
-    //   },
-    //   logs: [
-    //     '2023-10-01: Initialized',
-    //     '2023-10-02: Loading resources',
-    //     '2023-10-03: Resources loaded',
-    //     '2023-10-04: Processing data',
-    //     '2023-10-05: Data processed',
-    //     '2023-10-06: Saving results',
-    //     '2023-10-07: Results saved',
-    //     '2023-10-08: Completed',
-    //   ],
-    // },
-
-    // 全局列表选定状态等
-    selectedRows: undefined,
-    selectedCols: undefined,
-    currentObj: undefined,
-  } as GlobalStatus);
+  const Data = computed(() => _data.value);
 
   function resetData() {
-    //console.log("resetData");
-    _data.processing = false;
-    _data.process = undefined;
-    _data.selectedCols = undefined;
-    _data.selectedRows = undefined;
-    _data.currentObj = undefined;
-  }
+    if (debug) console.log("resetData");
+    _data.value = {
+      serverBase: "/",
+      configName: "server.config.json",
+      appLoading: false,
+      loading: false,
+      saving: false,
+      removing: false,
+      changed: false,
+      exposeHidden: false,
 
-  /**
-   * 解析应用路径，提取路径信息
-   *
-   * @returns 路径信息对象
-   */
-  function parseAppPath(): AppPathInfo {
-    if (!_data.appPath) {
-      return { depth: 0 };
-    }
-    // Split the path by '/' and remove empty segments
-    const parts = _data.appPath.split("/").filter(Boolean);
-    const depth = parts.length;
-
-    // Handle root path case (when path is '/' or '')
-    if (depth === 0) {
-      return { depth: 0 };
-    }
-
-    // Extract components
-    const entryName = parts[depth - 1]; // Last segment
-    const base = depth === 1 ? "/" : "/" + parts.slice(0, depth - 1).join("/"); // All but last segment
-    const top = parts[0]; // First segment
-    const remain = depth === 1 ? "" : "/" + parts.slice(1).join("/"); // All after first segment
-
-    // Return the complete AppPathInfo object
-    return {
-      depth,
-      base,
-      entryName,
-      top,
-      remain,
+      // 全局执行状态
+      processing: false,
+      process: undefined,
     };
   }
+
+  function setData(delta: Partial<GlobalStatus>) {
+    if (debug) console.log("setData", { ...delta });
+    _.assign(_data.value, delta);
+  }
+
+  function setProcessing(processing: string | boolean) {
+    _data.value.processing = processing;
+  }
+
+  function updateProcess(process: Partial<ProcessProps>) {
+    if (_data.value.process) {
+      _.assign(_data.value.process, process);
+    }
+  }
+
+  function setProcessProgress(p: number) {
+    if (_data.value.process && _data.value.process.progress) {
+      _data.value.process.progress.value = p;
+    }
+  }
+
+  function setProcessAbort(abort: string | ButtonProps | undefined) {
+    if (_data.value.process) {
+      _data.value.process.abort = abort;
+    }
+  }
+
+  function pushProcessLog(msg: string) {
+    if (_data.value.process) {
+      if (_data.value.process.logs) {
+        _data.value.process.logs.push(msg);
+      } else {
+        _data.value.process.logs = [msg];
+      }
+    }
+  }
+
+  // /**
+  //  * 解析应用路径，提取路径信息
+  //  *
+  //  * @returns 路径信息对象
+  //  */
+  // function parseAppPath(): AppPathInfo {
+  //   if (!_data.appPath) {
+  //     return { depth: 0 };
+  //   }
+  //   // Split the path by '/' and remove empty segments
+  //   const parts = _data.appPath.split("/").filter(Boolean);
+  //   const depth = parts.length;
+
+  //   // Handle root path case (when path is '/' or '')
+  //   if (depth === 0) {
+  //     return { depth: 0 };
+  //   }
+
+  //   // Extract components
+  //   const entryName = parts[depth - 1]; // Last segment
+  //   const base = depth === 1 ? "/" : "/" + parts.slice(0, depth - 1).join("/"); // All but last segment
+  //   const top = parts[0]; // First segment
+  //   const remain = depth === 1 ? "" : "/" + parts.slice(1).join("/"); // All after first segment
+
+  //   // Return the complete AppPathInfo object
+  //   return {
+  //     depth,
+  //     base,
+  //     entryName,
+  //     top,
+  //     remain,
+  //   };
+  // }
 
   function setAppPath(hubPath: string) {
     // 确保 hubPath(`http://xxxx/{appBase}/{hubPath}`) 是以 `/` 开头的
@@ -176,7 +193,7 @@ function defineGlobalStatus() {
     }
 
     // 去掉 appBase
-    let { appBase = "/" } = _data;
+    let { appBase = "/" } = _data.value;
     if (!appBase.endsWith("/")) {
       appBase += "/";
     }
@@ -195,11 +212,11 @@ function defineGlobalStatus() {
       hubPath = "";
     }
 
-    _data.appPath = hubPath;
+    _data.value.appPath = hubPath;
   }
 
   function getPathOfApp(path: string) {
-    let base = _data.appBase ?? "/";
+    let base = _data.value.appBase ?? "/";
     if (!path.startsWith(base)) {
       path = Util.appendPath(base, path);
     }
@@ -208,32 +225,37 @@ function defineGlobalStatus() {
 
   function onListSelect(selection: TableSelectEmitInfo) {
     let { checkedIds, current } = selection;
-    _data.selectedCols = 0;
-    _data.currentObj = current ?? undefined;
+    let delta: Partial<GlobalStatus> = {};
+    delta.selectedCols = 0;
+    delta.currentObj = current ?? undefined;
     if (checkedIds) {
-      _data.selectedRows = checkedIds.length ?? 0;
+      delta.selectedRows = checkedIds.length ?? 0;
     } else {
-      _data.selectedRows = 0;
+      delta.selectedRows = 0;
     }
+    setData(delta);
   }
 
   // watch(
-  //   () => _data.currentObj,
+  //   () => _data.selectedRows,
   //   (newVal, oldVal) => {
-  //     if (_.isNil(newVal) && oldVal) {
-  //       console.warn("currentObj[OFF] changed", newVal, oldVal);
-  //     } else {
-  //       console.log("currentObj[ON] changed", newVal, oldVal);
-  //     }
+  //     console.warn("selectedRows changed", newVal, oldVal);
   //   }
   // );
 
   return {
-    data: _data,
-    parseAppPath,
+    _data,
+    Data,
+    //parseAppPath,
     getPathOfApp,
     setAppPath,
     resetData,
+    setData,
+    setProcessing,
+    updateProcess,
+    setProcessProgress,
+    setProcessAbort,
+    pushProcessLog,
     onListSelect,
   };
 }

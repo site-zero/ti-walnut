@@ -172,7 +172,7 @@ export function useSessionStore() {
   async function signIn(info: SignInForm, afterOk: () => Promise<void>) {
     const _gl_sta = useGlobalStatus();
     try {
-      _gl_sta.data.processing = "正在执行登录";
+      _gl_sta.setProcessing("正在执行登录");
       let re = await Walnut.signInToDomain(info);
       // Sign-in successfully
       if (re.ok) {
@@ -188,7 +188,7 @@ export function useSessionStore() {
       }
       // console.log('signIn', re);
     } finally {
-      _gl_sta.data.processing = false;
+      _gl_sta.setProcessing(false);
     }
   }
 
@@ -297,7 +297,7 @@ export function useSessionStore() {
   async function reload(afterOk: () => Promise<void>) {
     const status = useGlobalStatus();
     try {
-      status.data.appLoading = true;
+      status.setData({ appLoading: true });
       let re = await Walnut.fetchMySession();
       if (re.ok) {
         _translate_session_result(re.data);
@@ -311,7 +311,7 @@ export function useSessionStore() {
         resetSession();
       }
     } finally {
-      status.data.appLoading = false;
+      status.setData({ appLoading: false });
     }
   }
 

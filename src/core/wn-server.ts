@@ -133,20 +133,22 @@ export class WalnutServer {
 
     // 初始化全局状态
     const _gl_sta = getGlobalStatus();
-    _gl_sta.data.appVersion = appVersion ?? "0.0.0";
-    _gl_sta.data.appTitle = appTitle ?? "Walnut";
-    _gl_sta.data.appName = appName || undefined;
-    _gl_sta.data.appBase = appBase || "/";
-    _gl_sta.data.quitPath = quitPath || undefined;
-    _gl_sta.data.serverBase = serverBase;
-    _gl_sta.data.configName = configName;
-    _gl_sta.data.domain = domain || undefined;
-    _gl_sta.data.loginSite = loginSite || undefined;
+    _gl_sta.setData({
+      appVersion: appVersion ?? "0.0.0",
+      appTitle: appTitle ?? "Walnut",
+      appName: appName || undefined,
+      appBase: appBase || "/",
+      quitPath: quitPath || undefined,
+      serverBase: serverBase,
+      configName: configName,
+      domain: domain || undefined,
+      loginSite: loginSite || undefined,
+    });
   }
 
   async prepare() {
     const _gl_sta = getGlobalStatus();
-    let { serverBase, configName, domain, loginSite } = _gl_sta.data;
+    let { serverBase, configName, domain, loginSite } = _gl_sta.Data.value;
 
     // 准备服务配置文件路径
     let configPath = [serverBase, configName].join("/");
@@ -169,19 +171,29 @@ export class WalnutServer {
 
     // 根据配置文件，设置全局状态管理
     if (config.logo) {
-      _gl_sta.data.appLogo = config.logo;
+      _gl_sta.setData({
+        appLogo: config.logo,
+      });
     }
     if (config.mainLogo) {
-      _gl_sta.data.signupMainLogo = config.mainLogo;
+      _gl_sta.setData({
+        signupMainLogo: config.mainLogo,
+      });
     }
     if (config.appTitle) {
-      _gl_sta.data.appTitle = config.appTitle;
+      _gl_sta.setData({
+        appTitle: config.appTitle,
+      });
     }
     if (config.site) {
-      _gl_sta.data.loginSite = config.site;
+      _gl_sta.setData({
+        loginSite: config.site,
+      });
     }
     if (config.domain) {
-      _gl_sta.data.domain = config.domain;
+      _gl_sta.setData({
+        domain: config.domain,
+      });
     }
 
     // 初始化服务器
@@ -243,7 +255,7 @@ export class WalnutServer {
 
   getAppStaticPath(path: string) {
     const _gl_sta = getGlobalStatus();
-    let { serverBase = "/" } = _gl_sta.data;
+    let { serverBase = "/" } = _gl_sta.Data.value;
     return Util.appendPath(serverBase, path);
   }
 
@@ -297,7 +309,7 @@ export class WalnutServer {
 
   getUrlForObjContent(id: string, options: GetUrlForObjContentOptions = {}) {
     let { download = "auto", downName, withTicket } = options;
-    if(id && id.startsWith("id:")){
+    if (id && id.startsWith("id:")) {
       id = id.substring(3).trim();
     }
     let uri = [];
@@ -938,7 +950,7 @@ export class WalnutServer {
 
     // 确保每个菜单项目的链接是正确的
     const _gl_sta = getGlobalStatus();
-    let { appBase = "/" } = _gl_sta.data;
+    let { appBase = "/" } = _gl_sta.Data.value;
     const _tidy_href_of_bar_item = (sbItem: SideBarItem) => {
       if (sbItem.href) {
         if (!sbItem.href.startsWith(appBase)) {
@@ -988,7 +1000,7 @@ export class WalnutServer {
     });
   }
 
-    async loadMyDynmicUISettings() {
+  async loadMyDynmicUISettings() {
     let loading = [] as Promise<void>[];
     if (this._ticket) {
       // 动态加载数据字典

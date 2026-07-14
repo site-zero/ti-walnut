@@ -1,12 +1,6 @@
-import {
-  AjaxResult,
-  Alert,
-  IconInput,
-  ProcessProps,
-  Prompt,
-} from "@site0/tijs";
+import { AjaxResult, Alert, IconInput, Prompt } from "@site0/tijs";
 import _ from "lodash";
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 import { Walnut } from "../../../..";
 import { _auth_inner_api, AuthStoreOptions } from "./use-auth.store";
 
@@ -82,77 +76,81 @@ export function useAuthResetPasswd(
 
     // 准备初始化进度
     let N = usrs.length;
-    _gb_state.data.process = reactive({
-      title: {
-        text: `Reset Passwod for selected (${N}) User`,
-      },
-      progress: {
-        value: 0,
-      },
-      listData: [],
-      listCurrentRowIndex: 0,
-      listConf: {
-        styleSheet: `
+    _gb_state.setData({
+      process: {
+        title: {
+          text: `Reset Passwod for selected (${N}) User`,
+        },
+        progress: {
+          value: 0,
+        },
+        listData: [],
+        listCurrentRowIndex: 0,
+        listConf: {
+          styleSheet: `
         .list-item .list-part.as-text abbr {
           color: var(--ti-color-danger);
           opacity: 1;
         }`,
-      },
-      abort: {
-        icon: "far-circle-stop",
-        text: "Abort",
-        action: () => {
-          abort_processing.value = true;
+        },
+        abort: {
+          icon: "far-circle-stop",
+          text: "Abort",
+          action: () => {
+            abort_processing.value = true;
+          },
         },
       },
-    } as ProcessProps);
+    });
 
     // 准备一个更新函数
     function _update_process() {
-      _gb_state.data.process!.listData = usrs.map((usr) => {
-        let st = status.get(usr.id) ?? "wait";
-        // 判断是否为错误状态
-        if (st && !/^(wait|ing|ok)$/.test(st)) {
-          st = "error";
-        }
+      _gb_state.updateProcess({
+        listData: usrs.map((usr) => {
+          let st = status.get(usr.id) ?? "wait";
+          // 判断是否为错误状态
+          if (st && !/^(wait|ing|ok)$/.test(st)) {
+            st = "error";
+          }
 
-        let icon = {
-          wait: {
-            type: "font",
-            value: "fas-hourglass-start",
-            logicType: "track",
-          } as IconInput,
-          ing: {
-            type: "font",
-            value: "fas-hourglass-half",
-            logicType: "secondary",
-          } as IconInput,
-          ok: {
-            type: "font",
-            value: "fas-check",
-            logicType: "success",
-          } as IconInput,
-          error: {
-            type: "font",
-            value: "zmdi-alert-triangle",
-            logicType: "danger",
-          } as IconInput,
-        }[st];
+          let icon = {
+            wait: {
+              type: "font",
+              value: "fas-hourglass-start",
+              logicType: "track",
+            } as IconInput,
+            ing: {
+              type: "font",
+              value: "fas-hourglass-half",
+              logicType: "secondary",
+            } as IconInput,
+            ok: {
+              type: "font",
+              value: "fas-check",
+              logicType: "success",
+            } as IconInput,
+            error: {
+              type: "font",
+              value: "zmdi-alert-triangle",
+              logicType: "danger",
+            } as IconInput,
+          }[st];
 
-        let tip: string | undefined = undefined;
-        if (st == "error") {
-          tip = status.get(usr.id) as string;
-          tip =
-            {
-              "e.jsbin.job_in_progress": "Job In Progress",
-            }[tip] || tip;
-        }
-        return {
-          icon,
-          tip,
-          text: [usr.nm, usr.nickname].join(": "),
-          value: usr.id,
-        };
+          let tip: string | undefined = undefined;
+          if (st == "error") {
+            tip = status.get(usr.id) as string;
+            tip =
+              {
+                "e.jsbin.job_in_progress": "Job In Progress",
+              }[tip] || tip;
+          }
+          return {
+            icon,
+            tip,
+            text: [usr.nm, usr.nickname].join(": "),
+            value: usr.id,
+          };
+        }),
       });
     }
 
@@ -163,7 +161,7 @@ export function useAuthResetPasswd(
     for (let i = 0; i < N; i++) {
       let usr = usrs[i];
       // 滚动显示
-      _gb_state.data.process!.listCurrentRowIndex = i;
+      _gb_state.updateProcess({ listCurrentRowIndex: i });
 
       // 用户主动取消
       if (abort_processing.value) {
@@ -171,7 +169,7 @@ export function useAuthResetPasswd(
       }
 
       // 更新进度
-      _gb_state.data.process!.progress!.value = (i + 1) / N;
+      _gb_state.setProcessProgress((i + 1) / N);
 
       // 更新状态
       status.set(usr.id, "ing");
@@ -199,15 +197,15 @@ export function useAuthResetPasswd(
     }
 
     // 标记完成
-    _gb_state.data.process!.abort = {
+    _gb_state.setProcessAbort({
       icon: "far-circle-check",
       text: "All Done, Click To Close",
       type: "success",
       action: () => {
         abort_processing.value = true;
-        _gb_state.data.process = undefined;
+        _gb_state.setData({ process: undefined });
       },
-    };
+    });
   }
   //------------------------------------------------------
   // 返回的特性应该就是一个函数就好
