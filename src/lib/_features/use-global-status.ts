@@ -8,7 +8,7 @@ import {
 import _ from "lodash";
 import { computed, ref } from "vue";
 
-const debug = true;
+const debug = false;
 
 // /**
 //  * 描述了一个应用路径的解析后信息。
@@ -89,16 +89,17 @@ export type GlobalStatus = {
 export type GlobalStatusApi = ReturnType<typeof defineGlobalStatus>;
 
 function defineGlobalStatus() {
-  let _data = ref({} as GlobalStatus);
+  let _data = ref({
+    serverBase: "/",
+    configName: "server.config.json",
+  } as GlobalStatus);
   resetData();
 
   const Data = computed(() => _data.value);
 
   function resetData() {
     if (debug) console.log("resetData");
-    _data.value = {
-      serverBase: "/",
-      configName: "server.config.json",
+    _.assign(_data.value, {
       appLoading: false,
       loading: false,
       saving: false,
@@ -109,7 +110,7 @@ function defineGlobalStatus() {
       // 全局执行状态
       processing: false,
       process: undefined,
-    };
+    });
   }
 
   function setData(delta: Partial<GlobalStatus>) {
