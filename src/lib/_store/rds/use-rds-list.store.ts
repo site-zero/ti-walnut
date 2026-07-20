@@ -945,7 +945,9 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   function __gen_query(): SqlQuery {
     let q = Util.jsonClone(_query.value);
     q.filter = q.filter ?? {};
-    q.filter = Util.filterRecordNilValueDeeply(q.filter);
+    q.filter = Util.filterRecordNilValueDeeply(q.filter, {
+      ignoreKey: () => false,
+    });
 
     // 融合两个条件
     let fixed = __create_fixed_match();
