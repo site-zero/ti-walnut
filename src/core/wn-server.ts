@@ -1124,12 +1124,26 @@ export class WalnutServer {
     return ids[0];
   }
 
-  async serverToday(fmt = "yyyy-MM-dd", timezone = "UTC"): Promise<string> {
+  async serverLocalToday_yyyyMMdd(): Promise<string> {
+    return await this.serverLocalToday("yyyyMMdd");
+  }
+
+  async serverLocalToday(fmt = "yyyy-MM-dd"): Promise<string> {
+    let re = await this.exec(`datex @fmt '${fmt}'`);
+    return _.trim(re as string);
+  }
+
+  async serverLocalNow(fmt = "yyyy-MM-dd HH:mm:ss"): Promise<string> {
+    let re = await this.exec(`datex @fmt '${fmt}'`);
+    return _.trim(re as string);
+  }
+
+  async serverUTCToday(fmt = "yyyy-MM-dd", timezone = "UTC"): Promise<string> {
     let re = await this.exec(`datex @fmt '${fmt}' @timezone ${timezone}`);
     return _.trim(re as string);
   }
 
-  async serverNow(
+  async serverUTCNow(
     fmt = "yyyy-MM-dd HH:mm:ss",
     timezone = "UTC"
   ): Promise<string> {
