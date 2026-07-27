@@ -191,10 +191,10 @@ export function useAuthStore(options: AuthStoreOptions) {
   const CurrentItem = computed(() => {
     // 用户的话，需要融合 role 属性
     if ("user" == mainObjType) {
-      let data = jsonClone(_users.CurrentItem.value);
-      if (!data) {
-        return;
+      if(!_users.CurrentItem.value) {
+        return
       }
+      let data = {..._users.CurrentItem.value};
       data.roles = CurrentUserRoleGrps.value.join(",").trim() || null;
       data.domainRoleValue = CurrentUserDomainRoleValue.value;
       return data;
