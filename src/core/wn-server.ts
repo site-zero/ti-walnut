@@ -18,6 +18,7 @@ import {
 import {
   Alert,
   ENV_KEYS,
+  getEnv,
   I18n,
   installTiCoreI18n,
   openAppModal,
@@ -35,6 +36,7 @@ import {
 import JSON5 from "json5";
 import _ from "lodash";
 import { installWalnutI18n } from "../i18n";
+import { getTimezoneOffset } from "./support";
 import { installWalnutDicts } from "./wn-dict";
 import { wnRunCommand } from "./wn-run-command";
 
@@ -393,8 +395,11 @@ export class WalnutServer {
         this._ticket = undefined;
         TiStore.local.remove(TICKET_KEY);
         setEnv(ENV_KEYS.TIMEZONE, null);
+        setEnv(ENV_KEYS.TIMEZONE_OFFSET, 0);
       } else {
         setEnv(ENV_KEYS.TIMEZONE, re.data.me?.meta?.TIMEZONE);
+        let tzOffset = getTimezoneOffset(re.data.me?.meta?.TIMEZONE);
+        setEnv(ENV_KEYS.TIMEZONE_OFFSET, tzOffset);
       }
       return re;
     }
@@ -403,6 +408,11 @@ export class WalnutServer {
         ok: false,
       });
     });
+  }
+
+  getEnvTimezoneOffset(): number {
+    let tz = getEnv(ENV_KEYS.TIMEZONE_OFFSET) as number;
+    return tz || 0;
   }
 
   async signInToDomain(info: SignInForm): Promise<AjaxResult> {
@@ -1373,10 +1383,20 @@ export type WnUploadFileProgress = {
   total: number;
 };
 
+/**
+ * 上传模式
+ *
+ * - "a": 追加模式，默认值
+ * - "r": 替换模式: `target`可以存在，如果是目录根据`nm`创建。
+ * 如果不存在，如果以 `/` 结尾则被当做目录，否则是目标文件路径
+ * - "s": 严格模式: `target`必须存在，且是一个文件，将会将其替换
+ */
+export type WnUploadMode = "a" | "r" | "s";
+
 export type WnUploadFileOptions = {
   uploadName?: string;
   target: string;
-  mode?: "a" | "r" | "s";
+  mode?: WnUploadMode;
   tmpl?: string;
   /**
    * 上传的文件，需要自动加上这个指定的前缀

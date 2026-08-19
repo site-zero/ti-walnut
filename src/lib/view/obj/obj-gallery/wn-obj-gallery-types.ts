@@ -19,6 +19,14 @@ export type WnObjGalleryEmitter = {
 
 export type GalleryMode = "wall" | "table";
 
+export function isGalleryMode(mode: any): mode is GalleryMode {
+  return /^wall|table$/.test(mode);
+}
+
+export function toGalleryMode(mode: any, dftMode: GalleryMode = "wall"): GalleryMode {
+  return isGalleryMode(mode) ? mode : dftMode;
+}
+
 type _ignore_keys = "data" | "currentId" | "checkedIds" | "emptyRoadblock";
 
 export type WnObjGalleryProps = CommonProps & {
@@ -29,6 +37,8 @@ export type WnObjGalleryProps = CommonProps & {
    * 默认为 `wall`
    */
   mode?: GalleryMode;
+
+  keepName?: string;
 
   //-----------------------------------------------------
   // 所有子控件都有的属性

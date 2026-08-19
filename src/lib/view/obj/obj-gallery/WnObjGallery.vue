@@ -59,7 +59,7 @@
     _upload_api.doUploadFiles();
   }
   //-----------------------------------------------------
-  const _api = useWnObjGalleryApi(props, emit);
+  const api = useWnObjGalleryApi(props, emit);
   //-----------------------------------------------------
   let _watched_bus_key: string | undefined = undefined;
   watch(
@@ -107,8 +107,9 @@
         :current-id="props.currentId"
         :checked-ids="props.checkedIds"
         :empty-roadblock="props.emptyRoadblock"
-        @select="_api.onSelect"
-        @open="_api.onOpenTableItem" />
+        @select="api.onSelect"
+        @open="api.onOpenTableItem"
+        @cell-open="api.onOpenTableCell" />
       <!--========== Wall ============-->
       <WnObjWall
         v-else-if="props.mode === 'wall'"
@@ -117,8 +118,8 @@
         :current-id="props.currentId"
         :checked-ids="props.checkedIds"
         :empty-roadblock="props.emptyRoadblock"
-        @select="_api.onSelect"
-        @open="_api.onOpenWallItem" />
+        @select="api.onSelect"
+        @open="api.onOpenWallItem" />
       <!--========== 不支持的模式 ============-->
       <TiRoadblock
         v-else

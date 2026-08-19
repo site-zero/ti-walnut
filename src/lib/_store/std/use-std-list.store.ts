@@ -50,7 +50,7 @@ export type StdListStoreOptions = LocalListEditSetup & {
    * 主目录路径，通常就是一个文件夹，如果是 thing 文件夹，
    * 那么，除了生米这个参数，还需要声明 indexPath='index'
    */
-  homePath: string | WnObj;
+  homePath: string | WnObj | (() => string | WnObj);
   /**
    * 数据对象存储的位置，如果未指定，则采用与 homePath 相同的路径
    */
@@ -232,6 +232,12 @@ function defineStdListStore(options: StdListStoreOptions) {
   //                 组合其他特性
   //---------------------------------------------
   const IndexDirObj = computed(() => _dir_index.value ?? _home_obj.value);
+  const IndexDirPath = computed(() => {
+    if (!IndexDirObj.value) {
+      return;
+    }
+    return `id:${IndexDirObj.value.id}`;
+  });
   //---------------------------------------------
   const _local = useLocalListEdit(_remote, _options);
   //---------------------------------------------
@@ -1078,12 +1084,18 @@ function defineStdListStore(options: StdListStoreOptions) {
    */
   async function reloadHome() {
     let { homePath, autoCreateHome, indexPath, dataPath } = _options;
+    let home: string | WnObj;
+    if (_.isFunction(homePath)) {
+      home = homePath();
+    } else {
+      home = homePath;
+    }
     // 读取 home Obj
     let oHome: WnObj | undefined = undefined;
-    if (isWnObj(homePath)) {
-      oHome = homePath;
+    if (isWnObj(home)) {
+      oHome = home;
     } else {
-      oHome = await _obj.fetch(homePath);
+      oHome = await _obj.fetch(home);
     }
 
     // 防空:自动创建
@@ -1096,6 +1108,19 @@ function defineStdListStore(options: StdListStoreOptions) {
     if (!oHome) {
       throw `homePath not found: ${homePath}`;
     }
+
+    // 如果是个文件，就优先高亮这个文件
+    let fileObjId: string | undefined = undefined;
+    if ("FILE" == oHome.race) {
+      fileObjId = oHome.id;
+      oHome = await _obj.get(oHome.pid);
+    }
+    // 再再次防空
+    if (!oHome) {
+      throw `homePath not found: ${homePath}`;
+    }
+
+    // 已经确保了 home obj 是个目录
     _home_obj.value = oHome;
 
     // init index path
@@ -1120,10 +1145,17 @@ function defineStdListStore(options: StdListStoreOptions) {
     // 重新加载查询条件
     _query.value = __create_data_query();
 
-    // 重新加载选中项目
-    let selection = _keep_select.value.loadObj() ?? {};
-    _current_id.value = selection.currentId;
-    _checked_ids.value = selection.checkedIds || [];
+    // 恢复选区: 直接指定的
+    if (fileObjId) {
+      _current_id.value = fileObjId;
+      _checked_ids.value = [fileObjId];
+    }
+    // 恢复选区: 上次选中的
+    else {
+      let selection = _keep_select.value.loadObj() ?? {};
+      _current_id.value = selection.currentId;
+      _checked_ids.value = selection.checkedIds || [];
+    }
   }
 
   /**
@@ -1194,6 +1226,7 @@ function defineStdListStore(options: StdListStoreOptions) {
     query: computed(() => _query.value),
     HomeObj: computed(() => _home_obj.value),
     IndexDirObj,
+    IndexDirPath,
     remoteList: computed(() => _remote.value),
     ActionStatus,
     ActionBarVars,

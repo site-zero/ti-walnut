@@ -110,6 +110,7 @@ export type RdsListStoreOptions = LocalListEditSetup & {
    * 可选全局状态接口，如果指定，则在 Select 等时机会自动更新状态
    */
   globalStatus?: GlobalStatusApi;
+  globalDefaultObj?: () => Vars | undefined | null;
 };
 
 function defineRdsListStore(options: RdsListStoreOptions) {
@@ -288,10 +289,28 @@ function defineRdsListStore(options: RdsListStoreOptions) {
   //---------------------------------------------
   function updateGlobalStatus() {
     if (options.globalStatus) {
-      options.globalStatus.setData({
-        selectedRows: _checked_ids.value.length,
-        currentObj: CurrentItem.value,
-      });
+      let dftObj = options.globalDefaultObj?.();
+      // 有选择
+      if (hasChecked.value) {
+        options.globalStatus.setData({
+          selectedRows: _checked_ids.value.length,
+          currentObj: CurrentItem.value,
+        });
+      }
+      // 显示默认选项
+      else if (dftObj) {
+        options.globalStatus.setData({
+          selectedRows: 0,
+          currentObj: dftObj,
+        });
+      }
+      // 清除选项
+      else {
+        options.globalStatus.setData({
+          selectedRows: 0,
+          currentObj: undefined,
+        });
+      }
     }
   }
   //---------------------------------------------
