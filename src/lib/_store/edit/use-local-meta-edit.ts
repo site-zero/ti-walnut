@@ -62,8 +62,8 @@ export type LocalMetaMakeChangeOptions = LocalMetaMakeDiffOptions & {
   updateSql?: string | (() => string);
   insertSql?: string | (() => string);
   insertSet?: SqlInsertSet;
-  insertPut?: string | (() => string);
-  updatePut?: string | (() => string);
+  insertPut?: string | ((q: Vars) => string);
+  updatePut?: string | ((q: Vars) => string);
   fetchBack?: (local: SqlResult, remote?: SqlResult) => SqlExecFetchBack;
   noresult?: boolean;
 };
@@ -223,20 +223,20 @@ export function useLocalMetaEdit(
 
     let sets = [] as SqlExecSetVar[];
     let sql: string | undefined = undefined;
-    let put: string | undefined = getSqlStr(options.updatePut);
+    let put: string | undefined = getSqlStr(options.updatePut, {});
     let vars: Vars | undefined = undefined;
     // 新创建的记录需要设置更多字段
     if (insertMeta.value) {
       vars = insertMeta.value;
-      sql = getSqlStr(options.insertSql);
-      put = getSqlStr(options.insertPut);
+      sql = getSqlStr(options.insertSql, vars);
+      put = getSqlStr(options.insertPut, vars);
       join_exec_set_vars(sets, options.insertSet);
     }
     // 已经存在的，那么要把 ID 设置一下
     else if (updateMeta.value) {
       vars = updateMeta.value;
-      sql = getSqlStr(options.updateSql);
-      put = getSqlStr(options.updatePut);
+      sql = getSqlStr(options.updateSql, vars);
+      put = getSqlStr(options.updatePut, vars);
     }
 
     // 再次防空

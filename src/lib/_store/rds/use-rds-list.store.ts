@@ -91,8 +91,8 @@ export type RdsListStoreOptions = LocalListEditSetup & {
    * @param q 即将发送查询的数据
    */
   patchQuery?: (q: SqlQuery) => void;
-  sqlQuery: string | (() => string);
-  sqlCount?: string | (() => string);
+  sqlQuery: string | ((q: Vars) => string);
+  sqlCount?: string | ((q: Vars) => string);
   queryPrefix?: RedQueryPrefixSetup;
   countPrefix?: RedQueryPrefixSetup;
   makeChange?: LocalListMakeChangeOptions;

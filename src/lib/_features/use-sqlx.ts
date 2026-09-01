@@ -72,7 +72,7 @@ export function defineSqlx(daoName?: string) {
     }
   }
   async function __query(
-    sql: string | (() => string),
+    sql: string | ((q: Vars) => string),
     q: Vars
   ): Promise<SqlResult[]> {
     try {
@@ -87,7 +87,7 @@ export function defineSqlx(daoName?: string) {
         cmds.push(daoName);
       }
       cmds.push("-cqn @vars");
-      cmds.push(`@query ${getSqlStr(sql)} -p`);
+      cmds.push(`@query ${getSqlStr(sql, q)} -p`);
       let cmdText = cmds.join(" ");
       if (debug) console.log(cmdText, q);
 
@@ -116,7 +116,7 @@ export function defineSqlx(daoName?: string) {
    * @returns 查询结果
    */
   async function query(
-    sql: string | (() => string),
+    sql: string | ((q: Vars) => string),
     query: SqlQuery
   ): Promise<SqlResult[]> {
     // 准备查询上下文
@@ -156,7 +156,7 @@ export function defineSqlx(daoName?: string) {
    * @returns 符合查询条件的记录数量
    */
   async function count(
-    sql: string | (() => string),
+    sql: string | ((q: Vars) => string),
     filter: QueryFilter,
     countKey: string = "total"
   ): Promise<number> {
@@ -172,7 +172,7 @@ export function defineSqlx(daoName?: string) {
         cmds.push(daoName);
       }
       cmds.push("-cqn @vars");
-      cmds.push(`@query ${getSqlStr(sql)} -p`);
+      cmds.push(`@query ${getSqlStr(sql, filter)} -p`);
       let cmdText = cmds.join(" ");
       if (debug) console.log(cmdText, filter);
 
@@ -302,7 +302,7 @@ export function defineSqlx(daoName?: string) {
         }
       }
       //............. @exec
-      cmds.push(`@exec ${getSqlStr(opt.sql)}`);
+      cmds.push(`@exec ${getSqlStr(opt.sql, opt.vars)}`);
       if (opt.noresult) {
         cmds.push("-noresult");
       }
@@ -362,9 +362,12 @@ export function defineSqlx(daoName?: string) {
   return { query, fetch, select, count, exec };
 }
 
-export function getSqlStr(sql?: string | (() => string)) {
+export function getSqlStr(
+  sql: undefined | string | ((q: Vars) => string),
+  q: Vars
+) {
   if (_.isFunction(sql)) {
-    return sql();
+    return sql(q);
   }
   return sql;
 }
@@ -433,7 +436,7 @@ export function compactSqlChanges(changes: SqlExecAction[]): SqlExecAction[] {
   // 准备一个生成唯一键的方法，需要不止考虑到一个 SqlExecAction 的 sql
   // 还需要考虑到其他设置信息
   const __gen_sea_key = (change: SqlExecAction) => {
-    let sql = getSqlStr(change.sql);
+    let sql = getSqlStr(change.sql, change.vars);
     if (!sql) return null;
     return [sql, JSON.stringify(_.omit(change, "vars"))].join("::");
   };

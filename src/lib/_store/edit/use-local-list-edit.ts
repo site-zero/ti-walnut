@@ -710,7 +710,7 @@ export function useLocalListEdit(
         explain: true,
         reset: true,
         noresult: options.noresult,
-        put: getSqlStr(options.insertPut),
+        put: getSqlStr(options.insertPut, _.first(insertList) || {}),
         sets,
       });
     }
@@ -724,7 +724,7 @@ export function useLocalListEdit(
           explain: true,
           reset: true,
           noresult: options.noresult,
-          put: getSqlStr(options.updatePut),
+          put: getSqlStr(options.updatePut, vars),
         });
       }
     }
