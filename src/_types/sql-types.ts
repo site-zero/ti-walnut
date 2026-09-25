@@ -30,6 +30,7 @@ export type SqlExecResult = {
 
 export type SqlQuery = {
   columns?: string[] | string;
+  vars?: Vars;
   filter: QueryFilter | QueryFilter[];
   sorter?: QuerySorter;
   pager?: SqlPager;

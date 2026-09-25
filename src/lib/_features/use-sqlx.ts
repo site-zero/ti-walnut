@@ -125,6 +125,10 @@ export function defineSqlx(daoName?: string) {
       sorter: query.sorter,
       ...getQueryLimit(query),
     } as Vars;
+    // 补充上下文变量
+    if (query.vars) {
+      _.defaults(q, query.vars);
+    }
     if (query.columns) {
       q.columns = _.concat(query.columns).join(",");
     }
