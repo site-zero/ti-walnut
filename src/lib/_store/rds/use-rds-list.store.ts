@@ -24,6 +24,7 @@ import {
   Walnut,
 } from "@site0/ti-walnut";
 import {
+  AlertError,
   apply_conflict_list,
   buildConflictList,
   BuildConflictListOptions,
@@ -1146,16 +1147,22 @@ function defineRdsListStore(options: RdsListStoreOptions) {
     //console.log('changes', changes);
     // 执行更新
     _action_status.value = "saving";
-    await sqlx.exec(changes, {
-      transLevel,
-    });
-    _action_status.value = undefined;
-
-    // 更新远程结果
-    if (options.refreshWhenSave) {
-      await queryRemoteList();
-      //强制取消本地改动
-      _local.reset();
+    try {
+      await sqlx.exec(changes, {
+        transLevel,
+      });
+      // 更新远程结果
+      if (options.refreshWhenSave) {
+        await queryRemoteList();
+        //强制取消本地改动
+        _local.reset();
+      }
+    } catch (e) {
+      // 捕获错误
+      await AlertError("Save Failed", null, e);
+    } finally {
+      // 清理状态
+      _action_status.value = undefined;
     }
   }
   //---------------------------------------------

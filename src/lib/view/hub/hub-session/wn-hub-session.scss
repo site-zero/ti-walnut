@@ -1,0 +1,77 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+
+.wn-hub-session {
+  //-----------------------------------------------------
+  .part-badge {
+    @include flex-align-nowrap;
+    gap: 0.5em;
+    cursor: pointer;
+    border-radius: var(--ti-measure-r-s);
+    padding: 0.2em 0.6em;
+    width: fit-content;
+    &:hover {
+      background-color: var(--ti-color-primary-r);
+      color: var(--ti-color-primary);
+    }
+  }
+  //-----------------------------------------------------
+  .part-mask {
+    position: fixed;
+    inset: 0;
+    z-index: $z-menu;
+  }
+  //-----------------------------------------------------
+  .part-menu {
+    position: fixed;
+    z-index: $z-menu;
+  }
+  //-----------------------------------------------------
+  .menu-con {
+    @include flex-align-v-nowrap;
+    overflow: hidden;
+    padding: var(--ti-gap-s);
+    //transition: opacity 0.3s;
+    background-color: var(--ti-color-menu);
+    color: var(--ti-color-menu-f);
+    min-width: var(--min-wrapper-width);
+    max-width: var(--max-wrapper-width);
+    box-shadow:
+      -1px -1px var(--ti-color-light),
+      1px 1px var(--ti-color-dark),
+      2px 2px 15px var(--ti-color-mask-thin);
+    border-radius: var(--item-radius);
+    z-index: $z-menu + 1;
+    width: fit-content;
+    //---------------------------------------------------
+    &.is-opened {
+      height: unset;
+    }
+    //---------------------------------------------------
+    &.is-ready {
+      height: unset;
+      opacity: 1;
+    }
+    //---------------------------------------------------
+    hr {
+      height: 1px;
+      border: 0;
+      border-top: 1px solid var(--ti-color-border-shallow);
+      margin: var(--ti-gap-s);
+    }
+    //---------------------------------------------------
+  }
+  //-----------------------------------------------------
+  .menu-item {
+    @include flex-align-nowrap;
+    gap: 0.5em;
+    padding: 0.2em 1em 0.2em 0.5em;
+    cursor: pointer;
+    border-radius: var(--ti-measure-r-s);
+    &:hover {
+      text-decoration: underline;
+      background-color: var(--ti-color-mask-weak);
+      color: var(--ti-color-primary);
+    }
+  }
+  //-----------------------------------------------------
+}

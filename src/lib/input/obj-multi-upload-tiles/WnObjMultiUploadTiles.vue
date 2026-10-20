@@ -1,9 +1,8 @@
 <script lang="ts" setup>
   import { ObjUploadItem, WnObjWall, WnObjWallProps } from "@site0/ti-walnut";
-  import { I18n, TiIcon, TiLoading, TiThumb } from "@site0/tijs";
+  import { I18n, TiActionBar, TiIcon, TiLoading, TiThumb } from "@site0/tijs";
   import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
-  import TiActionBar from "../../../../../tijs/src/lib/action/actionbar/TiActionBar.vue";
   import { useWnObjMultiUploadTilesActions } from "./use-wn-omup-actions";
   import { useWnObjMultiUploadTilesApi } from "./use-wn-omup-api";
   import {

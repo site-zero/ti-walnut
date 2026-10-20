@@ -40,10 +40,11 @@ export default defineConfig({
         },
         // 配置样式输出
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name.endsWith('.scss')) {
+          const assetName = assetInfo.name ?? '';
+          if (assetName.endsWith('.scss')) {
             return 'style.scss';
           }
-          return assetInfo.name;
+          return assetName || 'assets/[name][extname]';
         },
       },
     },
