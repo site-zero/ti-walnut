@@ -1,3 +1,4 @@
+import { UserInfo, Walnut } from "@site0/ti-walnut";
 import {
   Alert,
   FormProps,
@@ -6,10 +7,25 @@ import {
   openAppModal,
   Vars,
 } from "@site0/tijs";
+import _ from "lodash";
 
-export async function do_change_password() {
+type ChangePasswordOptions = {
+  getMe: () => UserInfo | undefined;
+  loginSitePath?: string | undefined | null;
+};
+
+export async function do_change_password(options: ChangePasswordOptions) {
+  const { getMe, loginSitePath } = options;
+  const me = getMe();
+  if (!me) {
+    await Alert("User Not Found", {
+      type: "danger",
+    });
+    return;
+  }
+
   // 收集用户输入的旧密码和新密码
-  let re = await openAppModal({
+  let result = await openAppModal({
     icon: "zmdi-lock",
     title: "Change Password",
     type: "primary",
@@ -18,6 +34,11 @@ export async function do_change_password() {
     height: "320px",
     clickMaskToClose: true,
     model: { event: "change", data: "data" },
+    // result: {
+    //   oldpasswd: "654321",
+    //   newpasswd: "123456",
+    //   passwd_2: "123456",
+    // },
     comType: "TiForm",
     comConf: {
       layoutHint: 1,
@@ -84,12 +105,22 @@ export async function do_change_password() {
   });
 
   // 用户取消
-  if (!re) {
+  if (!result) {
     return;
   }
 
-  // 比对两次密码输入
-  let { oldpasswd, newpasswd, passwd_2 } = re.data;
+  // 解构参数
+  let { oldpasswd, newpasswd, passwd_2 } = result;
+
+  // 必须用旧密码
+  if (!oldpasswd) {
+    await Alert("Old password is required", {
+      type: "danger",
+    });
+    return;
+  }
+
+  // 比对两次密码输入必须一致
   if (newpasswd !== passwd_2) {
     await Alert("New password and confirm password do not match", {
       type: "danger",
@@ -97,7 +128,7 @@ export async function do_change_password() {
     return;
   }
 
-  // 旧密码与新密码相同
+  // 旧密码与新密码相同没必要修改
   if (oldpasswd === newpasswd) {
     await Alert("Old password and new password cannot be the same", {
       type: "danger",
@@ -105,9 +136,36 @@ export async function do_change_password() {
     return;
   }
 
-  alert("还未完成实现");
-
   // 判断一下，如果是系统用户直接用 `passwd` 命令修改密码
-
+  if (me.userRace == "SYS") {
+    let cmdText = `passwd -old '${oldpasswd}' '${newpasswd}'`;
+    let re = await Walnut.exec(cmdText);
+    if (re && /^e./.test(re)) {
+      let msg = ["i18n:", _.trim(re)].join("");
+      await Alert(msg, { type: "danger" });
+      return;
+    }
+  }
   // 否则用 `webx -cqn -ajax "~/www/login" @passwd -oldpass "123456" -newpass "654321"`
+  else if (loginSitePath) {
+    let cmdText = `webx -cqn -ajax "${loginSitePath}" @passwd -oldpass "${oldpasswd}" -newpass "${newpasswd}"`;
+    let re = await Walnut.exec(cmdText, { as: "json" });
+    if (!re.ok) {
+      let msg = ["i18n:", _.trim(re.errCode)].join("");
+      await Alert(msg, { type: "danger" });
+      return;
+    }
+  }
+  // 否则警告
+  else {
+    await Alert("Cannot change password: no valid method found", {
+      type: "danger",
+    });
+    return;
+  }
+
+  // 提示成功
+  await Alert("Password changed successfully", {
+    type: "success",
+  });
 }

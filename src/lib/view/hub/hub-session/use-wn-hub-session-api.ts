@@ -47,7 +47,10 @@ export function useWnHubSessionApi(
   }
   //-----------------------------------------------------
   async function doChangePassword() {
-    await do_change_password();
+    await do_change_password({
+      getMe: () => session.data.me,
+      loginSitePath: props.loginSitePath,
+    });
   }
   //-----------------------------------------------------
   // 返回接口
