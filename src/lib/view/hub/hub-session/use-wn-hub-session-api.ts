@@ -31,7 +31,9 @@ export function useWnHubSessionApi(
     return session.data.mainRole == props.adminRole;
   });
   //-----------------------------------------------------
-  const CanSignInByAnotherUser = computed(() => isAdmin.value);
+  const CanSignInByAnotherUser = computed(
+    () => props.showSignInByAnotherUser && isAdmin.value
+  );
   //-----------------------------------------------------
   // 数据改动
   //-----------------------------------------------------

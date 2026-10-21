@@ -16,4 +16,9 @@ export type WnHubSessionProps = CommonProps & {
    * 默认为 `"ADMIN"`
    */
   adminRole?: string;
+
+  /**
+   * 是否显示“以其他用户身份登录”的选项
+   */
+  showSignInByAnotherUser?: boolean;
 };

@@ -74,14 +74,13 @@
             <span>Change Password</span>
           </div>
           <hr />
-          <div
-            class="menu-item"
-            v-if="api.CanSignInByAnotherUser.value"
-            @click="api.signInByAnotherUser()">
-            <i class="fa-solid fa-clipboard-user"></i>
-            <span>Sign In With Other User</span>
-          </div>
-          <hr />
+          <template v-if="api.CanSignInByAnotherUser.value">
+            <div class="menu-item" @click="api.signInByAnotherUser()">
+              <i class="fa-solid fa-clipboard-user"></i>
+              <span>Sign In With Other User</span>
+            </div>
+            <hr />
+          </template>
           <div class="menu-item" @click="emit('logout')">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Sign Out</span>

@@ -5,10 +5,10 @@ import WnHubSession from "./WnHubSession.vue";
 const COM_TYPE = "WnHubSession";
 
 const en_us = {
-  'com-name': 'WnHubSession',
+  "com-name": "WnHubSession",
 };
 const zh_cn = {
-  'com-name': 'WnHubSession',
+  "com-name": "WnHubSession",
 };
 
 const WnHubSessionInfo: TiComInfo = {
@@ -30,5 +30,6 @@ const WnHubSessionInfo: TiComInfo = {
   exampleProps: [],
 };
 
+export * from "./support";
 export * from "./wn-hub-session-types";
 export { WnHubSession, WnHubSessionInfo };

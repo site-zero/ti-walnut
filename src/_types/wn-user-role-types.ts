@@ -32,3 +32,10 @@ export function toWnUserRace(input: any): WnUserRace | undefined {
     return input;
   }
 }
+
+export function assertWnUserRace(input: any): WnUserRace | undefined {
+  if (isWnUserRace(input)) {
+    return input;
+  }
+  throw new Error(`Invalid WnUserRace value: ${input}`);
+}
