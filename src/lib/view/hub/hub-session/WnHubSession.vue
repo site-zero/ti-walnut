@@ -14,6 +14,7 @@
   const props = withDefaults(defineProps<WnHubSessionProps>(), {
     loginSitePath: "~/www/login",
     adminRole: "ADMIN",
+    passwdStrength: 0,
   });
   const api = useWnHubSessionApi(props, emit);
   //-----------------------------------------------------

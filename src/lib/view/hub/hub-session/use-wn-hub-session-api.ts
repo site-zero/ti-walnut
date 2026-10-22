@@ -52,6 +52,7 @@ export function useWnHubSessionApi(
     await do_change_password({
       getMe: () => session.data.me,
       loginSitePath: props.loginSitePath,
+      passwdStrength: props.passwdStrength,
     });
   }
   //-----------------------------------------------------
