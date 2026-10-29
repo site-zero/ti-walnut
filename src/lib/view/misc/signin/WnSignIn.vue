@@ -1,9 +1,9 @@
 <script lang="ts" setup>
+  import { SignInForm } from "@site0/ti-walnut";
   import { Alert, I18n, Vars } from "@site0/tijs";
   import { reactive } from "vue";
-  import { SignInForm } from "@site0/ti-walnut";
 
-  let emit = defineEmits<(event: "submit", info: SignInForm) => void>();
+  let emit = defineEmits<(event: "submit", payload: SignInForm) => void>();
 
   const props = defineProps<{
     style?: Vars;

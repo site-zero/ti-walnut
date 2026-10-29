@@ -1,0 +1,74 @@
+@use "@site0/tijs/sass/_all.scss" as *;
+@use "../signin/wn-sign-in.scss";
+
+.wn-sign-in-otp {
+  dl.as-auth-way {
+    dd {
+      display: flex;
+      gap: SZ(8);
+      padding: 0;
+
+      button {
+        flex: 1;
+        padding: 0.618em 0.5em;
+        border: 0;
+        border-radius: var(--ti-measure-r-s);
+
+        &.is-active {
+          background-color: #222;
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  dd.as-otp-input {
+    display: flex;
+    align-items: stretch;
+    gap: SZ(8);
+
+    input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    button {
+      flex: 0 0 auto;
+      padding: 0.5em 0.8em;
+      border: 0;
+      border-radius: var(--ti-measure-r-s);
+      font-size: 0.75em;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      &:disabled:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #000;
+        box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
+          1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 7px rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  > .as-captcha-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+    background: rgba(0, 0, 0, 0.45);
+
+    > .as-captcha-dialog {
+      overflow: hidden;
+      border-radius: var(--ti-measure-r-m);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+  }
+}

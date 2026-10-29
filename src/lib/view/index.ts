@@ -29,7 +29,7 @@ import {
 import { WnRdsBrowserInfo } from "./rds/rds-browser/rds-browser-index";
 
 // Misc
-import { WnCmdRunnerInfo, WnSignInInfo } from "./misc";
+import { WnCmdRunnerInfo, WnSignInInfo, WnSignInOTPInfo } from "./misc";
 
 export default {
   // Conflict
@@ -58,6 +58,7 @@ export default {
 
   // Misc
   WnSignin: WnSignInInfo,
+  WnSignInOTP: WnSignInOTPInfo,
   WnCmdRunner: WnCmdRunnerInfo,
 } as TiComSet;
 
@@ -76,3 +77,4 @@ export * from "./rds/rds-browser/rds-browser-index";
 // Misc
 export * from "./misc/cmd-runner/wn-cmd-runner-index";
 export * from "./misc/signin/wn-signin-index";
+export * from "./misc/signin-with-otp/wn-sign-in-otp-index";

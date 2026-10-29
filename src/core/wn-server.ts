@@ -246,6 +246,10 @@ export class WalnutServer {
     }
   }
 
+  getDomain() {
+    return this._conf.domain
+  }
+
   hasTicket() {
     return this._ticket ? true : false;
   }

@@ -1,0 +1,16 @@
+{
+  "wn-sign-in-otp-com-name": "Sign in with OTP",
+  "wn-sign-in-otp-way-password": "Password",
+  "wn-sign-in-otp-way-otp": "OTP",
+  "wn-sign-in-otp-form-otp": "OTP",
+  "wn-sign-in-otp-placeholder-otp": "Your one-time password",
+  "wn-sign-in-otp-form-get-otp": "Get OTP",
+  "wn-sign-in-otp-form-retry": "Retry in",
+  "wn-sign-in-otp-form-sending": "Sending…",
+  "wn-sign-in-otp-e-unm-empty": "Username cannot be empty",
+  "wn-sign-in-otp-e-pass-empty": "Password cannot be empty",
+  "wn-sign-in-otp-e-value-empty": "OTP cannot be empty",
+  "wn-sign-in-otp-e-send": "Failed to send OTP",
+  "wn-sign-in-otp-e-captcha-load": "Failed to load captcha, please try again",
+  "wn-sign-in-otp-e-captcha-ticket": "Captcha returned no valid ticket"
+}

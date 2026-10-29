@@ -77,6 +77,8 @@ export type WnDictSetup = {
 export interface SignInForm {
   username?: string;
   password?: string;
+  otp?: string;
+  otp_val?: string;
 }
 
 export type GuiViewLayout = {
