@@ -33,7 +33,9 @@
   },
   "scripts": {
     "build": "vue-tsc && vite build",
-    "test": "vitest --silent=false"
+    "test": "vitest --silent=false",
+    "docs:check": "node scripts/check-docs.mjs",
+    "docs:build": "www-gen-site doc"
   },
   "dependencies": {
     "@types/crypto-js": "^4.1.2",

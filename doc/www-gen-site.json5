@@ -1,0 +1,33 @@
+{
+  // Ti Walnut 文档站点配置（www-gen-site）
+  // 用法：www-gen-site "D:\workspace\git\github\site-zero\ti-walnut\doc"
+  site: {
+    title: "Ti Walnut 文档",
+    description: "Ti Walnut 前端库文档：快速上手、Walnut 服务、对象与 RDS 数据、Vue 组件、features、stores 与开发规范",
+    keywords: ["Ti Walnut", "TiJS", "Walnut", "Vue 3", "TypeScript", "文档"],
+    lang: "zh-CN",
+    baseUrl: "/",
+    favicon: "favicon.svg",
+  },
+
+  templates: {
+    theme: "nice",
+  },
+
+  build: {
+    outputDir: "../dist/ti-walnut-www",
+    urlStyle: "flat",
+    autoIndex: true,
+    stripOrderPrefix: false,
+    excludeGlobs: [
+      "_old/**",
+      "note/**",
+      "skill/**",
+    ],
+  },
+
+  markdown: {
+    gfm: true,
+    highlight: true,
+  },
+}
