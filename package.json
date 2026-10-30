@@ -1,6 +1,6 @@
 {
   "name": "@site0/ti-walnut",
-  "version": "1.4.10",
+  "version": "1.4.14",
   "description": "Walnut GUI base on Tijs",
   "repository": {
     "type": "git",
@@ -30,6 +30,9 @@
       "require": "./dist/ti-walnut.umd.js",
       "types": "./index.d.ts"
     }
+  },
+  "imports": {
+    "#assets/*": "./src/assets/*"
   },
   "scripts": {
     "build": "vue-tsc && vite build",

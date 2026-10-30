@@ -8,7 +8,7 @@
 - **core、组件、features 与 stores** —— 按使用单元查阅职责、示例、边界与源码入口；
 - **开发规范** —— 面向仓库贡献者，说明源码布局、新增组件与文档同步流程。
 
-仓库中的 `doc/skill/` 保存面向 AI Agent 的可复用写作流程，`doc/note/` 用于非正式过程笔记，两者均不发布。AI Agent 可从仓库根目录的 `AGENT.md` 开始阅读。
+仓库中的 `doc/skill/` 保存面向 AI Agent 的可复用写作流程，`doc/note/` 用于非正式过程笔记，两者均不发布。AI Agent 可从仓库根目录的 `AGENTS.md` 开始阅读。
 
 ## 本地维护
 

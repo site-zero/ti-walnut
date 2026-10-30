@@ -1,5 +1,5 @@
-import { TiComInfo, TiComRace } from "@site0/tijs";
-import { App } from "vue";
+import { TiComRace, type TiComInfo } from "@site0/tijs";
+import type { App } from "vue";
 import i18n from "./i18n";
 import WnSignInOTP from "./WnSignInOTP.vue";
 
@@ -15,8 +15,6 @@ const WnSignInOTPInfo: TiComInfo = {
   install: (app: App) => {
     app.component(COM_TYPE, WnSignInOTP);
   },
-  defaultProps: "",
-  exampleProps: [],
 };
 
 export * from "./wn-sign-in-otp-types";

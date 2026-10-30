@@ -133,3 +133,6 @@ dist
 package-lock.json
 yarn.lock
 
+# Local reference for agent
+LOCAL_REF.md
+

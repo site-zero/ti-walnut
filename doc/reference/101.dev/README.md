@@ -30,6 +30,6 @@ npm run docs:build
 
 - **源码入口**
   - `package.json`、`vite.config.ts`、`tsconfig.json` —— 构建与脚本契约。
-  - `AGENT.md` —— Agent 最少阅读路线。
+  - `AGENTS.md` —— Agent 最少阅读路线。
 - **相关文档**
   - [文档写作规范](../../skill/write-ti-walnut-doc.skill.md) —— 文档任务的完整流程。

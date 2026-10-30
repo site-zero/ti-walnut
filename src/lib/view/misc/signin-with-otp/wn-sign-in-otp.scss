@@ -2,7 +2,10 @@
 @use "../signin/wn-sign-in.scss";
 
 .wn-sign-in-otp {
-  dl.as-auth-way {
+  //-----------------------------------------------------
+  // 认证方式
+  //-----------------------------------------------------
+  dl.part-auth-way {
     dd {
       display: flex;
       gap: SZ(8);
@@ -22,40 +25,58 @@
     }
   }
 
-  dd.as-otp-input {
-    display: flex;
-    align-items: stretch;
-    gap: SZ(8);
+  //-----------------------------------------------------
+  // OTP 输入
+  //-----------------------------------------------------
+  dd.part-otp-input .part-otp-field {
+    position: relative;
 
     input {
-      flex: 1;
-      min-width: 0;
+      padding-right: 2em;
     }
 
     button {
-      flex: 0 0 auto;
-      padding: 0.5em 0.8em;
+      position: absolute;
+      top: 50%;
+      right: var(--ti-gap-s);
+      transform: translateY(-50%);
+      padding: 1em 0.6em;
       border: 0;
       border-radius: var(--ti-measure-r-s);
       font-size: 0.75em;
+      font-weight: 600;
       white-space: nowrap;
+      color: var(--ti-color-primary);
+      background: transparent;
+      box-shadow: none;
       cursor: pointer;
+      outline: none;
+      border: 1px solid transparent;
 
-      &:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
+      &:not(:disabled):hover {
+        background-color: var(--ti-color-primary-r);
+        border: 1px solid var(--ti-color-primary);
       }
 
-      &:disabled:hover {
-        background: rgba(255, 255, 255, 0.2);
-        color: #000;
-        box-shadow: -1px -1px 0 rgba(255, 255, 255, 0.9),
-          1px 1px 0 rgba(0, 0, 0, 0.3), 0 0 7px rgba(255, 255, 255, 0.3);
+      // &:focus-visible {
+      //   outline: 2px solid var(--ti-color-primary);
+      //   outline-offset: 1px;
+      // }
+
+      &.is-cooling,
+      &.is-sending {
+        background: var(--ti-color-track);
+        color: var(--ti-color-track-r);
+        font-weight: normal;
+        cursor: default;
       }
     }
   }
 
-  > .as-captcha-mask {
+  //-----------------------------------------------------
+  // 验证码弹层
+  //-----------------------------------------------------
+  > .part-captcha-mask {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -63,9 +84,9 @@
     align-items: center;
     justify-content: center;
     padding: 1em;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--ti-color-mask-thin);
 
-    > .as-captcha-dialog {
+    > .part-captcha-dialog {
       overflow: hidden;
       border-radius: var(--ti-measure-r-m);
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
