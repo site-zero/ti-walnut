@@ -14,6 +14,7 @@ import {
   WnFetchObjOptions,
   WnLoadOptions,
   WnObj,
+  WnSignInMode,
 } from "@site0/ti-walnut";
 import {
   Alert,
@@ -50,6 +51,11 @@ const debug = false;
  */
 type LoadMode = "public" | "protected";
 
+export type WnLoginSetup = {
+  system: WnSignInMode;
+  domain: WnSignInMode;
+};
+
 export function setTicketToLocalStore(ticket?: string | null) {
   if (ticket) {
     TiStore.local.set(TICKET_KEY, ticket);
@@ -74,6 +80,11 @@ export class WalnutServer {
    * 会话票据
    */
   private _ticket?: string;
+
+  /**
+   * 系统登录模式（懒加载）
+   */
+  private _loginSetup?: WnLoginSetup;
 
   /**
    * 全局缓存
@@ -210,7 +221,7 @@ export class WalnutServer {
       await this.loadI18n("public");
     }
 
-    this._setup_config(conf);
+    await this._setup_config(conf);
 
     return conf;
   } // async init(conf: ServerConfig) {
@@ -237,12 +248,18 @@ export class WalnutServer {
 
     // 初始化字典
     if (conf.dicts) {
-      this.loadDicts("public");
+      await this.loadDicts("public");
     }
 
     // 加载 i18n 资源
     if (conf.i18n) {
       await this.loadI18n("public");
+    }
+
+    // 读取登录配置
+    const loginSetup = await this.loadLoginSetup();
+    if (debug) {
+      console.log("Login setup:", loginSetup);
     }
   }
 
@@ -252,6 +269,31 @@ export class WalnutServer {
 
   hasTicket() {
     return this._ticket ? true : false;
+  }
+
+  async loadLoginSetup(force = false) {
+    if (!this._loginSetup || force) {
+      let url = this.getUrl("/a/login_mode");
+      let resp = await fetch(url);
+      let re = (await resp.json()) as AjaxResult;
+
+      // 报错
+      if (!re.ok) {
+        console.error("Failed to get login setup:", re);
+        return;
+      }
+      // 设置一下
+      this._loginSetup = re.data as WnLoginSetup;
+    }
+  }
+
+  getLoginSetup(): WnLoginSetup {
+    return (
+      this._loginSetup || {
+        system: "PASSWD_ONLY",
+        domain: "PASSWD_ONLY",
+      }
+    );
   }
 
   getConfig<T>(key: string, dft?: T): T {
