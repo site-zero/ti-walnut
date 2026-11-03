@@ -207,7 +207,10 @@ export function useWnSignInOTPCaptcha(options: WnSignInOTPCaptchaOptions) {
       if (!_is_captcha_visible.value || !$captchaBox.value) {
         return;
       }
-      const captchaQuery = { captcha: props.captcha };
+      const captchaQuery = {
+        captcha: props.captcha,
+        account: getAccount(),
+      };
       _tac = new Tac(
         {
           bindEl: $captchaBox.value,

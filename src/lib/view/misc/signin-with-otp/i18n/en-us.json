@@ -1,7 +1,9 @@
 {
   "wn-sign-in-otp-com-name": "Sign in with OTP",
   "wn-sign-in-otp-way-password": "Password",
-  "wn-sign-in-otp-way-otp": "One-Time Password",
+  "wn-sign-in-otp-way-password-tip": "Enter your password",
+  "wn-sign-in-otp-way-otp": "OTP",
+  "wn-sign-in-otp-way-otp-tip": "Send One-Time Password By Email",
   "wn-sign-in-otp-form-otp": "One-Time Password",
   "wn-sign-in-otp-placeholder-otp": "Your OTP",
   "wn-sign-in-otp-form-get-otp": "Get",

@@ -5,24 +5,8 @@
   //-----------------------------------------------------
   // 认证方式
   //-----------------------------------------------------
-  dl.part-auth-way {
-    dd {
-      display: flex;
-      gap: SZ(8);
-      padding: 0;
-
-      button {
-        flex: 1;
-        padding: 0.618em 0.5em;
-        border: 0;
-        border-radius: var(--ti-measure-r-s);
-
-        &.is-active {
-          background-color: #222;
-          color: #fff;
-        }
-      }
-    }
+  div.part-auth-way {
+    @include flex-center;
   }
 
   //-----------------------------------------------------
@@ -56,6 +40,13 @@
       &:not(:disabled):hover {
         background-color: var(--ti-color-primary-r);
         border: 1px solid var(--ti-color-primary);
+      }
+
+      &:disabled {
+        background: transparent;
+        color: var(--ti-color-track-r);
+        box-shadow: none;
+        cursor: not-allowed;
       }
 
       // &:focus-visible {

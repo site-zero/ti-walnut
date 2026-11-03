@@ -1,19 +1,37 @@
 <script setup lang="ts">
-  import { I18n } from "@site0/tijs";
-  import { watch } from "vue";
+  import { CssUtils, I18n, SwitcherProps, TiSwitcher } from "@site0/tijs";
+  import { computed, watch } from "vue";
   import { useWnSignInOTPApi } from "./use-wn-sign-in-otp-api";
   import type {
+    WnSignInAuthWay,
     WnSignInOTPEmitter,
     WnSignInOTPProps,
   } from "./wn-sign-in-otp-types";
   //-----------------------------------------------------
   const emit = defineEmits<WnSignInOTPEmitter>();
   const props = withDefaults(defineProps<WnSignInOTPProps>(), {
-    mode: "PASSWD_AND_OTP",
+    mode: "PASSWD_ONLY",
     otpCooldown: 60,
   });
   //-----------------------------------------------------
   const api = useWnSignInOTPApi(props, { emit });
+  //-----------------------------------------------------
+  const TopStyle = computed(() => CssUtils.toStyle(props.style));
+  //-----------------------------------------------------
+  const AuthWayConfig = computed(() => {
+    return {
+      style: {
+        backgroundColor: "var(--ti-color-primary-r)",
+      },
+      defaultItemType: "primary",
+      options: api.AuthWayOptions.value,
+      value: api.AuthWay.value,
+      autoI18n: true,
+      onChange: (value: WnSignInAuthWay) => {
+        api.setAuthWay(value);
+      },
+    } as SwitcherProps;
+  });
   //-----------------------------------------------------
   watch(
     () => props.otp,
@@ -33,11 +51,12 @@
 </script>
 
 <template>
-  <div
-    class="wn-signup-panel as-signin wn-sign-in-otp"
-    :style="props.style">
+  <div class="wn-signup-panel as-signin wn-sign-in-otp" :style="TopStyle">
     <slot name="header"></slot>
     <form @submit.prevent="api.onClickSubmit">
+      <!--
+      用户名
+      -->
       <dl>
         <dt>{{ I18n.get("wn-signin-form-name") }}</dt>
         <dd>
@@ -48,24 +67,15 @@
             v-model.trim="api.info.username" />
         </dd>
       </dl>
-
-      <dl v-if="api.ShowModeSelect.value" class="part-auth-way">
-        <dd>
-          <button
-            type="button"
-            :class="{ 'is-active': api.AuthWay.value === 'password' }"
-            @click="api.setAuthWay('password')">
-            {{ I18n.get("wn-sign-in-otp-way-password") }}
-          </button>
-          <button
-            type="button"
-            :class="{ 'is-active': api.AuthWay.value === 'otp' }"
-            @click="api.setAuthWay('otp')">
-            {{ I18n.get("wn-sign-in-otp-way-otp") }}
-          </button>
-        </dd>
-      </dl>
-
+      <!--
+      显示模式选择: PASSWD_OR_OTP 的时候
+      -->
+      <div v-if="api.ShowModeSelect.value" class="part-auth-way">
+        <TiSwitcher v-bind="AuthWayConfig" />
+      </div>
+      <!--
+      密码输入框
+      -->
       <dl v-if="api.ShowPassword.value">
         <dt>{{ I18n.get("wn-signin-form-pass") }}</dt>
         <dd>
@@ -74,10 +84,12 @@
             type="password"
             autocomplete="current-password"
             :placeholder="I18n.get('wn-signin-placeholder-pass')"
-            v-model.trim="api.info.password" />
+            v-model="api.info.password" />
         </dd>
       </dl>
-
+      <!--
+      一次性密码输入框
+      -->
       <dl v-if="api.ShowOtp.value">
         <dt>{{ I18n.get("wn-sign-in-otp-form-otp") }}</dt>
         <dd class="part-otp-input">
@@ -111,18 +123,25 @@
           </div>
         </dd>
       </dl>
-
+      <!--
+      提交按钮
+      -->
       <dl>
         <button type="submit">
           {{ I18n.get("wn-signin-form-submit") }}
         </button>
       </dl>
+      <!--
+      错误信息
+      -->
       <dl v-if="props.errCode">
         <div class="as-error">{{ I18n.get(props.errCode) }}</div>
       </dl>
     </form>
     <slot name="footer"></slot>
-
+    <!--
+      如果需要，这里显示人机验证码
+    -->
     <div v-if="api.IsCaptchaVisible.value" class="part-captcha-mask">
       <div class="part-captcha-dialog">
         <div ref="captchaBox"></div>

@@ -23,10 +23,10 @@ export type WnSignInOTPProps = {
   /** 根元素自定义样式。 */
   style?: Vars;
 
-  /** 用户名初始值。 */
+  /** 用户名初始值。账号为空时禁用获取 OTP。 */
   username?: string;
 
-  /** 密码初始值。 */
+  /** 密码初始值，保留前后空白。PASSWD_AND_OTP 模式下密码为空时禁用获取 OTP。 */
   password?: string;
 
   /** 登录错误码，非空时显示在表单底部。 */

@@ -247,7 +247,7 @@ export class WalnutServer {
   }
 
   getDomain() {
-    return this._conf.domain
+    return this._conf.domain;
   }
 
   hasTicket() {
@@ -265,6 +265,20 @@ export class WalnutServer {
     return Util.appendPath(serverBase, path);
   }
 
+  toSearchParams(params: Vars = {}) {
+    const sp = new URLSearchParams();
+    _.forEach(params, (v, k) => {
+      if (_.isUndefined(v)) return;
+      sp.append(k, v || "");
+    });
+    return sp;
+  }
+
+  toQueryString(params: Vars = {}) {
+    const sp = this.toSearchParams(params);
+    return sp.toString();
+  }
+
   getUrl(path: string, params?: Vars) {
     let sep = path.startsWith("/") ? "" : "/";
     let { protocal, host, port } = this._conf;
@@ -275,13 +289,7 @@ export class WalnutServer {
     } else {
       server_path = `${sep}${path}`;
     }
-
-    const qs = new URLSearchParams();
-    _.forEach(params, (v, k) => {
-      if (_.isUndefined(v)) return;
-      qs.append(k, v);
-    });
-    let queryString = qs.toString();
+    let queryString = this.toQueryString(params);
 
     // let qs = [] as string[];
     // if (params) {
@@ -305,11 +313,7 @@ export class WalnutServer {
     if (!params || _.isEmpty(params)) {
       return url;
     }
-    const qs = new URLSearchParams();
-    _.forEach(params, (v, k) => {
-      qs.append(k, v);
-    });
-    let queryString = qs.toString();
+    let queryString = this.toQueryString(params);
     return [url, queryString].filter(Boolean).join("?");
   }
 
@@ -431,6 +435,8 @@ export class WalnutServer {
       name: info.username,
       passwd: info.password,
       ajax: true,
+      otp: info.otp || undefined,
+      otp_val: info.otp_val || undefined,
     });
 
     // 处理返回
@@ -486,15 +492,12 @@ export class WalnutServer {
   ): Promise<string | null> {
     let { quiet, signal } = options;
     let url = this.getUrl(path, options.query);
-    const body = new URLSearchParams();
-    _.forEach(form, (v, k) => {
-      body.append(k, v);
-    });
+    const search = this.toSearchParams(form);
 
     try {
       let init = this.getRequestInit(signal, {
         method: "post",
-        body,
+        body: search,
         signal,
       });
       let resp = await fetch(url, init);
@@ -514,15 +517,12 @@ export class WalnutServer {
   ): Promise<any> {
     let { quiet, signal } = options;
     let url = this.getUrl(path, options.query);
-    const body = new URLSearchParams();
-    _.forEach(form, (v, k) => {
-      body.append(k, v);
-    });
+    const sp = this.toSearchParams(form);
 
     try {
       let init = this.getRequestInit(signal, {
         method: "post",
-        body,
+        body: sp,
         signal,
       });
       let resp = await fetch(url, init);
@@ -1299,7 +1299,7 @@ export class WalnutServer {
     }
 
     // 将 params 转换为查询字符串
-    const queryString = new URLSearchParams(params).toString();
+    const queryString = this.toQueryString(params);
 
     // 构建上传的 URL，包含查询字符串
     const url = `${this.getUrl("/o/save/stream")}?${queryString}`;

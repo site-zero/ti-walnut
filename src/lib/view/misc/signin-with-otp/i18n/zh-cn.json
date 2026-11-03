@@ -1,7 +1,9 @@
 {
-  "wn-sign-in-otp-com-name": "带 OTP 的登录表单",
+  "wn-sign-in-otp-com-name": "高级登录表单",
   "wn-sign-in-otp-way-password": "密码登录",
-  "wn-sign-in-otp-way-otp": "一次性密码登录",
+  "wn-sign-in-otp-way-password-tip": "输入你的用户密码",
+  "wn-sign-in-otp-way-otp": "一次性密码",
+  "wn-sign-in-otp-way-otp-tip": "通过邮箱发送一次性密码",
   "wn-sign-in-otp-form-otp": "一次性密码",
   "wn-sign-in-otp-placeholder-otp": "请输入一次性密码",
   "wn-sign-in-otp-form-get-otp": "获取",

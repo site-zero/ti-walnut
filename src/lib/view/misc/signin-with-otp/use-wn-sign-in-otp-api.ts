@@ -34,6 +34,7 @@ export function useWnSignInOTPApi(
     otp: props.otp,
     otp_val: "",
   });
+  //-----------------------------------------------------
   const _auth_way = ref<WnSignInAuthWay>("password");
   //-----------------------------------------------------
   const _otp_captcha = useWnSignInOTPCaptcha({
@@ -41,6 +42,7 @@ export function useWnSignInOTPApi(
     getAccount: () => _info.username || "",
     onSuccess: _send_otp,
   });
+  //-----------------------------------------------------
   const _otp_cooldown = useWnSignInOTPCooldown(props);
 
   //-----------------------------------------------------
@@ -48,12 +50,14 @@ export function useWnSignInOTPApi(
   //-----------------------------------------------------
   const Mode = computed<WnSignInMode>(() => props.mode || "PASSWD_AND_OTP");
   const ShowModeSelect = computed(() => Mode.value === "PASSWD_OR_OTP");
+  //-----------------------------------------------------
   const ShowPassword = computed(() => {
     if (Mode.value === "PASSWD_OR_OTP") {
       return _auth_way.value === "password";
     }
     return Mode.value === "PASSWD_AND_OTP" || Mode.value === "PASSWD_ONLY";
   });
+  //-----------------------------------------------------
   const ShowOtp = computed(() => {
     if (Mode.value === "PASSWD_OR_OTP") {
       return _auth_way.value === "otp";
@@ -63,14 +67,33 @@ export function useWnSignInOTPApi(
 
   //-----------------------------------------------------
   const AuthWay = computed(() => _auth_way.value);
-
+  const AuthWayOptions = computed(() => {
+    return [
+      {
+        icon: "fas-user-lock",
+        value: "password",
+        text: "i18n:wn-sign-in-otp-way-password",
+        tip: "i18n:wn-sign-in-otp-way-password-tip",
+      },
+      {
+        icon: "fas-envelope",
+        value: "otp",
+        text: "i18n:wn-sign-in-otp-way-otp",
+        tip: "i18n:wn-sign-in-otp-way-otp-tip",
+      },
+    ];
+  });
   //-----------------------------------------------------
   const Cooldown = _otp_cooldown.Cooldown;
   const IsSending = _otp_cooldown.IsSending;
   const IsCaptchaVisible = _otp_captcha.IsCaptchaVisible;
   const IsOtpButtonDisabled = computed(
     () =>
-      IsSending.value || IsCaptchaVisible.value || _otp_cooldown.IsActive.value
+      !_info.username?.trim() ||
+      (Mode.value === "PASSWD_AND_OTP" && !_info.password) ||
+      IsSending.value ||
+      IsCaptchaVisible.value ||
+      _otp_cooldown.IsActive.value
   );
 
   //-----------------------------------------------------
@@ -88,7 +111,7 @@ export function useWnSignInOTPApi(
     }
     if (ShowOtp.value) {
       payload.otp = props.otp;
-      payload.otp_val = _info.otp_val;
+      payload.otp_val = _info.otp_val?.trim();
     }
     emit("submit", payload);
   }
@@ -96,10 +119,6 @@ export function useWnSignInOTPApi(
   //-----------------------------------------------------
   async function onClickGetOtp() {
     if (IsOtpButtonDisabled.value) {
-      return;
-    }
-    if (!_info.username) {
-      Alert("i18n:wn-sign-in-otp-e-unm-empty", { type: "warn" });
       return;
     }
     await _otp_captcha.openCaptcha();
@@ -124,7 +143,7 @@ export function useWnSignInOTPApi(
       Alert("i18n:wn-sign-in-otp-e-pass-empty", { type: "warn" });
       return false;
     }
-    if (ShowOtp.value && !_info.otp_val) {
+    if (ShowOtp.value && !_info.otp_val?.trim()) {
       Alert("i18n:wn-sign-in-otp-e-value-empty", { type: "warn" });
       return false;
     }
@@ -184,6 +203,7 @@ export function useWnSignInOTPApi(
     info: _info,
     // 计算属性
     AuthWay,
+    AuthWayOptions,
     Cooldown,
     IsSending,
     IsCaptchaVisible,
