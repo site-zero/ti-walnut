@@ -30,7 +30,7 @@ status: done
 
 - [Core 服务与工具](20.core/README.md)：core 分区导航。
 - [Walnut 服务单例](20.core/10-walnut-server.md)：配置、请求、命令、内容和上传 API。
-- [对象与命令工具](20.core/20-wn-util.md)：路径、参数、图标、指纹与内容判断。
+- [对象与命令工具](20.core/20-wn-util.md)：路径拼接与 `normalizeFullPath` 环境展开、参数、图标、指纹与内容判断。
 - [Walnut 字典适配](20.core/30-wn-dict.md)：命令和资源接入 TiJS 字典。
 
 ## 30.components 组件
@@ -95,7 +95,7 @@ status: done
 
 - [Stores 分区导航](50.stores/README.md)：store 分类与共享范围。
 - [会话与认证](50.stores/session-auth.md)：共享会话和用户角色组合模型。
-- [标准对象列表](50.stores/std-list.md)：对象查询、选择、编辑、内容和冲突。
+- [标准对象列表](50.stores/std-list.md)：对象查询、祖先加载、选择、编辑、内容和冲突。
 - [标准对象 Meta](50.stores/std-meta.md)：单对象元数据与内容编辑。
 - [RDS stores](50.stores/rds.md)：SQLX 列表、单记录和精简模型。
 - [本地编辑与内容](50.stores/local-edit.md)：本地草稿、差异和 SQLX 变更。

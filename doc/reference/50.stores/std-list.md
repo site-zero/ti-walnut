@@ -46,8 +46,10 @@ await store.init();
 ### 编辑与加载
 
 - **`refreshWhenSave`**：保存后自动刷新。
-- **`patchRemote`**：远端记录进入模型前补充或修改。
+- **`patchRemote`**：远端记录进入模型前补充或修改；回调接收查询结果中的原始对象（不额外克隆）及其下标。
 - **`autoLoadContent`（默认 `false`）**：选中文件时自动加载内容。
+- **`autoLoadAncestors`（默认 `true`）**：监听主目录对象变化，自动加载祖先列表，包括主目录自身。
+- **`ancestorUntil`（默认 `"~"`）**：祖先查询截止路径。显式配置时先使用当前 session 的环境变量展开，与 `HomeObj.ph` 比较（忽略两边所有尾部 `/`）；相同时无需请求，`Ancestors` 直接使用 `[HomeObj]`，强制重载时也一样。
 - **`globalStatus`**：可选应用级状态接口。
 - 其余本地编辑配置继承 `LocalListEditSetup`。
 
@@ -56,15 +58,21 @@ await store.init();
 ### 主要状态
 
 - **数据**：`listData`、`remoteList`、`CurrentItem`、`CurrentContent`。
+- **目录**：`HomeObj` 是主目录对象；`Ancestors` 是祖先列表计算属性，包括 `HomeObj`。
+- **`AncestorsPath`**：按 `Ancestors` 顺序，以 `/` 拼接各对象的 `nm`（例如 `root/documents`），不额外添加前导或末尾斜杠；祖先列表为空时返回空字符串。
 - **查询**：`Pager`、`Filter`、`Sorter`。
 - **选择**：`CurrentObjId`、`hasCurrent`、`hasChecked`。
 - **过程**：`ActionStatus`、`LoadStatus`、`ActionBarVars`、`changed` 与空态计算属性。
+- **`ActionBarVars`**：包含 `loading`、`saving`、`deleting`、`changed`、`empty`、`hasCurrent`、`hasChecked` 和 `currentItem`，与 RDS 列表 store 保持一致。
 
 ### 查询与目录
 
 - **`init` / `reload` / `refresh` / `queryRemoteList`**：初始化、重载、刷新和远程查询。
 - **`openDir`**：切换目录上下文。
+- **`reloadAncestors(force: boolean = false)`**：显式截止路径与主目录路径匹配时直接使用 `[HomeObj]`；否则通过 `useWnObj().getAncestors` 加载主目录的祖先。按主目录 ID 记录加载来源，跳过已加载对象并复用同一对象的进行中请求；传入 `true` 跳过缓存。失败向调用方抛出，可再次重试；切换主目录、强制重载或命中路径短路后，旧请求不会覆盖新结果。关闭自动加载后仍可手动调用。
 - **`applyFilter` / `applySorter` / `applyPager`**：应用查询条件。
+- **`setFilter`**：移除顶层的 `null` / `undefined` 条件后克隆并保存，保留 `false`、`0` 和空字符串。
+- **`resetLocalQuery`**：清除持久化查询，并立即根据默认配置重建当前查询。
 
 ### 编辑与保存
 
@@ -73,6 +81,7 @@ await store.init();
 - **`setCurrentContent` / `saveCurrentContent` / `saveChange`**：编辑和保存当前内容。
 - **`makeDifferents` / `makeConflict` / `applyConflicts`**：生成差异、检测并应用冲突。
 - **`dropChange`**：放弃本地改动。
+- **`insertItemsBefore` / `insertItemsAfter`**：将插入下标直接交给本地列表编辑层处理，包括首项和越界下标，不改写为追加操作。
 
 ### 选择
 
@@ -95,6 +104,7 @@ init / queryRemoteList
 
 - `keepQuery` 只保存部分查询字段；`keepSelect` 保存当前与勾选 ID，不等于缓存远端数据。
 - 元数据和内容共同决定 `changed`。
+- `queryRemoteList` 查询失败时调用 `console.error` 并继续抛出原错误；经由 `reload`、`refresh` 或 `apply*` 调用时，调用方同样需要处理异常。
 - 工厂配置会经 `Util.jsonClone` 复制；函数等不可 JSON 化的配置仍由原始 `options` 在部分逻辑中读取，扩展配置时应核对具体消费路径。
 - 当前源码没有为此 store 做跨调用的单例复用，需要共享时应由上层保存同一个 API 实例。
 

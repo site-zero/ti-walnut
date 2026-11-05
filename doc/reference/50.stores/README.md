@@ -11,7 +11,7 @@ status: done
 ## 篇目
 
 - [会话与认证](session-auth.md)：共享会话、登录登出与账户角色组合模型。
-- [标准对象列表](std-list.md)：对象查询、分页、选择、编辑、内容与冲突。
+- [标准对象列表](std-list.md)：对象查询、祖先加载、分页、选择、编辑、内容与冲突。
 - [标准对象 Meta](std-meta.md)：单对象元数据与内容编辑。
 - [RDS stores](rds.md)：SQLX 驱动的列表、单记录与简单模型。
 - [本地编辑与内容](local-edit.md)：remote/local 差异和 SQL 变更生成。

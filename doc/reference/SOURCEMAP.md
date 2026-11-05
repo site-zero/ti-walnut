@@ -26,7 +26,7 @@ status: done
 | `src/core/wn-server.ts` | [Walnut 服务单例](20.core/10-walnut-server.md)、[服务与会话](10.concepts/03-server-session.md) |
 | `src/core/wn-run-command.ts` | [Walnut 服务单例](20.core/10-walnut-server.md)、[服务与会话](10.concepts/03-server-session.md) |
 | `src/_types/wn-server-config.ts` | [快速上手](00.start-here/01-getting-started.md)、[Walnut 字典适配](20.core/30-wn-dict.md) |
-| `src/core/wn-util.ts` | [对象与命令工具](20.core/20-wn-util.md)、[对象模型](10.concepts/04-obj-model.md) |
+| `src/core/wn-util.ts` | [对象与命令工具](20.core/20-wn-util.md)（含 `normalizeFullPath` 环境展开）、[对象模型](10.concepts/04-obj-model.md) |
 | `src/_types/wn-types.ts` | [对象模型](10.concepts/04-obj-model.md)、[对象与命令工具](20.core/20-wn-util.md) |
 | `src/core/wn-dict.ts` | [Walnut 字典适配](20.core/30-wn-dict.md) |
 | `src/lib/_store/use-session.store.ts` | [服务与会话](10.concepts/03-server-session.md)、[会话与认证](50.stores/session-auth.md) |
@@ -78,7 +78,7 @@ status: done
 | 源码路径 | 文档 |
 | --- | --- |
 | `src/lib/_store/auth/` | [会话与认证](50.stores/session-auth.md) |
-| `src/lib/_store/std/use-std-list.store.ts` | [标准对象列表](50.stores/std-list.md)、[数据 store 模型](10.concepts/05-data-stores.md) |
+| `src/lib/_store/std/use-std-list.store.ts`（含祖先加载） | [标准对象列表](50.stores/std-list.md)、[数据 store 模型](10.concepts/05-data-stores.md) |
 | `src/lib/_store/std/use-std-meta.store.ts` | [标准对象 Meta](50.stores/std-meta.md) |
 | `src/lib/_store/rds/` | [RDS stores](50.stores/rds.md) |
 | `src/lib/_store/edit/use-local-list-edit.ts` | [本地编辑与内容](50.stores/local-edit.md) |

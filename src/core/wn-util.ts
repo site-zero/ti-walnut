@@ -1,5 +1,5 @@
 import { WnObj, WnObjContentFinger } from "@site0/ti-walnut";
-import { appendPath, Iconable, IconInput, Icons, Vars } from "@site0/tijs";
+import { appendPath, Iconable, IconInput, Icons, Tmpl, Vars } from "@site0/tijs";
 import _ from "lodash";
 
 /**
@@ -76,6 +76,55 @@ export function genWnPath(base: string, subPath?: string) {
     re = appendPath(base, subPath);
   }
   return safeCmdArg(re);
+}
+
+/**
+ * 按 Walnut 环境变量展开完整路径，不查询 id: 对象或折叠 .. 路径段。
+ *
+ * @param ph 输入路径
+ * @param vars 环境变量，包括 HOME 和 PWD
+ * @param applyEnv 是否展开模板变量，默认为 true
+ * @returns 展开后的路径，保留输入的目录尾斜杠
+ */
+export function normalizeFullPath(
+  ph: string,
+  vars: Vars,
+  applyEnv = true
+): string {
+  if (!ph.trim()) return ph;
+
+  const isForDir = ph.endsWith("/");
+  const pwd = String(vars.PWD ?? "");
+  // 对齐 Java Disks.appendPath：清理空白段与重复斜杠，并保留根目录。
+  const joinPath = (base: string | undefined, subPath: string) => {
+    const path = appendPath(base ?? "", subPath);
+    const prefix = (base ?? subPath).startsWith("/") ? "/" : "";
+    return (
+      prefix +
+      path.split("/").map((part) => part.trim()).filter(Boolean).join("/")
+    );
+  };
+
+  if (!/^(\/|~|id:)/.test(ph)) {
+    ph = joinPath(pwd, ph);
+  }
+  if (ph.startsWith("~/") || ph === "~") {
+    const home = _.isNil(vars.HOME) ? undefined : String(vars.HOME);
+    ph = joinPath(home, ph.substring(1));
+  } else if (ph.startsWith("./")) {
+    ph = joinPath(pwd, ph.substring(1));
+  }
+
+  let re = applyEnv ? Tmpl.exec(ph, vars) : ph;
+  if (re === ".") {
+    re = pwd;
+  } else if (re.endsWith("/.")) {
+    re = re.substring(0, re.length - 2);
+  }
+  if (re.endsWith("id:")) {
+    throw new Error(`Empty path 'id:' is not allowed: ${re}`);
+  }
+  return isForDir && !re.endsWith("/") ? re + "/" : re;
 }
 
 export function getObjContentFinger(obj: WnObj): WnObjContentFinger {

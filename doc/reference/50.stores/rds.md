@@ -26,6 +26,10 @@ RDS stores 以 `useSqlx` 为数据访问层，为关系数据提供列表、单�
 
 主要状态与动作包括 `listData`、`CurrentItem`、`Pager/Filter/Sorter`、`changed`、`queryRemoteList`、`countRemote`、`createNewItem`、`makeChanges`、`saveChange`、`makeConflict`、`reload/refresh` 以及完整的选择和本地编辑方法。
 
+`ActionBarVars` 包含 `loading`、`saving`、`deleting`、`changed`、`empty`、`hasCurrent`、`hasChecked` 和 `currentItem`，与标准对象列表 store 保持一致。
+
+`queryRemoteList` 查询失败时调用 `console.error` 并继续抛出原错误；`reload`、`refresh` 和 `apply*` 的调用方同样需要处理异常。`countRemoteList` 无论成功还是失败，均通过 `finally` 清除 `ActionStatus`，计数失败仍向调用方抛出异常。
+
 ```ts
 const store = useRdsListStore({
   daoName: "main",

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+  import { useGlobalStatus, WnHubSession } from "@site0/ti-walnut";
   import { CssUtils, IconInput, TiIcon } from "@site0/tijs";
   import { computed } from "vue";
-  import { useGlobalStatus, WnHubAvatar } from "../../../../lib";
   import { WnHubSkyProps } from "./wn-hub-sky-types";
   //--------------------------------------------------
   const props = defineProps<WnHubSkyProps>();
@@ -50,13 +50,11 @@
     <div class="as-part is-crumb">
       appPath: [{{ _gb_sta.Data.value.appPath }}]
     </div>
-    <div class="as-part is-avatar">
-      <WnHubAvatar @logout="emit('logout')" />
-    </div>
-    <div class="as-part is-menu">
-      <a @click="emit('logout')"
-        ><i class="fa-solid fa-arrow-right-from-bracket"></i
-      ></a>
+    <div class="as-part is-user">
+      <WnHubSession
+        login-site-path="~/www/login"
+        :passwd-strength="5"
+        @logout="emit('logout')" />
     </div>
   </div>
 </template>

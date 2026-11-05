@@ -44,7 +44,8 @@
 
       &:disabled {
         background: transparent;
-        color: var(--ti-color-track-r);
+        color: var(--ti-color-track);
+        border: 1px dashed var(--ti-color-border-dark);
         box-shadow: none;
         cursor: not-allowed;
       }
@@ -57,7 +58,8 @@
       &.is-cooling,
       &.is-sending {
         background: var(--ti-color-track);
-        color: var(--ti-color-track-r);
+        color: var(--ti-color-track);
+        border: 1px dashed var(--ti-color-border-dark);
         font-weight: normal;
         cursor: default;
       }

@@ -1,10 +1,8 @@
-import { Util } from '@site0/tijs';
-import { WnObj, WnRace } from "@site0/ti-walnut";
-import { Walnut } from '../../../../core';
+import { WnObj } from "@site0/ti-walnut";
+import { Util } from "@site0/tijs";
+import { Walnut } from "../../../../core";
 
-export async function auto_create_obj(
-  path: string,
-): Promise<WnObj> {
+export async function auto_create_obj(path: string): Promise<WnObj> {
   let parentPath = Util.getParentPath(path);
   let name = Util.getFileName(path);
 
@@ -13,9 +11,9 @@ export async function auto_create_obj(
     `-p '${parentPath}'`,
     `-race DIR`,
     `'${name}' @json -cqn`,
-  ].join(' ');
+  ].join(" ");
 
-  let obj = await Walnut.exec(cmdText, { as: 'json' });
+  let obj = await Walnut.exec(cmdText, { as: "json" });
   if (!obj) {
     throw `auto_create_obj failed: ${cmdText}`;
   }

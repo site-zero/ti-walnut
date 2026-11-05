@@ -47,8 +47,7 @@
       flex: 1 1 auto;
       padding: 0 1em;
     }
-    &.is-avatar,
-    &.is-menu {
+    &.is-user {
       @include flex-center;
       padding:0 var(--ti-gap-s);
     }

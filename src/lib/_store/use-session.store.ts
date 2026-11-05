@@ -10,6 +10,7 @@ import { Alert, Gender, toGender, Vars } from "@site0/tijs";
 import _ from "lodash";
 import { computed, reactive, ref } from "vue";
 import { Walnut } from "../../core";
+import { normalizeFullPath as _normalize_full_path } from "../../core/wn-util";
 
 /*
 Read data from response:
@@ -150,6 +151,18 @@ export type SessionStore = ReturnType<typeof useSessionStore>;
  * 提供登录、登出、重置会话、获取对象路径和重新加载会话等功能。
  */
 export function useSessionStore() {
+  function normalizeFullPath(ph: string, applyEnv = true): string {
+    return _normalize_full_path(ph, SE.env, applyEnv);
+  }
+
+  function isSamePath(path1: string, path2: string): boolean {
+    let p1 = normalizeFullPath(path1);
+    let p2 = normalizeFullPath(path2);
+    p1 = p1.replace(/\/+$/, "");
+    p2 = p2.replace(/\/+$/, "");
+    return p1 === p2;
+  }
+
   /**
    * 执行用户登录操作。
    *
@@ -320,6 +333,8 @@ export function useSessionStore() {
     // ........................ Getters
     hasTicket: computed(() => (SE.ticket ? true : false)),
     // ........................ Actions
+    normalizeFullPath,
+    isSamePath,
     signIn,
     signOut,
     resetSession,

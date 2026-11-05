@@ -20,10 +20,14 @@ await session.reload(async () => {
 });
 
 console.log(session.hasTicket.value, session.data.me);
+
+// 使用当前会话的 HOME、PWD 等环境变量展开路径。
+const path = session.normalizeFullPath("~/documents/");
 ```
 
 主要动作：
 
+- **`normalizeFullPath(ph, applyEnv = true)`**：调用 core 同名工具，环境变量直接取当前 `session.data.env`；可关闭模板变量展开，不查询 `id:` 对象或折叠 `..`。
 - **`signIn(info, afterOk)`**：登录并转换会话；成功后执行异步回调，失败记录 `errCode`。
 - **`reload(afterOk)`**：重新获取当前会话；失败重置为未登录。
 - **`signOut()`**：退出当前会话，存在父会话时恢复父会话。
@@ -50,5 +54,6 @@ console.log(session.hasTicket.value, session.data.me);
   - `src/lib/_store/auth/use-auth-reset-passwd.ts` —— 密码重置流程。
   - `src/lib/_store/auth/auth-user-roles.ts` —— 用户角色转换。
 - **相关文档**
+  - [对象与命令工具](../20.core/20-wn-util.md) —— `normalizeFullPath` 的完整路径展开规则。
   - [服务与会话](../10.concepts/03-server-session.md) —— 服务层票据与 store 的关系。
   - [RDS stores](rds.md)、[标准对象列表](std-list.md) —— 认证 store 可组合的两类列表。
